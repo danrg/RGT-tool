@@ -4,10 +4,7 @@ import os
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
-ADMINS = (
-    ('Spyros Ioakeimidis', 'spyrosikmd@gmail.com'),
-    ('Grayson Kleine', 'grysnml82@gmail.com'),
-)
+ADMINS = ()
 
 MANAGERS = ADMINS
 
