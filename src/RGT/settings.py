@@ -1,12 +1,6 @@
 # Django settings for RGT project.
 import os
-
-DEBUG = False
-TEMPLATE_DEBUG = DEBUG
-
-ADMINS = ()
-
-MANAGERS = ADMINS
+from ownsettings import *
 
 projectPath = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../'))
 
@@ -136,16 +130,6 @@ INSTALLED_APPS = (
     'session_functional_tests',
 )
 
-# Email related settings
-EMAIL_HOST = 'USE_YOUR_OWN'
-EMAIL_HOST_USER = 'USE_YOUR_OWN'
-EMAIL_HOST_PASSWORD = 'USE_YOUR_OWN'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-
-# Recaptcha
-RECAPTCHA_KEY = 'USE_YOUR_OWN'
-
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error.
@@ -195,10 +179,3 @@ LOGGING = {
 # authentication backend settings
 AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend', 'RGT.authentication.backendAuthentication.BackendAuthentication')
 AUTH_PROFILE_MODULE = 'userProfile.UserProfile'
-
-from settings_local import *
-
-try:
-    from settings_dev import *
-except:
-    pass
