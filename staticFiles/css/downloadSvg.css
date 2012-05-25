@@ -1,0 +1,22 @@
+@CHARSET "ISO-8859-1";
+
+.downloadSvgTopMargin{
+	margin-top:5px;
+}
+
+.downloadSvgLeftMargin{
+	margin-left:5px;
+}
+
+#downloadSvgDownloadButton{
+	float: right;
+	margin-top: 20px;
+}
+
+#selectFileType{
+	min-width:70px;
+}
+
+#downloadSvgFileNameInput{
+	width: 150px;
+}

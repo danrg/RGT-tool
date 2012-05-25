@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+	RGT | Sessions - Administration
+{% endblock %}
+
+{% block stylesheet %}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/mySessionsContent.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/pendingResponses.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/gridTableGeneralFunctions.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/participants.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/resultAlternativeConcernTable.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/resultRatingWeightTable.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tipsy.css" />
+{% endblock %}
+
+{% block content %}
+<div style="position: relative;">
+	<div>
+		<h2>Session administration</h2>
+		On this page you can create or manage decision making sessions. <br/>
+		Click <a href="/sessions/participate/">here</a> to review the sessions you are participating in.
+		
+		<script type="text/javascript">
+			if(typeof showMySession != 'function')
+			{
+				$.ajax({
+					url: '{{ STATIC_URL }}js/mySessions.js',
+					dataType: 'script',
+					async:   false 
+				});
+			}
+		</script>
+		<!-- header just after the menu (create session, my session, etc) -->
+		<label for= "mySessionsSelect">Select session:</label><select id="mySessionsSelect" onchange= "showMySession()">
+		{% if sessions %}
+			<option value="noSessions">&nbsp;</option>
+			{% for name,usid in sessions  %}
+				<option value="{{ usid }}">{{ name }}</option>
+			{% endfor %}
+		{% else %}
+			<option value="noSessions">no sessions available</option>
+		{% endif %}
+		</select>
+		or <a href="/sessions/create/">create</a> a new session.
+	</div>
+	<div style= "position: absolute; left: 500px; top: 10px; max-height: 100px;">
+		{%include "gridMng/pendingResponses.html"%}
+	</div>
+</div>
+<div id="concentDiv">
+</div>
+{% endblock %}

@@ -1,0 +1,158 @@
+<div id="gridTrableContainerDiv">
+	<table id="{{tableId}}" border="0" class= "gridTable">
+		<tbody>
+			{% comment %} first row is the cell menu row of the table {% endcomment %}
+			<tr>
+					<td><label class="gridSizePlaceholder" style="min-width:40px; min-height:20px; float:right; visibility: hidden;">l</label></td> <!-- make sure the table doesn't change sizes -->
+					<td><!-- skip --></td>
+					{% for header in tableHeader%}
+						{% if changeCornAlt %}
+							<td class= "colMenu" onmouseover="showColMenu($(this))">
+								<div class= "colMenuDiv">
+									<a><img class= "deleteImage" src="{{ STATIC_URL }}icons/delete.png" alt="" onclick= "removeCol($(this).parents('td'))"/></a>
+									<a><img class= "addImage" src="{{ STATIC_URL }}icons/plus.png" alt="" onclick= "addCol($(this).parents('td'));isTableSaved()"/></a>
+								</div>
+							</td>
+						{% else %}
+							<td></td>
+						{% endif %}
+					{% endfor %}
+					<td><!-- skip --></td>
+					<td><!-- skip --></td>
+					<td><label class="gridSizePlaceholder" style="min-width:40px; min-height:20px; float:right; visibility: hidden;">l</label></td> <!-- make sure the table doesn't change sizes -->
+			</tr>
+			{% comment %} second row is the "header" of the table {% endcomment %}
+			<tr>
+					<td><!-- skip --></td> 
+					<td><!-- skip --></td>
+					{% for header in tableHeader %}
+						<td class= "alternativeCell" onmouseover="showColMenu($(this))" >
+							{% if changeCornAlt %}
+								{% if checkForTableIsSave %}
+									<input class= "tableHeader" type="text" id="alternative_{{forloop.counter}}_name" name="alternative_{{forloop.counter}}_name" value="{{ header }}" onchange="isTextEmpty($(this));isTableSaved()"/>
+								{% else %}
+									<input class= "tableHeader" type="text" id="alternative_{{forloop.counter}}_name" name="alternative_{{forloop.counter}}_name" value="{{ header }}"/>
+								{% endif %}
+							{% else %}
+								<input class= "tableHeader" type="text" id="alternative_{{forloop.counter}}_name" name="alternative_{{forloop.counter}}_name" value="{{ header }}"  disabled="disabled" readonly/>
+							{% endif %}
+						</td>
+					{% endfor %}
+					{% comment %} weight header {% endcomment%}
+					<td class= "alternativeCell" id="weightCol">
+						<input class= "tableHeader inner" type="text" value= "weight" disabled="disabled" readonly/>
+					</td>
+					<td>
+						<div>
+							{% if checkForTableIsSave %}
+								<img title="Current showing table has not been modified since retrieving its values." id="tableStatus" alt="" src="{{ STATIC_URL }}icons/table_saved.png">
+							{% endif %}
+						</div>
+					</td>
+					<td><!-- skip --></td>
+			</tr>
+			{% for row in table %}
+				{% comment %} data rows {% endcomment %}
+				<tr class="gridRow">
+					{% for ratio in row %}
+							{% if forloop.first %}
+								{% comment %} left row menu {% endcomment %}
+								{% if changeCornAlt %}
+								<td onmouseover="displayRowMenu($(this))">
+									<div id= "leftRowMenuDiv" class="gridRowMenu">
+										<a><img class= "deleteImage" src="{{ STATIC_URL }}icons/delete.png" alt="" onclick= "removeRow($(this).parents('td'))"/></a>
+										<a><img class= "addImage" src="{{ STATIC_URL }}icons/plus.png" alt="" onclick= "addRow($(this).parents('td'));isTableSaved()"/></a>
+									</div>
+								</td>
+								{% else %}
+								<td></td>
+								{% endif %}
+								{% comment %} concern {% endcomment %}
+								{% if changeCornAlt %}
+									{% if checkForTableIsSave %}
+										<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class="tableHeader" type="text" id="concern_{{forloop.parentloop.counter}}_left" name="concern_{{forloop.parentloop.counter}}_left" value="{{ ratio }}" onchange="isTextEmpty($(this));isTableSaved()" /></td>
+									{% else %}
+										<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class="tableHeader" type="text" id="concern_{{forloop.parentloop.counter}}_left" name="concern_{{forloop.parentloop.counter}}_left" value="{{ ratio }}"/></td>
+									{% endif %}
+								{% else %}
+									<td class= "concernCell"><input class="tableHeader" type="text" id="concern_{{forloop.parentloop.counter}}_left" name="concern_{{forloop.parentloop.counter}}_left" value="{{ ratio }}" disabled="disabled" readonly /></td>
+								{% endif %}
+								{% else %}{% if not forloop.last %}
+									<td class= "ratioCell" onmouseover="displayRowMenu($(this));showColMenu($(this))" >
+										<div>
+										{% if changeRatingsWeights %}
+											{% if checkForTableIsSave %}
+												<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="{{ ratio }}" onchange="isTextEmpty($(this));isTableSaved()"/>
+											{% else %}
+												<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="{{ ratio }}"/>
+											{% endif %}
+										{% else %}
+											{% if showRatingWhileFalseChangeRatingsWeights %}
+												<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="{{ ratio }}" disabled="disabled" readonly/>
+											{% else %}
+											 	<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="" disabled="disabled" readonly/>
+											{% endif %}
+										{% endif %}
+										</div>
+									</td>
+								{% else %}
+								{% comment %} end normal cells{% endcomment %}
+								{% comment %} weight {% endcomment%}
+								<td onmouseover="displayRowMenu($(this))">
+									{% if changeRatingsWeights %}
+										{% if checkForTableIsSave %}
+											<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "{{weights.pop}}" onchange="calculateTotalWeight($(this).parents('#gridTrableContainerDiv'));isTextEmpty($(this));isTableSaved()"/>
+										{% else %}
+											<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "{{weights.pop}}" onchange="calculateTotalWeight($(this).parents('#gridTrableContainerDiv'))"/>
+										{% endif %}
+									{% else %}
+										{% if showRatingWhileFalseChangeRatingsWeights %}
+											<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "{{weights.pop}}" disabled="disabled" readonly/>
+										{% else %}
+											<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "" disabled="disabled" readonly/>
+										{% endif %}
+									{% endif %}
+								</td>
+								{% comment %} concerns right {% endcomment %}
+								{% if changeCornAlt %}
+									{% if checkForTableIsSave %}
+										<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class= "tableHeader" type="text" id="concern_{{forloop.parentloop.counter}}_right" name="concern_{{forloop.parentloop.counter}}_right" value="{{ ratio }}" onchange="isTextEmpty($(this));isTableSaved()"/></td>
+									{% else %}
+										<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class= "tableHeader" type="text" id="concern_{{forloop.parentloop.counter}}_right" name="concern_{{forloop.parentloop.counter}}_right" value="{{ ratio }}"/></td>
+									{% endif %}
+								{% else %}
+									<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class= "tableHeader" type="text" id="concern_{{forloop.parentloop.counter}}_right" name="concern_{{forloop.parentloop.counter}}_right" value="{{ ratio }}" disabled="disabled" readonly/></td>
+								{% endif %}
+								{% comment %} right row menu {% endcomment %}
+								{% if changeCornAlt %}
+								<td onmouseover="displayRowMenu($(this))">
+									<div id= "rightRowMenuDiv" class="gridRowMenu">
+										<a><img class= "deleteImage" src="{{ STATIC_URL }}icons/delete.png" alt="" onclick= "removeRow($(this).parents('td'))"/></a>
+										<a><img class= "addImage" src="{{ STATIC_URL }}icons/plus.png" alt="" onclick= "addRow($(this).parents('td'));isTableSaved()"/></a>
+									</div>
+								</td>
+								{% else %}
+								<td></td>
+								{% endif %}
+							{%endif%}{%endif%}
+					{% endfor %}
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	<div class= "weightDiv">
+			<label class= "weightLabel">Total weight: </label><input id= "weightMeter" value= "0" disabled="disabled" readonly />
+	</div>
+	{% if not changeRatingsWeights %}
+		<input type= "hidden" value= "false" id="changeRatingsWeights">
+		{% if showRatingWhileFalseChangeRatingsWeights %}
+			<input type= "hidden" value= "true" id="showRatingWhileFalseChangeRatingsWeights">
+		{% endif %}
+	{% endif %}
+	{%comment%}non mandatory hidden field {% endcomment %}
+	{% if hiddenFields %}
+		{% for value, id in hiddenFields %}
+			<input type="hidden" value="{{value}}" id="{{id}}" name="{{id}}"/>
+		{% endfor %}
+	{%endif%}
+</div>

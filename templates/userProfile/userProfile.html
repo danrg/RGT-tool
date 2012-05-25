@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+	RGT | Profile
+{% endblock %}
+
+{% block stylesheet %}
+<link rel="Stylesheet" type="text/css" href="{{ STATIC_URL }}css/profile.css"/>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/profile.js"></script>
+{% endblock %}
+
+{% block content %}
+<h2>Update profile</h2>
+<p>You can update your profile using the form below, 
+or change your password by clicking <a href="/accounts/change/">here</a>.</p>
+<br />
+<div id="formFeedbackWrapper">
+	<div id="profileForm">
+		<form action="/profile/" method="post" id="form">
+			{% csrf_token %}
+			<div class="formelms">
+				{{ form.non_field_errors }}
+				{% for field in form %}
+			        {{ field.label_tag }}
+			        {{ field }}
+			        {% for error in field.errors %}
+			            <div class="error">{{error}}</div>
+			        {% endfor %}
+			    {% endfor %}
+			</div>
+			<input type="submit" value="Save"/>
+			{% if profileUpdated %}
+			<div id="feedback">
+				<span>Profile updated!</span>
+			</div>
+			{% endif %}
+		</form>
+	</div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+
+	<table border= "1" class= "grid" id= "pendingREsponsesTable">
+		<thead>
+			<tr>
+				<th>Pending responses</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for sessionName, sessionUSID in pedingResponsesTable %}
+				<tr class= "pendingSessionTr">
+					<td class="pendingSessionTd" onclick= "openSession('{{sessionUSID}}')">{{sessionName}}</td>
+				</tr>
+			{% endfor %}	
+		</tbody>
+	</table>

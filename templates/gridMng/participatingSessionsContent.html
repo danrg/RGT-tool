@@ -1,0 +1,78 @@
+{% load tz %} 
+<script type="text/javascript">
+if( typeof showColMenu != 'function')
+{
+	$.ajax({
+		url: '{{ STATIC_URL }}js/gridTableGeneralFunctions.js',
+		dataType: 'script',
+		async:   false 
+	});
+}
+if( typeof sendResponse != 'function')
+{
+	$.ajax({
+		url: '{{ STATIC_URL }}js/participatingSessionsContent.js',
+		dataType: 'script',
+		async: false
+	});
+}
+</script>
+<table class="grid">
+    <thead>
+        <tr>
+            <th colspan="2">Session details</th>
+        </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Current iteration</td>
+        <td id="participantSessionIteration">{{iteration}}</td>
+    </tr>
+    <tr>
+        <td>Session status</td>
+        <td>{{sessionStatus}}</td>
+    </tr>
+    <tr>
+    	<td>Number of participants that responded</td>
+    	<td>
+    		{% if showNParticipantsAndResponces %}
+    			{{nReceivedResponses}}/{{nParticipants}}
+    		{% else %}
+    			-----
+    		{% endif %}
+    	</td>
+    </tr>
+    <tr>
+        <td class= "participatingSessionsResponseHighlight">Response status</td>
+        <td id="responseStatusSpan" class= 'participatingSessionsResponseHighlight'>{{ responseStatus }}{% if dateTime %}{% localtime on %}{{ dateTime|date:"Y-m-d H:i:s" }}{% endlocaltime %}{% endif %}</td>
+    </tr>
+    <tr>
+        <td>Show your response from iteration</td>
+        <td>
+            <select id= "responseSelection" onchange= "getResponseFromIteration()"> <!-- Add a question mark icon here with tooltip explaining what this does-->
+                {% if not iterations %}
+                <option value="null">N/A</option>
+                {% else %}
+                <option value="null">    </option>
+                {% for i in iterations %}
+                {% if i != iteration %}
+                <option value="{{i}}">{{i}}</option>
+                {% endif %}
+                {% endfor %}
+                <option value="current">Cur</option>
+                {% endif %}
+            </select>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<!-- div with all the content -->
+<div id="participationSessionsContentDiv">
+	{% include "gridMng/participatingSessionsContentGrids.html" %}
+</div>
+<div id="responseOptionsDiv">
+	{% if responseTable and not hideSaveResponseButton %}
+		<input type="button" id="sendResponseButton" onclick="sendResponse()" value="Send response" />
+		<input type="button" id="participatingSessionsContentUndoAllButton" onclick="getResponseFromIteration('current')" value="Undo all" />
+	{% endif %}
+</div>

@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+	RGT | Contact
+{% endblock %}
+
+{% block content %}
+<h2>Contact RGT Team</h2>
+{% if not didContact %}
+	<div>Use the form below to contact with us!</div>
+	<form action="/contact/" method="post" id="form">
+		{% csrf_token %}
+		<div id="contactForm" class="formelms">
+			{{ form.non_field_errors }}
+			{% for field in form %}
+		        {{ field.label_tag }}
+		        {{ field }}
+		        {% for error in field.errors %}
+		            <div class="error">{{error}}</div>
+		        {% endfor %}
+		    {% endfor %}
+		</div>
+		<input type="submit" value="Send"/>
+	</form>
+{% else %}
+	<div>Thank you for contacting with us! We will reply as soon as possible!</div>
+{% endif %}
+{% endblock %}

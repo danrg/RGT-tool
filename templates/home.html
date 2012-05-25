@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+	RGT | Home
+{% endblock%}
+
+{% block content %}
+	{% if not user.is_superuser %}
+		{% if not verifiedEmail %}
+			<p>Please verify your email! Thank you!</p>
+			<br />
+		{% endif %}
+	{% endif %}
+	<p>
+        Welcome {{ firstName }}!
+        <br />
+        <br />
+        Please use the menu above to navigate!
+    </p>
+{% endblock %}

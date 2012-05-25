@@ -1,0 +1,18 @@
+@CHARSET "ISO-8859-1";
+
+.respondedRequest
+{
+    background-color: #DBFFCF;
+}
+
+.didNotRespondedRequest {
+    background-color: #FFB5B5;
+}
+
+#paticipatingRefreshImage:hover{
+	background-image: url('/static/icons/refresh_hover.png');
+}
+
+#paticipatingRefreshSpan{
+	float: right;
+}

@@ -1,0 +1,328 @@
+*
+{
+    margin: 0;
+    padding: 0;
+}
+
+html, body, form
+{
+    height: 100%;
+}
+
+#wrap
+{
+    min-height: 100%;
+}
+
+#main
+{
+    overflow:auto;
+    padding-bottom: 76px; /* must be same height as the footer */
+}
+
+#footer
+{
+    position: relative;
+    margin-top: -76px; /* negative value of footer height */
+    height: 76px;
+    clear:both;
+    line-height: 76px;
+    background-color: #FFFFFF;
+    box-shadow: 0px 0px 20px #000000;
+}
+
+#footer > div
+{
+    width: 800px;
+    margin: auto;
+    text-align: center;
+}
+
+body:before {
+    content:"";
+    height:100%;
+    float:left;
+    width:0;
+    margin-top:-32767px;
+}
+
+#header
+{
+    height: 70px;
+    box-shadow: 0px 0px 20px #000000;
+    background-color: #FFFFFF;
+}
+
+#header-center
+{
+    width: 800px;
+    margin: auto;
+}
+
+#header #logo
+{
+    float: left;
+}
+
+#header #logo > img
+{
+    margin-top: 10px;
+}
+
+#header #buttons
+{
+    float: right;
+    /*height: 61px;
+   line-height: 61px;*/
+}
+
+#header #buttons a
+{
+    display: block;
+    float: left;
+    height: 30px;
+    line-height: 30px;
+    padding: 0px 10px 0px 25px;
+    margin: 15px 15px;
+    color: #305580;
+    font-weight: normal;
+    text-decoration: none;
+    /*background: url('../Images/main-buttons.png') no-repeat;*/
+}
+
+#workspace
+{
+    min-width: 75%;
+    margin: auto;
+    text-align: center;
+}
+
+#content
+{
+    min-width: 900px;
+    overflow: auto;
+    margin: auto;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    display: inline-block;
+    text-align: left;
+}
+
+#content > div
+{
+    background: #fff;
+    /*box-shadow: 0px 0px 5px #466f90;*/
+    padding: 15px 20px 20px 20px;
+
+    border-radius: 7px;
+}
+
+#content h2
+{
+    /*text-transform: uppercase;*/
+    color: #194c78;
+    font-size: 14px;
+    margin: 15px 0px;
+    font-weight: bold;
+}
+
+#content h3
+{
+    color: #305580;
+    font-size: 12px;
+    margin-bottom: 10px;
+    margin-top: 15px;
+}
+
+#content .message
+{
+    margin: 15px 0px;
+}
+
+#content .formelms
+{
+    text-align: left;
+    /*padding-left: 42px;*/
+    padding-right: 52px;
+    /*padding-top: 15px;*/
+    padding-bottom: 10px;
+    min-height: 250px;
+}
+
+#content label
+{
+    font-size: 12px;
+    color: #666D70;
+    display: block;
+    padding-top: 10px;
+    padding-bottom: 4px;
+}
+
+/* COMMON CONTROLS */
+
+input[type="text"], input[type="password"], select
+{
+    height: 18px;
+    padding: 2px;
+    border: 1px solid #59a1cc;
+}
+
+textarea
+{
+    padding: 5px;
+    border: 1px solid #59a1cc;
+    font-family: Arial;
+    font-size: 13px;
+}
+
+select
+{
+    height: 24px;
+}
+
+div.button-container
+{
+    text-align: center;
+}
+
+div.error
+{
+    margin-top: 2px;
+    color: #b22e2e;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+div.error span
+{
+	
+    /*color: #cc3333;
+    line-height: 20px;
+    font-weight: bold;*/
+}
+
+/* TABLE INPUT */
+
+table.input-form input[type="text"], table.user-form input[type="password"], table.user-form select
+{
+    width: 90%;
+}
+
+table.input-form
+{
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+table.input-form td
+{
+    width: 25%;
+    padding: 5px;
+}
+
+table.input-form td.display
+{
+    font-weight: bold;
+}
+
+/* GRID */
+
+table.grid
+{
+    border-collapse: collapse;
+    border: 1px solid #ccdde7;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: #444444;
+}
+
+table.grid tr > th
+{
+    text-align: left;
+    font-weight: normal;
+    color: #596d7e;
+}
+
+table.grid tr
+{
+}
+
+table.grid tr > td, table.grid tr > th
+{
+    padding: 5px;
+    border: 1px solid #ccdde7;
+}
+
+table.grid tr > th
+{
+    background: #ebf1f5;
+}
+
+table.grid tr.normal
+{
+    background: #f0f8ff;
+}
+
+table.grid tr.group
+{
+    background: #fff;
+}
+
+table.grid div.progress
+{
+    border: 1px solid silver;
+    height: 18px;
+    line-height: 18px;
+    position: relative;
+}
+
+table.grid div.progress span
+{
+    display: block;
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: 11px;
+}
+
+table.grid div.progress div
+{
+    position: absolute;
+    background: #c5dfee;
+}
+
+table.grid tr.read
+{
+
+}
+
+table.grid tr.new td
+{
+    font-weight: bold;
+}
+
+table.grid a
+{
+    color: #2c5877;
+    text-decoration: none;
+}
+
+
+table.grid a.button
+{
+    color: #fff;
+}
+
+textarea.pre
+{
+    font-family: Courier New;
+    width: 100%;
+    height: 100px;
+}
+
+div.form-block p
+{
+    margin: 15px 0px;
+    line-height: 25px;
+}

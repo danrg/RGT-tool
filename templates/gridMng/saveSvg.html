@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="{{ STATIC_URL }}css/downloadSvg.css" type="text/css">
+<div>
+	<form method="post" id='formSaveSvg' action="/grids/download/image/">{% csrf_token %} 
+	<label>Please select the file type you want to download:</label>
+	<select name='convertTo' class="downloadSvgLeftMargin" id= "selectFileType">
+		<option value="svg">svg</option>
+	</select>
+	<label class="downloadSvgTopMargin">Please specify the name of the file:</label><input type="text" id="downloadSvgFileNameInput" name="fileName" class="downloadSvgTopMargin downloadSvgLeftMargin"/>
+	
+	</form>
+	<script type="text/javascript">	
+		function sendDownloadSvgForm()
+		{
+			//var svg= $('#' + $('#svgDivName').val()).svg('get');
+			//var data= svg.toSVG();
+			var form= $('#formSaveSvg');
+			//var input = $("<input>").attr("type", "hidden").attr("name", "data").val(data); 
+			//form.append($(input)); 
+			//form.append('<input  type="hidden" id="tempSvgData" name="data" value="' + data + '"/>');
+			//form.append('<input  type="hidden" name="fileName" value="test"/>');
+			//form.append('<input  type="hidden" name="convertTo" value="svg"/>');
+			form.submit();
+		}
+	</script>
+</div>

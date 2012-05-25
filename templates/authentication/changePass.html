@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+	RGT | Change Password
+{% endblock %}
+
+{% block stylesheet %}
+<link rel="Stylesheet" type="text/css" href="{{ STATIC_URL }}css/changePass.css"/>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/changePass.js"></script>
+{% endblock %}
+
+{% block content %}
+<h2>Change Password</h2>
+<p>Change your password using the following form, or update your profile by clicking <a href="/profile/">here</a>.</p>
+<br />
+<div id="formFeedbackWrapper">
+	<div id="changePassForm">
+		<form action="/accounts/change/" method="post" id="form">
+		    {% csrf_token %}
+		    <div class="formelms">
+		        {{ form.non_field_errors }}
+		        {% for field in form %}
+		            {{ field.label_tag }}
+		            {{ field }}
+		            {% for error in field.errors %}
+		                <div class="error">{{error}}</div>
+		            {% endfor %}
+		        {% endfor %}
+		    </div>
+			<input type="submit" value="Submit"/>
+			{% if passUpdated %}
+			<div id="feedback">
+				<span>Password updated!</span>
+			</div>
+			{% endif %} 
+		</form>
+	</div>
+</div>
+{% endblock %}

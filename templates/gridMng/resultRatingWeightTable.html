@@ -1,0 +1,54 @@
+<table border="0" class="resultRatingWeightTable">
+	{% if tableHead %}
+		<thead>
+			<tr>
+				<td colspan="{{headers|length|add:"3"}}" class="resultRatingWeightHead">{{tableHead}}</td>
+			</tr>
+		</thead>
+	{% endif %}
+	<tbody>
+		<tr>
+			<td></td>
+			{% for header in headers%}
+				<td class="resultRatingWeightAlternatives"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{header}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
+			{% endfor %}
+			<td class="resultRatingWeightAlternatives">weight</td>
+			<td></td>
+		</tr>
+		{% if not userColorMap %}
+			{% for row in table %}
+				<tr class="resultRatingWeightTr">
+					{%for value in row%}
+						{% if forloop.first%}
+							<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
+						{% else %}
+							{% if not forloop.last %}
+								<td class="resultRatingWeightValue">{{value}}</td>
+							{% else %}
+								<td class="resultRatingWeightWeight">{{ weights.pop }}</td>
+								<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
+							{% endif %}
+						{% endif %}
+					{% endfor %}
+				</tr>
+			{% endfor%}
+		{% else %}
+			{% for row in table %}
+				<tr class="resultRatingWeightTr">
+					{%for value, color in row%}
+						{% if forloop.first %}
+							<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
+						{% else %}
+							{% if not forloop.last %}
+								<td class="resultRatingWeightValue" style="background-color:rgb{{color}};">{{value}}</td>
+							{% else %}
+								<td class="resultRatingWeightWeight" style="background-color:rgb{{weightColorMap.pop}};">{{ weights.pop }}</td>
+								<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
+							{% endif %}
+						{% endif %}
+					{% endfor %}
+				</tr>
+			{% endfor%}
+		{% endif %}
+	</tbody>
+</table>

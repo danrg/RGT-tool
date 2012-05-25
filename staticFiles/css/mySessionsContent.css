@@ -1,0 +1,56 @@
+@CHARSET "ISO-8859-1";
+
+
+#sessionGridDiv{
+    max-width:100%;
+    overflow: auto;
+    -moz-box-shadow: 0 0 5px #888;
+    -webkit-box-shadow: 0 0 5px #888;
+    box-shadow: 0 0 5px #888;
+    padding-bottom: 15px;
+}
+
+#sessionGridOptions{
+	margin-top: 10px;
+}
+
+.dendrogramDiv{
+    text-align: center;
+    position: relative;
+}
+
+#sessionInfoDiv {
+	overflow: auto;
+}
+
+#sessionInfoDiv #sessionDetails {
+	display: inline-table;
+	vertical-align: top;
+}
+
+#sessionInfoDiv #sessionParticipants {
+	display: inline-table;
+	vertical-align: top;
+	margin-left: 40px;
+}
+
+#sessionInfoDiv #sessionParticipants .grid {
+	min-width: 300px;
+	overflow: auto;	
+}
+
+#mySessionDendrogram {
+	margin-top: 10px;
+}
+
+#mySessionResultsDendrogram {
+	margin-top: 15px;
+}
+
+#mySessionResultsDendrogramTitleIteration {
+	color: red;
+}
+
+#clearResultsButton {
+	margin-top: 10px;
+}

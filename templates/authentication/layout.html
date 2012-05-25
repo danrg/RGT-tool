@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="Stylesheet" type="text/css" href="{{ STATIC_URL }}css/login.css" />
+    <link rel="Stylesheet" type="text/css" href="{{ STATIC_URL }}css/shared.css" />
+</head>
+<body>
+<div id="wrap">
+    <div id="loginBox">
+        <div class="inset-bottom">
+            <img src="{{ STATIC_URL }}images/rgt-logo.png" id="logo" alt="Logo" />
+        </div>
+        <div class="inset-top inset-bottom">
+            <h1>{% block header %}{% endblock %}</h1>
+        </div>
+        <div class="inset-top inset-bottom formelms">
+        {% block content %}
+        {% endblock %}
+        </div>
+        <div class="inset-top stickbottom">
+        {% block footer %}
+        {% endblock %}
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+@CHARSET "ISO-8859-1";
+
+.alternativeCell{
+	background-image: linear-gradient(bottom, rgb(141,179,235) 13%, rgb(95,144,227) 57%);
+	background-image: -o-linear-gradient(bottom, rgb(141,179,235) 13%, rgb(95,144,227) 57%);
+	background-image: -moz-linear-gradient(bottom, rgb(141,179,235) 13%, rgb(95,144,227) 57%);
+	background-image: -webkit-linear-gradient(bottom, rgb(141,179,235) 13%, rgb(95,144,227) 57%);
+	background-image: -ms-linear-gradient(bottom, rgb(141,179,235) 13%, rgb(95,144,227) 57%);
+
+	background-image: -webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0.13, rgb(141,179,235)),
+	color-stop(0.57, rgb(95,144,227)))
+	
+	-ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#8db3eb', EndColorStr='#5f90e3'); /* IE8 */
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorStr='#8db3eb', EndColorStr='#5f90e3'); /* IE6,IE7 */
+}
+
+.gridRowMenu{
+	display: none;
+}
+
+.colMenuDiv{
+	display: none;
+}
+
+.tableHeader{
+	border:0px solid; 
+	background-color: transparent;
+	color: rgb(255, 225, 255);
+	font-weight: bolder;
+	text-align:center;
+}
+
+.concernCell {
+	background-color:rgb(141,179,235);
+}
+
+.gridTable input[type=text]{
+	width: 100px
+}
+
+.deleteImage
+{
+	border:0px solid;
+}
+
+.addImage
+{
+	border:0px solid;
+}
+
+.gridTable td{
+	text-align:center;
+}
+
+.weightDiv{
+	background-color: rgb(141,179,235);
+	width: 150px;
+	margin-left: 44px;
+}
+
+#content label.weightLabel {
+	display: inline-block;
+	padding-bottom: 6px;
+	padding-top: 6px;
+	padding-left: 5px;
+}
+
+#weightMeter{
+	width: 50px;
+	padding-left: 5px;
+	background-color: transparent;
+	border:0px solid; 
+	color: rgb(255, 225, 255);
+}
+
+#content label.gridSizePlaceholder {
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+

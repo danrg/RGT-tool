@@ -1,0 +1,27 @@
+@CHARSET "ISO-8859-1";
+
+#gridData {
+	max-width:100%;
+	overflow: auto;
+}
+
+#content label.gridNameLabel {
+	padding-top: 0px;
+}
+
+#createGridBody {
+	margin-left: 5px;
+}
+
+#content .formelms {
+	padding: 0px;
+}
+
+#gridDiv {
+	overflow: auto;
+	width: 990px;
+	-moz-box-shadow: 0 0 5px #888;
+	-webkit-box-shadow: 0 0 5px #888;
+	box-shadow: 0 0 5px #888;
+	padding-bottom: 15px;
+}

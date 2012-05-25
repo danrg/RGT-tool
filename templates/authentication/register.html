@@ -1,0 +1,39 @@
+{% extends 'authentication/layout.html' %}
+
+{% block title %}
+	RGT | Register
+{% endblock %}
+
+{% block header %}
+	Register
+{% endblock %}
+
+{% block content %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/recaptchaTemplate.js"></script>
+
+<form action="/auth/register/" method="post" id="form">
+    {% csrf_token %}
+	<div id="formRegistration">
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            {{ field.label_tag }}
+            {{ field }}
+            {% for error in field.errors %}
+                <div class="error">{{error}}</div>
+            {% endfor %}
+        {% endfor %}
+	</div>
+
+    {% include 'authentication/recaptchaTemplate.html' %}
+
+	<input type="submit" value="Register"/> 
+</form>
+{% endblock %}
+
+{% block footer %}
+<p class="sub">
+    Already have an account? <a href="/auth/login/">Login!</a>
+    <br />
+    <a href="/accounts/forgot/">Forgotten your password?</a>
+</p>
+{% endblock %}

@@ -1,0 +1,5 @@
+@CHARSET "ISO-8859-1";
+
+#participatingSessionsRefreshImage:hover{
+	background-image: url('/static/icons/refresh_hover.png');
+}

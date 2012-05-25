@@ -1,0 +1,85 @@
+body {
+    background-color: #800000;
+    font-family: Verdana;
+    font-size: 13px;
+    color: #444;
+}
+input[type="button"], input[type="submit"]
+{
+    background-color: #009CEF;
+    border: 1px solid #005aa8;
+    color: #fff;
+    border-radius: 2px;
+    text-align: center;
+
+    padding: 5px 15px 5px 15px;
+    font-size: 12px;
+}
+
+input[type="button"]:hover, input[type="submit"]:hover
+{
+    background-color: #005aa8;
+}
+
+input[type="button"][disabled]
+{
+	background-color: lightgray;
+	color: gray;
+}
+
+a.button
+{
+    display: inline-block;
+    height: 21px;
+    line-height: 21px;
+    /*background: url('../images/button-bg.png') repeat-x left 45%;*/
+    border: 1px solid #005aa8;
+    color: #fff;
+    border-radius: 2px;
+    text-decoration: none;
+    padding: 0px 9px 0px 27px;
+    margin-top: 5px;
+    font-size: 11px;
+}
+
+a.less-important
+{
+    /*background: url('../Images/button-bg2.png') repeat-x left 45%;*/
+    border: 1px solid #6598ca;
+}
+
+img
+{
+    border: 0;
+}
+
+.validation-summary-errors
+{
+    color: #cc3333;
+    line-height: 20px;
+    font-weight: bold;
+}
+
+
+/* Related to dendrogram divs. Dendrograms appear in Grids and Sessions */
+.dendrogram {
+	margin-top: 15px;
+}
+
+.dendrogramDiv {
+    text-align: center;
+    -moz-box-shadow: 0 0 5px #888;
+	-webkit-box-shadow: 0 0 5px #888;
+	box-shadow: 0 0 5px #888;
+	padding-top: 10px;
+}
+
+.dendrogramHead {
+	text-align: center;
+	margin-bottom: 5px;
+}
+
+.dendrogramTitle {
+	font-weight: bold;
+	color: #596D7E;
+}

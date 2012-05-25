@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="Stylesheet" type="text/css" href="{{ STATIC_URL }}css/style.css" />
+    <link rel="Stylesheet" type="text/css" href="{{ STATIC_URL }}css/shared.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/flick/jquery-ui-1.8.18.custom.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.loadmask.css" />
+    {% block stylesheet %}{% endblock %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.8.20.custom.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/ajaxPostDjangoFix.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.loadmask.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}js/dialogbox.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}js/loadSpinner.js"></script>
+	<script type="text/javascript">
+        $(window).ready(function(){
+        	//preload the image used to display the waiting status of an ajax request
+        	img1 = new Image();
+            img1.src = "{{ STATIC_URL }}images/ajax-loader.gif";
+            {% block onloadJavascript %}
+            {% endblock %}
+		});
+    </script>
+    {% block javascript %}
+	{% endblock %}
+</head>
+<body>
+<div id="wrap">
+    <div id="main">
+        <div id="header">
+            <div id="header-center">
+                <div id="logo">
+                    <img src="{{ STATIC_URL }}images/rgt-logo.png" alt=""/></div>
+                <div id="buttons">
+                    {% include 'menu.html' %}
+                </div>
+            </div>
+        </div>
+        <div id="workspace">
+            <div id="content">
+                <div>
+                    {% block content %}
+                    {% endblock %}
+                    <div id="modalDialogBox" class="dialogBoxModal">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="footer">
+    <div>
+        Repertory Grid Tool ©2012 | <a href="/contact/">Contact Us!</a>
+    </div>
+</div>
+</body>
+</html>

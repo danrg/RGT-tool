@@ -1,0 +1,42 @@
+{% extends 'authentication/layout.html' %}
+
+{% block title %}
+	RGT | Forgot Password
+{% endblock %}
+
+{% block header %}
+	Forgot Password
+{% endblock %}
+
+{% block content %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/recaptchaTemplate.js"></script>
+{% if checkEmail %}
+<div>Please check your email!</div>
+{% else %}
+
+<form action="/accounts/forgot/" method="post" id="form">
+    {% csrf_token %}
+	<div id="forgotPassForm">
+		{% for field in form %}
+            {{ field.label_tag }}
+            {{ field }}
+            {% for error in field.errors %}
+                <div class="error">{{error}}</div>
+            {% endfor %}
+        {% endfor %}
+	</div>
+
+    {% include 'authentication/recaptchaTemplate.html' %}
+	<input type="submit" value="Submit" />
+</form>
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+{% if not checkEmail %}
+<p class="sub">
+    Not what you were looking for? <br/>
+    <a href="/auth/register/">Register</a> or <a href="/auth/login/">Login</a>
+</p>
+{% endif %}
+{% endblock %}

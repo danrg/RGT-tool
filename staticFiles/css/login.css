@@ -1,0 +1,145 @@
+*
+{
+    margin: 0;
+    padding: 0;
+}
+
+#wrap {
+    margin-bottom: 1000px;
+
+}
+
+#loginBox
+{
+    width: 340px;
+    min-height: 450px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -225px 0 0 -170px;
+    box-shadow: 0px 0px 15px #000000;
+    background: #ffffff;     /* RUG kleuren palette */
+    border-radius: 7px;
+    text-align: center;
+}
+
+#loginBox .inset-top
+{
+    border-top: 1px solid #fff;
+}
+
+#loginBox .inset-bottom
+{
+    border-bottom: 1px solid #dee7ec;
+}
+
+#loginBox img
+{
+    margin-top: 22px;
+    margin-bottom: 20px;
+}
+
+#loginBox h1
+{
+    color: #666D70;
+    font-weight: bold;
+    font-size: 19px;
+    line-height: 19px;
+    margin-top: 9px;
+    margin-bottom: 11px;
+    text-align: left;
+    text-indent: 42px;
+}
+
+#loginBox .formelms
+{
+    text-align: left;
+    padding-left: 42px;
+    padding-right: 52px;
+    padding-top: 15px;
+    padding-bottom: 10px;
+    min-height: 250px;
+}
+
+#loginBox label
+{
+    font-size: 12px;
+    color: #666D70;
+    display: block;
+    padding-top: 10px;
+    padding-bottom: 4px;
+}
+
+#loginBox input[type="text"], #loginBox input[type="password"]
+{
+    border: 1px solid #666D70;
+    border-radius: 4px;
+    width: 100%;
+    padding: 5px;
+    font-size: 14px;
+    color: #555;
+}
+
+#loginBox input[type="image"]
+{
+    margin-top: 22px;
+}
+
+#loginBox div.error
+{
+    color: #b22e2e;
+    font-weight: bold;
+    font-size: 12px;
+    display: block;
+    margin-top: 2px;
+}
+
+.field-validation-error
+{
+    color: #b22e2e;
+    font-weight: bold;
+    font-size: 12px;
+    display: block;
+}
+.field-validation-valid
+{
+    display: none;
+}
+
+#loginBox .stickbottom
+{
+    height: 60px;
+    position: relative;
+    bottom: 0px;
+    left: 0px;
+    width: 340px;
+}
+
+#loginBox .stickbottom p
+{
+    line-height: 30px;
+    font-size: 12px;
+    color: #83a9c8;
+}
+
+#loginBox input[type="submit"] 
+{
+    margin-top: 15px;
+}
+
+#loginBox p.explanation
+{
+    font-size: 12px;
+    color: #4580b1;
+}
+
+
+#loginBox a.resetpassword
+{
+    display: block;
+    float: right;
+    font-size: 12px;
+    color: #315c80;
+    text-decoration: none;
+    margin-top: 22px;
+}

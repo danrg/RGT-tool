@@ -1,0 +1,75 @@
+<div id="resultAlternativeConcernTablesDiv">
+	<div id="concernsResults">
+		<h2>Concerns</h2>
+		<table class="grid" border= "0">
+	           <thead>
+	           <tr>
+	               <th>Left</th>
+	               <th>Right</th>
+	               <th>Times cited</th>
+	           </tr>
+	           </thead>
+			<tbody>
+				{% for leftC, rightC, nPair, nLeftC, nRightC, isNew in concerns %}
+					{%	comment %} header for the tr {% endcomment %}
+					{% if forloop.first %}
+					<tr class= "resultAlternativeConcernRow">
+						<td class= "{% cycle 'resultAlternativeConcernAmountCellBg1' 'resultAlternativeConcernAmountCellBg2' as bgColor%}" title="Times cited individually {{nLeftC}}">{{leftC}}</td>
+						<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="Times cited individually {{nRightC}}">{{rightC}}</td>
+						{% if isNew %}
+							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nPair}}<div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png"/></div></td>
+						{% else %}
+							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nPair}}</td>
+						{% endif %}
+					</tr>
+					{% else %}
+					<tr class= "resultAlternativeConcernRow">
+						<td class= "{% cycle bgColor%}" title="Times cited individually {{nLeftC}}">{{leftC}}</td>
+						<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="Times cited individually {{nRightC}}">{{rightC}}</td>
+						{% if isNew %}
+							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nPair}}<div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png"/></div></td>
+						{% else %}
+							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nPair}}</td>
+						{% endif %}
+					</tr>
+					{% endif %}
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	<div id="alternativesResults">
+	    <h2>Alternatives</h2>
+		<table class="grid">
+	           <thead>
+	               <tr>
+	                   <th>Name</th>
+	                   <th>Times cited</th>
+	               </tr>
+	           </thead>
+			<tbody>
+				{% for alternaive, nTime, isNew in alternatives %}
+					{%	comment %} header for the tr {% endcomment %}
+					{% if forloop.first %}
+					<tr class= "resultAlternativeConcernRow">
+						<td class= "{% cycle 'resultAlternativeConcernAmountCellBg1' 'resultAlternativeConcernAmountCellBg2' as bgColor%}">{{alternaive}}</td>
+						{% if isNew %}
+							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nTime}}<div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png"/></div></td>
+						{% else %}
+							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nTime}}</td>
+						{% endif %}
+					</tr>
+					{% else %}
+					<tr class= "resultAlternativeConcernRow">
+						<td class="{% cycle bgColor%}">{{alternaive}}</td>
+						{% if isNew %}
+							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nTime}}<div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png"/></div></td>
+						{% else %}
+							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nTime}}</td>
+						{% endif %}
+					</tr>
+					{% endif %}
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>

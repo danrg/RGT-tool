@@ -1,0 +1,53 @@
+@CHARSET "ISO-8859-1";
+
+.tableOptions{
+	position: relative;
+	top: 5px;
+	display: none;
+}
+
+#results{
+	width: 1000px;
+	overflow: auto;
+	-moz-box-shadow: 0 0 5px #888;
+	-webkit-box-shadow: 0 0 5px #888;
+	box-shadow: 0 0 5px #888;
+	padding-bottom: 15px;
+	margin-top: 7px;
+	display: none;
+}
+
+#informationTd{
+	text-align:left;
+	height: 20px;
+}
+
+#informationDisplayDiv{
+	background-color:#fafbfc;
+	min-width: 200px;
+	max-width: 500px;
+	overflow: auto;	
+}
+
+#informationDisplayDiv label{
+	font-weight: bold;
+	font-size: 11pt;
+}
+
+#informationDiv{
+	display: inline;
+}
+
+#showMyGridsTableOptions
+{
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+#content label.gridNameLabel {
+	display: inline-block;
+}
+
+#gridNameDiv {
+	margin-top:20px;
+}

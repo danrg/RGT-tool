@@ -1,0 +1,12 @@
+@CHARSET "ISO-8859-1";
+
+.pendingSessionTr{
+	background-color: #FFB5B5;
+	
+}
+.pendingSessionTr:hover{
+	background-color: #FFD6D6;
+}
+.pendingSessionTd{
+	cursor: pointer;
+}

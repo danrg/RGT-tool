@@ -1,0 +1,58 @@
+@CHARSET "ISO-8859-1";
+
+.resultRatingWeightAlternatives{
+	background-image: linear-gradient(bottom, rgb(141,179,235) 13%, rgb(95,144,227) 57%);
+	background-image: -o-linear-gradient(bottom, rgb(141,179,235) 13%, rgb(95,144,227) 57%);
+	background-image: -moz-linear-gradient(bottom, rgb(141,179,235) 13%, rgb(95,144,227) 57%);
+	background-image: -webkit-linear-gradient(bottom, rgb(141,179,235) 13%, rgb(95,144,227) 57%);
+	background-image: -ms-linear-gradient(bottom, rgb(141,179,235) 13%, rgb(95,144,227) 57%);
+	/* previous colors: rgb(253,157,99) 13%, rgb(255,198,163) 57% */
+
+	background-image: -webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0.13, rgb(141,179,235)),
+	color-stop(0.57, rgb(95,144,227)))
+	
+	-ms-filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#ffc6a3', EndColorStr='#fd9d63'); /* IE8 */
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorStr='#ffc6a3', EndColorStr='#fd9d63'); /* IE6,IE7 */
+	min-width: 90px;
+	height: 21px;
+	text-align: center;
+	font-weight: bold;
+}
+
+td.resultRatingWeightConcern{
+	background-color: #8DB3EB; /* previous color: #f7b686 */
+	text-align: center;
+	min-width: 90px;
+	height: 21px;
+}
+
+.resultRatingWeighTableSpacers{
+	width:10px; 
+	visibility:hidden; 
+	display:inline;
+}
+
+.resultRatingWeightWeight{
+	text-align: center;
+}
+
+.resultRatingWeightValue{
+	text-align: center;
+}
+
+.resultRatingWeightHead{
+	text-align: center;
+	font-weight: bold;
+	font-size: 11pt;
+}
+
+.resultRatingWeightTable{
+	margin-left:auto; 
+	margin-right:auto;
+	margin-top: 20px;
+}
+

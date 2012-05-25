@@ -1,0 +1,7 @@
+@CHARSET "ISO-8859-1";
+
+.ui-button .ui-button-text 
+{ 
+   padding: 1px 3px 1px 3px !important; 
+   font-size: 10pt !important; 
+} 

@@ -1,0 +1,11 @@
+<div id="resultsRatingsWeightsTables">
+	<div style= "overflow: auto">
+		{% include "gridMng/resultRatingWeightTable.html" with headers=rangeHeaders table=rangeTable weights=rangeWeights weightColorMap=rangeWeightColorMap tableHead=rangeTableHead userColorMap="True" STATIC_URL=STATIC_URL %}
+	</div>
+	<div style= "overflow: auto">
+		{% include "gridMng/resultRatingWeightTable.html" with headers=meanHeaders table=meanTable weights=meanWeights tableHead=meanTableHead STATIC_URL=STATIC_URL %}
+	</div>
+	<div style= "overflow: auto">
+		{% include "gridMng/resultRatingWeightTable.html" with headers=stdHeaders table=stdTable weights=stdWeights tableHead=stdTableHead userColorMap="True"  weightColorMap=stdWeightColorMap STATIC_URL=STATIC_URL %}
+	</div>
+</div>

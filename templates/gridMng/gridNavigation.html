@@ -1,0 +1,125 @@
+{% extends 'layout.html' %}
+    {% block stylesheet %}
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tipsy.css" rel="stylesheet" />
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smallButton.css" rel="stylesheet" />
+    {% endblock %}
+
+    {% block javascript %}
+        <script type="text/javascript" src="{{ STATIC_URL }}js/jshashtable-2.1_src.js"></script>
+
+        <script type="text/javascript">
+            function showMessageInDialogBox(text)
+            {
+                console.log(text);
+                $('#modalDialogBox').html('<p>' + text + '</p>');
+                $('#modalDialogBox').dialog('open');
+            }
+
+            //load a page inside the sessionPageDiv div
+            function getPage(page, div)
+            {
+                var url= '';
+                switch(page)
+                {
+                    case 'createSession':
+                    {
+                        url= '/grid/session/createPage/';
+                        break;
+                    }
+                    case 'mySessions':
+                    {
+                        url= '/grid/session/mySessionsPage/';
+                        break;
+                    }
+                    case 'showMyGrid':
+                    {
+                        url= '/grid/showMyGridsPage/';
+                        break;
+                    }
+                    case 'createMyGrid':
+                    {
+                        url= '/grid/createMyGridPage/';
+                        break;
+                    }
+                    case 'participatingSessions':
+                    {
+                        url= '/grid/session/participatingSessionsPage/';
+                        break;
+                    }
+                    default:
+                    {
+                        url= null;
+                        break;
+                    }
+                }
+                //get the page
+                if( url != null)
+                {
+                    $.post(url, '',function(data){
+                        if($(data).find('error').length <= 0)
+                        {
+                            //console.log($(data).find('htmlData').text());
+                            $("#" + div).html($(data).find('htmlData').text());
+                            //use the jquery ui button
+                            $('#' + div).find('input:button, button').button();
+                        }
+                        else
+                        {
+                            //error handling here
+                        }
+                    });
+                }
+            }
+
+        </script>
+    {% endblock %}
+
+    {% block onloadJavascript %}
+        <!--<script type="text/javascript">-->
+            //create the tabs
+            $(function() {
+                $( "#tabsDiv" ).tabs();
+            });
+
+            //use jqurey ui buttons
+            $('input:button, button').button();
+
+            //use jquery radio buttons
+            $("#radio").buttonset();
+            $("#myGridsNavigationDiv").buttonset();
+
+            //prepare the modal dialog box
+            $('#modalDialogBox').dialog({
+                autoOpen: false,
+                modal: true,
+                title: 'Information',
+                buttons: {
+                    Ok: function() {
+                        $( this ).dialog( "close" );
+                    }
+                }
+            });
+    {% endblock %}
+
+    {% block content %}
+	    <div class="container">
+		    <div id="tabsDiv" class= "span-24">
+			    <ul>
+				    <li><a href="#tabs-1">My Grids</a></li>
+				    <li><a href="#tabs-2">Sessions</a></li>
+			    </ul>
+    			<div id="tabs-2" class= "span-24">
+	    			<div id="radio">
+		    				<input type="radio" id="createSession" name="radio" onclick= "getPage('createSession', 'sessionPageDiv')"/><label for="createSession">Create Session</label>
+			    			<input type="radio" id="mySessions" name="radio" onclick= "getPage('mySessions', 'sessionPageDiv')"/><label for="mySessions">My Sessions</label>
+				    		<input type="radio" id="participatingSessions" name="radio" onclick= "getPage('participatingSessions', 'sessionPageDiv')"/><label for="participatingSessions">Session i am participating</label>
+				    </div>
+				    <div id= "sessionPageDiv">
+				    </div>
+			    </div>
+		    </div>
+	    </div>
+	    <!-- this div is used as a modal dialog box -->
+	    <div id="modalDialogBox" class="dialogBoxModal">
+	    </div>
+    {% endblock %}

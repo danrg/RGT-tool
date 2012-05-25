@@ -1,0 +1,11 @@
+{% load tz %}
+<table class="grid">
+	<thead>
+		<th colspan="4">Participating Users <span id=paticipatingRefreshSpan><img id="paticipatingRefreshImage" src="/static/icons/refresh.png" onclick="getParticipantPage()"/></span></th>
+	</thead>
+	{% for participant, class, dateTime in participants %}
+	<tr>
+		<td class="{{class}}">{{ participant.first_name }} {% if dateTime %}responded at: {% localtime on %}{{ dateTime|date:"Y-m-d H:i:s" }}{% endlocaltime %}{% endif %}</td>
+    </tr>
+    {% endfor %}
+</table>

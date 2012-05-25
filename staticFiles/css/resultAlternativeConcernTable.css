@@ -1,0 +1,39 @@
+@CHARSET "ISO-8859-1";
+
+#resultAlternativeConcernTablesDiv {
+	margin-bottom: 10px;
+}
+
+#resultAlternativeConcernTablesDiv #alternativesResults {
+	display: inline-table;
+	vertical-align: top;
+	margin-left: 60px;
+}
+
+#resultAlternativeConcernTablesDiv #concernsResults {
+	display: inline-table;
+	vertical-align: top;
+}
+
+.resultAlternativeConcernAmountCell{
+	text-align:center;
+	position: relative;
+}
+
+.resultAlternativeConcernAmountCellBg1{
+	background-color: #d6e9f6;
+}
+
+.resultAlternativeConcernAmountCellBg2{
+	background-color: #bdd1f7;
+}
+
+.resultAlternativeConcernRow:hover td{
+	background-color: #78b6e5;
+}
+
+.resultAlternativeConcernNewDiv{
+	position: absolute; 
+	margin-left: 85px; 
+	margin-top: -15px
+}

@@ -1,0 +1,33 @@
+{% extends 'authentication/layout.html' %}
+
+{% block title %}
+	RGT | Login
+{% endblock %}
+
+{% block header %}
+	Login
+{% endblock %}
+
+{% block content %}
+<form action="/auth/login/" method="post" id="form">
+    {% csrf_token %}
+    <div id="loginForm">
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            {{ field.label_tag }}
+            {{ field }}
+            {% for error in field.errors %}
+                <div class="error">{{error}}</div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+	<input type="submit" value="Login"/> 
+</form>
+{% endblock %}
+
+{% block footer %}
+ <p class="sub">
+     Don't have an account? <a href="/auth/register/" id="register-link">Register!</a> <br/>
+    <a href="/accounts/forgot/">Forgotten your password?</a>
+</p>
+{% endblock %}
