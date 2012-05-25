@@ -110,3 +110,10 @@ function participatingGetSessionUSID()
 {
 	return $('#participatingSessionSelect option:selected').val();
 }
+
+//function used in pendingResponses.html
+function openSession(sessionUSID)
+{
+	$('#participatingSessionSelect').find('option[value= "' + sessionUSID + '"]').attr('selected', true);
+	showParticipatingSessionDetails();
+}
