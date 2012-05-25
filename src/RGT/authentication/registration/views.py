@@ -22,7 +22,7 @@ def register(request):
         response = captcha.submit(  
             request.POST['recaptcha_challenge_field'],  
             request.POST['recaptcha_response_field'],  
-            'USE_YOUR_OWN',  #private key
+            settings.RECAPTCHA_KEY,  #private key
             request.META['REMOTE_ADDR'],)
         if registrationForm.is_valid():
             # check if re_captcha is valid 

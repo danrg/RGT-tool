@@ -1,11 +1,12 @@
 # Django settings for RGT project.
 import os
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Name', 'USE_YOUR_OWN email address'),
+    ('Spyros Ioakeimidis', 'spyrosikmd@gmail.com'),
+    ('Grayson Kleine', 'grysnml82@gmail.com'),
 )
 
 MANAGERS = ADMINS
@@ -139,11 +140,14 @@ INSTALLED_APPS = (
 )
 
 # Email related settings
-EMAIL_HOST = ''
+EMAIL_HOST = 'USE_YOUR_OWN'
 EMAIL_HOST_USER = 'USE_YOUR_OWN'
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_PASSWORD = 'USE_YOUR_OWN'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+# Recaptcha
+RECAPTCHA_KEY = 'USE_YOUR_OWN'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -194,3 +198,10 @@ LOGGING = {
 # authentication backend settings
 AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend', 'RGT.authentication.backendAuthentication.BackendAuthentication')
 AUTH_PROFILE_MODULE = 'userProfile.UserProfile'
+
+from settings_local import *
+
+try:
+    from settings_dev import *
+except:
+    pass
