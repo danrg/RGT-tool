@@ -6,10 +6,11 @@
 			</tr>
 		</thead>
 		<tbody>
+			<!-- The function openSession should be implemented in the javascript of the parent page!! -->
 			{% for sessionName, sessionUSID in pedingResponsesTable %}
 				<tr class= "pendingSessionTr">
 					<td class="pendingSessionTd" onclick= "openSession('{{sessionUSID}}')">{{sessionName}}</td>
 				</tr>
-			{% endfor %}	
+			{% endfor %}
 		</tbody>
 	</table>

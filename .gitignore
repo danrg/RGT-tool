@@ -1,3 +1,5 @@
 *.pyc
+*.log
 .idea
-ownsettings.py
+src/RGT/ownsettings.py
+src/sqlite.db

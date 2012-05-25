@@ -3,3 +3,17 @@
 #participatingSessionsRefreshImage:hover{
 	background-image: url('/static/icons/refresh_hover.png');
 }
+
+#participatingSessionsPendingGeneralInfo {
+	display: inline-table;
+	vertical-align: top;
+}
+
+#participatingSessionsPendingResponsesDiv{
+	display: inline-table;
+	vertical-align: top;
+	margin-left: 20px;
+	max-width: 300px;
+	max-height: 500px;
+	overflow: auto;
+}

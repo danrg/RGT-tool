@@ -239,8 +239,12 @@ def getParticipatingSessionsPage(request):
         sessions.append((userParticipateSession.session.usid, userParticipateSession.session.facilitator.user.first_name + ':' + userParticipateSession.session.name))
     if len(sessions) <= 0:
         hasSessions= False
-
-    context= RequestContext(request, {'sessions':sessions, 'hasSessions':hasSessions, 'pedingResponsesTable': __createPendingResponseData__(request.user)})
+    
+    pendingResponsesTable=  __createPendingResponseData__(request.user)
+    if pendingResponsesTable != None:
+        context= RequestContext(request, {'sessions':sessions, 'hasSessions':hasSessions, 'pedingResponsesTable':pendingResponsesTable})
+    else:
+        context= RequestContext(request, {'sessions':sessions, 'hasSessions':hasSessions})
     return render(request, 'gridMng/participatingSessions.html', context)
 
 def ajaxJoinSession(request):
@@ -856,7 +860,7 @@ def __generateWeightRatingResultTables__(sessionGrid=None, data=[], calculateWit
                 while k < nData:
                     concernObj= data[0].grid.concerns_set.all()[i]
                     alternativeObj= data[0].grid.alternatives_set.all()[j]
-                    rating= Ratings.objects.get(concern=concernObj, alternative=alternativeObj) #i do a 'get' here instead of 'filter'. why do you use filter?
+                    rating= Ratings.objects.get(concern=concernObj, alternative=alternativeObj) #spyros: i do a 'get' here instead of 'filter'. why you use filter?
                     if calculateWithWeight:
                         weight= concernObj.weight
                     #check if we have a min and max value in the begin, if not set it now
@@ -1063,7 +1067,7 @@ def __createPaticipantPanelData__(sessionObj):
     return participantData
 
 def __createPendingResponseData__(userObj= None):
-    table=[]
+    table= None
     
     if userObj != None:
         #find out all the sessions that the user is part of
@@ -1075,10 +1079,7 @@ def __createPendingResponseData__(userObj= None):
                 if sessionObj.state.name == State.objects.getWaitingForAltAndConState().name or sessionObj.state.name == State.objects.getWaitingForWeightsAndRatingsState().name:
                     #now that we know the session is in the correct state lets check if the user has responded.
                     if len(ResponseGrid.objects.filter(user= userObj, session= sessionObj, iteration= sessionObj.iteration)) <= 0:
+                        if table == None:
+                            table= []
                         table.append((sessionObj.name + ' : ' + sessionObj.facilitator.user.first_name, sessionObj.usid))
-        else:
-            table.append([])
-    else: 
-        table.append([])
-    
     return table

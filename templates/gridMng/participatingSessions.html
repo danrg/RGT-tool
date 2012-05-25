@@ -8,39 +8,48 @@
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/participatingSessions.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/participatingSessionsContent.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/gridTableGeneralFunctions.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/pendingResponses.css" />
 {% endblock %}
 
 {% block content %}
-<h2>Participating Sessions</h2>
-On this page you can review the sessions you are participating in. <br/>
-Click <a href="/sessions/">here</a> to administrate your sessions.
-<script type="text/javascript">
-	if( typeof participateInSession != 'function')
-	{
-		$.ajax({
-			url: '{{ STATIC_URL }}js/participatingSessions.js',
-			dataType: 'script',
-			async:   false 
-		});
-	}
-</script>
-<label for="participatingSessionSelect">Select session:</label><select id="participatingSessionSelect" onchange= "showParticipatingSessionDetails()">
-	{%if not hasSessions%}
-		<option id= "noSessionOption">No session available</option>
-	{% else %}
-		<option value="noSession"> </option>
-	{% endif %}
-	{% for usid, name in sessions %}
-		<option value="{{ usid }}">{{ name }}</option>
-	{% endfor %}
-</select>
-<img id= "participatingSessionsRefreshImage" src="/static/icons/refresh.png" onclick= "showParticipatingSessionDetails()"/>
-<div id="joinSessionMenuDiv">
-	<label for="invitationKeyInput">Invitation key:</label>
-    <input type="text" id="invitationKeyInput"/>
-    <input type="button" onclick="joinSession()" value="Join Session" />
+<div>
+	<div id="participatingSessionsPendingGeneralInfo">
+		<h2>Participating Sessions</h2>
+		On this page you can review the sessions you are participating in. <br/>
+		Click <a href="/sessions/">here</a> to administrate your sessions.
+		<script type="text/javascript">
+			if( typeof participateInSession != 'function')
+			{
+				$.ajax({
+					url: '{{ STATIC_URL }}js/participatingSessions.js',
+					dataType: 'script',
+					async:   false 
+				});
+			}
+		</script>
+		<label for="participatingSessionSelect">Select session:</label><select id="participatingSessionSelect" onchange= "showParticipatingSessionDetails()">
+			{%if not hasSessions%}
+				<option id= "noSessionOption">No session available</option>
+			{% else %}
+				<option value="noSession"> </option>
+			{% endif %}
+			{% for usid, name in sessions %}
+				<option value="{{ usid }}">{{ name }}</option>
+			{% endfor %}
+		</select>
+		<img id= "participatingSessionsRefreshImage" src="/static/icons/refresh.png" onclick= "showParticipatingSessionDetails()"/>
+		<div id="joinSessionMenuDiv">
+			<label for="invitationKeyInput">Invitation key:</label>
+		    <input type="text" id="invitationKeyInput"/>
+		    <input type="button" onclick="joinSession()" value="Join Session" />
+		</div>
+	</div>
+	<div id="participatingSessionsPendingResponsesDiv">
+		{% if pedingResponsesTable %}
+			{%include "gridMng/pendingResponses.html"%}
+		{% endif %}
+	</div>
 </div>
-
 <div id="participatingSessionContentDiv">
 </div>
 {% endblock %}
