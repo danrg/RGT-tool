@@ -1,6 +1,6 @@
 """
 This file is used for the functional tests related to grid operations,
-using the selenium module. These will pass when you run "manage.py test grid_functional_tests".
+using the selenium module. These will pass when you run "manage.py test functional_tests".
 
 Test cases implemented:
     - Create Grid Test
@@ -17,6 +17,7 @@ class CreateGridTest(BaseLiveTest):
     fixtures = ['admin_user.json']
         
     def test_can_create_grid(self):
+        # User logs in successfully
         self.can_login()
         
         # User clicks 'Grids' link and sees the my grids page
@@ -73,6 +74,7 @@ class UpdateGridTest(BaseLiveTest):
     fixtures = ['grid_admin_user.json']
     
     def test_can_update_grid(self):
+        # User logs in successfully
         self.can_login()
         
         # User clicks 'Grids' link and sees the my grids page
@@ -103,8 +105,8 @@ class UpdateGridTest(BaseLiveTest):
         ActionChains(self.browser).move_to_element(alternative_2_name).perform()
         
         # User clicks the button to add a column
-        add_image_column = self.browser.find_element_by_xpath("//div[@class='colMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
-        add_image_column.click()
+        add_column_button = self.browser.find_element_by_xpath("//div[@class='colMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
+        add_column_button.click()
         
         # User types value for alternative3
         alternative_3_name = self.browser.find_element_by_name("alternative_3_name")
@@ -120,8 +122,8 @@ class UpdateGridTest(BaseLiveTest):
         ActionChains(self.browser).move_to_element(concern_3_left).perform()
         
         # User clicks the button to add a row
-        add_image_row = self.browser.find_element_by_xpath("//div[@class='gridRowMenu' and @id='leftRowMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
-        add_image_row.click()
+        add_row_button = self.browser.find_element_by_xpath("//div[@class='gridRowMenu' and @id='leftRowMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
+        add_row_button.click()
         
         # User types left and right value for concern4
         concern_4_left = self.browser.find_element_by_name("concern_4_left")
@@ -139,22 +141,22 @@ class UpdateGridTest(BaseLiveTest):
         ActionChains(self.browser).move_to_element(concern_2_right).perform()
         
         # User clicks the button to delete the second row
-        delete_image_button = self.browser.find_element_by_xpath("//div[@class='gridRowMenu' and @id='rightRowMenuDiv' and contains(@style, 'block')]/a[1]/img[@class='deleteImage']")
-        delete_image_button.click()
+        delete_row_button = self.browser.find_element_by_xpath("//div[@class='gridRowMenu' and @id='rightRowMenuDiv' and contains(@style, 'block')]/a[1]/img[@class='deleteImage']")
+        delete_row_button.click()
         
         # User mouse over to alternative_1_name.
         alternative_1_name = self.browser.find_element_by_name("alternative_1_name")
         ActionChains(self.browser).move_to_element(alternative_1_name).perform()
         
         # User clicks the button to delete the first column
-        delete_row_button = self.browser.find_element_by_xpath("//div[@class='colMenuDiv' and contains(@style, 'block')]/a[1]/img[@class='deleteImage']")
-        delete_row_button.click()
+        delete_column_button = self.browser.find_element_by_xpath("//div[@class='colMenuDiv' and contains(@style, 'block')]/a[1]/img[@class='deleteImage']")
+        delete_column_button.click()
         
         # User clicks the save button
         save_button = self.browser.find_element_by_css_selector("input[value='Save']")
         save_button.click()
         
-        # A dialog box appears with the message 'Grid was saved.'
+        # A dialog box appears with the message 'Grid was saved'
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[role='dialog']"))
         dialog_box = self.browser.find_element_by_class_name("ui-dialog")
         self.assertIn('Grid was saved', dialog_box.text)

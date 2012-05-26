@@ -1,6 +1,6 @@
 """
 This file is used for the functional tests related to authentication operations,
-using the selenium module. These will pass when you run "manage.py test authentication_functional_tests".
+using the selenium module. These will pass when you run "manage.py test functional_tests".
 
 Test Classes Used:
     - Register Test
@@ -12,7 +12,7 @@ from selenium.webdriver.common.keys import Keys
 class RegisterTest(BaseLiveTest):
     
     def test_can_register(self):
-        # # User opens the web browser and goes to RGT home page
+        # User opens the web browser and goes to RGT home page
         self.browser.get(self.live_server_url + '/home/')
         
         # User sees the RGT login page
