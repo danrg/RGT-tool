@@ -5,6 +5,7 @@ using the selenium module. These will pass when you run "manage.py test function
 Test cases implemented:
     - Create Grid Test
     - Update Grid Test
+    - Delete Grid Test
 
 """
 from RGT.functional_tests.tests.base import BaseLiveTest
@@ -13,8 +14,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 import random
         
-class CreateGridTest(BaseLiveTest):
-    fixtures = ['admin_user.json']
+class GridTests(BaseLiveTest):
+    #fixtures = ['admin_user.json']
+    fixtures = ['grid_admin_user.json']
         
     def test_can_create_grid(self):
         # User logs in successfully
@@ -68,10 +70,6 @@ class CreateGridTest(BaseLiveTest):
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[role='dialog']"))
         dialog_box = self.browser.find_element_by_class_name("ui-dialog")
         self.assertIn('Grid was created.', dialog_box.text)
-        
-
-class UpdateGridTest(BaseLiveTest):
-    fixtures = ['grid_admin_user.json']
     
     def test_can_update_grid(self):
         # User logs in successfully
@@ -161,6 +159,44 @@ class UpdateGridTest(BaseLiveTest):
         dialog_box = self.browser.find_element_by_class_name("ui-dialog")
         self.assertIn('Grid was saved', dialog_box.text)
         
+    def test_can_delete_grid(self):
+        # User logs in successfully
+        self.can_login()
         
+        # User clicks 'Grids' link and sees the my grids page
+        grids_link = self.browser.find_element_by_link_text("Grids")
+        grids_link.click()
         
+        body = self.browser.find_element_by_tag_name('body')
+        self.assertIn('Grid Management', body.text)
+            
+        # The 'select' tag contains the created grid with name 'grid1'
+        select_field = self.browser.find_element_by_css_selector("select")
+        self.assertIn('grid1', select_field.text)
         
+        # User selects the option with grid name 'grid1' and sees the grid with the
+        # name 'grid1' in the input text.
+        option_fields = self.browser.find_elements_by_css_selector('option')
+        option_fields[1].click()
+        
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("gridTrableContainerDiv"))
+        grid_name_field = self.browser.find_element_by_name("gridName")
+        self.assertEquals('grid1', grid_name_field.get_attribute('value'))
+        
+        # User clicks the delete grid button
+        delete_button = self.browser.find_element_by_css_selector("input[value='Delete']")
+        delete_button.click()
+        
+        # A dialog box appears that asks from the user to confirm delete
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[role='dialog']"))
+        dialog_box = self.browser.find_element_by_class_name("ui-dialog")
+        self.assertIn('Delete grid?', dialog_box.text)
+        
+        # The user clicks the delete grid button from the dialog box
+        delete_grid_button = self.browser.find_element_by_class_name("ui-button-text")
+        delete_grid_button.click()
+        
+        # A dialog box appears with the message 'Grid was deleted'
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[role='dialog']"))
+        dialog_box = self.browser.find_element_by_class_name("ui-dialog")
+        self.assertIn('Grid was deleted.', dialog_box.text)
