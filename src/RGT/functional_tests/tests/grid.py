@@ -1,6 +1,12 @@
 """
 This file is used for the functional tests related to grid operations,
-using the selenium module. These will pass when you run "manage.py test functional_tests".
+using the selenium module. These will pass when you run "manage.py test functional_tests.GridTests".
+This file also includes the base test for the grids which includes general functions needed
+by the test cases.
+
+General Functions:
+    - can_goto_grid_page
+    - can_show_grid
 
 Test cases implemented:
     - Create Grid Test
@@ -40,6 +46,7 @@ class BaseGridLiveTest(BaseLiveTest):
         option_fields = self.browser.find_elements_by_css_selector('option')
         option_fields[1].click()
         
+        # Wait until the the grid appears successfully
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("gridTrableContainerDiv"))
         grid_name_field = self.browser.find_element_by_name("gridName")
         self.assertEquals('grid1', grid_name_field.get_attribute('value'))
@@ -192,4 +199,5 @@ class GridTests(BaseGridLiveTest):
         show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show Dendogram']")
         show_dendrogram_button.click()
         
+        # Wait until the dendrogram appears successfully
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_class_name("hasSVG"))
