@@ -6,6 +6,7 @@ Test cases implemented:
     - Create Grid Test
     - Update Grid Test
     - Delete Grid Test
+    - Show Dendrogram Test
 
 """
 from RGT.functional_tests.tests.base import BaseLiveTest
@@ -13,12 +14,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 import random
-        
-class GridTests(BaseLiveTest):
-    #fixtures = ['admin_user.json']
-    fixtures = ['grid_admin_user.json']
-        
-    def test_can_create_grid(self):
+
+class BaseGridTest(BaseLiveTest):
+    
+    def can_goto_grid_page(self):
         # User logs in successfully
         self.can_login()
         
@@ -28,6 +27,29 @@ class GridTests(BaseLiveTest):
         
         body = self.browser.find_element_by_tag_name('body')
         self.assertIn('Grid Management', body.text)
+        
+    def can_show_grid(self):
+        self.can_goto_grid_page()
+        
+        # The 'select' tag contains the created grid with name 'grid1'
+        select_field = self.browser.find_element_by_css_selector("select")
+        self.assertIn('grid1', select_field.text)
+        
+        # User selects the option with grid name 'grid1' and sees the grid with the
+        # name 'grid1' in the input text.
+        option_fields = self.browser.find_elements_by_css_selector('option')
+        option_fields[1].click()
+        
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("gridTrableContainerDiv"))
+        grid_name_field = self.browser.find_element_by_name("gridName")
+        self.assertEquals('grid1', grid_name_field.get_attribute('value'))
+        
+class GridTests(BaseGridTest):
+    fixtures = ['grid_admin_user.json']
+        
+    def test_can_create_grid(self):
+        # User logs in successfully and goes to grid page
+        self.can_goto_grid_page()
         
         # User clicks the create grid link and sees the create grid page
         create_grid_link = self.browser.find_element_by_link_text("create")
@@ -72,30 +94,11 @@ class GridTests(BaseLiveTest):
         self.assertIn('Grid was created.', dialog_box.text)
     
     def test_can_update_grid(self):
-        # User logs in successfully
-        self.can_login()
-        
-        # User clicks 'Grids' link and sees the my grids page
-        grids_link = self.browser.find_element_by_link_text("Grids")
-        grids_link.click()
-        
-        body = self.browser.find_element_by_tag_name('body')
-        self.assertIn('Grid Management', body.text)
-            
-        # The 'select' tag contains the created grid with name 'grid1'
-        select_field = self.browser.find_element_by_css_selector("select")
-        self.assertIn('grid1', select_field.text)
-        
-        # User selects the option with grid name 'grid1' and sees the grid with the
-        # name 'grid1' in the input text.
-        option_fields = self.browser.find_elements_by_css_selector('option')
-        option_fields[1].click()
-        
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("gridTrableContainerDiv"))
-        grid_name_field = self.browser.find_element_by_name("gridName")
-        self.assertEquals('grid1', grid_name_field.get_attribute('value'))
+        # User logs in successfully, goes to grid page and selects a saved grid
+        self.can_show_grid()
         
         # User changes the name of the grid to 'grid123'
+        grid_name_field = self.browser.find_element_by_name("gridName")
         grid_name_field.send_keys('23')
         
         # User mouser over to alternative2
@@ -160,28 +163,8 @@ class GridTests(BaseLiveTest):
         self.assertIn('Grid was saved', dialog_box.text)
         
     def test_can_delete_grid(self):
-        # User logs in successfully
-        self.can_login()
-        
-        # User clicks 'Grids' link and sees the my grids page
-        grids_link = self.browser.find_element_by_link_text("Grids")
-        grids_link.click()
-        
-        body = self.browser.find_element_by_tag_name('body')
-        self.assertIn('Grid Management', body.text)
-            
-        # The 'select' tag contains the created grid with name 'grid1'
-        select_field = self.browser.find_element_by_css_selector("select")
-        self.assertIn('grid1', select_field.text)
-        
-        # User selects the option with grid name 'grid1' and sees the grid with the
-        # name 'grid1' in the input text.
-        option_fields = self.browser.find_elements_by_css_selector('option')
-        option_fields[1].click()
-        
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("gridTrableContainerDiv"))
-        grid_name_field = self.browser.find_element_by_name("gridName")
-        self.assertEquals('grid1', grid_name_field.get_attribute('value'))
+        # User logs in successfully, goes to grid page and selects a saved grid
+        self.can_show_grid()
         
         # User clicks the delete grid button
         delete_button = self.browser.find_element_by_css_selector("input[value='Delete']")
@@ -200,3 +183,8 @@ class GridTests(BaseLiveTest):
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[role='dialog']"))
         dialog_box = self.browser.find_element_by_class_name("ui-dialog")
         self.assertIn('Grid was deleted.', dialog_box.text)
+        
+    def test_can_show_dendrogram(self):
+        # User logs in successfully, goes to grid page and selects a saved grid
+        self.can_show_grid()
+        
