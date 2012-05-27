@@ -15,7 +15,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 import random
 
-class BaseGridTest(BaseLiveTest):
+class BaseGridLiveTest(BaseLiveTest):
     
     def can_goto_grid_page(self):
         # User logs in successfully
@@ -44,7 +44,7 @@ class BaseGridTest(BaseLiveTest):
         grid_name_field = self.browser.find_element_by_name("gridName")
         self.assertEquals('grid1', grid_name_field.get_attribute('value'))
         
-class GridTests(BaseGridTest):
+class GridTests(BaseGridLiveTest):
     fixtures = ['grid_admin_user.json']
         
     def test_can_create_grid(self):
@@ -188,3 +188,8 @@ class GridTests(BaseGridTest):
         # User logs in successfully, goes to grid page and selects a saved grid
         self.can_show_grid()
         
+        # User clicks the show dendrogram button
+        show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show Dendogram']")
+        show_dendrogram_button.click()
+        
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_class_name("hasSVG"))
