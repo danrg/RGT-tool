@@ -8,6 +8,14 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
 class BaseSessionLiveTest(BaseLiveTest):
+    """
+    This is the base class test which the SessionTests class must extend. It defines some
+    general functions used by many test cases.
+    
+    General Functions:
+        - can_goto_session_page
+    
+    """
     
     def can_goto_session_page(self):
         # User logs in successfully
@@ -58,3 +66,7 @@ class SessionTests(BaseSessionLiveTest):
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[role='dialog']"))
         dialog_box = self.browser.find_element_by_class_name("ui-dialog")
         self.assertIn('Session was created.', dialog_box.text)
+        
+        # User clicks the close button to close the dialog
+        close_dialog_button = self.browser.find_element_by_css_selector("button[role='button']")
+        close_dialog_button.click()
