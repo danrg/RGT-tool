@@ -27,9 +27,9 @@ class BaseGridLiveTest(BaseLiveTest):
         - can_show_grid
     
     """
-    def can_goto_grid_page(self):
+    def can_goto_grid_page(self, email='', password=''):
         # User logs in successfully
-        self.can_login()
+        self.can_login(email, password)
         
         # User clicks 'Grids' link and sees the grids page
         grids_link = self.browser.find_element_by_link_text("Grids")
@@ -38,8 +38,9 @@ class BaseGridLiveTest(BaseLiveTest):
         body = self.browser.find_element_by_tag_name('body')
         self.assertIn('Grid Management', body.text)
         
-    def can_select_grid(self):
-        self.can_goto_grid_page()
+    def can_select_grid(self, email='', password=''):
+        # User logs in successfully and goes to grid page 
+        self.can_goto_grid_page(email, password)
         
         # The 'select' tag contains the created grid with name 'grid1'
         select_field = self.browser.find_element_by_css_selector("select")
@@ -60,7 +61,7 @@ class GridTests(BaseGridLiveTest):
         
     def test_can_create_grid(self):
         # User logs in successfully and goes to grid page
-        self.can_goto_grid_page()
+        self.can_goto_grid_page('admin@admin.com', '123')
         
         # User clicks the create grid link and sees the create grid page
         create_grid_link = self.browser.find_element_by_link_text("create")
@@ -110,7 +111,7 @@ class GridTests(BaseGridLiveTest):
     
     def test_can_update_grid(self):
         # User logs in successfully, goes to grid page and selects a saved grid
-        self.can_select_grid()
+        self.can_select_grid('admin@admin.com', '123')
         
         # User changes the name of the grid to 'grid123'
         grid_name_field = self.browser.find_element_by_name("gridName")
@@ -183,7 +184,7 @@ class GridTests(BaseGridLiveTest):
         
     def test_can_delete_grid(self):
         # User logs in successfully, goes to grid page and selects a saved grid
-        self.can_select_grid()
+        self.can_select_grid('admin@admin.com', '123')
         
         # User clicks the delete grid button
         delete_button = self.browser.find_element_by_css_selector("input[value='Delete']")
@@ -209,7 +210,7 @@ class GridTests(BaseGridLiveTest):
         
     def test_can_show_dendrogram(self):
         # User logs in successfully, goes to grid page and selects a saved grid
-        self.can_select_grid()
+        self.can_select_grid('admin@admin.com', '123')
         
         # User clicks the show dendrogram button
         show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show Dendogram']")
