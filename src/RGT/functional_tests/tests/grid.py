@@ -1,6 +1,6 @@
 """
 This file is used for the functional tests related to grid operations,
-using the selenium module. These will pass when you run "manage.py test functional_tests.GridTests".
+using the python selenium module. These will pass when you run "manage.py test functional_tests.GridTests".
 This file also includes the base test for the grids which includes general functions needed
 by the test cases.
 
@@ -100,14 +100,8 @@ class GridTests(BaseGridLiveTest):
         save_button = self.browser.find_element_by_css_selector("input[value='Save']")
         save_button.click()
         
-        # A dialog box appears with the message 'Grid was created.'
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[role='dialog']"))
-        dialog_box = self.browser.find_element_by_class_name("ui-dialog")
-        self.assertIn('Grid was created.', dialog_box.text)
-        
-        # User clicks the close button to close the dialog
-        close_dialog_button = self.browser.find_element_by_css_selector("button[role='button']")
-        close_dialog_button.click()
+        # A dialog box appears with the message 'Grid was created.' and user closes it
+        self.wait_for_dialog_box_with_message("Grid was created.")
     
     def test_can_update_grid(self):
         # User logs in successfully, goes to grid page and selects a saved grid
@@ -174,13 +168,7 @@ class GridTests(BaseGridLiveTest):
         save_button.click()
         
         # A dialog box appears with the message 'Grid was saved'
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[role='dialog']"))
-        dialog_box = self.browser.find_element_by_class_name("ui-dialog")
-        self.assertIn('Grid was saved', dialog_box.text)
-        
-        # User clicks the close button to close the dialog
-        close_dialog_button = self.browser.find_element_by_css_selector("button[role='button']")
-        close_dialog_button.click()
+        self.wait_for_dialog_box_with_message("Grid was saved")
         
     def test_can_delete_grid(self):
         # User logs in successfully, goes to grid page and selects a saved grid
@@ -200,13 +188,7 @@ class GridTests(BaseGridLiveTest):
         delete_grid_button.click()
         
         # A dialog box appears with the message 'Grid was deleted'
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[role='dialog']"))
-        dialog_box = self.browser.find_element_by_class_name("ui-dialog")
-        self.assertIn('Grid was deleted.', dialog_box.text)
-        
-        # User clicks the close button to close the dialog
-        close_dialog_button = self.browser.find_element_by_css_selector("button[role='button']")
-        close_dialog_button.click()
+        self.wait_for_dialog_box_with_message("Grid was deleted")
         
     def test_can_show_dendrogram(self):
         # User logs in successfully, goes to grid page and selects a saved grid

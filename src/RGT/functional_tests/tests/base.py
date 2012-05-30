@@ -4,11 +4,13 @@ and the tear down operations, as well as it provides general functions.
 
 General Functions:
     - can_login
+    - wait_for_dialog_box_with_message
 
 """
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
 
 class BaseLiveTest(LiveServerTestCase):
     
@@ -43,4 +45,14 @@ class BaseLiveTest(LiveServerTestCase):
         # the Home page
         body = self.browser.find_element_by_tag_name('body')
         self.assertIn('Welcome', body.text)
+        
+    def wait_for_dialog_box_with_message(self, message=''):
+        # wait for the dialog box to appear with the desired message
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[role='dialog']"))
+        dialog_box = self.browser.find_element_by_class_name("ui-dialog")
+        self.assertIn(message, dialog_box.text)
+        
+        # User clicks the close button to close the dialog
+        close_dialog_button = self.browser.find_element_by_css_selector("button[role='button']")
+        close_dialog_button.click()
         
