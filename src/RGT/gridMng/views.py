@@ -547,11 +547,12 @@ def ajaxGenerateDendogram(request):
                     try:     
                         imgData= __createDendogram__(grid1)
                         return HttpResponse(imgData, content_type='application/xml')
-                    except Exception as error:
-                        if len(error.args) >= 1:
-                            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
-                        else:
-                            return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'), content_type='application/xml')
+                    except:
+                        print "Exception in user code:"
+                        print '-'*60
+                        traceback.print_exc(file=sys.stdout)
+                        print '-'*60
+                        return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'), content_type='application/xml')
             except:
                 print "Exception in user code:"
                 print '-'*60
@@ -559,7 +560,7 @@ def ajaxGenerateDendogram(request):
                 print '-'*60
                 return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
         else:
-            return HttpResponse(createXmlErrorResponse('Could not find the grid to generate the dendogram'), content_type='application/xml')
+            return HttpResponse(createXmlErrorResponse('Could not find the grid to generate the dendrogram'), content_type='application/xml')
     else:
         return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'), content_type='application/xml')
 

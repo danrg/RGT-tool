@@ -915,12 +915,12 @@ def __generateWeightRatingResultTables__(sessionGrid=None, data=[], calculateWit
                     rowRange.append(maxValue - minValue)
                     #calculate the mean
                     mean= total/len(population)
-                    rowMean.append( "%.2f" % mean)
+                    rowMean.append(mean)
                     #calculate std
                     total= 0
                     for value in population:
                         total+= (value - mean)**2
-                    rowStd.append("%.2f" % round(sqrt(total/len(population)), 1))
+                    rowStd.append(round(sqrt(total/len(population)), 1))
                     k= 0
                     j+= 1
                 else:
