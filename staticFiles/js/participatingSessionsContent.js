@@ -52,7 +52,7 @@ function getResponseFromIteration(iteration)
 					{
 						$('#participationSessionsContentDiv').html($(data).find('htmlData').text());
 						$('#participationSessionsContentDiv').find('input:button, button').button();
-						$('#participationSessionsContentGridsDiv').find('table').each(function(){
+						$('#participationSessionsContentGridsDiv').find('#gridTrableContainerDiv').each(function(){
 							prepareForNewGrid($(this));	
 						});
 						hideLoadingSpinner($('#wrap'));

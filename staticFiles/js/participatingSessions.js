@@ -74,8 +74,8 @@ function showParticipatingSessionDetails()
 						$('#participatingSessionContentDiv').html($(data).find('htmlData').text());
 						if($('#participatingSessionGridDiv').find('table').length >= 1)
 						{
-							prepareForNewGrid($('#participatingSessionGridDiv').find('table'));
-							prepareForNewGrid($('#participatingSessionGridAnswerDiv').find('table'));
+							prepareForNewGrid($('#participatingSessionGridDiv'));
+							prepareForNewGrid($('#participatingSessionGridAnswerDiv'));
 						}
 						hideLoadingSpinner(loadingDiv);
 					}

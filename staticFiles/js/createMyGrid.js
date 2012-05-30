@@ -13,7 +13,7 @@ if( typeof showColMenu != 'function')
 
 function prepareGrid()
 {
-	prepareForNewGrid($('#gridData').find('#gridDiv').find('table'));
+	prepareForNewGrid($('#gridData').find('#gridDiv'));
 }
 
 function createGrid()

@@ -12,7 +12,7 @@
 			<h4 id= "participatingSessionSuggestionGridHeader">Your Suggestion Grid</h4>
 			<form id="participatingSessionResponseGridForm">
 				{% if responseTable %}
-					{% include "gridMng/gridTable.html" with table=responseTable tableHeader=responseTableHeader weights=responseWeights changeRatingsWeights=responseChangeRatingsWeights changeCornAlt=responseChangeCornAlt checkForTableIsSave=responseCheckForTableIsSave showRatingWhileFalseChangeRatingsWeights=responseShowRatingWhileFalseChangeRatingsWeights tableId=responseTableId STATIC_URL=STATIC_URL only %}
+					{% include "gridMng/gridTable.html" with table=responseTable tableHeader=responseTableHeader weights=responseWeights changeRatingsWeights=responseChangeRatingsWeights changeCornAlt=responseChangeCornAlt checkForTableIsSave=responseCheckForTableIsSave showRatingWhileFalseChangeRatingsWeights=responseShowRatingWhileFalseChangeRatingsWeights tableId=responseTableId doesNotShowLegend=responseDoesNotShowLegend STATIC_URL=STATIC_URL only %}
 				{% endif %}
 			</form>
 		</div>

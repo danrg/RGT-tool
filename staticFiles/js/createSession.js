@@ -25,7 +25,7 @@ function showGridSessionSelection(){
 					if($(data).find('error').length <= 0)
 					{
 						$('#createSessionBasedOnGrid').html($(data).find('htmlData').text());
-						prepareForNewGrid($('#createSessionBasedOnGrid').find('table'));
+						prepareForNewGrid($('#createSessionBasedOnGrid'));
 						//calculateTotalWeight($('#createSessionBasedOnGrid').find('table'));
 						hideLoadingSpinner($('#createSessionBasedOnGrid'));
 					}

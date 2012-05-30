@@ -64,10 +64,10 @@ function showMyGrid(reload)
 						}
 						
 						$("#results").html($(data).find('htmlData').text());
-						prepareForNewGrid($('#results').find('table'));	//this function is from gridTableGeneralFunctions.js
+						prepareForNewGrid($('#results'));	//this function is from gridTableGeneralFunctions.js
 						
 						//calculate total weight
-						calculateTotalWeight($('#results').find('table').parent());
+						calculateTotalWeight($('#results'));
 									
 						//set table status as matching with the db 
 						hasTableBeenSaved= true;
