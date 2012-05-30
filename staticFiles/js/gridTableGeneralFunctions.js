@@ -22,10 +22,14 @@ var colMenuTimers= new Hashtable();
 var nFixedCols= 5;//number of cols that are not user for alternatives
 var nFixedRows= 2;//number of rows that are not user for concerns
 
-//this function should be called if a new grid is loaded in the page
-function prepareForNewGrid(table)
+/**
+ * this function should be called if a new grid is loaded in the page
+ * @param containerDiv this object should contain the div where the gridTable.html page is placed
+ */
+function prepareForNewGrid(containerDiv)
 {
-	var tableContainer = $(table).parent();
+	var table= containerDiv.find('#mainGridDiv table')
+	//var tableContainer = $(table).parent();
 	 //add the animation to the buttons of the menu of the grid
 	$(table).find(".deleteImage").hover(function(){
 		 $(this).attr("src", urlStaticFiles + "icons/delete_hover.png");
@@ -83,7 +87,11 @@ function prepareForNewGrid(table)
 	{
 		colMenuTimers.put(tableId, new Array(getNumberOfAlternatives(table)));
 	}
-	calculateTotalWeight(tableContainer);
+	
+	//initiate the grid menu
+	prepareGridMenu(containerDiv);
+	
+	calculateTotalWeight(containerDiv);
 }
 	
 //this function will hide and show the row menu
@@ -162,7 +170,7 @@ function addRow(cell)
 	var rightId= "concern_" + nConcerns +"_right";
 	var ratingReadOnly= isRatingReadOnly(cell);
 	var showRatingWhileFalseChangeRatingsWeights= isShowRatingIfReadOnly(cell);
-	var tableContainer = findTable(cell).parent();
+	var containerDiv = findTable(cell).parents('#gridTrableContainerDiv');
 	//$("#nConcerns").val(nConcerns);
 	
 	//add the new row to the table
@@ -285,7 +293,11 @@ function addRow(cell)
 	});//end mouse leave
 	
 	//calculate the total weight
-	calculateTotalWeight(tableContainer);
+	calculateTotalWeight(containerDiv);
+	if(typeof isTableSaved == 'function')
+	{
+		isTableSaved();
+	}
 }
 
 function removeRow(cell)
@@ -293,7 +305,7 @@ function removeRow(cell)
 	var concernNumber= cell.getRowAndCellIndex()[0] - 1;
 	var nConcerns= getNumberOfConcerns(cell);//parseInt($("#nConcerns").val());
 	var temp= null;
-	var tableContainer = findTable(cell).parent();
+	var containerDiv = findTable(cell).parents('#gridTrableContainerDiv');
 	if(nConcerns - 1 != 0)
 	{	
 		//update all the ids of the table 
@@ -339,9 +351,12 @@ function removeRow(cell)
 		//remove add -1 to the total concerns
 		nConcerns--;
 		//$("#nConcerns").val(nConcerns);
-		calculateTotalWeight(tableContainer);
+		calculateTotalWeight(containerDiv);
 		
-		isTableSaved();
+		if(typeof isTableSaved == 'function')
+		{
+			isTableSaved();
+		}
 	}
 }
 
@@ -429,6 +444,11 @@ function addCol(cell)
 	//add +1 position to the colMenuTimers
 	var tableId= getTableId(cell);
 	colMenuTimers.get(tableId).push(null);
+	
+	if(typeof isTableSaved == 'function')
+	{
+		isTableSaved();
+	}
 }
 
 function removeCol(cell)
@@ -485,16 +505,19 @@ function removeCol(cell)
 		//remove -1 position to the colMenuTimers
 		colMenuTimers.get(tableId).pop();
 
-		isTableSaved();
+		if(typeof isTableSaved == 'function')
+		{
+			isTableSaved();
+		}
 	}
 }
 
-function calculateTotalWeight(tableContainer)
+function calculateTotalWeight(containerDiv)
 {
-	var nConcerns= getNumberOfConcerns(tableContainer.find('table'));//parseInt($("#nConcerns").val())
+	var nConcerns= getNumberOfConcerns(containerDiv.find('#mainGridDiv table'));//parseInt($("#nConcerns").val())
 	var weightTotal= 0.0;
 	var id= null;
-	var tbody= tableContainer.find('tbody');//$('#Grid>tbody');
+	var tbody= containerDiv.find('#mainGridDiv table>tbody');//$('#Grid>tbody');
 	
 	for(var i= 0; i < nConcerns; i++)
 	{
@@ -504,11 +527,11 @@ function calculateTotalWeight(tableContainer)
 	
 	if(weightTotal >= 0 || weightTotal < 0)
 	{
-		tableContainer.find('#weightMeter').attr('value', weightTotal);
+		containerDiv.find('#weightMeter').attr('value', weightTotal);
 	}
 	else
 	{
-		tableContainer.find('#weightMeter').attr('value', '-----');
+		containerDiv.find('#weightMeter').attr('value', '-----');
 	}
 }
 
@@ -591,12 +614,20 @@ function getTableId(obj)
 
 function isRatingReadOnly(obj)
 {
-	var ratingReadOnly= findTable(obj).parent('div').find('#changeRatingsWeights').val();
+	var ratingReadOnly= findTable(obj).parents('#gridTrableContainerDiv').find('#changeRatingsWeights').val();
 	try
 	{
 		if (ratingReadOnly != null && (ratingReadOnly != '' || ratingReadOnly != ' '))
 		{
-			ratingReadOnly= Boolean(ratingReadOnly);
+			//the meaning of isRatingReadOnly and changeRatingsWeights are different from each other, so that is why we invert a true to false
+			if(ratingReadOnly.toLowerCase() == 'false')
+			{
+				ratingReadOnly= true;
+			}
+			else
+			{
+				ratingReadOnly= false;
+			}
 		}
 		else
 		{
@@ -612,12 +643,20 @@ function isRatingReadOnly(obj)
 
 function isShowRatingIfReadOnly(obj)
 {
-	var showRatingWhileFalseChangeRatingsWeights= findTable(obj).parent('div').find('#showRatingWhileFalseChangeRatingsWeights').val();
+	var showRatingWhileFalseChangeRatingsWeights= findTable(obj).parents('#gridTrableContainerDiv').find('#showRatingWhileFalseChangeRatingsWeights').val();
 	try
 	{
 		if (showRatingWhileFalseChangeRatingsWeights != null && (showRatingWhileFalseChangeRatingsWeights != '' || showRatingWhileFalseChangeRatingsWeights != ' '))
 		{
-			showRatingWhileFalseChangeRatingsWeights= Boolean(showRatingWhileFalseChangeRatingsWeights);
+			if(showRatingWhileFalseChangeRatingsWeights.toLowerCase() == 'true')
+			{
+				showRatingWhileFalseChangeRatingsWeights= true;
+			}
+			else
+			{
+				showRatingWhileFalseChangeRatingsWeights= false;
+			}
+			
 		}
 		else
 		{
@@ -629,6 +668,22 @@ function isShowRatingIfReadOnly(obj)
 		showRatingWhileFalseChangeRatingsWeights= false;
 	}
 	return showRatingWhileFalseChangeRatingsWeights;
+}
+
+/**
+ * This function is called when there is a change in the value of the 
+ * 
+ * For now only values from 1 to 5 are supported, those values are hardcoded for now.
+ * @param inputRating jquery object representing the input
+ */
+function rationRangeValidation(inputRating)
+{
+	var rating= parseInt(inputRating.val());
+	if( !(rating >= 1 && rating <= 5))
+	{
+		inputRating.val(1.0);
+		showMessageInDialogBox('Only values betwen 1 and 5 are allowed');
+	}
 }
 
 function isGridComplete() {
@@ -656,4 +711,34 @@ function isTextEmpty(tag) {
 	} else {
 		tag.val(value);
 	}
-}	
+}
+
+/**
+ * This function will make the menu that appears in the grid table ready to be used
+ * @param containerDiv jquery object representing the div where all the grid table componenets are located
+ */
+function prepareGridMenu(containerDiv)
+{
+	//take care of all the mouse overs
+	containerDiv.find('#gridTableToggleLegendImg').mouseover(function(){
+		$(this).attr('src', '/static/icons/legend_hover.png');
+	});
+	
+	//take care of when the menu should be displayed
+	containerDiv.find('#mainGridDiv').mouseenter(function(){
+		$(this).find('#gridTableExtraOptionsMenuDiv').show();
+	});
+	
+	containerDiv.find('#mainGridDiv').mouseleave(function(){
+		$(this).find('#gridTableExtraOptionsMenuDiv').hide();
+	});
+}
+
+/**
+ * This function will hide or show the grid legend
+ * @param obj jquery object representing the html component that used the function
+ */
+function toggleGridLegend(obj)
+{
+	obj.parents('#gridTrableContainerDiv').find('#tableLegendDiv').toggle('slide');
+}

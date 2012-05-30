@@ -30,7 +30,7 @@ function startSession()
 				if($(data).find('error').length <= 0)
 				{
 					$('#' + getContentDivId()).html($(data).find('htmlData').text());
-					prepareForNewGrid($('#contentDiv').find('table'));
+					prepareForNewGrid($('#contentDiv'));
 					hideLoadingSpinner($('#wrap'));
 				}
 				else
@@ -65,7 +65,7 @@ function requestAlternativeConcerns()
 				if($(data).find('error').length <= 0)
 				{
 					$('#' + getContentDivId()).html($(data).find('htmlData').text());
-					prepareForNewGrid($('#contentDiv').find('table'));
+					prepareForNewGrid($('#contentDiv'));
 					hideLoadingSpinner($('#wrap'));
 				}
 				else
@@ -101,7 +101,7 @@ function requestRatings()
 				if($(data).find('error').length <= 0)
 				{
 					$('#' + getContentDivId()).html($(data).find('htmlData').text());
-					prepareForNewGrid($('#contentDiv').find('table'));
+					prepareForNewGrid($('#contentDiv'));
 					hideLoadingSpinner($('#wrap'));
 				}
 				else
@@ -137,7 +137,7 @@ function finishSession() {
 				if($(data).find('error').length <= 0)
 				{
 					$('#' + getContentDivId()).html($(data).find('htmlData').text());
-					prepareForNewGrid($('#contentDiv').find('table'));
+					prepareForNewGrid($('#contentDiv'));
 					hideLoadingSpinner($('#wrap'));
 				}
 				else
@@ -211,7 +211,7 @@ function finishCurrentRequest()
 				if($(data).find('error').length <= 0)
 				{
 					$('#' + getContentDivId()).html($(data).find('htmlData').text());
-					prepareForNewGrid($('#contentDiv').find('table'));
+					prepareForNewGrid($('#contentDiv'));
 					hideLoadingSpinner($('#wrap'));
 				}
 				else
@@ -383,7 +383,7 @@ function getSessionGrid()
 				if($(data).find('error').length <= 0)
 				{
 					$('#form').html($(data).find('htmlData').text());
-					prepareForNewGrid($('#contentDiv').find('table'));
+					prepareForNewGrid($('#contentDiv'));
 					hideLoadingSpinner($('#sessionGridDiv'));
 				}
 				else

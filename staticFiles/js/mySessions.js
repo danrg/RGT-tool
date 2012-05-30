@@ -18,7 +18,6 @@ function showMySession()
 	try
 	{
 		var sessionUSID= mySessionsGetSessionUSID();
-		console.log(sessionUSID);
 		if(sessionUSID != 'noSessions' && sessionUSID != '' && sessionUSID != null)
 		{
 			var str= 'sessionUSID=' + sessionUSID;
@@ -29,7 +28,7 @@ function showMySession()
 					if($(data).find('error').length <= 0)
 					{
 						$('#concentDiv').html($(data).find('htmlData').text());
-						prepareForNewGrid($('#contentDiv').find('table'));
+						prepareForNewGrid($('#contentDiv'));
 						//set tipsy
 						$('#tableStatus').tipsy({fade:true, gravity: 's'});
 						$('.toolTip').tipsy({fade:true, gravity: 's', delayIn: 1500});

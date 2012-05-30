@@ -82,3 +82,27 @@
 	padding-bottom: 0px;
 }
 
+#tablegend{
+	border-collapse:collapse;
+}
+
+#legendTableHeaderValue{
+	border-right:thin solid;
+	padding-right: 5px
+}
+
+#legendTableHeaderDescription{
+	padding-left: 5px;	
+}
+
+#dummieTableLegendDiv{
+	display: inline-table;
+}
+
+.legendValue{
+	text-align:center; border-right:thin solid;
+}
+
+.legendDescription{
+	padding-left: 5px;
+}
