@@ -93,6 +93,14 @@ class SessionTests(BaseSessionLiveTest):
         # Wait until the menu of the buttons changes to the session handling menu
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("input[value='Request Alt/Con']"))
         
+        # The iteration label show iteration 1
+        iteration_label = self.browser.find_element_by_id("iteration")
+        self.assertIn("1", iteration_label.text)
+        
+        # The iteration status shows 'Check Values'
+        current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
+        self.assertIn("Check Values", current_iteration_status.text)
+        
         ### REQUEST ALTERNATIVES / CONCERNS STEP ###
         
         # Facilitator admin clicks the request alternatives and concerns button
@@ -101,6 +109,10 @@ class SessionTests(BaseSessionLiveTest):
         
         # Wait until the session menu changes, to include the finish session button
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("input[value='Finish Request']"))
+        
+        # The iteration status shows 'A/C'
+        current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
+        self.assertIn("A/C", current_iteration_status.text)
         
         # Facilitator admin logs out
         logout_link = self.browser.find_element_by_link_text("Log out")
@@ -148,12 +160,24 @@ class SessionTests(BaseSessionLiveTest):
         # Wait until the session menu changes, to include the request ratings button
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("input[value='Request Ratings']"))
         
+        # The iteration label show iteration 2
+        iteration_label = self.browser.find_element_by_id("iteration")
+        self.assertIn("2", iteration_label.text)
+        
+        # The iteration status shows 'Check Values'
+        current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
+        self.assertIn("Check Values", current_iteration_status.text)
+        
         # Facilitator admin clicks the request ratings button
         request_ratings_button = self.browser.find_element_by_css_selector("input[value='Request Ratings']")
         request_ratings_button.click()
         
         # Wait until the session menu changes, to include the finish session button
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("input[value='Finish Request']"))
+        
+        # The iteration status shows 'R/W'
+        current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
+        self.assertIn("R/W", current_iteration_status.text)
         
         # Facilitator admin logs out
         logout_link = self.browser.find_element_by_link_text("Log out")
@@ -188,6 +212,29 @@ class SessionTests(BaseSessionLiveTest):
         # Participant user2 logs out
         logout_link = self.browser.find_element_by_link_text("Log out")
         logout_link.click()
+        
+        ### END SESSION STEP ###
+        
+        # Facilitator admin logs in, selects the session with name session1
+        self.facilitator_can_select_session("admin@admin.com", "123", "session1")
+        
+        # Facilitator admin clicks the finish request button
+        finish_request_button = self.browser.find_element_by_css_selector("input[value='Finish Request']")
+        finish_request_button.click()
+        
+        # Wait until the session menu changes, to include the request ratings button
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("input[value='End session']"))
+        
+        # The iteration label show iteration 2
+        iteration_label = self.browser.find_element_by_id("iteration")
+        self.assertIn("3", iteration_label.text)
+        
+        # The iteration status shows 'Check Values'
+        current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
+        self.assertIn("Check Values", current_iteration_status.text)
+        
+        end_session_button = self.browser.find_element_by_css_selector("input[value='End session']")
+        end_session_button.click()
     
 class FacilitatorSessionTests(BaseSessionLiveTest):
     """
