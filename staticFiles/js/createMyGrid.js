@@ -21,7 +21,7 @@ function createGrid()
 	showLoadingSpinner(loadingDiv, 'Please wait...');
 	try
 	{
-		var table= $('#gridData').find('#gridDiv').find('table');
+		var table= getGridTable($('#gridData').find('#gridDiv'));
 		var str= 'nAlternatives=' + getNumberOfAlternatives(table) + '&nConcerns=' + getNumberOfConcerns(table) + '&tableOnly=true&'+ $('#form').serialize();
 		var error= '';
 		$.post('/grids/create/', str, function(data){

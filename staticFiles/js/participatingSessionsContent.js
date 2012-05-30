@@ -2,7 +2,7 @@ function sendResponse()
 {
 	var sessionUSID= participatingGetSessionUSID(); //function is from participatingSession.js
 	var iteration= $.trim($('#participantSessionIteration').text());
-	var table= $('#participatingSessionResponseGridForm').find('table');
+	var table= getGridTable($('#participatingSessionResponseGridForm'));
 	var nAlternatives= getNumberOfAlternatives(table);
 	var nConcerns= getNumberOfConcerns(table);
 	var form= $('#participatingSessionResponseGridForm');

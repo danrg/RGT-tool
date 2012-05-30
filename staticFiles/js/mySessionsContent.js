@@ -166,7 +166,7 @@ function saveSessionGrid()
 	try
 	{
 		var form= $('#sessionGridDiv').find('form');
-		var table= $('#sessionGridDiv').find('table');
+		var table= getGridTable($('#sessionGridDiv'));
 		var iteration= $('#iteration').text();
 		str= 'nConcerns=' + getNumberOfConcerns(table) + '&nAlternatives='+ getNumberOfAlternatives(table) + '&gridType=session' + '&iteration=' + iteration + '&sessionUSID='+ mySessionsGetSessionUSID() + '&' + form.serialize();
 		$.post('/grids/update/', str, function(data){

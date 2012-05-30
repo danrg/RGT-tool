@@ -742,3 +742,12 @@ function toggleGridLegend(obj)
 {
 	obj.parents('#gridTrableContainerDiv').find('#tableLegendDiv').toggle('slide');
 }
+
+/**
+ * This function is used from an outside script to retrive the jquery object that represents the grid table
+ * @param obj an jquery object that represents the div encasing all the gri table components
+ */
+function getGridTable(obj)
+{
+	return obj.find('#mainGridDiv table');
+}

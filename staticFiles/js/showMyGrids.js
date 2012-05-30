@@ -228,7 +228,7 @@ function saveGrid()
 	showLoadingSpinner(loadingDiv, 'Saving...');
 	try{
 		var formString= $("#form").serialize();
-		var table= $('#results').find('table');
+		var table= getGridTable($('#results'));
 		var gridUSID = $("#gridUSID").val();
 		var gridName= $("#gridName").val();
 		var str= 'gridUSID=' + gridUSID + '&gridName=' + gridName + '&nAlternatives=' + getNumberOfAlternatives(table) + '&nConcerns=' + getNumberOfConcerns(table) + '&' + formString;
