@@ -132,7 +132,7 @@ class FacilitatorSessionTests(BaseSessionLiveTest):
         
         # User types session name
         session_name_field = self.browser.find_element_by_id("sessionNameInputBox")
-        session_name_field.send_keys("session1")
+        session_name_field.send_keys("session3")
         
         # User clicks the create session button
         create_session_button = self.browser.find_element_by_css_selector("input[value='Create Session']")
@@ -143,7 +143,7 @@ class FacilitatorSessionTests(BaseSessionLiveTest):
         dialog_box = self.browser.find_element_by_class_name("ui-dialog")
         self.assertIn('Session was created.', dialog_box.text)
         
-        # User clicks the close button to close the dialog
+        # Facilitator clicks the close button to close the dialog
         close_dialog_button = self.browser.find_element_by_css_selector("button[role='button']")
         close_dialog_button.click()
     
@@ -171,3 +171,11 @@ class ParticipantSessionTests(BaseSessionLiveTest):
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[role='dialog']"))
         dialog_box = self.browser.find_element_by_class_name("ui-dialog")
         self.assertIn('You have been added as participant in session: "session2".', dialog_box.text)
+        
+        # Participant clicks the close button to close the dialog
+        close_dialog_button = self.browser.find_element_by_css_selector("button[role='button']")
+        close_dialog_button.click()
+        
+        # The participating session with name admin:session2 appears in the select tag
+        select_field = self.browser.find_element_by_css_selector("select")
+        self.assertIn('admin:session2', select_field.text)
