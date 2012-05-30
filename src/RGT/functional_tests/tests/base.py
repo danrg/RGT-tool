@@ -22,13 +22,14 @@ class BaseLiveTest(LiveServerTestCase):
     
     # This function performs an implicit test that the user can login. This is used in the base
     # test class, as the login operation is required in the majority of the test cases.
-    def can_login(self, email='', password=''):
-        # User opens the web browser and goes to RGT home page
-        self.browser.get(self.live_server_url + '/home/')
-        
-        # User sees the RGT login page
-        body = self.browser.find_element_by_tag_name('body')
-        self.assertIn('Login', body.text)
+    def can_login(self, email='', password='', login_first_time=True):
+        if login_first_time:
+            # User opens the web browser and goes to RGT home page
+            self.browser.get(self.live_server_url + '/home/')
+            
+            # User sees the RGT login page
+            body = self.browser.find_element_by_tag_name('body')
+            self.assertIn('Login', body.text)
         
         # User types email and password and hits enter
         email_field = self.browser.find_element_by_name('email')
