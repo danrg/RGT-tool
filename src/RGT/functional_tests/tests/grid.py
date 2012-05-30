@@ -1,6 +1,8 @@
 """
 This file is used for the functional tests related to grid operations,
-using the selenium module. These will pass when you run "manage.py test functional_tests".
+using the selenium module. These will pass when you run "manage.py test functional_tests.GridTests".
+This file also includes the base test for the grids which includes general functions needed
+by the test cases.
 
 Test cases implemented:
     - Create Grid Test
@@ -16,20 +18,29 @@ from selenium.webdriver.common.action_chains import ActionChains
 import random
 
 class BaseGridLiveTest(BaseLiveTest):
+    """
+    This is the base class test which the GridTests class must extend. It defines some
+    general functions used by many test cases.
     
-    def can_goto_grid_page(self):
+    General Functions:
+        - can_goto_grid_page
+        - can_show_grid
+    
+    """
+    def can_goto_grid_page(self, email='', password=''):
         # User logs in successfully
-        self.can_login()
+        self.can_login(email, password)
         
-        # User clicks 'Grids' link and sees the my grids page
+        # User clicks 'Grids' link and sees the grids page
         grids_link = self.browser.find_element_by_link_text("Grids")
         grids_link.click()
         
         body = self.browser.find_element_by_tag_name('body')
         self.assertIn('Grid Management', body.text)
         
-    def can_show_grid(self):
-        self.can_goto_grid_page()
+    def can_select_grid(self, email='', password=''):
+        # User logs in successfully and goes to grid page 
+        self.can_goto_grid_page(email, password)
         
         # The 'select' tag contains the created grid with name 'grid1'
         select_field = self.browser.find_element_by_css_selector("select")
@@ -40,16 +51,17 @@ class BaseGridLiveTest(BaseLiveTest):
         option_fields = self.browser.find_elements_by_css_selector('option')
         option_fields[1].click()
         
+        # Wait until the the grid appears successfully
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("gridTrableContainerDiv"))
         grid_name_field = self.browser.find_element_by_name("gridName")
         self.assertEquals('grid1', grid_name_field.get_attribute('value'))
         
 class GridTests(BaseGridLiveTest):
-    fixtures = ['grid_admin_user.json']
+    fixtures = ['user_grid.json']
         
     def test_can_create_grid(self):
         # User logs in successfully and goes to grid page
-        self.can_goto_grid_page()
+        self.can_goto_grid_page('admin@admin.com', '123')
         
         # User clicks the create grid link and sees the create grid page
         create_grid_link = self.browser.find_element_by_link_text("create")
@@ -92,10 +104,14 @@ class GridTests(BaseGridLiveTest):
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[role='dialog']"))
         dialog_box = self.browser.find_element_by_class_name("ui-dialog")
         self.assertIn('Grid was created.', dialog_box.text)
+        
+        # User clicks the close button to close the dialog
+        close_dialog_button = self.browser.find_element_by_css_selector("button[role='button']")
+        close_dialog_button.click()
     
     def test_can_update_grid(self):
         # User logs in successfully, goes to grid page and selects a saved grid
-        self.can_show_grid()
+        self.can_select_grid('admin@admin.com', '123')
         
         # User changes the name of the grid to 'grid123'
         grid_name_field = self.browser.find_element_by_name("gridName")
@@ -162,9 +178,13 @@ class GridTests(BaseGridLiveTest):
         dialog_box = self.browser.find_element_by_class_name("ui-dialog")
         self.assertIn('Grid was saved', dialog_box.text)
         
+        # User clicks the close button to close the dialog
+        close_dialog_button = self.browser.find_element_by_css_selector("button[role='button']")
+        close_dialog_button.click()
+        
     def test_can_delete_grid(self):
         # User logs in successfully, goes to grid page and selects a saved grid
-        self.can_show_grid()
+        self.can_select_grid('admin@admin.com', '123')
         
         # User clicks the delete grid button
         delete_button = self.browser.find_element_by_css_selector("input[value='Delete']")
@@ -184,12 +204,17 @@ class GridTests(BaseGridLiveTest):
         dialog_box = self.browser.find_element_by_class_name("ui-dialog")
         self.assertIn('Grid was deleted.', dialog_box.text)
         
+        # User clicks the close button to close the dialog
+        close_dialog_button = self.browser.find_element_by_css_selector("button[role='button']")
+        close_dialog_button.click()
+        
     def test_can_show_dendrogram(self):
         # User logs in successfully, goes to grid page and selects a saved grid
-        self.can_show_grid()
+        self.can_select_grid('admin@admin.com', '123')
         
         # User clicks the show dendrogram button
         show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show Dendogram']")
         show_dendrogram_button.click()
         
+        # Wait until the dendrogram appears successfully
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_class_name("hasSVG"))
