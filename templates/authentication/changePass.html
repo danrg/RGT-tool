@@ -24,19 +24,19 @@
 		        {{ form.non_field_errors }}
 		        {% for field in form %}
 		            {{ field.label_tag }}
-		            {{ field }}
+                    {{ field }}
 		            {% for error in field.errors %}
 		                <div class="error">{{error}}</div>
 		            {% endfor %}
 		        {% endfor %}
 		    </div>
 			<input type="submit" value="Submit"/>
-			{% if passUpdated %}
-			<div id="feedback">
-				<span>Password updated!</span>
-			</div>
-			{% endif %} 
-		</form>
+            {% if passUpdated %}
+                <div id="feedback">
+                    <span>Password updated!</span>
+                </div>
+            {% endif %}
+        </form>
 	</div>
 </div>
 {% endblock %}
