@@ -354,9 +354,11 @@ def ajaxGetParticipatingSessionContentPage(request):
                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                 else:
                     #calculate how many participants there are in this session and how many have sent a response
+                    nResponses= 0
+                    nParticipants= 0
                     try:
                         nResponses= len(sessionObj.getUsersThatRespondedRequest())
-                        nParticipants= nResponses +  len(sessionObj.getParticipators())
+                        nParticipants= len(sessionObj.getParticipators())
                     except:
                         print "Exception in user code:"
                         print '-'*60
