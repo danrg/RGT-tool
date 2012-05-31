@@ -48,7 +48,7 @@ class BaseLiveTest(LiveServerTestCase):
         
     def wait_for_dialog_box_with_message(self, message=''):
         # wait for the dialog box to appear with the desired message
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[role='dialog']"))
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("div[class*='ui-dialog'][style*='block']"))
         dialog_box = self.browser.find_element_by_class_name("ui-dialog")
         self.assertIn(message, dialog_box.text)
         
