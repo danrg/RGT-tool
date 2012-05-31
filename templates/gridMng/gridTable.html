@@ -1,5 +1,5 @@
-<div id="gridTrableContainerDiv">
-	<div id= "mainGridDiv" style="display: inline-table">
+<div class="gridTrableContainerDiv">
+	<div class= "mainGridDiv" style="display: inline-table">
 		<table id="{{tableId}}" border="0" class= "gridTable" >
 			<tbody>
 				{% comment %} first row is the cell menu row of the table {% endcomment %}
@@ -27,8 +27,8 @@
 						<td><!-- skip --></td> 
 						{% comment %} grid table menu, max of 5 to 6 buttons {% endcomment %}
 						<td>
-							<div id= "gridTableExtraOptionsMenuDiv" style="display: none;">
-								<img src= "/static/icons/legend.png" id= "gridTableToggleLegendImg" onclick= "toggleGridLegend($(this))" title= "toggle legend"/>
+							<div class= "gridTableExtraOptionsMenuDiv" style="display: none;">
+								<img src= "/static/icons/legend.png" class= "gridTableToggleLegendImg" onclick= "toggleGridLegend($(this))" title= "toggle legend"/>
 							</div>
 						</td>
 						{% for header in tableHeader %}
@@ -45,13 +45,13 @@
 							</td>
 						{% endfor %}
 						{% comment %} weight header {% endcomment%}
-						<td class= "alternativeCell" id="weightCol">
+						<td class= "alternativeCell weightCol" >
 							<input class= "tableHeader inner" type="text" value= "weight" disabled="disabled" readonly/>
 						</td>
 						<td>
 							<div>
 								{% if checkForTableIsSave %}
-									<img title="Current showing table has not been modified since retrieving its values." id="tableStatus" alt="" src="{{ STATIC_URL }}icons/table_saved.png">
+									<img title="Current showing table has not been modified since retrieving its values." class="tableStatus" alt="" src="{{ STATIC_URL }}icons/table_saved.png">
 								{% endif %}
 							</div>
 						</td>
@@ -65,7 +65,7 @@
 									{% comment %} left row menu {% endcomment %}
 									{% if changeCornAlt %}
 									<td onmouseover="displayRowMenu($(this))">
-										<div id= "leftRowMenuDiv" class="gridRowMenu">
+										<div class="gridRowMenu leftRowMenuDiv">
 											<a><img class= "deleteImage" src="{{ STATIC_URL }}icons/delete.png" alt="" onclick= "removeRow($(this).parents('td'))"/></a>
 											<a><img class= "addImage" src="{{ STATIC_URL }}icons/plus.png" alt="" onclick= "addRow($(this).parents('td'))"/></a>
 										</div>
@@ -107,9 +107,9 @@
 									<td onmouseover="displayRowMenu($(this))">
 										{% if changeRatingsWeights %}
 											{% if checkForTableIsSave %}
-												<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "{{weights.pop}}" onchange="calculateTotalWeight($(this).parents('#gridTrableContainerDiv'));isTextEmpty($(this));isTableSaved()"/>
+												<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "{{weights.pop}}" onchange="calculateTotalWeight($(this).parents('.gridTrableContainerDiv'));isTextEmpty($(this));isTableSaved()"/>
 											{% else %}
-												<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "{{weights.pop}}" onchange="calculateTotalWeight($(this).parents('#gridTrableContainerDiv'))"/>
+												<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "{{weights.pop}}" onchange="calculateTotalWeight($(this).parents('.gridTrableContainerDiv'))"/>
 											{% endif %}
 										{% else %}
 											{% if showRatingWhileFalseChangeRatingsWeights %}
@@ -132,7 +132,7 @@
 									{% comment %} right row menu {% endcomment %}
 									{% if changeCornAlt %}
 									<td onmouseover="displayRowMenu($(this))">
-										<div id= "rightRowMenuDiv" class="gridRowMenu">
+										<div class="gridRowMenu rightRowMenuDiv">
 											<a><img class= "deleteImage" src="{{ STATIC_URL }}icons/delete.png" alt="" onclick= "removeRow($(this).parents('td'))"/></a>
 											<a><img class= "addImage" src="{{ STATIC_URL }}icons/plus.png" alt="" onclick= "addRow($(this).parents('td'))"/></a>
 										</div>
@@ -146,19 +146,19 @@
 				{% endfor %}
 			</tbody>
 		</table>
-		<div id= "weightTableDiv" class= "weightDiv" style="display: inline-table">
-				<label class= "weightLabel">Total weight: </label><input id= "weightMeter" value= "0" disabled="disabled" readonly />
+		<div class= "weightDiv weightTableDiv" style="display: inline-table">
+				<label class= "weightLabel">Total weight: </label><input class= "weightMeter" value= "0" disabled="disabled" readonly />
 		</div>
 	</div>
 	{% comment %} the dummie div is used so when playing the toggle animation the grid table won't jump around{% endcomment %}
-	<div id= "dummieTableLegendDiv">
-		<div id="tableLegendDiv" >
+	<div class= "dummieTableLegendDiv">
+		<div class="tableLegendDiv" >
 			{% if not doesNotShowLegend %}
-				<table id= "tablegend">
+				<table class= "tablegend">
 					<thead>
 						<tr>
-							<th id= "legendTableHeaderValue" >Value</th>
-							<th  id= "legendTableHeaderDescription" >Description</th>
+							<th class= "legendTableHeaderValue" >Value</th>
+							<th class= "legendTableHeaderDescription" >Description</th>
 						</tr>
 					</thead>
 					<tbody>

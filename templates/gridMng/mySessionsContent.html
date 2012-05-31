@@ -66,7 +66,7 @@
         <table>
             <tr>
 				{% if not hasSessionStarted %}
-                    <td><input type="button" onclick="startSession()" value="Start session"/></td>
+                    <td><input type="button" onclick="startSession()" value="Start Session"/></td>
 				{% endif %}
 				{% if showRequestButtons %}
                     <td><input type="button" onclick="requestAlternativeConcerns()" value="Request Alt/Con" /></td>
@@ -76,17 +76,17 @@
                     <td><input type="button" onclick="finishCurrentRequest()" value="Finish Request" /></td>
 				{% endif %}
 				{% if hasSessionStarted and showCloseSessionButton %}
-                    <td><input type="button" onclick="finishSession()" value="End session"/></td>
+                    <td><input type="button" onclick="finishSession()" value="End Session"/></td>
 				{% endif %}
 				{% if hasSessionStarted %}
-					<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show dendrogram"/></td>
+					<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show Dendrogram"/></td>
 				{% endif %}
             </tr>
 		</table>
 	{% else %}
 		<table>
 			<tr>
-				<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show dendrogram" /></td>
+				<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show Dendrogram" /></td>
 			</tr>
 		</table>
 	{% endif %}
