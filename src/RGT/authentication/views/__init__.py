@@ -1,2 +1,3 @@
 from ChangePasswordView import ChangePasswordView
+from ForgotPasswordView import ForgotPasswordView
 

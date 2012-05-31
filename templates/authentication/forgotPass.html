@@ -27,6 +27,7 @@
 	</div>
 
     {% include 'authentication/recaptchaTemplate.html' %}
+    <div class="error">{{ form.non_field_errors }}</div>
 	<input type="submit" value="Submit" />
 </form>
 {% endif %}
