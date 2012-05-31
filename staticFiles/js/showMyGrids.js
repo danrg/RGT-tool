@@ -23,15 +23,6 @@ if( typeof createSvgMenu != 'function')
 	});
 }
 
-if(!jQuery.tipsy)
-{
-	$.ajax({
-		url: urlStaticFiles + 'js/tipsy.js',
-		dataType: 'script',
-		async:   false 
-	});
-}
-
 //function used to get a grid from the db and display it to the user
 function showMyGrid(reload)
 {
@@ -78,7 +69,7 @@ function showMyGrid(reload)
 						isGridComplete();
 									
 						//set tipsy
-						$('#tableStatus').tipsy({fade:true, gravity: 's'});
+						initiateGridTableToolTip($('#results'))
 						
 						//clear the histogram
 //						if($('#dendogramDiv').find('img').is('#dendogramImage'))
@@ -200,9 +191,8 @@ function isTableSaved()
 	{
 		if(hasTableBeenSaved)
 		{
-			var obj= $('#tableStatus');
-			obj.attr('src', urlStaticFiles + 'icons/table_not_saved.png');
-			obj.attr('title', 'Current showing table has been modified since retrieving it from the server.');
+			changeTableSaveStatusIcon($('#results'), false);
+			setGridTableSaveStatusToolTip($('#results'), 'Current showing table has been modified since retrieving it from the server.');
 			hasTableBeenSaved= false;
 			// this is needed here because in order to generate the dendogram, we use the values
 			// that are stored, and if the table is saved which means that the values shown are
@@ -214,9 +204,8 @@ function isTableSaved()
 	{
 		if(!hasTableBeenSaved)
 		{
-			var obj= $('#tableStatus');
-			obj.attr('src', urlStaticFiles + 'icons/table_saved.png');
-			obj.attr('title', 'Current showing table has not been modified since retrieving it from the server.');
+			changeTableSaveStatusIcon($('#results'), true);
+			setGridTableSaveStatusToolTip($('#results'), 'Current showing table has not been modified since retrieving it from the server.');
 			hasTableBeenSaved= true;
 			isGridComplete();
 		}

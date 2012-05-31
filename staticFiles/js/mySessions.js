@@ -3,15 +3,6 @@ var loadingDiv= $('#wrap');
 var hasTableBeenSaved = true;
 var masterFormString = '';
 
-if(!jQuery.tipsy)
-{
-	$.ajax({
-		url: urlStaticFiles + 'js/tipsy.js',
-		dataType: 'script',
-		async:   false 
-	});
-}
-
 function showMySession()
 {
 	showLoadingSpinner(loadingDiv, null);
@@ -30,8 +21,7 @@ function showMySession()
 						$('#concentDiv').html($(data).find('htmlData').text());
 						prepareForNewGrid($('#contentDiv'));
 						//set tipsy
-						$('#tableStatus').tipsy({fade:true, gravity: 's'});
-						$('.toolTip').tipsy({fade:true, gravity: 's', delayIn: 1500});
+						initiateGridTableToolTip($('#concentDiv'));
 						hideLoadingSpinner(loadingDiv);
 						hasTableBeenSaved= true;
 						masterFormString = $('#form').serialize();
@@ -78,9 +68,8 @@ function isTableSaved()
 	{
 		if(hasTableBeenSaved)
 		{
-			var obj= $('#tableStatus');
-			obj.attr('src', urlStaticFiles + 'icons/table_not_saved.png');
-			obj.attr('title', 'Current showing table has been modified since retrieving it from the server.');
+			changeTableSaveStatusIcon($('#concentDiv'), false);
+			setGridTableSaveStatusToolTip($('#concentDiv'), 'Current showing table has been modified since retrieving it from the server.');
 			hasTableBeenSaved= false;
 		}
 	}
@@ -88,9 +77,8 @@ function isTableSaved()
 	{
 		if(!hasTableBeenSaved)
 		{
-			var obj= $('#tableStatus');
-			obj.attr('src', urlStaticFiles + 'icons/table_saved.png');
-			obj.attr('title', 'Current showing table has not been modified since retrieving it from the server.');
+			changeTableSaveStatusIcon($('#concentDiv'), true);
+			setGridTableSaveStatusToolTip($('#concentDiv'), 'Current showing table has not been modified since retrieving it from the server.');
 			hasTableBeenSaved= true;
 		}
 	}

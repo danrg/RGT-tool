@@ -28,7 +28,7 @@ var nFixedRows= 2;//number of rows that are not user for concerns
  */
 function prepareForNewGrid(containerDiv)
 {
-	var table= containerDiv.find('#mainGridDiv table')
+	var table= containerDiv.find('.mainGridDiv table')
 	//var tableContainer = $(table).parent();
 	 //add the animation to the buttons of the menu of the grid
 	$(table).find(".deleteImage").hover(function(){
@@ -94,7 +94,10 @@ function prepareForNewGrid(containerDiv)
 	calculateTotalWeight(containerDiv);
 }
 	
-//this function will hide and show the row menu
+/**
+ * This function will hide and show the row menu
+ * @param cell jquery object representing a cell in the row where the row menu should be shown/hidden
+ */
 function displayRowMenu(cell)
 {
 	
@@ -104,25 +107,28 @@ function displayRowMenu(cell)
 	nCols= cell.parent('tr').children('td').length;
 	if( Math.floor(nCols/2) > colIndex )
 	{
-		var rightMenu= cell.parent('tr').find('#rightRowMenuDiv');
+		var rightMenu= cell.parent('tr').find('.rightRowMenuDiv');
 		if(!rightMenu.is(':hidden'))
 		{
 			rightMenu.hide();
 		}
-		cell.parent('tr').find('#leftRowMenuDiv').show();
+		cell.parent('tr').find('.leftRowMenuDiv').show();
 	}
 	else
 	{
-		var leftMenu= cell.parent('tr').find('#leftRowMenuDiv');
+		var leftMenu= cell.parent('tr').find('.leftRowMenuDiv');
 		if(!leftMenu.is(':hidden'))
 		{
 			leftMenu.hide();
 		}
-		cell.parent('tr').find('#rightRowMenuDiv').show();
+		cell.parent('tr').find('.rightRowMenuDiv').show();
 	}
 }
 
-//this function will set the col menu hide in n milliseconds and show the col menu
+/**
+ * This function will set the col menu hide in n milliseconds and show the col menu
+ * @param cell jquery object representing a cell in the col where the col menu should be hidden
+ */
 function showColMenu(cell)
 {
 	var temp= cell.getRowAndCellIndex();
@@ -145,7 +151,14 @@ function showColMenu(cell)
 	}
 }
 
-//hide the col menu
+/**
+ * Hide the col menu
+ * 
+ * @param cell jquery object representing a cell in the col where the col menu should be hidden
+ * @param cellIndex int representing the index of the cell
+ * @param delayed boolean indicating if the function will be executed now or not
+ * @param tableId string representing the table id of the cell where the cell menu will be hidden
+ */
 function hidecolMenu(cell, cellIndex, delayed, tableId)
 {
 	if(delayed == true)
@@ -162,6 +175,10 @@ function hidecolMenu(cell, cellIndex, delayed, tableId)
 	}
 }
 
+/**
+ * This function will add a row to the grid table
+ * @param cell jquery object representing a cell in the table that a new row will be added
+ */
 function addRow(cell)
 {
 	var nConcerns= getNumberOfConcerns(cell);//parseInt($("#nConcerns").val());
@@ -170,7 +187,7 @@ function addRow(cell)
 	var rightId= "concern_" + nConcerns +"_right";
 	var ratingReadOnly= isRatingReadOnly(cell);
 	var showRatingWhileFalseChangeRatingsWeights= isShowRatingIfReadOnly(cell);
-	var containerDiv = findTable(cell).parents('#gridTrableContainerDiv');
+	var containerDiv = findTable(cell).parents('.gridTrableContainerDiv');
 	//$("#nConcerns").val(nConcerns);
 	
 	//add the new row to the table
@@ -180,7 +197,7 @@ function addRow(cell)
 	
 	//row menu
 	cols+= '<td onmouseover="displayRowMenu($(this))">\n';
-	cols+= '<div id= "leftRowMenuDiv" class="gridRowMenu">\n';
+	cols+= '<div class="gridRowMenu leftRowMenuDiv">\n';
 	cols+= '<a><img class= "deleteImage" src="' + urlStaticFiles + 'icons/delete.png" alt="" onclick= "removeRow($(this).parents(\'td\'))"/></a>\n';
 	cols+= '<a><img class= "addImage" src="' + urlStaticFiles + 'icons/plus.png" alt="" onclick= "addRow($(this).parents(\'td\'))"/></a>\n';
 	cols+= '</div>\n';
@@ -204,7 +221,7 @@ function addRow(cell)
 	if(!ratingReadOnly)
 	{
 		cols+= '<td onmouseover="displayRowMenu($(this))">\n'
-		cols+= '<input type="text" id= "weight_concern' + nConcerns + '" name= "weight_concern' + nConcerns + '" value= "1.0" onchange="calculateTotalWeight($(this).parents(\'#gridTrableContainerDiv\'));isTextEmpty($(this));isTableSaved()"/>\n';
+		cols+= '<input type="text" id= "weight_concern' + nConcerns + '" name= "weight_concern' + nConcerns + '" value= "1.0" onchange="calculateTotalWeight($(this).parents(\'.gridTrableContainerDiv\'));isTextEmpty($(this));isTableSaved()"/>\n';
 		cols+= '</td>\n'
 	}
 	else
@@ -212,13 +229,13 @@ function addRow(cell)
 		if(showRatingWhileFalseChangeRatingsWeights)
 		{
 			cols+= '<td onmouseover="displayRowMenu($(this))">\n'
-			cols+= '<input type="text" id= "weight_concern' + nConcerns + '" name= "weight_concern' + nConcerns + '" value= "1.0" onchange="calculateTotalWeight($(this).parents(\'#gridTrableContainerDiv\'))" disabled="disabled" readonly/>\n';
+			cols+= '<input type="text" id= "weight_concern' + nConcerns + '" name= "weight_concern' + nConcerns + '" value= "1.0" onchange="calculateTotalWeight($(this).parents(\'.gridTrableContainerDiv\'))" disabled="disabled" readonly/>\n';
 			cols+= '</td>\n'
 		}
 		else
 		{
 			cols+= '<td onmouseover="displayRowMenu($(this))">\n'
-			cols+= '<input type="text" id= "weight_concern' + nConcerns + '" name= "weight_concern' + nConcerns + '" value= "" onchange="calculateTotalWeight($(this).parents(\'#gridTrableContainerDiv\'))" disabled="disabled" readonly/>\n';
+			cols+= '<input type="text" id= "weight_concern' + nConcerns + '" name= "weight_concern' + nConcerns + '" value= "" onchange="calculateTotalWeight($(this).parents(\'.gridTrableContainerDiv\'))" disabled="disabled" readonly/>\n';
 			cols+= '</td>\n'
 		}
 	}
@@ -226,7 +243,7 @@ function addRow(cell)
 	cols+= '<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class= "tableHeader" type="text" id="' + rightId + '" name="' + rightId + '" onchange="isTextEmpty($(this));isTableSaved()" /></td>\n';
 	//add the new row to the table
 	cols+= '<td onmouseover="displayRowMenu($(this))">\n';
-	cols+= '<div id= "rightRowMenuDiv" class="gridRowMenu">\n';
+	cols+= '<div class="gridRowMenu rightRowMenuDiv">\n';
 	cols+= '<a><img class= "deleteImage" src="' + urlStaticFiles + 'icons/delete.png" alt="" onclick= "removeRow($(this).parents(\'td\'))"/></a>\n';
 	cols+= '<a><img class= "addImage" src="' + urlStaticFiles + 'icons/plus.png" alt="" onclick= "addRow($(this).parents(\'td\'))"/></a>\n';
 	cols+= '</div>\n';
@@ -299,13 +316,16 @@ function addRow(cell)
 		isTableSaved();
 	}
 }
-
+/**
+ * This function will remove a row in place of a grid table
+ * @param cell jquery object representing a cell in the table that a row will be removed
+ */
 function removeRow(cell)
 {
 	var concernNumber= cell.getRowAndCellIndex()[0] - 1;
 	var nConcerns= getNumberOfConcerns(cell);//parseInt($("#nConcerns").val());
 	var temp= null;
-	var containerDiv = findTable(cell).parents('#gridTrableContainerDiv');
+	var containerDiv = findTable(cell).parents('.gridTrableContainerDiv');
 	if(nConcerns - 1 != 0)
 	{	
 		//update all the ids of the table 
@@ -360,6 +380,10 @@ function removeRow(cell)
 	}
 }
 
+/**
+ * This function will add a col in a grid table
+ * @param cell jquery object representing a cell in the table that a new col will be added
+ */
 function addCol(cell)
 {
 	var temp= null;
@@ -451,6 +475,10 @@ function addCol(cell)
 	}
 }
 
+/**
+ * This function will remove a col in place of grid table
+ * @param cell jquery object representing a cell in the table that a col will be removed
+ */
 function removeCol(cell)
 {
 	var alternativeNumber= cell.getRowAndCellIndex()[1] - 1;
@@ -512,12 +540,16 @@ function removeCol(cell)
 	}
 }
 
+/**
+ * Function used to calculate the total weight value used in the grid table
+ * @param containerDiv jquery object containing all the components of a grid table
+ */
 function calculateTotalWeight(containerDiv)
 {
-	var nConcerns= getNumberOfConcerns(containerDiv.find('#mainGridDiv table'));//parseInt($("#nConcerns").val())
+	var nConcerns= getNumberOfConcerns(containerDiv.find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
 	var weightTotal= 0.0;
 	var id= null;
-	var tbody= containerDiv.find('#mainGridDiv table>tbody');//$('#Grid>tbody');
+	var tbody= containerDiv.find('.mainGridDiv table>tbody');//$('#Grid>tbody');
 	
 	for(var i= 0; i < nConcerns; i++)
 	{
@@ -527,15 +559,19 @@ function calculateTotalWeight(containerDiv)
 	
 	if(weightTotal >= 0 || weightTotal < 0)
 	{
-		containerDiv.find('#weightMeter').attr('value', weightTotal);
+		containerDiv.find('.weightMeter').attr('value', weightTotal);
 	}
 	else
 	{
-		containerDiv.find('#weightMeter').attr('value', '-----');
+		containerDiv.find('.weightMeter').attr('value', '-----');
 	}
 }
 
-//function used to find what the number of alternatives, only supports table, td and tr objects
+/**
+ * Function used to find what the number of alternatives, only supports table, td and tr objects
+ * @param obj jquery object representing a table or td or tr
+ * @returns {Number} numbers of alternative
+ */
 function getNumberOfAlternatives(obj)
 {
 	var nCols= 0;
@@ -560,7 +596,11 @@ function getNumberOfAlternatives(obj)
 	return nCols - nFixedCols; 
 }
 
-//function used to find what the number of concerns, only supports table, td and tr objects
+/**
+ * Function used to find what the number of concerns, only supports table, td and tr objects
+ * @param obj jquery object representing a table or td or tr
+ * @returns {Number} number of concerns
+ */
 function getNumberOfConcerns(obj)
 {
 	var nRows= 0;
@@ -585,7 +625,11 @@ function getNumberOfConcerns(obj)
 	return nRows - nFixedRows;
 }
 
-//only supports table, td and tr objects
+/**
+ * Only supports table, td and tr objects
+ * @param obj jquery object representing a table or td or tr
+ * @returns jquery object representing the table
+ */
 function findTable(obj)
 {
 	switch(obj.prop('tagName').toLowerCase())
@@ -605,16 +649,25 @@ function findTable(obj)
 	}
 }
 
-//get the table id the is stored in a hidden value that pertence to a grid table
+/**
+ * Get the table id the is stored in a hidden value that pertence to a grid table
+ * @param obj jquery object representing a table or tr or td
+ * @returns string representing the table id
+ */
 function getTableId(obj)
 {
 	var table= findTable(obj);
 	return table.attr('id');
 }
 
+/**
+ * Function used to determine if the grid table ratings should be readonly
+ * @param obj jquery object representing a table or td or tr
+ * @returns boolean
+ */
 function isRatingReadOnly(obj)
 {
-	var ratingReadOnly= findTable(obj).parents('#gridTrableContainerDiv').find('#changeRatingsWeights').val();
+	var ratingReadOnly= findTable(obj).parents('.gridTrableContainerDiv').find('#changeRatingsWeights').val();
 	try
 	{
 		if (ratingReadOnly != null && (ratingReadOnly != '' || ratingReadOnly != ' '))
@@ -641,9 +694,14 @@ function isRatingReadOnly(obj)
 	return ratingReadOnly;
 }
 
+/**
+ * This function is used to determine if the ratings should be shown if the ratings are set to read only
+ * @param obj jquery object representing a table or td or tr
+ * @returns boolean
+ */
 function isShowRatingIfReadOnly(obj)
 {
-	var showRatingWhileFalseChangeRatingsWeights= findTable(obj).parents('#gridTrableContainerDiv').find('#showRatingWhileFalseChangeRatingsWeights').val();
+	var showRatingWhileFalseChangeRatingsWeights= findTable(obj).parents('.gridTrableContainerDiv').find('#showRatingWhileFalseChangeRatingsWeights').val();
 	try
 	{
 		if (showRatingWhileFalseChangeRatingsWeights != null && (showRatingWhileFalseChangeRatingsWeights != '' || showRatingWhileFalseChangeRatingsWeights != ' '))
@@ -720,17 +778,17 @@ function isTextEmpty(tag) {
 function prepareGridMenu(containerDiv)
 {
 	//take care of all the mouse overs
-	containerDiv.find('#gridTableToggleLegendImg').mouseover(function(){
+	containerDiv.find('.gridTableToggleLegendImg').mouseover(function(){
 		$(this).attr('src', '/static/icons/legend_hover.png');
 	});
 	
 	//take care of when the menu should be displayed
-	containerDiv.find('#mainGridDiv').mouseenter(function(){
-		$(this).find('#gridTableExtraOptionsMenuDiv').show();
+	containerDiv.find('.mainGridDiv').mouseenter(function(){
+		$(this).find('.gridTableExtraOptionsMenuDiv').show();
 	});
 	
-	containerDiv.find('#mainGridDiv').mouseleave(function(){
-		$(this).find('#gridTableExtraOptionsMenuDiv').hide();
+	containerDiv.find('.mainGridDiv').mouseleave(function(){
+		$(this).find('.gridTableExtraOptionsMenuDiv').hide();
 	});
 }
 
@@ -740,7 +798,7 @@ function prepareGridMenu(containerDiv)
  */
 function toggleGridLegend(obj)
 {
-	obj.parents('#gridTrableContainerDiv').find('#tableLegendDiv').toggle('slide', {direction: "right"});
+	obj.parents('.gridTrableContainerDiv').find('.tableLegendDiv').toggle('slide', {direction: "right"});
 }
 
 /**
@@ -749,5 +807,60 @@ function toggleGridLegend(obj)
  */
 function getGridTable(obj)
 {
-	return obj.find('#mainGridDiv table');
+	return obj.find('.mainGridDiv table');
+}
+
+/**
+ * This function is used to retrieve the img of the save status of a grid table
+ * @param containerDiv jquery object containing all the components of a grid table
+ * @returns jquery object of the img tag
+ */
+function getGridTableSaveStatusImage(containerDiv)
+{
+	return containerDiv.find('.tableStatus')
+}
+
+/**
+ * Function used to change the text of the tool tip
+ * @param containerDiv containerDiv jquery object containing all the components of a grid table
+ * @param text 
+ */
+function setGridTableSaveStatusToolTip(containerDiv, text)
+{
+	containerDiv.find('.tableStatus').attr('title', text);
+}
+
+/**
+ * Function used to change the icon that is used to indicate is the table is saved or not 
+ * @param containerDiv jquery object containing all the components of a grid table
+ * @param isSaved boolean indicating if the table is saved or not
+ */
+function changeTableSaveStatusIcon(containerDiv, isSaved)
+{
+	if(isSaved)
+	{
+		containerDiv.find('.tableStatus').attr('src', urlStaticFiles + 'icons/table_saved.png');
+	}
+	else
+	{
+		containerDiv.find('.tableStatus').attr('src', urlStaticFiles + 'icons/table_not_saved.png');
+	}
+}
+
+/**
+ * This function should be called one time when using the indicator if the table is saved or not
+ * @param containerDiv jquery object containing all the components of a grid table
+ */
+function initiateGridTableToolTip(containerDiv)
+{
+	if(!jQuery.tipsy)
+	{
+		$.ajax({
+			url: urlStaticFiles + 'js/tipsy.js',
+			dataType: 'script',
+			async:   false 
+		});
+	}
+	
+	containerDiv.find('.tableStatus').tipsy({fade:true, gravity: 's'});
 }
