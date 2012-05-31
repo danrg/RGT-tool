@@ -82,7 +82,6 @@ function isTableSaved()
 			obj.attr('src', urlStaticFiles + 'icons/table_not_saved.png');
 			obj.attr('title', 'Current showing table has been modified since retrieving it from the server.');
 			hasTableBeenSaved= false;
-			enableSaveButton(true);
 		}
 	}
 	else
@@ -93,7 +92,6 @@ function isTableSaved()
 			obj.attr('src', urlStaticFiles + 'icons/table_saved.png');
 			obj.attr('title', 'Current showing table has not been modified since retrieving it from the server.');
 			hasTableBeenSaved= true;
-			enableSaveButton(false);
 		}
 	}
 }
