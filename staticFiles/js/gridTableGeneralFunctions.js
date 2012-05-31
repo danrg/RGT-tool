@@ -740,7 +740,7 @@ function prepareGridMenu(containerDiv)
  */
 function toggleGridLegend(obj)
 {
-	obj.parents('#gridTrableContainerDiv').find('#tableLegendDiv').toggle('slide');
+	obj.parents('#gridTrableContainerDiv').find('#tableLegendDiv').toggle('slide', {direction: "right"});
 }
 
 /**

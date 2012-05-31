@@ -1,41 +1,4 @@
 <div id="gridTrableContainerDiv">
-	{% comment %} the dummie div is used so when playing the toggle animation the grid table won't jump around{% endcomment %}
-	<div id= "dummieTableLegendDiv">
-		<div id="tableLegendDiv" >
-			{% if not doesNotShowLegend %}
-				<table id= "tablegend">
-					<thead>
-						<tr>
-							<th id= "legendTableHeaderValue" >Value</th>
-							<th  id= "legendTableHeaderDescription" >Description</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td class= "legendValue">1</td>
-							<td class= "legendDescription">Strong agreed with left pole</td>
-						</tr>
-						<tr>
-							<td class= "legendValue">2</td>
-							<td class= "legendDescription">Agree with left</td>
-						</tr>
-						<tr>
-							<td class= "legendValue">3</td>
-							<td class= "legendDescription">Neutral</td>
-						</tr>
-						<tr>
-							<td class= "legendValue">4</td>
-							<td class= "legendDescription">Agree with right</td>
-						</tr>
-						<tr>
-							<td class= "legendValue">5</td>
-							<td class= "legendDescription">Strongly agree with right pole</td>
-						</tr>
-					</tbody>
-				</table>
-			{% endif %}
-		</div>
-	</div>
 	<div id= "mainGridDiv" style="display: inline-table">
 		<table id="{{tableId}}" border="0" class= "gridTable" >
 			<tbody>
@@ -185,6 +148,43 @@
 		</table>
 		<div id= "weightTableDiv" class= "weightDiv" style="display: inline-table">
 				<label class= "weightLabel">Total weight: </label><input id= "weightMeter" value= "0" disabled="disabled" readonly />
+		</div>
+	</div>
+	{% comment %} the dummie div is used so when playing the toggle animation the grid table won't jump around{% endcomment %}
+	<div id= "dummieTableLegendDiv">
+		<div id="tableLegendDiv" >
+			{% if not doesNotShowLegend %}
+				<table id= "tablegend">
+					<thead>
+						<tr>
+							<th id= "legendTableHeaderValue" >Value</th>
+							<th  id= "legendTableHeaderDescription" >Description</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class= "legendValue">1</td>
+							<td class= "legendDescription">Strong agreed with left pole</td>
+						</tr>
+						<tr>
+							<td class= "legendValue">2</td>
+							<td class= "legendDescription">Agree with left</td>
+						</tr>
+						<tr>
+							<td class= "legendValue">3</td>
+							<td class= "legendDescription">Neutral</td>
+						</tr>
+						<tr>
+							<td class= "legendValue">4</td>
+							<td class= "legendDescription">Agree with right</td>
+						</tr>
+						<tr>
+							<td class= "legendValue">5</td>
+							<td class= "legendDescription">Strongly agree with right pole</td>
+						</tr>
+					</tbody>
+				</table>
+			{% endif %}
 		</div>
 	</div>
 	{% if not changeRatingsWeights %}

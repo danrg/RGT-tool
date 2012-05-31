@@ -97,10 +97,16 @@
 
 #dummieTableLegendDiv{
 	display: inline-table;
+	float: right;
+	margin-top: 0px;
 }
 
+#mainGridDiv{
+	overflow: auto;
+}
 .legendValue{
-	text-align:center; border-right:thin solid;
+	text-align:center; 
+	border-right:thin solid;
 }
 
 .legendDescription{
