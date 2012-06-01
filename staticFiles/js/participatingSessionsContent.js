@@ -81,7 +81,7 @@ function getResponseFromIteration(iteration)
 						if (currentIteration){
 							$('#participatingSessionCurrentSessionGridHeader').html('Session Grid of Current Iteration');
 						} else {
-							$('#participatingSessionCurrentSessionGridHeader').html('Session Grid of Iteration <b style="color: red;">'+iteration+'</b>');
+							$('#participatingSessionCurrentSessionGridHeader').html('Session Grid of Iteration '+iteration);
 						}
 						$('#participationSessionsContentGridsDiv').find('.gridTrableContainerDiv').each(function(){
 							prepareForNewGrid($(this));	
