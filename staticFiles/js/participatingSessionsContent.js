@@ -51,6 +51,7 @@ function getResponseFromIteration(iteration)
 					if($(data).find('error').length <= 0)
 					{
 						$('#participationSessionsContentDiv').html($(data).find('htmlData').text());
+						$('#sessionGridIteration').html(' <b style="color: red;">'+iteration+'</b>');
 						$('#participationSessionsContentDiv').find('input:button, button').button();
 						$('#participationSessionsContentGridsDiv').find('#gridTrableContainerDiv').each(function(){
 							prepareForNewGrid($(this));	

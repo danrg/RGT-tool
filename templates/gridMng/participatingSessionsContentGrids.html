@@ -1,7 +1,7 @@
 <div id= "participationSessionsContentGridsDiv">
 	{% if displaySessionGrid %}
 		<div id="participatingSessionGridDiv">
-			<h4 id= "participatingSessionCurrentSessionGridHeader">Current Session Grid</h4>
+			<h4 id= "participatingSessionCurrentSessionGridHeader">Session Grid of Iteration<span id="sessionGridIteration"></span></h4>
 			{% if table %}
 				{% include "gridMng/gridTable.html" %}
 			{% endif %}

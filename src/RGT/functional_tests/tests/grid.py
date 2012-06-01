@@ -13,6 +13,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from random import randint
+import time
 
 class BaseGridLiveTest(BaseLiveTest):
     """
@@ -55,7 +56,7 @@ class BaseGridLiveTest(BaseLiveTest):
         
 class GridTests(BaseGridLiveTest):
     """
-    This class...
+    This class includes the tests related to grid operations.
     
     Test cases implemented:
         - Create Grid Test
@@ -102,6 +103,16 @@ class GridTests(BaseGridLiveTest):
             weight = self.browser.find_element_by_name("weight_concern%d" % (i + 1))
             weight.send_keys(Keys.CLEAR)
             weight.send_keys(randint(1, 5))
+            
+        # User mouser over to concern_1
+        concern_1_left = self.browser.find_element_by_name("concern_1_left")
+        ActionChains(self.browser).move_to_element(concern_1_left).perform()
+        
+        # User clicks the button to hide the legend
+        hide_legend_button = self.browser.find_element_by_class_name('gridTableToggleLegendImg')
+        hide_legend_button.click()
+        
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_xpath('//div[@class="tableLegendDiv" and contains(@style, "none")]'))
         
         # User clicks the save button
         save_button = self.browser.find_element_by_css_selector("input[value='Save']")
@@ -153,6 +164,8 @@ class GridTests(BaseGridLiveTest):
         number_of_alternatives = 3
         for i in range(number_of_alternatives):
             self.browser.find_element_by_name("ratio_concer4_alternative%d" % (i + 1)).send_keys(randint(1, 5))
+            
+        # Hide legend test here
         
         # User mouse over to concern_2_right
         concern_2_right = self.browser.find_element_by_name("concern_2_right")
@@ -207,3 +220,5 @@ class GridTests(BaseGridLiveTest):
         
         # Wait until the dendrogram appears successfully
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_class_name("hasSVG"))
+        
+        time.sleep(1)
