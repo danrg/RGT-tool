@@ -441,7 +441,8 @@ def ajaxRespond(request):
             return HttpResponse(createXmlErrorResponse('Session was not found'), content_type='application/xml')
     else:
         return HttpResponse(createXmlErrorResponse('Invalid request, request is missing arguments'), content_type='application/xml')
- 
+
+#this function only return the content grids!! 
 def ajaxGetParticipatingSessionsContentGrids(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
@@ -465,10 +466,10 @@ def ajaxGetParticipatingSessionsContentGrids(request):
                         context= None
                         if responseGridRelation.grid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
                             context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
-                                                          'responseTable': dic2['table'], 'responseTableHeader':dic2['tableHeader'], 'responseWeights':dic2['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':False, 'responseTableId':randomStringGenerator(), 'responseDoesNotShowLegend': True })
+                                                          'responseTable': dic2['table'], 'responseTableHeader':dic2['tableHeader'], 'responseWeights':dic2['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':True, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':False, 'responseTableId':randomStringGenerator(), 'responseDoesNotShowLegend': True })
                         else:
-                            context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'showRatingWhileFalseChangeRatingsWeights':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 
-                                                          'responseTable': dic2['table'], 'responseTableHeader':dic2['tableHeader'], 'responseWeights':dic2['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':True, 'responseTableId':randomStringGenerator() })
+                            context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'showRatingWhileFalseChangeRatingsWeights':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
+                                                          'responseTable': dic2['table'], 'responseTableHeader':dic2['tableHeader'], 'responseWeights':dic2['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':True, 'responseTableId':randomStringGenerator()})
                         htmlData= template.render(context)
                         return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                     else:
@@ -486,7 +487,7 @@ def ajaxGetParticipatingSessionsContentGrids(request):
                                 dic= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
                                 template= loader.get_template('gridMng/participatingSessionsContentGrids.html')
                                 context= None
-                                context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'displaySessionGrid': True, 'displayResponseGrid': True,
+                                context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
                                                               'responseTable': dic['table'], 'responseTableHeader':dic['tableHeader'], 'responseWeights':dic['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator() })
                                 htmlData= template.render(context)
                                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
