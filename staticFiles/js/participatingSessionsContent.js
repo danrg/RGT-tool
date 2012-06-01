@@ -31,8 +31,10 @@ function sendResponse()
 function getResponseFromIteration(iteration)
 {
 	showLoadingSpinner($('#wrap'), 'Please wait...')
+	var currentIteration = false;
 	try
 	{
+		
 		var sessionUSID= participatingGetSessionUSID(); //function is from participatingSession.js
 		if(iteration == null || iteration == '')
 		{
@@ -42,6 +44,7 @@ function getResponseFromIteration(iteration)
 		{
 			if(iteration == 'current')
 			{
+				currentIteration = true;
 				iteration= $('#participantSessionIteration').text();
 			}
 			str= 'sessionUSID=' + sessionUSID + '&iteration=' + iteration;
@@ -51,9 +54,13 @@ function getResponseFromIteration(iteration)
 					if($(data).find('error').length <= 0)
 					{
 						$('#participationSessionsContentDiv').html($(data).find('htmlData').text());
-						$('#sessionGridIteration').html(' <b style="color: red;">'+iteration+'</b>');
+						if (currentIteration){
+							$('#participatingSessionCurrentSessionGridHeader').html('Session Grid of Current Iteration');
+						} else {
+							$('#participatingSessionCurrentSessionGridHeader').html('Session Grid of Iteration <b style="color: red;">'+iteration+'</b>');
+						}
 						$('#participationSessionsContentDiv').find('input:button, button').button();
-						$('#participationSessionsContentGridsDiv').find('#gridTrableContainerDiv').each(function(){
+						$('#participationSessionsContentGridsDiv').find('.gridTrableContainerDiv').each(function(){
 							prepareForNewGrid($(this));	
 						});
 						hideLoadingSpinner($('#wrap'));

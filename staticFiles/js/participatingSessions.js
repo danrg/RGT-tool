@@ -72,6 +72,7 @@ function showParticipatingSessionDetails()
 					if($(data).find('error').length <= 0)
 					{
 						$('#participatingSessionContentDiv').html($(data).find('htmlData').text());
+						$('#participatingSessionCurrentSessionGridHeader').html('Session Grid of Current Iteration');
 						if($('#participatingSessionGridDiv').find('table').length >= 1)
 						{
 							prepareForNewGrid($('#participatingSessionGridDiv'));
