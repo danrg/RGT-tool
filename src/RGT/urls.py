@@ -1,8 +1,8 @@
 from django.conf.urls.defaults import patterns, include, url
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
-from authentication.views import ChangePasswordView
-from authentication.views import ForgotPasswordView
+from authentication.views import *
+
 
 admin.autodiscover()
 
@@ -21,7 +21,7 @@ urlpatterns = patterns('',
     #url(r'^registerCloseBeta/$', 'RGT.applicationForm.views.registerUser'),
     #url(r'^thx/$', 'RGT.applicationForm.views.showThankYouPage'),
     url(r'^home/', 'RGT.views.home'),
-    url(r'^auth/register/', 'RGT.authentication.registration.views.register'),
+    url(r'^auth/register/', RegistrationView.as_view()),
     url(r'^auth/login/', 'RGT.authentication.login.views.login'),
     url(r'^auth/logout/', 'RGT.authentication.login.views.logout'),
     url(r'^auth/verify/(?P<verifyEmailCode>[A-Za-z0-9]+)/$', 'RGT.authentication.registration.views.verify'),

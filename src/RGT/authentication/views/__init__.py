@@ -1,3 +1,4 @@
-from ChangePasswordView import ChangePasswordView
-from ForgotPasswordView import ForgotPasswordView
+from ChangePasswordView import *
+from ForgotPasswordView import *
+from RegistrationView import *
 
