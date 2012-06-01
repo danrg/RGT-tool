@@ -5,9 +5,6 @@ from RGT.authentication.forms.CaptchaSecuredForm import CaptchaSecuredForm
 class ForgotPasswordForm(CaptchaSecuredForm):
     email = forms.EmailField(label='Enter your email address:')
 
-    def __init__(self, *args, **kwargs):
-        super(ForgotPasswordForm, self).__init__(*args, **kwargs)
-
     def clean_email(self):
         data = self.cleaned_data['email']
 

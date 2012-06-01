@@ -5,22 +5,18 @@ from django.views.generic.edit import FormView
 from RGT.authentication.EmailService import EmailService
 from RGT.gridMng import utility
 from RGT.authentication.forms import RegistrationForm
+from RGT.authentication.views.CaptchaSecuredFormViewMixin import CaptchaSecuredFormViewMixin
 
-class RegistrationView(FormView):
+class RegistrationView(FormView, CaptchaSecuredFormViewMixin):
     template_name = "authentication/register.html"
     success_url = "/home"
+    form_class = RegistrationForm
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated():
             return HttpResponseRedirect('/home/')
 
         return super(RegistrationView, self).get(self, request, *args, **kwargs);
-
-    def get_form(self, form_class):
-        if self.request.method in ('POST', 'PUT'):
-            return RegistrationForm(self.request.POST, request = self.request)
-
-        return RegistrationForm()
 
     def form_valid(self, form):
         email = form.cleaned_data['email']

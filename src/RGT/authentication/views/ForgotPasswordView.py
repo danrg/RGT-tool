@@ -6,16 +6,12 @@ from RGT import settings
 from RGT.authentication.models import PassRecoverCode
 from RGT.authentication.EmailService import EmailService
 from RGT.gridMng import utility #for randomStringGenerator.....
+from RGT.authentication.views.CaptchaSecuredFormViewMixin import CaptchaSecuredFormViewMixin
 
 
-class ForgotPasswordView(FormView):
+class ForgotPasswordView(FormView, CaptchaSecuredFormViewMixin):
     template_name = 'authentication/forgotPass.html'
-
-    def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
-            return HttpResponseRedirect('/home/')
-
-        return super(ForgotPasswordView, self).get(self, request, *args, **kwargs);
+    form_class = ForgotPasswordForm
 
     def get_form(self, form_class):
         if self.request.method in ('POST', 'PUT'):
