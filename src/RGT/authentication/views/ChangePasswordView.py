@@ -1,7 +1,8 @@
 from django.views.generic.edit import FormView
 from RGT.authentication.forms import ChangePasswordForm
+from RGT import AuthorizedView
 
-class ChangePasswordView(FormView):
+class ChangePasswordView(FormView, AuthorizedView):
     template_name = 'authentication/changePass.html'
 
     def form_valid(self, form):

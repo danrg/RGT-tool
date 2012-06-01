@@ -11,6 +11,7 @@ from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+import time
 
 class BaseLiveTest(LiveServerTestCase):
     
@@ -56,3 +57,5 @@ class BaseLiveTest(LiveServerTestCase):
         close_dialog_button = self.browser.find_element_by_css_selector("button[role='button']")
         close_dialog_button.click()
         
+        # Do nothing after the dialog box disappeared
+        time.sleep(1)

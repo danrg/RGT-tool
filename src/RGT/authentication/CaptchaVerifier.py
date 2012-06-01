@@ -1,5 +1,5 @@
 import logging
-from src.RGT import settings
+from RGT import settings
 from recaptcha.client import captcha
 import sys
 

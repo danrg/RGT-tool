@@ -2,6 +2,7 @@ from django.conf.urls.defaults import patterns, include, url
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 from authentication.views import ChangePasswordView
+from authentication.views import ForgotPasswordView
 
 admin.autodiscover()
 
@@ -24,7 +25,8 @@ urlpatterns = patterns('',
     url(r'^auth/login/', 'RGT.authentication.login.views.login'),
     url(r'^auth/logout/', 'RGT.authentication.login.views.logout'),
     url(r'^auth/verify/(?P<verifyEmailCode>[A-Za-z0-9]+)/$', 'RGT.authentication.registration.views.verify'),
-    url(r'^accounts/forgot/$', 'RGT.authentication.forgotPassword.views.forgotPass'),
+    #url(r'^accounts/forgot/$', 'RGT.authentication.forgotPassword.views.forgotPass'),
+    url(r'^accounts/forgot/$', ForgotPasswordView.as_view()),
     url(r'^accounts/recover/$', 'RGT.authentication.recoverPassword.views.recoverPass'),
     url(r'^accounts/recover/(?P<passRecoverCode>[A-Za-z0-9]+)/$', 'RGT.authentication.recoverPassword.views.recoverPass'),
     url(r'^accounts/change/', ChangePasswordView.as_view()),
