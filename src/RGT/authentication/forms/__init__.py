@@ -1,3 +1,4 @@
-from ChangePasswordForm import ChangePasswordForm
-from ForgotPasswordForm import ForgotPasswordForm
-from CaptchaSecuredForm import CaptchaSecuredForm
+from ChangePasswordForm import *
+from ForgotPasswordForm import *
+from CaptchaSecuredForm import *
+from RegistrationForm import *

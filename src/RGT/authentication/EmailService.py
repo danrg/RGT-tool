@@ -19,6 +19,18 @@ class EmailService(object):
 
         return self.prepareAndSendEmail(subject, passRecoverCode.email, htmlContent.render(context))
 
+    def sendRegistrationEmail(self, user, verificationCode):
+        subject = 'Email verification for RGT!'
+        htmlContentTemplate = 'authentication/verifyEmail.html'
+
+        linkInitialPart = settings.HOST_NAME+'/auth/verify/'
+        link = linkInitialPart + verificationCode + '/'
+
+        htmlContent = get_template(htmlContentTemplate)
+        context = Context({'link': link, 'user': user})
+
+        return self.prepareAndSendEmail(subject, user.email, htmlContent.render(context))
+
     def prepareAndSendEmail(self, subject, toMail, htmlContent):
         fromMail = settings.EMAIL_HOST_USER
         email = EmailMultiAlternatives(subject, None, fromMail, [toMail])
