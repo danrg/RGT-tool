@@ -155,6 +155,10 @@ class SessionTests(BaseSessionLiveTest):
         # page and selects the session session1 of admin
         self.participant_can_select_session("test1@test1.com", "123", "admin:session1", False)
         
+        # The number of participants shows 0/2 which means that none participant responded yet
+        session_details_body = self.browser.find_element_by_id("sessionDetails")
+        self.assertIn("0/2", session_details_body.text)
+        
         # Participant user1 mouse over to alternative_2
         # (because there are two grids, there are also two alternative fields with the same name)
         alternatives_with_name_alternative_2 = self.browser.find_elements_by_name("alternative_2_name")
@@ -174,6 +178,12 @@ class SessionTests(BaseSessionLiveTest):
         
         self.wait_for_dialog_box_with_message("Response was sent.")
         
+        # The number of participants shows 1/2 which means that one out of 2 participants responded
+        # and the response status says Response was sent
+        session_details_body = self.browser.find_element_by_id("sessionDetails")
+        self.assertIn("1/2", session_details_body.text)
+        self.assertIn("Response was sent at:", session_details_body.text)
+        
         # Participant user1 logs out
         logout_link = self.browser.find_element_by_link_text("Log out")
         logout_link.click()
@@ -181,6 +191,10 @@ class SessionTests(BaseSessionLiveTest):
         # Participant user2 logs in, goes to participating session
         # page and selects the session session1 of user admin
         self.participant_can_select_session("test2@test2.com", "123", "admin:session1", False)
+        
+        # The number of participants shows 1/2 which means that one out of 2 participants responded
+        session_details_body = self.browser.find_element_by_id("sessionDetails")
+        self.assertIn("1/2", session_details_body.text)
         
         # Participant user2 mouse over concern_3_left
         # (because there are two grids, there are also two concerns with the same name)
@@ -216,6 +230,12 @@ class SessionTests(BaseSessionLiveTest):
         send_response_button.click()
         
         self.wait_for_dialog_box_with_message("Response was sent.")
+        
+        # The number of participants shows 2/2 which means that all participants responded
+        # and the response status says Response was sent
+        session_details_body = self.browser.find_element_by_id("sessionDetails")
+        self.assertIn("2/2", session_details_body.text)
+        self.assertIn("Response was sent at:", session_details_body.text)
         
         # Participant user2 logs out
         logout_link = self.browser.find_element_by_link_text("Log out")

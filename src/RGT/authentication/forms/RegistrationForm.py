@@ -1,7 +1,8 @@
-from django.contrib.auth.models import User
 from django import forms
+from django.contrib.auth.models import User
+from RGT.authentication.forms.CaptchaSecuredForm import CaptchaSecuredForm
 
-class RegistrationForm(forms.Form):
+class RegistrationForm(CaptchaSecuredForm):
     email = forms.EmailField(label='E-mail address')
     firstName = forms.CharField(label='First name')
     lastName = forms.CharField(label='Last name')
@@ -13,11 +14,11 @@ class RegistrationForm(forms.Form):
 
         password = cleaned_data.get('password')
         retyped = cleaned_data.get('retyped')
-        
+
         if password and retyped:
             if password != retyped:
                 self.errors['retyped'] = self.error_class(['The passwords do not match.'])
-    
+
                 # Remove invalid entries
                 if password:
                     del cleaned_data['password']
@@ -29,15 +30,13 @@ class RegistrationForm(forms.Form):
     def clean_email(self):
         user = None
         data = self.cleaned_data['email']
-    
+
         try:
             user = User.objects.get(email= data)
         except User.DoesNotExist: #do nothing
             pass
-    
+
         if user is not None:
             raise forms.ValidationError('This email address is already registered.')
-    
+
         return data
-    
-    
