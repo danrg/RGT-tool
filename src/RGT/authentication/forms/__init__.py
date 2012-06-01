@@ -1,1 +1,3 @@
 from ChangePasswordForm import ChangePasswordForm
+from ForgotPasswordForm import ForgotPasswordForm
+from CaptchaSecuredForm import CaptchaSecuredForm

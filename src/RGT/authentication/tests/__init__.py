@@ -1,1 +1,1 @@
-__author__ = 'P266113'
+from EmailServiceTest import *
