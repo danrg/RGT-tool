@@ -1,31 +1,55 @@
 function sendResponse()
 {
-	var sessionUSID= participatingGetSessionUSID(); //function is from participatingSession.js
-	var iteration= $.trim($('#participantSessionIteration').text());
-	var table= getGridTable($('#participatingSessionResponseGridForm'));
-	var nAlternatives= getNumberOfAlternatives(table);
-	var nConcerns= getNumberOfConcerns(table);
-	var form= $('#participatingSessionResponseGridForm');
-	var strD= '';
-	//serialize the disabled inputs
-	form.find('input:disabled').each(function(){
-		strD = strD + '&' + $(this).attr('name') + '=' + $(this).val();
-	});
-	var str=  'nConcerns=' + nConcerns + '&nAlternatives=' + nAlternatives + '&iteration=' + iteration + '&gridType=response&sessionUSID=' + sessionUSID + '&' + form.serialize() + strD;
-	$.post('/sessions/respond/', str, function(data){
-		if($(data).find('error').length <= 0)
-		{
-			var dateTime = $(data).find('dateTime').text();
-			$('#responseStatusA').attr('class', 'green');
-			$('#responseStatusSpan').text('Response was sent at: ' + dateTime);
-			showMessageInDialogBox('Response was sent.');
-			//$('.participatingSessionsResponseHighlight').effect('highlight', {color: '#AFDCEC'}, 1500);
-		}
-		else
-		{
-			showMessageInDialogBox($(data).find('error').text());
-		}
-	})
+	showLoadingSpinner($('#wrap'), 'Please wait...')
+	try
+	{
+		var sessionUSID= participatingGetSessionUSID(); //function is from participatingSession.js
+		var iteration= $.trim($('#participantSessionIteration').text());
+		var table= getGridTable($('#participatingSessionResponseGridForm'));
+		var nAlternatives= getNumberOfAlternatives(table);
+		var nConcerns= getNumberOfConcerns(table);
+		var form= $('#participatingSessionResponseGridForm');
+		var strD= '';
+		//serialize the disabled inputs
+		form.find('input:disabled').each(function(){
+			strD = strD + '&' + $(this).attr('name') + '=' + $(this).val();
+		});
+		var str=  'nConcerns=' + nConcerns + '&nAlternatives=' + nAlternatives + '&iteration=' + iteration + '&gridType=response&sessionUSID=' + sessionUSID + '&' + form.serialize() + strD;
+		$.post('/sessions/respond/', str, function(data){
+			try
+			{
+				if($(data).find('error').length <= 0)
+				{
+					var dateTime = $(data).find('dateTime').text();
+					$('#responseStatusA').attr('class', 'green');
+					$('#responseStatusSpan').text('Response was sent at: ' + dateTime);
+					if($(data).find('extra').find('nResponses').length >= 1)
+					{
+						$('#nReceivedResponses').text($(data).find('extra').find('nResponses').text());
+						console.log($(data).find('extra').find('nResponses').text());
+					}
+					hideLoadingSpinner($('#wrap'));
+					showMessageInDialogBox('Response was sent.');
+					//$('.participatingSessionsResponseHighlight').effect('highlight', {color: '#AFDCEC'}, 1500);
+				}
+				else
+				{
+					hideLoadingSpinner($('#wrap'));
+					showMessageInDialogBox($(data).find('error').text());
+				}
+			}
+			catch(err)
+			{
+				console.log(err);
+				hideLoadingSpinner($('#wrap'));
+			}
+		})
+	}
+	catch(err)
+	{
+		console.log(err);
+		hideLoadingSpinner($('#wrap'));
+	}
 }
 
 function getResponseFromIteration(iteration)
@@ -51,8 +75,8 @@ function getResponseFromIteration(iteration)
 					if($(data).find('error').length <= 0)
 					{
 						$('#participationSessionsContentDiv').html($(data).find('htmlData').text());
-						$('#participationSessionsContentDiv').find('input:button, button').button();
-						$('#participationSessionsContentGridsDiv').find('#gridTrableContainerDiv').each(function(){
+						//$('#participationSessionsContentDiv').find('input:button, button').button();
+						$('#participationSessionsContentGridsDiv').find('.gridTrableContainerDiv').each(function(){
 							prepareForNewGrid($(this));	
 						});
 						hideLoadingSpinner($('#wrap'));

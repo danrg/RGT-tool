@@ -17,7 +17,7 @@ from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
 from RGT.gridMng.error.wrongState import  WrongState
 from RGT.gridMng.error.userIsFacilitator import  UserIsFacilitator
 from RGT.gridMng.views import __generateGridTable__, __createDendogram__
-from RGT.gridMng.utility import createXmlErrorResponse, createXmlSuccessResponse, randomStringGenerator, createXmlForComboBox, validateName
+from RGT.gridMng.utility import createXmlErrorResponse, createXmlSuccessResponse, randomStringGenerator, createXmlForComboBox, validateName, createXmlForNumberOfResponseSent
 from RGT.gridMng.views import ajaxUpdateGrid, ajaxCreateGrid
 from math import sqrt, ceil
 import uuid
@@ -379,7 +379,7 @@ def ajaxGetParticipatingSessionContentPage(request):
                         elif state.name == SessionState.RW:
                             dic= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
                             template= loader.get_template('gridMng/participatingSessionsContent.html')
-                            context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayResponseGrid': True,
+                            context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
                                                                   'responseTable': dic['table'], 'responseTableHeader':dic['tableHeader'], 'responseWeights':dic['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True })
                             htmlData= template.render(context)
                             return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
@@ -397,7 +397,7 @@ def ajaxGetParticipatingSessionContentPage(request):
                             dic= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
                             dic2= __generateGridTable__(responseGrid[0].grid)
                             template= loader.get_template('gridMng/participatingSessionsContent.html')
-                            context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'showRatingWhileFalseChangeRatingsWeights':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'Response was sent at: ', 'responseWasSent':True, 'sessionStatusClass':'green', 'responseStatusClass':'green', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayResponseGrid': True,
+                            context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'showRatingWhileFalseChangeRatingsWeights':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'Response was sent at: ', 'responseWasSent':True, 'sessionStatusClass':'green', 'responseStatusClass':'green', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
                                                               'responseTable': dic2['table'], 'responseTableHeader':dic2['tableHeader'], 'responseWeights':dic2['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'dateTime':responseGrid[0].grid.dateTime, 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True })
                             htmlData= template.render(context)
                             return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
@@ -434,7 +434,7 @@ def ajaxRespond(request):
                         print '-'*60 
                 else:
                     #this is a new grid, which means first response
-                    return ajaxCreateGrid(request)
+                    return ajaxCreateGrid(request, createXmlForNumberOfResponseSent(len(sessionObj.getUsersThatRespondedRequest()) + 1))
             else:
                 return HttpResponse(createXmlErrorResponse('You are not participating in the session, can\'t send response grid'), content_type='application/xml')
         else:

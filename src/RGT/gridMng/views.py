@@ -59,7 +59,8 @@ def getCreateMyGridPage(request):
         print '-'*60
         return HttpResponse(createXmlErrorResponse('unknown error'), content_type='application/xml')
 
-def ajaxCreateGrid(request):
+#extraXmlData is only added if the response is a success
+def ajaxCreateGrid(request, extraXmlData= None):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
 
@@ -174,7 +175,18 @@ def ajaxCreateGrid(request):
                 if isResponseGrid:
                     gridResponseRelation=  ResponseGrid(grid= gridObj, session= sessionObj, iteration= sessionIteration, user= userObj)
                     gridResponseRelation.save()
-                    return HttpResponse(createXmlSuccessResponse('Grid created successfully.', createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
+                    
+                    #check if we need to pass extra data into the xml success response
+                    if extraXmlData == None:
+                        return HttpResponse(createXmlSuccessResponse('Grid created successfully.', createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
+                    else:
+                        extraDataToUse= None
+                        if isinstance(extraXmlData, list):
+                            extraXmlData.append(createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                            extraDataToUse= extraXmlData
+                        else:
+                            extraDataToUse= [extraXmlData, createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))]
+                        return HttpResponse(createXmlSuccessResponse('Grid created successfully.', extraDataToUse), content_type='application/xml')
             except:
                 try:
                     gridObj.delete()

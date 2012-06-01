@@ -27,9 +27,11 @@
 						<td><!-- skip --></td> 
 						{% comment %} grid table menu, max of 5 to 6 buttons {% endcomment %}
 						<td>
-							<div class= "gridTableExtraOptionsMenuDiv" style="display: none;">
-								<img src= "/static/icons/legend.png" class= "gridTableToggleLegendImg" onclick= "toggleGridLegend($(this))" title= "toggle legend"/>
-							</div>
+							{% if not doesNotShowLegend %}
+								<div class= "gridTableExtraOptionsMenuDiv" style="display: none;">
+									<img src= "/static/icons/legend.png" class= "gridTableToggleLegendImg" onclick= "toggleGridLegend($(this))" title= "toggle legend"/>
+								</div>
+							{% endif %}
 						</td>
 						{% for header in tableHeader %}
 							<td class= "alternativeCell" onmouseover="showColMenu($(this))" >

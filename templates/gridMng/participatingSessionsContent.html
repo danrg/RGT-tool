@@ -36,7 +36,7 @@ if( typeof sendResponse != 'function')
     	<td>Number of participants that responded</td>
     	<td>
     		{% if showNParticipantsAndResponces %}
-    			{{nReceivedResponses}}/{{nParticipants}}
+    			<span id= "nReceivedResponses">{{nReceivedResponses}}</span>/{{nParticipants}}
     		{% else %}
     			-----
     		{% endif %}

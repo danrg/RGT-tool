@@ -26,8 +26,13 @@ def createXmlSuccessResponse(htmlData, extraData= None):
     #add the extra data
     if extraData:
         extraNode= doc.createElement('extra')
-        extraNode.appendChild(extraData)
+        if not isinstance(extraData, list):
+            extraNode.appendChild(extraData)  
+        else:
+            for data in extraData:
+                extraNode.appendChild(data)
         topElement.appendChild(extraNode)
+                
     return doc.toxml()
 
 def createXmlErrorResponse(errorData):
@@ -53,6 +58,20 @@ def createXmlForComboBox(data):
         elementNode.appendChild(valueNode)
         elementNode.appendChild(displayNode)
         topElement.appendChild(elementNode)
+    return topElement
+
+def createXmlForIterationNumber(iteration):
+    impl= getDOMImplementation()
+    doc= impl.createDocument(None, "iteration", None)
+    topElement= doc.documentElement
+    topElement.appendChild(doc.createTextNode(str(iteration)))
+    return topElement
+
+def createXmlForNumberOfResponseSent(nResponsesSent):
+    impl= getDOMImplementation()
+    doc= impl.createDocument(None, "nResponses", None)
+    topElement= doc.documentElement
+    topElement.appendChild(doc.createTextNode(str(nResponsesSent)))
     return topElement
 
 def randomStringGenerator(size= 14):
