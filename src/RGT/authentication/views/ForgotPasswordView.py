@@ -11,12 +11,6 @@ class ForgotPasswordView(CaptchaSecuredFormView):
     template_name = 'authentication/forgotPass.html'
     form_class = ForgotPasswordForm
 
-    def get_form(self, form_class):
-        if self.request.method in ('POST', 'PUT'):
-            return ForgotPasswordForm(self.request.POST, request = self.request)
-
-        return ForgotPasswordForm()
-
     def form_valid(self, form):
         email = form.cleaned_data['email']
         user = User.objects.get(email=email)
