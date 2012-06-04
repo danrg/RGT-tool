@@ -1,13 +1,12 @@
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
-from django.views.generic.edit import FormView
 from RGT.authentication.EmailService import EmailService
 from RGT.gridMng import utility
 from RGT.authentication.forms import RegistrationForm
-from RGT.authentication.views.CaptchaSecuredFormViewMixin import CaptchaSecuredFormViewMixin
+from RGT.authentication.views.CaptchaSecuredFormView import CaptchaSecuredFormView
 
-class RegistrationView(FormView, CaptchaSecuredFormViewMixin):
+class RegistrationView(CaptchaSecuredFormView):
     template_name = "authentication/register.html"
     success_url = "/home"
     form_class = RegistrationForm
