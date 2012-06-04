@@ -423,6 +423,28 @@ def ajaxRespond(request):
             if len(userSessionRelation) >= 1:
                 #determine if it is a new response grid or not
                 userResponseGridRelation= userObj.responsegrid_set.filter(iteration= int(request.POST['iteration']), session= sessionObj)
+                #if the response is for a concern/alternative request, run extra validation code (no empty concerns or alternatives allowed)
+                if sessionObj.state.name == State.objects.getWaitingForAltAndConState().name:
+                    try:
+                        __validateAltConResponse__(request)
+                    except ValueError as error:
+                        print "Exception in user code:"
+                        print '-'*60
+                        traceback.print_exc(file=sys.stdout)
+                        print '-'*60 
+                        return HttpResponse(createXmlErrorResponse(error.args[0]))
+                    except KeyError as error:
+                        print "Exception in user code:"
+                        print '-'*60
+                        traceback.print_exc(file=sys.stdout)
+                        print '-'*60 
+                        return HttpResponse(createXmlErrorResponse(error.args[0]))
+                    except:
+                        print "Exception in user code:"
+                        print '-'*60
+                        traceback.print_exc(file=sys.stdout)
+                        print '-'*60 
+                        return HttpResponse(createXmlErrorResponse('Unknown error'))
                 if len(userResponseGridRelation) >= 1:
                     #this is an update
                     try:
@@ -1098,3 +1120,51 @@ def __createPendingResponseData__(userObj= None):
                             table= []
                         table.append((sessionObj.name + ' : ' + sessionObj.facilitator.user.first_name, sessionObj.usid))
     return table
+
+def __validateAltConResponse__(request):
+    
+    #general validation
+    if request.POST.has_key('nAlternatives') and request.POST.has_key('nConcerns'):
+        nAlternatives= int(request.POST['nAlternatives'])
+        nConcerns= int(request.POST['nConcerns'])
+        
+        i= 0
+        #check the concern if they are empty or not
+        while i < nConcerns:
+            #check left pole
+            keyName= 'concern_'+ str((i + 1)) + '_left'
+            if request.POST.has_key(keyName):
+                if request.POST[keyName] == None or request.POST[keyName].strip() == '':
+                    print 'Error concern ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"' 
+                    raise ValueError('One or more concerns are empty')
+            else:
+                print 'Error request is missing argument: ' + keyName
+                raise KeyError('Invalid request, request is missing argument(s)')
+            
+            #check right pole
+            keyName= 'concern_'+ str((i + 1)) + '_right'
+            if request.POST.has_key(keyName):
+                if request.POST[keyName] == None or request.POST[keyName].strip() == '':
+                    print 'Error concern ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"' 
+                    raise ValueError('One or more concerns are empty')
+            else:
+                print 'Error request is missing argument: ' + keyName
+                raise KeyError('Invalid request, request is missing argument(s)')
+            i+= 1;
+        
+        i= 0;
+        #validate the alternatives
+        while i < nAlternatives:
+            keyName= 'alternative_' + str((i + 1)) + '_name'
+            if request.POST.has_key(keyName):
+                if request.POST[keyName] == None or request.POST[keyName].strip() == '':
+                    print 'Error alternative ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"' 
+                    raise ValueError('One or more alternatives are empty')
+            else:
+                print 'Error request is missing argument: ' + keyName
+                raise KeyError('Invalid request, request is missing argument(s)') 
+            i+= 1
+        return True
+    else:
+        print 'Error request is missing arguments: nAlternatives: ' + str(request.POST.has_key('nAlternatives')) + ' nConcerns: ' +  str(request.POST.has_key('nConcerns'))
+        raise KeyError('Invalid request, request is missing argument(s)')
