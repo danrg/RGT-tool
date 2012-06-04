@@ -655,7 +655,7 @@ def ajaxConvertSvgTo(request):
             errorImageData= getImageError()
             # send the file
             response = HttpResponse(errorImageData, content_type= 'image/jpg')
-            response['Content-Length'] = fpInMemory.tell()
+            response['Content-Length'] = fpInMemory.tell() if fpInMemory else None
             response['Content-Disposition'] = 'attachment; filename=error.jpg'
             return response 
     except:
@@ -666,7 +666,7 @@ def ajaxConvertSvgTo(request):
         errorImageData= getImageError()
         # send the file
         response = HttpResponse(errorImageData, content_type= 'image/jpg')
-        response['Content-Length'] = fpInMemory.tell()
+        response['Content-Length'] = fpInMemory.tell() if fpInMemory else None
         response['Content-Disposition'] = 'attachment; filename=error.jpg'
         return response         
     
