@@ -6,15 +6,13 @@
 
 {% block content %}
 	{% if not user.is_superuser %}
-		{% if not verifiedEmail %}
+		{% if not user.is_active %}
+		<div id="verify-message">
 			<p>Please verify your email! Thank you!</p>
-			<br />
+		</div>
 		{% endif %}
 	{% endif %}
-	<p>
-        Welcome {{ firstName }}!
-        <br />
-        <br />
-        Please use the menu above to navigate!
-    </p>
+	<div id="welcome-message">
+		<p>Welcome {{ firstName }}! Please use the menu above to navigate!</p>
+    </div>
 {% endblock %}

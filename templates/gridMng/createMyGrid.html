@@ -5,6 +5,11 @@
 {% endblock %}
 
 {% block content %}
+{% if not user.is_active %}
+	<div id="verify-message">
+		<p>Please verify your email in order to use this part of the application! Thank you!</p>
+	</div>
+{% else %}
 <div id="myGridDiv">
 <link type="text/css" href="{{ STATIC_URL }}css/tipsy.css" rel="stylesheet" />
 <link type="text/css" href="{{ STATIC_URL }}css/smallButton.css" rel="stylesheet" />
@@ -49,4 +54,5 @@
 	}
 </script>
 </div>
+{% endif %}
 {% endblock %}

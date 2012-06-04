@@ -27,6 +27,7 @@ class RegistrationView(FormView, CaptchaSecuredFormViewMixin):
         user = User.objects.create_user(email, email, password);
         user.first_name = firstName
         user.last_name = lastName
+        user.is_active = False
         user.save();
 
         #login the user after creation
