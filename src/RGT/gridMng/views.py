@@ -21,7 +21,7 @@ import sys, os
 import traceback
 import base64
 from io import BytesIO
-from types import TupleType, StringType
+from types import StringType
 
 def getCreateMyGridPage(request):
     if not request.user.is_authenticated():
@@ -765,8 +765,8 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
     while i < nAlternatives:
         keyName= 'alternative_' + str((i + 1)) + '_name'
         if not request.POST.has_key(keyName):
-            print 'Error key not found: ' + keyName
-            raise KeyError('Invalid request, request is missing argument(s)')
+            #print 'Error key not found: ' + keyName
+            raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
             #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
         else:
             #alternative names should be unique in a grid, so lets check for that
@@ -790,8 +790,8 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
         #check the left pole first
         keyName= 'concern_'+ str((i + 1)) + '_left'
         if not request.POST.has_key(keyName):
-            print 'Error key not found: ' + keyName
-            raise KeyError('Invalid request, request is missing argument(s)')
+            #print 'Error key not found: ' + keyName
+            raise KeyError('Invalid request, request is missing argument(s)',  'Error key not found: ' + keyName)
             #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
         else:
             #the right and left pole can be None so convert the empty string into None
@@ -807,8 +807,8 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
         #check the right pole
         keyName= 'concern_'+ str((i + 1)) + '_right'
         if not request.POST.has_key(keyName):
-            print 'Error key not found: ' + keyName
-            raise KeyError('Invalid request, request is missing argument(s)')
+            #print 'Error key not found: ' + keyName
+            raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
             #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
         else:
             #the right and left pole can be None so convert the empty string into None
@@ -826,8 +826,8 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
             #lets check if the weight key is present
             keyName= 'weight_concern'+ str((i + 1))
             if not request.POST.has_key(keyName):
-                print 'Error key not found: ' + keyName
-                raise KeyError('Invalid request, request is missing argument(s)')
+                #print 'Error key not found: ' + keyName
+                raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
                 #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
             else:
                 #allowed values for the values are None, '', ' ' and numbers
@@ -861,8 +861,8 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
             while j < nAlternatives:
                 keyName= 'ratio_concer' + str((i + 1)) +'_alternative' + str(( j + 1))
                 if not request.POST.has_key(keyName):
-                    print 'Error key not found: ' + keyName
-                    raise KeyError('Invalid request, request is missing argument(s)')
+                    #print 'Error key not found: ' + keyName
+                    raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
                     #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
                 else:
                     keyValue= request.POST[keyName].strip()

@@ -1135,21 +1135,21 @@ def __validateAltConResponse__(request):
             keyName= 'concern_'+ str((i + 1)) + '_left'
             if request.POST.has_key(keyName):
                 if request.POST[keyName] == None or request.POST[keyName].strip() == '':
-                    print 'Error concern ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"' 
-                    raise ValueError('One or more concerns are empty')
+                    #print 'Error concern ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"' 
+                    raise ValueError('One or more concerns are empty', 'Error concern ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"')
             else:
-                print 'Error request is missing argument: ' + keyName
-                raise KeyError('Invalid request, request is missing argument(s)')
+                #print 'Error request is missing argument: ' + keyName
+                raise KeyError('Invalid request, request is missing argument(s)', 'Error request is missing argument: ' + keyName)
             
             #check right pole
             keyName= 'concern_'+ str((i + 1)) + '_right'
             if request.POST.has_key(keyName):
                 if request.POST[keyName] == None or request.POST[keyName].strip() == '':
-                    print 'Error concern ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"' 
-                    raise ValueError('One or more concerns are empty')
+                    #print 'Error concern ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"' 
+                    raise ValueError('One or more concerns are empty', 'Error concern ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"')
             else:
-                print 'Error request is missing argument: ' + keyName
-                raise KeyError('Invalid request, request is missing argument(s)')
+                #print 'Error request is missing argument: ' + keyName
+                raise KeyError('Invalid request, request is missing argument(s)', 'Error request is missing argument: ' + keyName)
             i+= 1;
         
         i= 0;
@@ -1158,13 +1158,13 @@ def __validateAltConResponse__(request):
             keyName= 'alternative_' + str((i + 1)) + '_name'
             if request.POST.has_key(keyName):
                 if request.POST[keyName] == None or request.POST[keyName].strip() == '':
-                    print 'Error alternative ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"' 
-                    raise ValueError('One or more alternatives are empty')
+                    #print 'Error alternative ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"' 
+                    raise ValueError('One or more alternatives are empty', 'Error alternative ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"')
             else:
-                print 'Error request is missing argument: ' + keyName
-                raise KeyError('Invalid request, request is missing argument(s)') 
+                #print 'Error request is missing argument: ' + keyName
+                raise KeyError('Invalid request, request is missing argument(s)', 'Error request is missing argument: ' + keyName) 
             i+= 1
         return True
     else:
-        print 'Error request is missing arguments: nAlternatives: ' + str(request.POST.has_key('nAlternatives')) + ' nConcerns: ' +  str(request.POST.has_key('nConcerns'))
-        raise KeyError('Invalid request, request is missing argument(s)')
+        #print 'Error request is missing arguments: nAlternatives: ' + str(request.POST.has_key('nAlternatives')) + ' nConcerns: ' +  str(request.POST.has_key('nConcerns'))
+        raise KeyError('Invalid request, request is missing argument(s)', 'Error request is missing arguments: nAlternatives: ' + str(request.POST.has_key('nAlternatives')) + ' nConcerns: ' +  str(request.POST.has_key('nConcerns')))
