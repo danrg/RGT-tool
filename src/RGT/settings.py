@@ -7,6 +7,8 @@ DENDROGRAM_FONT_LOCATION = projectPath + '/src/RGT/LiberationSans-Regular.ttf'
 
 HOST_NAME = 'USE_YOUR_OWN'
 
+EMAIL_VERIFICATION = True
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
