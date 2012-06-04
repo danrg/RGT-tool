@@ -1,15 +1,13 @@
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect
-from django.views.generic.edit import FormView
 from RGT.authentication.forms.ForgotPasswordForm import ForgotPasswordForm
 from RGT import settings
 from RGT.authentication.models import PassRecoverCode
 from RGT.authentication.EmailService import EmailService
 from RGT.gridMng import utility #for randomStringGenerator.....
-from RGT.authentication.views.CaptchaSecuredFormViewMixin import CaptchaSecuredFormViewMixin
+from RGT.authentication.views.CaptchaSecuredFormView import CaptchaSecuredFormView
 
 
-class ForgotPasswordView(FormView, CaptchaSecuredFormViewMixin):
+class ForgotPasswordView(CaptchaSecuredFormView):
     template_name = 'authentication/forgotPass.html'
     form_class = ForgotPasswordForm
 
