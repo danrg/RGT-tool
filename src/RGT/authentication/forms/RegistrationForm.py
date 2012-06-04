@@ -9,10 +9,6 @@ class RegistrationForm(CaptchaSecuredForm):
     password = forms.CharField(label=(u'Password'), widget=forms.PasswordInput(render_value=False))
     retyped = forms.CharField(label=(u'Confirm Password'), widget=forms.PasswordInput(render_value=False))
 
-    def __init__(self, *args, **kwargs):
-        super(RegistrationForm, self).__init__(*args, **kwargs)
-
-
     def clean(self):
         cleaned_data = super(RegistrationForm, self).clean()
 
