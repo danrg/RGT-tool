@@ -432,19 +432,19 @@ def ajaxRespond(request):
                         print '-'*60
                         traceback.print_exc(file=sys.stdout)
                         print '-'*60 
-                        return HttpResponse(createXmlErrorResponse(error.args[0]))
+                        return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                     except KeyError as error:
                         print "Exception in user code:"
                         print '-'*60
                         traceback.print_exc(file=sys.stdout)
                         print '-'*60 
-                        return HttpResponse(createXmlErrorResponse(error.args[0]))
+                        return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                     except:
                         print "Exception in user code:"
                         print '-'*60
                         traceback.print_exc(file=sys.stdout)
                         print '-'*60 
-                        return HttpResponse(createXmlErrorResponse('Unknown error'))
+                        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                 if len(userResponseGridRelation) >= 1:
                     #this is an update
                     try:

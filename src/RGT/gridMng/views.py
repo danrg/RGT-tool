@@ -129,9 +129,27 @@ def ajaxCreateGrid(request, extraXmlData= None):
             concernValues= None
             alternativeValues= None
             ratioValues= None
-            obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
-            if type(obj) != TupleType:
-                return obj
+            obj= None
+            try:                
+                obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
+            except KeyError as error:
+                print "Exception in user code:"
+                print '-'*60
+                traceback.print_exc(file=sys.stdout)
+                print '-'*60
+                return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+            except ValueError as error:
+                print "Exception in user code:"
+                print '-'*60
+                traceback.print_exc(file=sys.stdout)
+                print '-'*60
+                return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+            except:
+                print "Exception in user code:"
+                print '-'*60
+                traceback.print_exc(file=sys.stdout)
+                print '-'*60
+                return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
             nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj
             try:
                 if request.POST.has_key('gridName'):
@@ -383,9 +401,27 @@ def ajaxUpdateGrid(request):
             #if the grid name isn't a string than it is an error
             return gridCheckNameResult
     #because django will save stuff to the database even if .save() is not called, we need to validate everything before starting to create the objects that will be used to populate the db
-    obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
-    if type(obj) != TupleType:
-        return obj
+    obj= None
+    try:
+        obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
+    except KeyError as error:
+        print "Exception in user code:"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60
+        return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+    except ValueError as error:
+        print "Exception in user code:"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60
+        return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+    except:
+        print "Exception in user code:"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60
+        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
     nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj     
         
     if gridObj != None:
@@ -720,132 +756,143 @@ def __generateGridTable__(gridObj):
     return dic
 
 def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
-    nAlternatives= None
-    nConcerns= None 
+
     concernValues= [] #this will contain a tuple with 3 values, (leftPole, rightPole, weight)
     alternativeValues= []
     ratioValues= []
     usedConcernNames= []
     
-    try:
+
+    i= 0
+    j= 0
+    nAlternatives= int(request.POST['nAlternatives'])
+    nConcerns= int(request.POST['nConcerns'])
+    
+    #check if the keys with the alternatives are present
+    while i < nAlternatives:
+        keyName= 'alternative_' + str((i + 1)) + '_name'
+        if not request.POST.has_key(keyName):
+            print 'Error key not found: ' + keyName
+            raise KeyError('Invalid request, request is missing argument(s)')
+            #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
+        else:
+            #alternative names should be unique in a grid, so lets check for that
+            temp= request.POST[keyName].strip()
+            if temp != '':
+                if not temp in alternativeValues:
+                    alternativeValues.append(temp)
+                else:
+                    raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
+                    #return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"))
+            else:
+                raise ValueError("No empty values are allowed for alternatives")
+                #return HttpResponse(createXmlErrorResponse("No empty values are allowed for alternatives"), content_type='application/xml') 
+        i+= 1
+    
+    i= 0
+    #check if all the keys for the left and right pole are present
+    while i < nConcerns:
+        leftPole= None
+        rightPole= None
+        #check the left pole first
+        keyName= 'concern_'+ str((i + 1)) + '_left'
+        if not request.POST.has_key(keyName):
+            print 'Error key not found: ' + keyName
+            raise KeyError('Invalid request, request is missing argument(s)')
+            #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
+        else:
+            #the right and left pole can be None so convert the empty string into None
+            leftPole= request.POST[keyName]
+            if leftPole == '':
+                leftPole= None
+            #the names of the left and right pole should be unique in a grid, so lets check for that. If the left pole is none, allow it to be saved
+            if not leftPole in usedConcernNames or leftPole == None:
+                usedConcernNames.append(leftPole)
+            else:
+                raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
+                #return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
+        #check the right pole
+        keyName= 'concern_'+ str((i + 1)) + '_right'
+        if not request.POST.has_key(keyName):
+            print 'Error key not found: ' + keyName
+            raise KeyError('Invalid request, request is missing argument(s)')
+            #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
+        else:
+            #the right and left pole can be None so convert the empty string into None
+            rightPole= request.POST[keyName].strip()
+            if rightPole == '':
+                rightPole= None
+            #the names of the left and right pole should be unique in a grid, so lets check for that. If the right pole is none, allow it to be saved
+            if not rightPole in usedConcernNames or rightPole == None:
+                usedConcernNames.append(rightPole)
+            else:
+                raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
+                #return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
+        #if it is a response grid of the alternative.concern we don't need to check for the weights as they will not be there
+        if not isConcernAlternativeResponseGrid:
+            #lets check if the weight key is present
+            keyName= 'weight_concern'+ str((i + 1))
+            if not request.POST.has_key(keyName):
+                print 'Error key not found: ' + keyName
+                raise KeyError('Invalid request, request is missing argument(s)')
+                #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
+            else:
+                #allowed values for the values are None, '', ' ' and numbers
+                keyValue= request.POST[keyName]
+                if not (keyValue == None or keyValue == ' ' or keyValue == ''): 
+                    try:
+                        value= float(keyValue)
+                        concernValues.append((leftPole, rightPole, value))
+                    except:
+                        raise ValueError("Invalid input " + keyValue)
+                        #return HttpResponse(createXmlErrorResponse("Invalid input " + keyValue), content_type='application/xml')
+                else:
+                    concernValues.append((leftPole, rightPole, None)) 
+        else:
+            concernValues.append((leftPole, rightPole, None))
+        i+= 1
+    i= 0
+    
+    #we are going to check the ratios now, because the response grid for the alternative/concern doesn't have ratios we don't need to check for them
+    if not isConcernAlternativeResponseGrid:
         i= 0
         j= 0
-        nAlternatives= int(request.POST['nAlternatives'])
-        nConcerns= int(request.POST['nConcerns'])
-        
-        #check if the keys with the alternatives are present
-        while i < nAlternatives:
-            keyName= 'alternative_' + str((i + 1)) + '_name'
-            if not request.POST.has_key(keyName):
-                return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
-            else:
-                #alternative names should be unique in a grid, so lets check for that
-                temp= request.POST[keyName].strip()
-                if temp != '':
-                    if not temp in alternativeValues:
-                        alternativeValues.append(temp)
-                    else:
-                        return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"))
-                else:
-                    return HttpResponse(createXmlErrorResponse("No empty values are allowed for alternatives"), content_type='application/xml') 
-            i+= 1
-        
-        i= 0
-        #check if all the keys for the left and right pole are present
+        hasEmptyConcern= False;
         while i < nConcerns:
-            leftPole= None
-            rightPole= None
-            #check the left pole first
-            keyName= 'concern_'+ str((i + 1)) + '_left'
-            if not request.POST.has_key(keyName):
-                return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
+            ratios= []
+            #it is not allowed to have rations in an concern that has no leftPole or rightPole
+            if concernValues[i][0] != None and concernValues[i][1] != None:
+                hasEmptyConcern= False
             else:
-                #the right and left pole can be None so convert the empty string into None
-                leftPole= request.POST[keyName]
-                if leftPole == '':
-                    leftPole= None
-                #the names of the left and right pole should be unique in a grid, so lets check for that. If the left pole is none, allow it to be saved
-                if not leftPole in usedConcernNames or leftPole == None:
-                    usedConcernNames.append(leftPole)
-                else:
-                    return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
-            #check the right pole
-            keyName= 'concern_'+ str((i + 1)) + '_right'
-            if not request.POST.has_key(keyName):
-                return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
-            else:
-                #the right and left pole can be None so convert the empty string into None
-                rightPole= request.POST[keyName].strip()
-                if rightPole == '':
-                    rightPole= None
-                #the names of the left and right pole should be unique in a grid, so lets check for that. If the right pole is none, allow it to be saved
-                if not rightPole in usedConcernNames or rightPole == None:
-                    usedConcernNames.append(rightPole)
-                else:
-                    return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
-            #if it is a response grid of the alternative.concern we don't need to check for the weights as they will not be there
-            if not isConcernAlternativeResponseGrid:
-                #lets check if the weight key is present
-                keyName= 'weight_concern'+ str((i + 1))
+                hasEmptyConcern= True
+            while j < nAlternatives:
+                keyName= 'ratio_concer' + str((i + 1)) +'_alternative' + str(( j + 1))
                 if not request.POST.has_key(keyName):
-                    return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
+                    print 'Error key not found: ' + keyName
+                    raise KeyError('Invalid request, request is missing argument(s)')
+                    #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
                 else:
-                    #allowed values for the values are None, '', ' ' and numbers
-                    keyValue= request.POST[keyName]
-                    if not (keyValue == None or keyValue == ' ' or keyValue == ''): 
-                        try:
-                            value= float(keyValue)
-                            concernValues.append((leftPole, rightPole, value))
-                        except:
-                            return HttpResponse(createXmlErrorResponse("Invalid input " + keyValue), content_type='application/xml')
-                    else:
-                        concernValues.append((leftPole, rightPole, None)) 
-            else:
-                concernValues.append((leftPole, rightPole, None))
-            i+= 1
-        i= 0
-        
-        #we are going to check the ratios now, because the response grid for the alternative/concern doesn't have ratios we don't need to check for them
-        if not isConcernAlternativeResponseGrid:
-            i= 0
-            j= 0
-            hasEmptyConcern= False;
-            while i < nConcerns:
-                ratios= []
-                #it is not allowed to have rations in an concern that has no leftPole or rightPole
-                if concernValues[i][0] != None and concernValues[i][1] != None:
-                    hasEmptyConcern= False
-                else:
-                    hasEmptyConcern= True
-                while j < nAlternatives:
-                    keyName= 'ratio_concer' + str((i + 1)) +'_alternative' + str(( j + 1))
-                    if not request.POST.has_key(keyName):
-                        return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
-                    else:
-                        keyValue= request.POST[keyName].strip()
-                        #valid values for the they are None, ' ', '' and numbers, anything else is not allowed
-                        if not (keyValue == None or keyValue == ''):
-                            if hasEmptyConcern:
-                                return HttpResponse(createXmlErrorResponse('It is not allowed to have ratings while the concern is empty'), content_type='application/xml')
-                            else:
-                                try:
-                                    value= float(keyValue)
-                                    ratios.append(value)
-                                except:
-                                    return HttpResponse(createXmlErrorResponse("Invalid value: " + keyValue), content_type='application/xml')
+                    keyValue= request.POST[keyName].strip()
+                    #valid values for the they are None, ' ', '' and numbers, anything else is not allowed
+                    if not (keyValue == None or keyValue == ''):
+                        if hasEmptyConcern:
+                            raise ValueError('It is not allowed to have ratings while the concern is empty')
+                            #return HttpResponse(createXmlErrorResponse('It is not allowed to have ratings while the concern is empty'), content_type='application/xml')
                         else:
-                            ratios.append(None)
-                    j+= 1
-                ratioValues.append(ratios)
-                j= 0
-                i+= 1
-        return (nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues)
-    except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
-        return HttpResponse(createXmlErrorResponse("Request could not be processed, invalid argument(s)"), content_type='application/xml')
+                            try:
+                                value= float(keyValue)
+                                ratios.append(value)
+                            except:
+                                raise ValueError("Invalid value: " + keyValue)
+                                #return HttpResponse(createXmlErrorResponse("Invalid value: " + keyValue), content_type='application/xml')
+                    else:
+                        ratios.append(None)
+                j+= 1
+            ratioValues.append(ratios)
+            j= 0
+            i+= 1
+    return (nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues)
+    
     
 def __createDendogram__(gridObj):
  
