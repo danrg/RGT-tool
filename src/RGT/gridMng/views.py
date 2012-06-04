@@ -261,16 +261,22 @@ def ajaxGetGrid(request):
     # false: will not call the javascript function isTableSaved()#
     ##############################################################
     
-    #validate the options
-    gridUSID= request.REQUEST['gridUSID']
-    viewMode= request.REQUEST['viewMode']
-    writeMode= request.REQUEST['writeMode']
-    
     checkForTableIsSave= False
     changeRatingsWeights= False
     changeCornAlt= False
     showRatingWhileFalseChangeRatingsWeights= True
     error= None;
+    
+    #validate the options
+    gridUSID = None
+    viewMode = None
+    writeMode = None
+    try:
+        gridUSID= request.REQUEST['gridUSID']
+        viewMode= request.REQUEST['viewMode']
+        writeMode= request.REQUEST['writeMode']
+    except KeyError:
+        error = 'Invalid arguments.'
     
     #variable check
     try:
@@ -626,6 +632,7 @@ def ajaxSaveSvgPage(request):
 def ajaxConvertSvgTo(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
+    fpInMemory = None
     try:
         if request.POST.has_key('data') and request.POST.has_key('fileName') and request.POST.has_key('convertTo'):
             if request.POST['convertTo'] == 'svg':
@@ -684,7 +691,7 @@ def ajaxConvertSvgTo(request):
             errorImageData= getImageError()
             # send the file
             response = HttpResponse(errorImageData, content_type= 'image/jpg')
-            response['Content-Length'] = fpInMemory.tell()
+            response['Content-Length'] = fpInMemory.tell() if fpInMemory else None
             response['Content-Disposition'] = 'attachment; filename=error.jpg'
             return response 
     except:
@@ -695,7 +702,7 @@ def ajaxConvertSvgTo(request):
         errorImageData= getImageError()
         # send the file
         response = HttpResponse(errorImageData, content_type= 'image/jpg')
-        response['Content-Length'] = fpInMemory.tell()
+        response['Content-Length'] = fpInMemory.tell() if fpInMemory else None
         response['Content-Disposition'] = 'attachment; filename=error.jpg'
         return response         
     

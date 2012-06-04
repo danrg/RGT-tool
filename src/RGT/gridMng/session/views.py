@@ -280,7 +280,7 @@ def ajaxJoinSession(request):
             print '-'*60
             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
     else:
-        return HttpResponse(createXmlErrorResponse(error))
+        return HttpResponse(createXmlErrorResponse(error), content_type='application/xml')
 
 def ajaxChangeSessionState(request):
     if not request.user.is_authenticated():

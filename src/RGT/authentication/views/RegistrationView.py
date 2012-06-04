@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from RGT.authentication.EmailService import EmailService
 from RGT.gridMng import utility
+from django.conf import settings
 from RGT.authentication.forms import RegistrationForm
 from RGT.authentication.views.CaptchaSecuredFormView import CaptchaSecuredFormView
 
@@ -26,6 +27,8 @@ class RegistrationView(CaptchaSecuredFormView):
         user = User.objects.create_user(email, email, password);
         user.first_name = firstName
         user.last_name = lastName
+        if settings.EMAIL_VERIFICATION:
+            user.is_active = False
         user.save();
 
         #login the user after creation
