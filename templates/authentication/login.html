@@ -12,7 +12,6 @@
 <form action="/auth/login/" method="post" id="form">
     {% csrf_token %}
     <div id="loginForm">
-        {{ form.non_field_errors }}
         {% for field in form %}
             {{ field.label_tag }}
             {{ field }}
@@ -20,6 +19,7 @@
                 <div class="error">{{error}}</div>
             {% endfor %}
         {% endfor %}
+        <div class="error">{{ form.non_field_errors }}</div>
     </div>
 	<input type="submit" value="Login"/> 
 </form>
