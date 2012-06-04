@@ -1,6 +1,5 @@
 # Django settings for RGT project.
 import os
-from ownsettings import *
 
 projectPath = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../'))
 
@@ -177,3 +176,5 @@ LOGGING = {
 # authentication backend settings
 AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend', 'RGT.authentication.backendAuthentication.BackendAuthentication')
 AUTH_PROFILE_MODULE = 'userProfile.UserProfile'
+
+from ownsettings import *
