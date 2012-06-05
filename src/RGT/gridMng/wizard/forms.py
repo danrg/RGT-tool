@@ -1,8 +1,8 @@
 from django import forms
 
 class GeneralsForm(forms.Form):
-    topic = forms.CharField()
-    alternatives = forms.BooleanField(required=False)
+    grid_name = forms.CharField()
+    description = forms.CharField(widget=forms.Textarea, required=False)
     
 class AlternativesForm(forms.Form):
     alternative = forms.CharField()
