@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+	RGT | Grids - Wizard
+{% endblock %}
+
+{% block content %}
+{% if not user.is_active %}
+	<div id="verify-message">
+		<p>Please verify your email in order to use this part of the application! Thank you!</p>
+	</div>
+{% else %}
+	<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
+	<form action="" method="post">{% csrf_token %}
+	<table>
+	{{ wizard.management_form }}
+	{% if wizard.form.forms %}
+	    {{ wizard.form.management_form }}
+	    {% for form in wizard.form.forms %}
+	        {{ form }}
+	    {% endfor %}
+	{% else %}
+	    {{ wizard.form }}
+	{% endif %}
+	</table>
+	{% if wizard.steps.prev %}
+	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">first step</button>
+	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">prev step</button>
+	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.next }}">next step</button>
+	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.last }}">last step</button>
+	{% endif %}
+	<input type="submit" value="submit"/>
+	</form>
+{% endif %}
+{% endblock %}
