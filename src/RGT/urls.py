@@ -1,20 +1,10 @@
 from django.conf.urls.defaults import patterns, include, url
-# Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 from authentication.views import *
-
 
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'RGT.views.home', name='home'),
-    # url(r'^RGT/', include('RGT.foo.urls')),
-
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'RGT.views.home'),
     #url(r'^$', 'RGT.applicationForm.views.showAppForm'),
@@ -25,7 +15,6 @@ urlpatterns = patterns('',
     url(r'^auth/login/', LoginView.as_view()),
     url(r'^auth/logout/', LogoutRedirectView.as_view()),
     url(r'^auth/verify/(?P<verifyEmailCode>[A-Za-z0-9]+)/$', 'RGT.authentication.registration.views.verify'),
-    #url(r'^accounts/forgot/$', 'RGT.authentication.forgotPassword.views.forgotPass'),
     url(r'^accounts/forgot/$', ForgotPasswordView.as_view()),
     url(r'^accounts/recover/$', 'RGT.authentication.recoverPassword.views.recoverPass'),
     url(r'^accounts/recover/(?P<passRecoverCode>[A-Za-z0-9]+)/$', 'RGT.authentication.recoverPassword.views.recoverPass'),
