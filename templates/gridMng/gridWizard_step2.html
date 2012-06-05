@@ -4,6 +4,35 @@
 	RGT | Grids - Wizard
 {% endblock %}
 
+{% block onloadJavascript %}
+    $('#btnAdd').click(function() {
+    var num     = $('.clonedInput').length; // how many "duplicatable" input fields we currently have
+    var newNum  = new Number(num + 1);      // the numeric ID of the new input field being added
+
+    // update count of alternatives
+    $('#numAlternatives').val(newNum);
+
+    // create the new element via clone(), and manipulate it's ID using newNum value
+    var newElem = $('#input' + num).clone().attr('id', 'input' + newNum);
+
+    // edit label to reference to the correct input field
+    newElem.children(':first').attr('for', 'alternative' + newNum);
+
+    // manipulate the name/id values of the input inside the new element
+    newElem.children(':nth-child(2)').attr('id', 'alternative' + newNum).attr('name', 'alternative' + newNum).val("");
+
+    // insert the new element after the last "duplicatable" input field
+    $('#input' + num).after(newElem);
+
+    // enable the "remove" button
+    //$('#btnDel').attr('disabled','');
+
+    // business rule: you can only add 5 names
+    //if (newNum == 5)
+    //$('#btnAdd').attr('disabled','disabled');
+    });
+{% endblock%}
+
 {% block content %}
 {% if not user.is_active %}
 	<div id="verify-message">
@@ -12,17 +41,18 @@
 {% else %}
 	<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
 	<form action="" method="post">{% csrf_token %}
-	<table>
-	{{ wizard.management_form }}
-	{% if wizard.form.forms %}
-	    {{ wizard.form.management_form }}
-	    {% for form in wizard.form.forms %}
-	        {{ form }}
-	    {% endfor %}
-	{% else %}
-	    {{ wizard.form }}
-	{% endif %}
-	</table>
+        {{ wizard.management_form }}
+        <label for="alternative">Alternative:</label>
+        <input type="text" name="alternative" id="alternative" />
+
+        <input type="hidden" id="numAlternatives" name="numAlternatives" value="1"/>
+        <div id="input1" style="margin-bottom:4px;" class="clonedInput">
+            <label for="alternative1">Alternative:</label>
+            <input type="text" name="alternative1" id="alternative1" />
+        </div>
+
+        <input type="button" id="btnAdd" value="Add another alternative" />
+
 	{% if wizard.steps.prev %}
 	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">first step</button>
 	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">prev step</button>
