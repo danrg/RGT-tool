@@ -13,3 +13,7 @@ def home(request):
                       {'firstName': request.user.first_name, 'verifiedEmail': profile.verifiedEmail})
 
     return redirect_to(request, '/auth/login/', permanent=False)
+
+def help(request, helpMessageId = ''):
+    # Return AJAX response
+    pass
