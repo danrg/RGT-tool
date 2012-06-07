@@ -1,5 +1,4 @@
 from django import forms
-from django.forms.fields import CharField
 
 class GeneralsForm(forms.Form):
     grid_name = forms.CharField()
@@ -11,13 +10,16 @@ class AlternativesForm(forms.Form):
         super(AlternativesForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
             for x in range(int(self.data['numAlternatives'])):
-                alternativeName = 'alternative%d' % (x+1);
-                self.fields[alternativeName] = CharField()
-                print self.data[alternativeName]
-            pass
-
-
-    alternative = forms.CharField()
+                alternativeName = 'alternative%d' % (x+1)
+                value = 'alternative%d'%(x+1)
+                # after the first time of submitting the form, Django adds '1-' prefix to
+                # the alternatives names, and thats why the names are checked, in order to get
+                # the data of the form.data with the correct key.
+                if '1-%s' % alternativeName in self.data.keys():
+                    value = '1-alternative%d'%(x+1)
+                # every time alternative fields are added with the name 'alternative..'
+                self.fields[alternativeName] = forms.CharField(
+                            widget=forms.TextInput()) #attrs={'value':self.data[value]}
     
 class ConcernsForm(forms.Form):
     concern = forms.CharField()
