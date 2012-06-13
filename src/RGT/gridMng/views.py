@@ -12,7 +12,6 @@ from RGT.gridMng.models import Concerns
 from RGT.gridMng.models import Ratings
 from RGT.gridMng.models import Facilitator
 from RGT.gridMng.models import Session
-from RGT.gridMng.models import ResponseGrid
 from RGT.gridMng.utility import createXmlErrorResponse, createXmlSuccessResponse, randomStringGenerator, validateName, convertSvgTo, getImageError,\
     createDateTimeTag
 from RGT.gridMng.hierarchical import hcluster, drawDendogram2, transpose, drawDendogram3
@@ -60,164 +59,69 @@ def getCreateMyGridPage(request):
         return HttpResponse(createXmlErrorResponse('unknown error'), content_type='application/xml')
 
 #extraXmlData is only added if the response is a success
-def ajaxCreateGrid(request, extraXmlData= None):
+def ajaxCreateGrid(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
 
     if request.method == 'POST':
         
-        for key in request.REQUEST.keys():
-            print 'key: ' + key + ' values: ' + request.REQUEST[key]
-        print '------'
+        #for key in request.REQUEST.keys():
+        #    print 'key: ' + key + ' values: ' + request.REQUEST[key]
+        #print '------'
         
-        gridObj= None
+        gridType= None
         userObj= request.user
-        sessionIteration= -1
-        sessionObj= None;
-        isResponseGrid= False
         isConcernAlternativeResponseGrid= False
         #check the if the inputs are correct
         if request.POST.has_key('nAlternatives') and request.POST.has_key('nConcerns'): #and request.POST.has_key('gridName')
             if request.POST.has_key('gridType'):
                 if request.POST['gridType'] == 'response':
-                    if request.POST.has_key('sessionUSID') and request.POST.has_key('iteration'):
-                        userObj= request.user
-                        #check if user can answer to the session
-                        sessionObj= Session.objects.filter(usid= request.POST['sessionUSID'])
-                        if len(sessionObj) >= 1:
-                            sessionObj= sessionObj[0]
-                            userSessionRelation= userObj.userparticipatesession_set.filter(session= sessionObj)
-                            if len(userSessionRelation) >= 1:
-                                sessionIteration= int(request.POST['iteration'])
-                                if sessionObj.iteration == sessionIteration:
-                                    if sessionObj.state.name == State.AC or sessionObj.state.name == State.RW:
-                                        if sessionObj.state.name == State.AC:
-                                            gridObj= Grid(grid_type= Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN);
-                                            isResponseGrid= True
-                                            isConcernAlternativeResponseGrid= True
-                                        elif sessionObj.state.name == State.RW:
-                                            gridObj= Grid(grid_type= Grid.GridType.RESPONSE_GRID_RATING_WEIGHT);
-                                            isResponseGrid= True
-                                    else:
-                                        return HttpResponse(createXmlErrorResponse('Can\'t create response grid, session is in a state where that is not permitted'), content_type='application/xml')
-                                else:
-                                    return HttpResponse(createXmlErrorResponse('Can\'t create response grid, response iteration does not match current session iteration'), content_type='application/xml')
-                            else:
-                                return HttpResponse(createXmlErrorResponse('You are not participating in the session, can\'t send response grid'), content_type='application/xml')
-                        else:
-                            return HttpResponse(createXmlErrorResponse('Session was not found'), content_type='application/xml')
-                    else:
-                        return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml') 
+                    return HttpResponse(createXmlErrorResponse("Invalid request, unsupported operation"), content_type='application/xml') 
                 elif request.POST['gridType'] == 'user':
-                    gridObj= Grid(user= userObj, grid_type= Grid.GridType.USER_GRID)
+                    gridType= Grid.GridType.USER_GRID
                 else:
                     return HttpResponse(createXmlErrorResponse("Unsupported grid type"), content_type='application/xml')
             else:
                 #if the gridType key is not found assume it is a user grid
-                gridObj= Grid(user= userObj, grid_type= Grid.GridType.USER_GRID)
+                gridType= Grid.GridType.USER_GRID
         else:
             return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
-        
-        #try:
-        #    gridObj= Grid.objects.get(user= user1, name= gridName)
-        #except:
-        #    pass
-        if gridObj != None:
-            #lets validate the data, this needs to be done before we start creating the db objects because django will save the objects even if we don't ask to save it
-            nConcerns= None
-            nAlternatives= None
-            concernValues= None
-            alternativeValues= None
-            ratioValues= None
-            obj= None
-            try:                
-                obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
-            except KeyError as error:
-                print "Exception in user code:"
-                print '-'*60
-                traceback.print_exc(file=sys.stdout)
-                print '-'*60
-                return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
-            except ValueError as error:
-                print "Exception in user code:"
-                print '-'*60
-                traceback.print_exc(file=sys.stdout)
-                print '-'*60
-                return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
-            except:
-                print "Exception in user code:"
-                print '-'*60
-                traceback.print_exc(file=sys.stdout)
-                print '-'*60
-                return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
-            nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj
-            try:
-                if request.POST.has_key('gridName'):
-                    result= validateName(request.POST['gridName'])
-                    if  type(result) == StringType:
-                        gridObj.name= result
-                    else:
-                        return result
-                
-                gridObj.usid = randomStringGenerator(20)
-                gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
-                #gridObj.dateTime = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-                gridObj.save()
-                #gridObj= Grid.objects.create(user= userObj, name= gridName)
-                #print 'nAlternatives: ' + str(nAlternatives)
-                
-                alternatives= []
-                concerns= []
-                i= 0
-                
-                while i < nAlternatives:
-                    alternative= Alternatives.objects.create(grid= gridObj, name= alternativeValues[i])
-                    alternatives.append(alternative)
-                    i+= 1
-                    
-                i= 0
-                while i < nConcerns:
-                    concern= Concerns.objects.create(grid= gridObj, leftPole= concernValues[i][0], rightPole= concernValues[i][1], weight= concernValues[i][2])
-                    concerns.append(concern)
-                    i+= 1
-                i= 0
-                j= 0
-                if not isConcernAlternativeResponseGrid:
-                    while i < nConcerns:
-                        while j < nAlternatives:
-                            Ratings.objects.create(concern= concerns[i], alternative= alternatives[j], rating= ratioValues[i][j])
-                            j+= 1
-                        i+= 1
-                        j= 0
-                #ok, the grid was created now if the grid is a response grid, add it to the ResponseGrid table
-                if isResponseGrid:
-                    gridResponseRelation=  ResponseGrid(grid= gridObj, session= sessionObj, iteration= sessionIteration, user= userObj)
-                    gridResponseRelation.save()
-                    
-                    #check if we need to pass extra data into the xml success response
-                    if extraXmlData == None:
-                        return HttpResponse(createXmlSuccessResponse('Grid created successfully.', createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
-                    else:
-                        extraDataToUse= None
-                        if isinstance(extraXmlData, list):
-                            extraXmlData.append(createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-                            extraDataToUse= extraXmlData
-                        else:
-                            extraDataToUse= [extraXmlData, createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))]
-                        return HttpResponse(createXmlSuccessResponse('Grid created successfully.', extraDataToUse), content_type='application/xml')
-            except:
-                try:
-                    gridObj.delete()
-                except:
-                    print 'Could not delete the grid'
-                print "Exception in user code:"
-                print '-'*60
-                traceback.print_exc(file=sys.stdout)
-                print '-'*60
-                return HttpResponse(createXmlErrorResponse("Could not create grid."), content_type='application/xml')
-        else:
+
+        #lets validate the data
+        try:                
+            obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
+        except KeyError as error:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+        except ValueError as error:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+        except:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+            return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+        nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj
+        gridName= None
+        if request.POST.has_key('gridName'):
+            result= validateName(request.POST['gridName'])
+            if  type(result) == StringType:
+                gridName= result
+            else:
+                return result
+        try:
+            createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, True)
+        except:
             #return render_to_response('gridMng/createGrid.html', {'existingProjectName': request.REQUEST['grid']}, context_instance=RequestContext(request))
-            return HttpResponse(createXmlErrorResponse("Could not create grid."), content_type='application/xml') 
+            return HttpResponse(createXmlErrorResponse("Could not create grid."), content_type='application/xml')
+    #return an empty grid page
     return getCreateMyGridPage(request)
 
 
@@ -368,23 +272,7 @@ def ajaxUpdateGrid(request):
             else:
                 return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
         elif gridType == 'response':
-            if request.POST.has_key('sessionUSID') and request.POST.has_key('iteration'):
-                sessionObj= Session.objects.filter(usid= request.POST['sessionUSID'])
-                if len(sessionObj) >= 1:
-                    sessionObj= sessionObj[0]
-                    sessionIteration= int(request.POST['iteration'])
-                    if sessionIteration == sessionObj.iteration:
-                        responseGridRelation= request.user.responsegrid_set.filter(session= sessionObj, iteration= sessionIteration)
-                        if len(responseGridRelation) >= 1:
-                            gridObj= responseGridRelation[0].grid
-                            if gridObj.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
-                                isConcernAlternativeResponseGrid= True
-                    else:
-                        return HttpResponse(createXmlErrorResponse("Can't update grid, session is in a state where that is not permitted"), content_type='application/xml') 
-                else:
-                    return HttpResponse(createXmlErrorResponse("Session was not found"), content_type='application/xml')
-            else:
-                return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
+            return HttpResponse(createXmlErrorResponse("Invalid request, unsupported operation"), content_type='application/xml')
         elif gridType == 'user':
             gridObj= Grid.objects.get(user= user1, usid= request.POST['gridUSID'])
     else:
@@ -423,154 +311,22 @@ def ajaxUpdateGrid(request):
         print '-'*60
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
     nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj     
-        
-    if gridObj != None:
-        try:
-            valuesChanged= None #use to check if we need to clear the dendogram field in the Grid model
-            objToCommit= []
-            totalConcenrs= gridObj.concerns_set.all().count()
-            totalAlternatives= gridObj.alternatives_set.all().count()
-            alternatives= []
-            concerns= []
-               
-            for obj in gridObj.alternatives_set.all():
-                alternatives.append(obj)
-                
-            for obj in gridObj.concerns_set.all():
-                concerns.append(obj)
-                
-            i= 0;
-            j= 0;
-                
-            #remove the concerns and alternatives first, this is because we want to avoid any type of database errors
-            if nConcerns < totalConcenrs:
-                valuesChanged= 1
-                i= totalConcenrs - nConcerns
-                while i > 0:
-                    concern1= concerns.pop()
-                    concern1.delete()
-                    i-= 1
-            if nAlternatives < totalAlternatives:
-                valuesChanged= 1
-                i= totalAlternatives - nAlternatives
-                while i > 0:
-                    alternative1= alternatives.pop()
-                    alternative1.delete()
-                    i-= 1
-                
-            i= 0
-            #lets update what we have
-            #lets check what changed with the concerns first
-            while i < nConcerns and i < totalConcenrs:
-                #check if the name of the concern is the same
-                if concerns[i].leftPole != concernValues[i][0] or concerns[i].rightPole != concernValues[i][1]:
-                    concern1= concerns[i]
-                    concern1.leftPole= concernValues[i][0]
-                    concern1.rightPole= concernValues[i][1]
-                    if not valuesChanged:
-                        valuesChanged= 1
-                    objToCommit.append(concern1)
-                #check if the weight didn't change only if the grid is not an response grid from alternative/concerns as it doesn't have weights or ratios
-                if not isConcernAlternativeResponseGrid:
-                    newWeight= concernValues[i][2]
-                    if concerns[i].weight != newWeight :
-                        concern1= concerns[i]
-                        concern1.weight= newWeight
-                        if not valuesChanged:
-                            valuesChanged= 1
-                        objToCommit.append(concern1)
-                i+= 1
-            i= 0
-            #check if the names are the same
-            while i < nAlternatives and i < totalAlternatives:
-                if alternatives[i].name != alternativeValues[i]:
-                    alternatives[i].name= alternativeValues[i]
-                    if not valuesChanged:
-                        valuesChanged= 1
-                    objToCommit.append(alternatives[i])
-                i+= 1
-            i= 0
-            j= 0
-            #the alternative/concern response grid has no ratios, so just ignore it
-            if not isConcernAlternativeResponseGrid:
-                while i < nConcerns and i < totalConcenrs:
-                    while j < nAlternatives and j < totalAlternatives:
-                        newValue= ratioValues[i][j]
-                        #if request.POST.has_key('ratio_concer' + str(i + 1) + '_alternative' + str(j + 1)):
-                            #newValue= float(request.POST['ratio_concer' + str(i + 1) + '_alternative' + str(j + 1)]) 
-                        ratingObjList= Ratings.objects.filter(concern= concerns[i], alternative= alternatives[j])
-                        if (len(ratingObjList) > 0):
-                            ratingObj = ratingObjList[0]
-                        # check to see if the rating had a value before, if not create the new value
-                        if newValue != ratingObj.rating:
-                            #update values here
-                            ratingObj.rating= newValue
-                            objToCommit.append(ratingObj)
-                            if not valuesChanged:
-                                valuesChanged= 1
-                        j+= 1
-                    i+= 1
-                    j= 0
-                
-            #now lets take care of adding stuff
-            if nConcerns > totalConcenrs:
-                valuesChanged= 1
-                i= totalConcenrs
-                j= 0
-                while i < nConcerns:
-                    concern= Concerns.objects.create(grid= gridObj, leftPole= concernValues[i][0], rightPole= concernValues[i][1], weight= concernValues[i][2])
-                    objToCommit.append(concern)
-                    concerns.append(concern)
-                    if not isConcernAlternativeResponseGrid:
-                        #create ratios for the concern, ratios will be created only for the old known alternatives
-                        while j < totalAlternatives:
-                            rate= Ratings(concern= concerns[i], alternative= alternatives[j], rating= ratioValues[i][j])
-                            objToCommit.append(rate)
-                            j+= 1
-                        j= 0
-                    i+= 1
-            #here we know if we had more concerns it has already been added to the concern list, thus totalConcenrs == nConcerns now.
-            if nAlternatives > totalAlternatives:
-                valuesChanged= 1
-                i= 0;
-                j= totalAlternatives
-                #lets create the new alternatives
-                while i < (nAlternatives - totalAlternatives):
-                    #print request.REQUEST['alternative_' + str((totalAlternatives + i + 1)) + '_name']
-                    alternative= Alternatives.objects.create(grid= gridObj, name= alternativeValues[i + totalAlternatives])
-                    objToCommit.append(alternative)
-                    alternatives.append(alternative)
-                    i+= 1
-                i= 0
-                #create the ratios
-                if not isConcernAlternativeResponseGrid:
-                    while i < nConcerns:
-                        while j < nAlternatives:
-                            rate= Ratings(concern= concerns[i], alternative= alternatives[j], rating= ratioValues[i][j])
-                            objToCommit.append(rate);
-                            j+= 1
-                        j= totalAlternatives
-                        i+= 1
-            if valuesChanged:
-                gridObj.dendogram= ''
-                #check to see if the grid obj is already schedule to be saved
-                if not (gridObj in objToCommit):
-                    objToCommit.append(gridObj)
-            #now that all went ok commit the changes (except delete as that one is done when the function is called)
-            for obj in objToCommit:
-                obj.save()
-            gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
-            gridObj.save()
-            return HttpResponse(createXmlSuccessResponse('Grid was saved', createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
+    
+    #update the grid
+    if gridObj != None: 
+        try:   
+            isGridCreated= updateGrid(gridObj , nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, isConcernAlternativeResponseGrid)
+            if isGridCreated:
+                return HttpResponse(createXmlSuccessResponse('Grid was saved', createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
         except:
             print "Exception in user code:"
             print '-'*60
             traceback.print_exc(file=sys.stdout)
             print '-'*60
-            return HttpResponse(createXmlErrorResponse("unknown error"), content_type='application/xml')
+            return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
     else:
         return HttpResponse(createXmlErrorResponse("No grid found"), content_type='application/xml')
-        
+    
 def ajaxDeleteGrid(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
@@ -973,3 +729,197 @@ def __createDendogram__(gridObj):
         traceback.print_exc(file=sys.stdout)
         print '-'*60
         raise Exception('Unknown error, couldn\'t create the dendogram')
+
+#intern function used to update a grid
+def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, isConcernAlternativeResponseGrid):
+    if gridObj != None:
+        valuesChanged= None #use to check if we need to clear the dendogram field in the Grid model
+        objToCommit= []
+        totalConcenrs= gridObj.concerns_set.all().count()
+        totalAlternatives= gridObj.alternatives_set.all().count()
+        alternatives= []
+        concerns= []
+           
+        for obj in gridObj.alternatives_set.all():
+            alternatives.append(obj)
+            
+        for obj in gridObj.concerns_set.all():
+            concerns.append(obj)
+            
+        i= 0;
+        j= 0;
+            
+        #remove the concerns and alternatives first, this is because we want to avoid any type of database errors
+        if nConcerns < totalConcenrs:
+            valuesChanged= 1
+            i= totalConcenrs - nConcerns
+            while i > 0:
+                concern1= concerns.pop()
+                concern1.delete()
+                i-= 1
+        if nAlternatives < totalAlternatives:
+            valuesChanged= 1
+            i= totalAlternatives - nAlternatives
+            while i > 0:
+                alternative1= alternatives.pop()
+                alternative1.delete()
+                i-= 1
+            
+        i= 0
+        #lets update what we have
+        #lets check what changed with the concerns first
+        while i < nConcerns and i < totalConcenrs:
+            #check if the name of the concern is the same
+            if concerns[i].leftPole != concernValues[i][0] or concerns[i].rightPole != concernValues[i][1]:
+                concern1= concerns[i]
+                concern1.leftPole= concernValues[i][0]
+                concern1.rightPole= concernValues[i][1]
+                if not valuesChanged:
+                    valuesChanged= 1
+                objToCommit.append(concern1)
+            #check if the weight didn't change only if the grid is not an response grid from alternative/concerns as it doesn't have weights or ratios
+            if not isConcernAlternativeResponseGrid:
+                newWeight= concernValues[i][2]
+                if concerns[i].weight != newWeight :
+                    concern1= concerns[i]
+                    concern1.weight= newWeight
+                    if not valuesChanged:
+                        valuesChanged= 1
+                    objToCommit.append(concern1)
+            i+= 1
+        i= 0
+        #check if the names are the same
+        while i < nAlternatives and i < totalAlternatives:
+            if alternatives[i].name != alternativeValues[i]:
+                alternatives[i].name= alternativeValues[i]
+                if not valuesChanged:
+                    valuesChanged= 1
+                objToCommit.append(alternatives[i])
+            i+= 1
+        i= 0
+        j= 0
+        #the alternative/concern response grid has no ratios, so just ignore it
+        if not isConcernAlternativeResponseGrid:
+            while i < nConcerns and i < totalConcenrs:
+                while j < nAlternatives and j < totalAlternatives:
+                    newValue= ratioValues[i][j]
+                    #if request.POST.has_key('ratio_concer' + str(i + 1) + '_alternative' + str(j + 1)):
+                        #newValue= float(request.POST['ratio_concer' + str(i + 1) + '_alternative' + str(j + 1)]) 
+                    ratingObjList= Ratings.objects.filter(concern= concerns[i], alternative= alternatives[j])
+                    if (len(ratingObjList) > 0):
+                        ratingObj = ratingObjList[0]
+                    # check to see if the rating had a value before, if not create the new value
+                    if newValue != ratingObj.rating:
+                        #update values here
+                        ratingObj.rating= newValue
+                        objToCommit.append(ratingObj)
+                        if not valuesChanged:
+                            valuesChanged= 1
+                    j+= 1
+                i+= 1
+                j= 0
+            
+        #now lets take care of adding stuff
+        if nConcerns > totalConcenrs:
+            valuesChanged= 1
+            i= totalConcenrs
+            j= 0
+            while i < nConcerns:
+                concern= Concerns.objects.create(grid= gridObj, leftPole= concernValues[i][0], rightPole= concernValues[i][1], weight= concernValues[i][2])
+                objToCommit.append(concern)
+                concerns.append(concern)
+                if not isConcernAlternativeResponseGrid:
+                    #create ratios for the concern, ratios will be created only for the old known alternatives
+                    while j < totalAlternatives:
+                        rate= Ratings(concern= concerns[i], alternative= alternatives[j], rating= ratioValues[i][j])
+                        objToCommit.append(rate)
+                        j+= 1
+                    j= 0
+                i+= 1
+        #here we know if we had more concerns it has already been added to the concern list, thus totalConcenrs == nConcerns now.
+        if nAlternatives > totalAlternatives:
+            valuesChanged= 1
+            i= 0;
+            j= totalAlternatives
+            #lets create the new alternatives
+            while i < (nAlternatives - totalAlternatives):
+                #print request.REQUEST['alternative_' + str((totalAlternatives + i + 1)) + '_name']
+                alternative= Alternatives.objects.create(grid= gridObj, name= alternativeValues[i + totalAlternatives])
+                objToCommit.append(alternative)
+                alternatives.append(alternative)
+                i+= 1
+            i= 0
+            #create the ratios
+            if not isConcernAlternativeResponseGrid:
+                while i < nConcerns:
+                    while j < nAlternatives:
+                        rate= Ratings(concern= concerns[i], alternative= alternatives[j], rating= ratioValues[i][j])
+                        objToCommit.append(rate);
+                        j+= 1
+                    j= totalAlternatives
+                    i+= 1
+        if valuesChanged:
+            gridObj.dendogram= ''
+            #check to see if the grid obj is already schedule to be saved
+            if not (gridObj in objToCommit):
+                objToCommit.append(gridObj)
+        #now that all went ok commit the changes (except delete as that one is done when the function is called)
+        for obj in objToCommit:
+            obj.save()
+        gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
+        gridObj.save()
+        return True
+    else:
+        raise ValueError('GridObj was None')
+    
+#this function will create and save a basic grid. After succefull creation the grid is returned 
+def createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, createRatios):
+    
+    if userObj != None and gridType != None and nConcerns != None and nAlternatives != None and concernValues != None and alternativeValues != None and ratioValues != None and createRatios != None:
+        try:
+            gridObj= Grid.objects.create(user= userObj, grid_type= gridType)
+            if gridName != None:
+                gridObj.name= gridName
+            gridObj.usid = randomStringGenerator(20)
+            gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
+            #gridObj.dateTime = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+            gridObj.save()
+            #gridObj= Grid.objects.create(user= userObj, name= gridName)
+            #print 'nAlternatives: ' + str(nAlternatives)
+            
+            alternatives= []
+            concerns= []
+            i= 0
+            
+            while i < nAlternatives:
+                alternative= Alternatives.objects.create(grid= gridObj, name= alternativeValues[i])
+                alternatives.append(alternative)
+                i+= 1
+                
+            i= 0
+            while i < nConcerns:
+                concern= Concerns.objects.create(grid= gridObj, leftPole= concernValues[i][0], rightPole= concernValues[i][1], weight= concernValues[i][2])
+                concerns.append(concern)
+                i+= 1
+            i= 0
+            j= 0
+            if createRatios:
+                while i < nConcerns:
+                    while j < nAlternatives:
+                        Ratings.objects.create(concern= concerns[i], alternative= alternatives[j], rating= ratioValues[i][j])
+                        j+= 1
+                    i+= 1
+                    j= 0
+            return gridObj
+        except:
+            try:
+                gridObj.delete()
+            except:
+                print 'Could not delete the grid'
+                print "Exception in user code:"
+                print '-'*60
+                traceback.print_exc(file=sys.stdout)
+                print '-'*60
+            raise
+    else:
+        raise ValueError('One or more variables were None')

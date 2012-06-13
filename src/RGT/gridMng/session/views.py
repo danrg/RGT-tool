@@ -17,13 +17,14 @@ from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
 from RGT.gridMng.error.wrongState import  WrongState
 from RGT.gridMng.error.userIsFacilitator import  UserIsFacilitator
 from RGT.gridMng.views import __generateGridTable__, __createDendogram__
-from RGT.gridMng.utility import createXmlErrorResponse, createXmlSuccessResponse, randomStringGenerator, createXmlForComboBox, validateName, createXmlForNumberOfResponseSent
-from RGT.gridMng.views import ajaxUpdateGrid, ajaxCreateGrid
+from RGT.gridMng.utility import createXmlErrorResponse, createXmlSuccessResponse, randomStringGenerator, createXmlForComboBox, validateName, createXmlForNumberOfResponseSent, createDateTimeTag
+from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid__
 from math import sqrt, ceil
 import uuid
 import sys
 import traceback
 from types import StringType
+from datetime import datetime
 
 def ajaxGetCreateSessionPage(request):
     if not request.user.is_authenticated():
@@ -414,6 +415,11 @@ def ajaxRespond(request):
         return redirect_to(request, '/auth/login/')
     #check inputs
     userObj= request.user
+    nConcerns= None
+    nAlternatives= None
+    concernValues= None
+    alternativeValues= None
+    ratioValues= None
     if request.POST.has_key('sessionUSID') and request.POST.has_key('gridType') and request.POST.has_key('iteration'):
         #check if user can answer to the session
         sessionObj= Session.objects.filter(usid= request.POST['sessionUSID'])
@@ -421,42 +427,139 @@ def ajaxRespond(request):
             sessionObj= sessionObj[0]
             userSessionRelation= userObj.userparticipatesession_set.filter(session= sessionObj)
             if len(userSessionRelation) >= 1:
-                #determine if it is a new response grid or not
-                userResponseGridRelation= userObj.responsegrid_set.filter(iteration= int(request.POST['iteration']), session= sessionObj)
-                #if the response is for a concern/alternative request, run extra validation code (no empty concerns or alternatives allowed)
-                if sessionObj.state.name == State.objects.getWaitingForAltAndConState().name:
-                    try:
-                        __validateAltConResponse__(request)
-                    except ValueError as error:
-                        print "Exception in user code:"
-                        print '-'*60
-                        traceback.print_exc(file=sys.stdout)
-                        print '-'*60 
-                        return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
-                    except KeyError as error:
-                        print "Exception in user code:"
-                        print '-'*60
-                        traceback.print_exc(file=sys.stdout)
-                        print '-'*60 
-                        return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
-                    except:
-                        print "Exception in user code:"
-                        print '-'*60
-                        traceback.print_exc(file=sys.stdout)
-                        print '-'*60 
-                        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
-                if len(userResponseGridRelation) >= 1:
-                    #this is an update
-                    try:
-                        return ajaxUpdateGrid(request)
-                    except:
-                        print "Exception in user code:"
-                        print '-'*60
-                        traceback.print_exc(file=sys.stdout)
-                        print '-'*60 
+                sessionIteration= int(request.POST['iteration'])
+                #check if the session is in a state where it is allowed to send a response
+                if sessionIteration == sessionObj.iteration:
+                    userResponseGridRelation= userObj.responsegrid_set.filter(iteration= sessionIteration, session= sessionObj)
+                    
+                    #if the response is for a concern/alternative request, run extra validation code (no empty concerns or alternatives allowed)
+                    if sessionObj.state.name == State.objects.getWaitingForAltAndConState().name:
+                        try:
+                            __validateAltConResponse__(request)
+                        except ValueError as error:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60 
+                            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+                        except KeyError as error:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60 
+                            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+                        except:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60 
+                            return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+                    #determine if it is a new response grid or not
+                    if len(userResponseGridRelation) >= 1:
+                        #this is an update
+                        gridObj= userResponseGridRelation[0].grid
+                        isConcernAlternativeResponseGrid= False;
+                        if gridObj.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
+                            isConcernAlternativeResponseGrid= True
+                        obj= None
+                        try:
+                            obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
+                        except KeyError as error:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60
+                            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+                        except ValueError as error:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60
+                            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+                        except:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60
+                            return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+                        nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj
+                        
+                        if gridObj != None:
+                            try:   
+                                isGridCreated= updateGrid(gridObj , nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, isConcernAlternativeResponseGrid)
+                                if isGridCreated:
+                                    return HttpResponse(createXmlSuccessResponse('Grid was saved', createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
+                            except:
+                                print "Exception in user code:"
+                                print '-'*60
+                                traceback.print_exc(file=sys.stdout)
+                                print '-'*60
+                                return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+                        else:
+                            return HttpResponse(createXmlErrorResponse("No grid found"), content_type='application/xml')
+                            #return ajaxUpdateGrid(request)
+                    else:
+                        #this is a new grid, which means first response
+                        gridType= None
+                        showRatings= True
+                        isConcernAlternativeResponseGrid= False
+                        #discover the response grid type
+                        if sessionObj.state.name == SessionState.AC:
+                            gridType= Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN
+                            showRatings= False
+                            isConcernAlternativeResponseGrid= True
+                        elif sessionObj.state.name == SessionState.RW:
+                            gridType= Grid.GridType.RESPONSE_GRID_RATING_WEIGHT
+                        obj= None
+                        #validate and retrieve the data that is going to be used in the grid
+                        try:
+                            obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
+                        except KeyError as error:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60
+                            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+                        except ValueError as error:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60
+                            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+                        except:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60
+                            return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+                        
+                        nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj
+                        try: 
+                            #set the relation ship of the response grid with the session
+                            gridObj= createGrid(userObj, gridType,  None, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, showRatings)
+                            gridResponseRelation=  ResponseGrid(grid= gridObj, session= sessionObj, iteration= sessionIteration, user= userObj)
+                            gridResponseRelation.save()
+                            
+                            extraXmlData= createXmlForNumberOfResponseSent(len(sessionObj.getUsersThatRespondedRequest()) + 1) 
+                            if extraXmlData == None:
+                                return HttpResponse(createXmlSuccessResponse('Grid created successfully.', createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
+                            else:
+                                extraDataToUse= None
+                                if isinstance(extraXmlData, list):
+                                    extraXmlData.append(createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                                    extraDataToUse= extraXmlData
+                                else:
+                                    extraDataToUse= [extraXmlData, createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))]
+                                return HttpResponse(createXmlSuccessResponse('Grid created successfully.', extraDataToUse), content_type='application/xml')
+                        except:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60
+                            return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                 else:
-                    #this is a new grid, which means first response
-                    return ajaxCreateGrid(request, createXmlForNumberOfResponseSent(len(sessionObj.getUsersThatRespondedRequest()) + 1))
+                    return HttpResponse(createXmlErrorResponse('Can\'t create response grid, session is in a state where that is not permitted'), content_type='application/xml')       
+                    #return ajaxCreateGrid(request, createXmlForNumberOfResponseSent(len(sessionObj.getUsersThatRespondedRequest()) + 1))
             else:
                 return HttpResponse(createXmlErrorResponse('You are not participating in the session, can\'t send response grid'), content_type='application/xml')
         else:
