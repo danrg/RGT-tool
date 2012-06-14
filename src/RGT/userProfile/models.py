@@ -10,6 +10,7 @@ class UserProfile(models.Model):
     phone = models.CharField(max_length=20);
     verifiedEmail = models.BooleanField(default=False)
     verifyEmailCode = models.CharField(max_length=14, unique=False)
+    displayHelp = models.BooleanField(default=True)
 
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

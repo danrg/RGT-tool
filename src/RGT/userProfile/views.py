@@ -1,8 +1,13 @@
 from django.views.generic.simple import redirect_to
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from RGT.userProfile.userProfileForm import UserProfileForm
+from RGT.gridMng.utility import createXmlSuccessResponse
+
+def ajaxGetDisplayHelpState(request):
+    profile= request.user.get_profile()
+    return HttpResponse(createXmlSuccessResponse(`profile.displayHelp`), content_type='application/xml')
 
 def displayUserProfile(request):
     if not request.user.is_authenticated():
@@ -16,7 +21,8 @@ def displayUserProfile(request):
             profile= user.get_profile()
             profile.address= form.cleaned_data['address']
             profile.phone= form.cleaned_data['phone']
-            profile.save();
+            profile.displayHelp = form.cleaned_data['displayHelp']
+            profile.save()
             user.first_name = form.cleaned_data['firstName']
             user.last_name = form.cleaned_data['lastName']
             user.save()
@@ -35,7 +41,8 @@ def displayUserProfile(request):
         form= UserProfileForm(initial={'firstName':user.first_name,
                                        'lastName':user.last_name,
                                        'address': profile.address,
-                                       'phone': profile.phone
+                                       'phone': profile.phone,
+                                       'displayHelp': profile.displayHelp,
                                        })
         return render_to_response('userProfile/userProfile.html',
                                   {'form': form, 'profileUpdated': profileUpdated},

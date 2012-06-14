@@ -4,16 +4,6 @@
 	RGT | Home
 {% endblock%}
 
-{% block onloadJavascript %}
-    $(".helpHover").each(function(index, value) {
-        $(value).hover(function(e) {
-            $(this).tipsy({title: function(){return "I'M A GOOGLE BROWSER. I WILL STOP USING CAPS NOW.";}, html: false});
-        });
-    });
-
-    $(".helpHover").hide();
-{% endblock %}
-
 {% block content %}
 	{% if not user.is_superuser %}
 		{% if not user.is_active %}
@@ -31,7 +21,8 @@
         Please take note that we currently only support the following browsers: <br/> <br/>
         <ul style="list-style: none">
             <li>Microsoft Internet Explorer 9</li>
-            <li>Mozilla FireFox 12 (or higher)</li>
+            <li>Mozilla FireFox 12 (or higher)
+            </li>
             <li>
                 Google Chrome 19 (or higher) <img src="{{ STATIC_URL }}icons/help.png" style="display: inline;" class="helpHover" id="help_googleChrome" />
             </li>
@@ -47,8 +38,24 @@
 
 {% block javascript%}
     <script type="text/javascript">
-        function toggleHelp() {
-                $(".helpHover").toggle();
-        }
+    var displayHelp = false;
+    $(function() {
+        $.get('/profile/displayHelp', function(data) {
+            displayHelp = data.childNodes[0].childNodes[0].childNodes[0].textContent;
+
+            if(displayHelp === "True")
+                $(".helpHover").show("fast");
+            else
+                $(".helpHover").hide("fast");
+        });
+
+        $(".helpHover").each(function(index, value) {
+            $(value).hover(function(e) {
+                $(this).tipsy({title: function(){return "I'M A GOOGLE BROWSER. I WILL STOP USING CAPS NOW.";}, html: false});
+            });
+        });
+
+        $(".helpHover").hide();
+    });
     </script>
 {% endblock %}
