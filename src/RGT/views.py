@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.views.generic.simple import redirect_to
 from HelpMessages import HELP_MESSAGES
 #import logging
 from RGT.gridMng.utility import createXmlSuccessResponse, createXmlErrorResponse
@@ -14,7 +13,7 @@ def home(request):
 
 @login_required
 def help(request, helpMessageId = ''):
-    if(helpMessageId in HELP_MESSAGES):
+    if helpMessageId in HELP_MESSAGES:
         return HttpResponse(createXmlSuccessResponse(HELP_MESSAGES[helpMessageId]), content_type='application/xml')
 
     return HttpResponse(createXmlErrorResponse('Help topic not found'), content_type='application/xml')
