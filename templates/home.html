@@ -24,38 +24,17 @@
             <li>Mozilla FireFox 12 (or higher)
             </li>
             <li>
-                Google Chrome 19 (or higher) <img src="{{ STATIC_URL }}icons/help.png" style="display: inline;" class="helpHover" id="help_googleChrome" />
+                Google Chrome 19 (or higher)
             </li>
 
         </ul>
     </p>
     </div>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/tipsy.js"></script>
-    <link rel="Stylesheet" type="text/css" href="{{ STATIC_URL }}css/tipsy.css" />
-    <br/>
-    Click <a href="#" onclick="toggleHelp()">here</a> to enable help.
 {% endblock %}
 
 {% block javascript%}
-    <script type="text/javascript">
-    var displayHelp = false;
-    $(function() {
-        $.get('/profile/displayHelp', function(data) {
-            displayHelp = data.childNodes[0].childNodes[0].childNodes[0].textContent;
-
-            if(displayHelp === "True")
-                $(".helpHover").show("fast");
-            else
-                $(".helpHover").hide("fast");
-        });
-
-        $(".helpHover").each(function(index, value) {
-            $(value).hover(function(e) {
-                $(this).tipsy({title: function(){return "I'M A GOOGLE BROWSER. I WILL STOP USING CAPS NOW.";}, html: false});
-            });
-        });
-
-        $(".helpHover").hide();
-    });
-    </script>
+    <!-- <img src="{{ STATIC_URL }}icons/help.png" style="display: inline;" class="helpHover" id="help_googleChrome" /> -->
+    <script type="text/javascript" src="{{ STATIC_URL }}js/tipsy.js"></script>
+    <link rel="Stylesheet" type="text/css" href="{{ STATIC_URL }}css/tipsy.css" />
+    <script type="text/javascript" src="{{ STATIC_URL }}js/displayHelp.js"></script>
 {% endblock %}

@@ -24,4 +24,5 @@ urlpatterns = patterns('',
     url(r'^contact/', 'RGT.contact.views.contact'),
     url(r'^grids/', include('RGT.gridMng.urls')),
     url(r'^sessions/', include('RGT.gridMng.session.urls')),
+    url(r'^help/(?P<helpMessageId>.*)/$', 'RGT.views.help'),
 )

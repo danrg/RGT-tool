@@ -1,6 +1,9 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic.simple import redirect_to
+from HelpMessages import HELP_MESSAGES
 #import logging
+from RGT.gridMng.utility import createXmlSuccessResponse, createXmlErrorResponse
 
 def home(request):
     if request.user.is_authenticated():
@@ -15,5 +18,7 @@ def home(request):
     return redirect_to(request, '/auth/login/', permanent=False)
 
 def help(request, helpMessageId = ''):
-    # Return AJAX response
-    pass
+    if(helpMessageId in HELP_MESSAGES):
+        return HttpResponse(createXmlSuccessResponse(HELP_MESSAGES[helpMessageId]), content_type='application/xml')
+
+    return HttpResponse(createXmlErrorResponse('Help topic not found'), content_type='application/xml')
