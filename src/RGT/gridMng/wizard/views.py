@@ -12,27 +12,32 @@ class GridWizard(SessionWizardView):
         context = super(GridWizard, self).get_context_data(form=form, **kwargs)
         if self.steps.step1 == 3:
             try:
-                print self.alternativeData
+                context.update({'alternatives_data':self.get_cleaned_data_for_step('1')})
             except:
                 pass
-            context.update({'variable': True})
+        elif self.steps.step1 == 4:
+            context.update({'concerns_data':self.get_cleaned_data_for_step('2')})
+        elif self.steps.step1 == 5:
+            context.update({'alternatives_data':self.get_cleaned_data_for_step('1'),
+                            'concerns_data':self.get_cleaned_data_for_step('2')})
         return context
     
-    def process_step(self, form):
-        if self.steps.step1 == 2:
-            # this is a GridWizard class attribute now, in this way it is possible to
-            # pass data between steps
-            self.alternativeData={}
-            # construct a dictionary with the alternative data when processing the data
-            # of step2, in order to read them in step3
-            for x in range(int(form.data['numAlternatives'])):
-                alternativeName = 'alternative%d' % (x+1)
-                value = 'alternative%d'%(x+1)
-                if '1-%s' % alternativeName in form.data.keys():
-                    value = '1-alternative%d'%(x+1)
-                self.alternativeData.update({alternativeName:form.data[value]})
-        return self.get_form_step_data(form)
+#    def process_step(self, form):
+#        # if it is the processing of alternatives step
+#        if self.steps.step1 == 2:
+#            # this is a GridWizard class attribute now, in this way it is possible to
+#            # pass data between steps
+#            self.alternatives_data = []
+#            # construct a dictionary with the alternative data when processing the data
+#            # of step2, in order to read them in step3
+#            for x in range(int(form.data['numAlternatives'])):
+#                alternative_name = '1-alternative%d' % (x+1)
+#                self.alternatives_data.append({alternative_name:form.data[alternative_name]})
+#            
+#        return self.get_form_step_data(form)   
 
     def done(self, form_list, **kwargs):
         # process data of the form and redirect to success page
+        for form in form_list:
+            print form.data
         return HttpResponseRedirect('/')

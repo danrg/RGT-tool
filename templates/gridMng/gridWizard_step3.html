@@ -1,8 +1,65 @@
 {% extends 'layout.html' %}
+{% load wizard_extras %}
 
 {% block title %}
 	RGT | Grids - Wizard
 {% endblock %}
+
+{% block stylesheet %}
+<style type="text/css">
+.drop {
+	border-style: solid;
+	border-width: 1px;
+	width: 200px;
+	height: 200px;
+}
+.drag {
+	width: 100px;
+	background-color: blue;
+}
+</style>
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.8.21.custom.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('.drag').draggable();
+	$('.drop').droppable({
+		drop: function(event, ui) {
+			var i = ui.draggable;
+			$(this).append(i.clone().attr('style', 'position: relative;').draggable());
+			$(i).remove();
+		}
+	});
+	
+	$('#add-conc-but').click(function() {
+		// get references of the left and right part of the concerns thea the user inserted
+		var lcField = $('#left-conc');
+		var rcField = $('#right-conc');
+		// get the number of clonded inputs
+		var numOfCloned = $('.cloned').length;
+		// this is the new number
+		var newNum = numOfCloned + 1;
+		// get the values of the right and left concern that the user inserted
+		var leftConcValue = lcField.val();
+		var rightConcValue = rcField.val();
+		// construct the ids and the names of the new created fields that will become part of the form fields
+		var leftId = "id_2-concern"+newNum+"-left";
+		var rightId = "id_2-concern"+newNum+"-right";
+		var leftName = "2-concern"+newNum+"-left";
+		var rightName = "2-concern"+newNum+"-right";
+		// append the new concern with the left and right pole on the concern list
+		$('#conc-list').append('<div id="input'+newNum+'" class="cloned"><input type="text" name="'+leftName+'" id="'+leftId+'" value="'+leftConcValue+'" /><input type="text" name="'+rightName+'" id="'+rightId+'" value="'+rightConcValue+'" /></div>');
+		// put the new number of concerns
+		$('#numConcernPairs').val(newNum);
+		// clear the values
+		lcField.val('');
+		rcField.val('');
+	});
+});
+</script>
+{% endblock javascript %}
 
 {% block content %}
 {% if not user.is_active %}
@@ -12,7 +69,6 @@
 {% else %}
 	<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
 	<form action="" method="post">{% csrf_token %}
-	<table>
 	{{ wizard.management_form }}
 	{% if wizard.form.forms %}
 	    {{ wizard.form.management_form }}
@@ -20,14 +76,55 @@
 	        {{ form }}
 	    {% endfor %}
 	{% else %}
-	    {{ wizard.form }}
+		<div id="step-head">
+			<p>Select alternatives from the list...<p>
+		</div>
+		<div class="drop" id="alt-list">
+			{% for alternative in alternatives_data|sort_dict_by_key %}
+				<div class="drag" id="{{ alternative.0 }}">{{ alternative.1 }}</div>
+			{% endfor %}
+		</div>
+		<div id="sim-list-head">
+			<p>Put similar alternatives in the list below.</p> 
+		</div>
+		<div class="drop" id="sim-list"></div>
+		<div id="left-conc-input">
+			<input type="text" id="left-conc" />
+		</div>
+		<div id="dif-list-head">
+			<p>Put different alternatives in the list below.</p> 
+		</div>
+		<div class="drop" id="dif-list"></div>
+		<div id="right-conc-input">
+			<input type="text" id="right-conc" />
+		</div>
+		<div id="add-conc-but-wrapper">
+			<input type="button" id="add-conc-but" value="Add" />
+		</div>
+		<div id="conc-list-header">
+			<span>This list contains a review of the concerns that you inserted.</span>
+		</div>
+		<div id="conc-list">
+			{% if wizard.form.fields|length > 0 %}
+				<div id="input1" class="cloned">
+				{% for field in wizard.form %}
+					{{ field }}
+					{{ field.errors }}
+					{% if forloop.counter|divisibleby:"2" %}
+						{% if forloop.counter|divide_by:2 < wizard.form.fields|length|divide_by:2 %}
+							</div>
+							<div id="input{{ forloop.counter|divide_by:2|add:'1' }}" class="cloned">
+						{% endif %}
+					{% endif %}
+				{% endfor %}
+				</div>
+			{% endif %}
+		</div>
+		<input type="hidden" id="numConcernPairs" name="numConcernPairs" value="{{ wizard.form.fields|length|divide_by:2 }}" />
 	{% endif %}
-	</table>
 	{% if wizard.steps.prev %}
 	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">first step</button>
 	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">prev step</button>
-	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.next }}">next step</button>
-	<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.last }}">last step</button>
 	{% endif %}
 	<input type="submit" value="submit"/>
 	</form>

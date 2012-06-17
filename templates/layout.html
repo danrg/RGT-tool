@@ -14,6 +14,8 @@
 	<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.loadmask.js"></script>
 	<script type="text/javascript" src="{{ STATIC_URL }}js/dialogbox.js"></script>
 	<script type="text/javascript" src="{{ STATIC_URL }}js/loadSpinner.js"></script>
+	{% block javascript %}
+	{% endblock %}
 	<script type="text/javascript">
         $(window).ready(function(){
         	//preload the image used to display the waiting status of an ajax request
@@ -24,8 +26,6 @@
             {% endblock %}
 		});
     </script>
-    {% block javascript %}
-	{% endblock %}
 </head>
 <body>
 <div id="wrap">

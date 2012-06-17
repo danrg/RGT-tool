@@ -1,8 +1,21 @@
 {% extends 'layout.html' %}
+{% load wizard_extras %}
 
 {% block title %}
 	RGT | Grids - Wizard
 {% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#alt-list').change(function(event) {
+		$('.rating-input').each(function(index) {
+			console.log($(this));
+		});
+	});
+});
+</script>
+{% endblock javascript %}
 
 {% block content %}
 {% if not user.is_active %}
@@ -20,7 +33,26 @@
 	        {{ form }}
 	    {% endfor %}
 	{% else %}
-	    {{ wizard.form }}
+		{{ alternatives_data|length }} {{ concerns_data|length }} {{ wizard.form.fields|length }}
+	    <div id="step-header">
+	    	<p>Please select an alternative that you want to rate. Then insert a rating for each concern.</p>
+	    </div>
+	    <div id="alt-sel">
+	    	<select id="alt-list">
+	    		<option></option>
+	    		{% for alternative in alternatives_data|sort_dict_by_key %}
+	    			<option id="{{ alternative.0 }}">{{ alternative.1 }}</option>
+	    		{% endfor %}
+	    	</select>
+	    </div>
+	    <div id="concern-list">
+	    	{% for concern in concerns_data|sort_dict_by_key %}
+	    		{{ concern.0 }} - {{ concern.1 }}
+	    		{% if forloop.counter|divisibleby:"2" %}
+	    			<input type="text" name="" id="" class="rating-input" />
+	    		{% endif %}
+	    	{% endfor %}
+	    </div>
 	{% endif %}
 	</table>
 	{% if wizard.steps.prev %}
