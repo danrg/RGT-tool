@@ -1,0 +1,37 @@
+{% extends 'gridMng/wizard/gridWizard_base.html' %}
+{% load wizard_extras %}
+
+{% block javascript %}
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#alt-list').change(function(event) {
+		$('.rating-input').each(function(index) {
+			console.log($(this));
+		});
+	});
+});
+</script>
+{% endblock javascript %}
+
+{% block step_header %}
+<span>Please select an alternative that you want to rate. Then insert a rating for each concern.</span>
+{% endblock step_header %}
+
+{% block wizard_content %}
+<div id="alt-sel">
+	<select id="alt-list">
+		<option></option>
+		{% for alternative in alternatives_data|sort_dict_by_key %}
+			<option id="{{ alternative.0 }}">{{ alternative.1 }}</option>
+		{% endfor %}
+	</select>
+</div>
+<div id="concern-list">
+	{% for concern in concerns_data|sort_dict_by_key %}
+		{{ concern.0 }} - {{ concern.1 }}
+		{% if forloop.counter|divisibleby:"2" %}
+			<input type="text" name="" id="" class="rating-input" />
+		{% endif %}
+	{% endfor %}
+</div>
+{% endblock wizard_content %}

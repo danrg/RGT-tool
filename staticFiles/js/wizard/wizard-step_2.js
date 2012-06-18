@@ -1,6 +1,6 @@
 $(document).ready(function() {
-	$('#btnAdd').click(function() {
-	    var num     = $('.clonedInput').length; // how many "duplicatable" input fields we currently have
+	$('#btn-add').click(function() {
+	    var num     = $('.cloned').length; // how many "duplicatable" input fields we currently have
 	    var newNum  = new Number(num + 1);      // the numeric ID of the new input field being added
 	
 	    // update count of alternatives

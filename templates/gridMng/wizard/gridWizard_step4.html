@@ -1,0 +1,42 @@
+{% extends 'gridMng/wizard/gridWizard_base.html' %}
+{% load wizard_extras %}
+
+{% block step_header %}
+<span>Please insert weights for the concerns.</span>
+{% endblock step_header %}
+
+{% block wizard_content %}
+{% if wizard.form.fields|length == 0 %}
+	{% for concern in concerns_data|sort_dict_by_key %}
+		{{ concern }}
+		{% if forloop.counter|divisibleby:"2" %}
+			<div id="input{{ forloop.counter|divide_by:2 }}" class="cloned">
+				<input type="text" name="3-weight{{ forloop.counter|divide_by:2 }}" id="id_3-weight{{ forloop.counter|divide_by:2 }}" /> 
+			</div>
+		{% endif %}
+	{% endfor %}
+{% else %}
+	{% for field in wizard.form %}
+		<div id="input{{ forloop.counter }}" class="cloned">
+			<div class="field-wrapper">
+				<div class="field-input-wrapper">
+					{{ field }}	
+				</div>
+				<div class="field-errors-wrapper">
+					{{ field.errors }}
+				</div>
+			</div>
+		</div>
+	{% endfor %}
+	{% if concerns_data|length|divide_by:2 > wizard.form.fields|length %}
+   		{% for concern in concerns_data|sort_dict_by_key %}
+   			{% if forloop.counter|divide_by:2 > wizard.form.fields|length %}
+    			<div id="input{{ forloop.counter }}" class="cloned">
+    				<input type="text" name="3-weight{{ forloop.counter|divide_by:2 }}" id="id_3-weight{{ forloop.counter|divide_by:2 }}" />
+				</div>
+			{% endif %}
+   		{% endfor %}
+	{% endif %}
+{% endif %}
+<input type="hidden" name="numWeights" id="numWeights" value="{% if wizard.form.fields|length == 0 %}{{ concerns_data|length|divide_by:2 }}{% else %}{% if not concerns_data %}{{ wizard.form.fields|length }}{% else %}{{ concerns_data|length|divide_by:2 }}{% endif %}{% endif %}" />
+{% endblock wizard_content %}
