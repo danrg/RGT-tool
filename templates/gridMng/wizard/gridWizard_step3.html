@@ -1,0 +1,77 @@
+{% extends 'gridMng/wizard/gridWizard_base.html' %}
+{% load wizard_extras %}
+
+{% block stylesheet %}
+<style type="text/css">
+.drop {
+	border-style: solid;
+	border-width: 1px;
+	width: 200px;
+	height: 200px;
+}
+.drag {
+	width: 100px;
+	background-color: blue;
+}
+</style>
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui-1.8.21.custom.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/wizard/wizard-step_3.js"></script>
+{% endblock javascript %}
+
+{% block step_header %}
+<span>Select alternatives from the list...</span>
+{% endblock step_header %}
+
+{% block wizard_content %}
+<div class="drop" id="alt-list">
+	{% for alternative in alternatives_data|sort_dict_by_key %}
+		<div class="drag" id="{{ alternative.0 }}">{{ alternative.1 }}</div>
+	{% endfor %}
+</div>
+<div id="sim-list-head">
+	<p>Put similar alternatives in the list below.</p> 
+</div>
+<div class="drop" id="sim-list"></div>
+<div id="left-conc-input">
+	<input type="text" id="left-conc" />
+</div>
+<div id="dif-list-head">
+	<p>Put different alternatives in the list below.</p> 
+</div>
+<div class="drop" id="dif-list"></div>
+<div id="right-conc-input">
+	<input type="text" id="right-conc" />
+</div>
+<div id="add-conc-but-wrapper">
+	<input type="button" id="add-conc-but" value="Add" />
+</div>
+<div id="conc-list-header">
+	<span>This list contains a review of the concerns that you inserted.</span>
+</div>
+<div id="conc-list">
+	{% if wizard.form.fields|length > 0 %}
+		<div id="input1" class="cloned">
+		{% for field in wizard.form %}
+			<div class="field-wrapper">
+				<div class="field-input-wrapper">
+					{{ field }}
+				</div>
+				<div class="field-errors-wrapper">
+					{{ field.errors }}
+				</div>
+			</div>
+			{% if forloop.counter|divisibleby:"2" %}
+				{% if forloop.counter|divide_by:2 < wizard.form.fields|length|divide_by:2 %}
+					</div>
+					<div id="input{{ forloop.counter|divide_by:2|add:'1' }}" class="cloned">
+				{% endif %}
+			{% endif %}
+		{% endfor %}
+		</div>
+	{% endif %}
+</div>
+<input type="hidden" id="numConcernPairs" name="numConcernPairs" value="{{ wizard.form.fields|length|divide_by:2 }}" />
+{% endblock wizard_content %}

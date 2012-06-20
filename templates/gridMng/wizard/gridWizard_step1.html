@@ -1,0 +1,21 @@
+{% extends 'gridMng/wizard/gridWizard_base.html' %}
+
+{% block step_header %}
+<span>Please type the name of the grid. You have also the option to add a description.</span>
+{% endblock step_header %}
+
+{% block wizard_content %}
+	{% for field in wizard.form %}
+		<div class="field-wrapper">
+			<div class="field-label-wrapper">
+				{{ field.label }}	
+			</div>
+			<div class="field-input-wrapper">
+				{{ field }}
+			</div>
+			<div class="field-errors-wrapper">
+				{{ field.errors }}
+			</div>
+		</div>
+	{% endfor %}
+{% endblock wizard_content %}

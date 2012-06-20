@@ -1,0 +1,107 @@
+{% extends 'gridMng/wizard/gridWizard_base.html' %}
+{% load wizard_extras %}
+
+{% block stylesheet %}
+<style type="text/css">
+#alternative-name {
+	font-weight: bold;
+}
+</style>
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script type="text/javascript">
+$(document).ready(function() {
+	setAlternativeName($('#alternatives-list').val());
+	$('#alternatives-list').change(function(event) {
+		setAlternativeName($('#alternatives-list').val());
+		var numberOfConcerns = $('.rating-input').length;
+		var alternativeIndex = event.target.options.selectedIndex;
+		var ratingValues = new Array();
+		for (i=0;i<numberOfConcerns;i++) {
+			ratingValues[i] = $('#rating-concern'+(i+1)+'-alternative'+(alternativeIndex+1)).val();
+		}
+		$('.rating-input').each(function(index) {
+			$(this).val(ratingValues[index]);
+		});
+	});
+	$('#save-button').click(function(event) {
+		var ratingValues = new Array();
+		$('.rating-input').each(function(index) {
+			ratingValues[index] = $(this).val();
+		});
+		var alternativeIndex = $('#alternatives-list option:selected').index();
+		var numberOfConcerns = $('.rating-input').length;
+		for (i=0;i<numberOfConcerns;i++) {
+			$('#rating-concern'+(i+1)+'-alternative'+(alternativeIndex+1)).val(ratingValues[i]);
+		}
+	});
+	function setAlternativeName(text) {
+		$('#alternative-name').text(text);
+	}
+});
+</script>
+{% endblock javascript %}
+
+{% block step_header %}
+<span>Please select an alternative that you want to rate.</span>
+{% endblock step_header %}
+
+{% block wizard_content %}
+<div id="alternatives-wrapper">
+	<div id="alternatives-selection-wrapper">
+		<select id="alternatives-list">
+			{% for alternative in alternatives_data|sort_dict_by_key %}
+				<option id="{{ alternative.0 }}">{{ alternative.1 }}</option>
+			{% endfor %}
+		</select>
+	</div>
+</div>
+<div id="concern-list">
+	<div id="concern-list-header">
+		<span>Insert a rating for each concern, for the alternative <span id="alternative-name"></span>. Then, click the save button to temporarily save the rating values.</span><br />
+		<span>Please note that in order to successfully save the values and move to the next step, you have to press the submit button.</span><br />
+		<span>In case that you select the previous button, you will have to enter the values again.</span>
+	</div>
+	<div id="concern-list-data">
+		{% for concern in concerns_data|sort_dict_by_key %}
+			{{ concern.1 }}
+			{% if forloop.counter|divisibleby:"2" %}
+				<input type="text" id="rating{{ forloop.counter|divide_by:2 }}" class="rating-input" value="0" /><br />
+			{% endif %}
+		{% endfor %}
+	</div>
+</div>
+<div class="button-wrapper">
+	<input type="button" id="save-button" value="Save" />
+</div>
+<div class="data-wrapper">
+	{% if wizard.form.fields|length > 0 %}
+		<div id="input1" class="rca-data">
+		{% for field in wizard.form %}
+			{{ field }}
+			{% if forloop.counter|divisibleby:"2" %}
+				{% if forloop.counter|divide_by:2 < wizard.form.fields|length|divide_by:2 %}
+					</div>
+					<div id="input{{ forloop.counter|divide_by:2|add:'1' }}" class="rca-data">
+				{% endif %}
+			{% endif %}
+		{% endfor %}
+		</div>
+	{% else %}
+		{% for alternative in alternatives_data|sort_dict_by_key %}
+		<div id="input{{ forloop.counter }}" class="rca-data">
+			{% for concern in concerns_data|sort_dict_by_key %}
+				{% if forloop.counter|divisibleby:"2" %}
+					<input type="hidden" id="rating-concern{{ forloop.counter|divide_by:2 }}-alternative{{ forloop.parentloop.counter }}" name="rating-concern{{ forloop.counter|divide_by:2 }}-alternative{{ forloop.parentloop.counter }}" value="0" />
+				{% endif %}
+			{% endfor %}
+		</div>
+		{% endfor %}
+	{% endif %}
+	<div id="extra-data">
+		<input type="hidden" id="num-alternatives" name="num-alternatives" value="{{ alternatives_data|length }}" />
+		<input type="hidden" id="num-concerns" name="num-concerns" value="{{ concerns_data|length|divide_by:2 }}" />
+	</div>
+</div>
+{% endblock wizard_content %}

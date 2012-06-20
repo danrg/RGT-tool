@@ -3,10 +3,9 @@ from django.contrib.formtools.wizard.views import SessionWizardView
 
 
 class GridWizard(SessionWizardView):
-    template_name='gridMng/gridWizard.html'
 
     def get_template_names(self):
-        return [ 'gridMng/gridWizard_step{0}.html'.format(self.steps.step1)]
+        return [ 'gridMng/wizard/gridWizard_step{0}.html'.format(self.steps.step1)]
     
     def get_context_data(self, form, **kwargs):
         context = super(GridWizard, self).get_context_data(form=form, **kwargs)

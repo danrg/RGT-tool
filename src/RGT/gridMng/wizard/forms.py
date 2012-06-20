@@ -35,7 +35,7 @@ class WeightsForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(WeightsForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
-            for x in range(int(self.data['numWeights'])):
+            for x in range(int(self.data['num-weights'])):
                 weight_name = 'weight%d' % (x+1)
                 self.fields[weight_name] = forms.FloatField()
     
@@ -44,4 +44,7 @@ class RatingsForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(RatingsForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
-            pass
+            for x in range(int(self.data['num-alternatives'])):
+                for z in range(int(self.data['num-concerns'])):
+                    rating_name = 'rating-concern%d-alternative%d' % ((z+1), (x+1))
+                    self.fields[rating_name] = forms.CharField(widget=forms.HiddenInput(), required=False)
