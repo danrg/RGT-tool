@@ -18,12 +18,12 @@
 		{% if not userColorMap %}
 			{% for row in table %}
 				<tr class="resultRatingWeightTr">
-					{%for value in row%}
+					{%for value, jsData in row%}
 						{% if forloop.first%}
 							<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
 						{% else %}
 							{% if not forloop.last %}
-								<td class="resultRatingWeightValue">{{value}}</td>
+								<td class="resultRatingWeightValue"><span style="cursor:pointer" onclick= "displayChartOfRatings({{jsData}})">{{value}}</span></td>
 							{% else %}
 								<td class="resultRatingWeightWeight">{{ weights.pop }}</td>
 								<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
@@ -35,12 +35,12 @@
 		{% else %}
 			{% for row in table %}
 				<tr class="resultRatingWeightTr">
-					{%for value, color in row%}
+					{%for value, color, jsData in row%}
 						{% if forloop.first %}
 							<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
 						{% else %}
 							{% if not forloop.last %}
-								<td class="resultRatingWeightValue" style="background-color:rgb{{color}};">{{value}}</td>
+								<td class="resultRatingWeightValue" style="background-color:rgb{{color}};"><span style="cursor:pointer" onclick="displayChartOfRatings({{jsData}})">{{value}}</span></td>
 							{% else %}
 								<td class="resultRatingWeightWeight" style="background-color:rgb{{weightColorMap.pop}};">{{ weights.pop }}</td>
 								<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>

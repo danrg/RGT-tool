@@ -685,7 +685,9 @@ def ajaxGetResults(request):
                                         print '-'*60
                                         return HttpResponse(createXmlErrorResponse('Unknown Error'), content_type='application/xml')
                                 elif gridType == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:
-                                    stdRating, meanRating, rangeRating, stdWeight, meanWeight, rangeWeight, globalData= __generateWeightRatingResultTables__(sessionObj.sessiongrid_set.filter(iteration= iterationObj)[0].grid, responseGridRelation)
+                                    sessionGridObj= sessionObj.sessiongrid_set.filter(iteration= iterationObj)[0].grid
+                                    #create the basic table, only values
+                                    stdRating, meanRating, rangeRating, stdWeight, meanWeight, rangeWeight, globalData= __generateWeightRatingResultTables__(sessionGridObj, responseGridRelation)
                                     # now that we have the results lets change the format so we can create the tables
                                     #first lets  create the header
                                     header= []
@@ -698,30 +700,81 @@ def ajaxGetResults(request):
                                     alternatives= sessionObj.sessiongrid_set.filter(iteration= iterationObj)[0].grid.alternatives_set.all()
                                     rightPole= None
                                     leftPole= None
+                                    #create the heat map, only the std and range tables have color maps
                                     rangeColorMap= __createRangeTableColorMap__(globalData[0], globalData[1], rangeRating)
                                     rangeWeightColorMap= __createRangeTableColorMap__(globalData[2], globalData[3], rangeWeight)
                                     stdColorMap= __createStdTableColorMap__(globalData[0], globalData[1], stdRating)
                                     stdWeightColorMap= __createStdTableColorMap__(globalData[2], globalData[3], stdWeight)
-                                    tableRatingRangeColor= []
-                                    tableRatingStdColor= []
+                                    tableRatingRangeColor= [] #final table with the value to be displayed and the background color
+                                    tableRatingStdColor= [] #final table with the value to be displayed and the background color
+                                    tableRatingMean= [] #final table with the value to be displayed and js code
+                                    
+                                    #now lets create the data that is needed for the javascript to generate the chart
+                                    participantNames= []
+                                    
+                                    #retrieve all the names
+                                    while i < len(responseGridRelation):
+                                        participantNames.append(responseGridRelation[i].grid.user.first_name)
+                                        i+= 1
+                                    i= 0
+                                    #create the data for the javascript. format should be a string --> [[name,value], [name,value], ....., [name,value]]. 
+                                    javascriptData= [] #format should be [[cell with js string data], [cell with js string data], ...]
+                                    while i < len(concerns):
+                                        row= []
+                                        
+                                        while k < len(alternatives):
+                                            temp= '['
+                                            j= 0
+                                            #first element is always what is in the session grid
+                                            temp+= '[\'session\','
+                                            tempRating= Ratings.objects.get(concern= concerns[i], alternative= alternatives[k]).rating
+                                            if tempRating != None and  tempRating >= 1:
+                                                temp+= str(tempRating) + ']'
+                                            else:
+                                                temp+= '0]'
+                                            #now add all other elements
+                                            while j < len(responseGridRelation):
+                                                tempConcerns= responseGridRelation[j].grid.concerns_set.all()[i]
+                                                tempAlternative= responseGridRelation[j].grid.alternatives_set.all()[k]
+                                                tempRating= Ratings.objects.get(concern= tempConcerns, alternative= tempAlternative).rating
+                                                if tempRating != None and  tempRating >= 1:
+                                                    temp+= ',[\'' + participantNames[j] + '\',' + str(tempRating) + ']'
+                                                else:
+                                                    temp+= ',[\'' + participantNames[j] + '\',0]'
+                                                j+= 1
+                                            j= 0
+                                            k+= 1
+                                            temp+= ']'
+                                            row.append(temp)
+                                        k= 0
+                                        javascriptData.append(row)
+                                        i+= 1
+                                    i= 0
+                                    
+                                    #now merge all the information so the template can create the tables with the heat map
                                     while i < len(concerns):
                                         rowRange= []
                                         rowStd= []
+                                        rowMean= []
+                                        #create a tulip with the value that should be displayed in the td and the color of the background for each cell in the row
                                         while k < len(alternatives):
-                                            rowRange.append((rangeRating[i][k], rangeColorMap[i][k]))
-                                            rowStd.append((stdRating[i][k], stdColorMap[i][k]))
+                                            rowRange.append((rangeRating[i][k], rangeColorMap[i][k], javascriptData[i][k]))
+                                            rowStd.append((stdRating[i][k], stdColorMap[i][k], javascriptData[i][k]))
+                                            rowMean.append((meanRating[i][k], javascriptData[i][k]))
                                             k+= 1
                                         k= 0
+                                        #add the concerns to the range, mean and std tables
                                         rightPole= concerns[i].rightPole
                                         leftPole= concerns[i].leftPole
                                         rowStd.insert(0, (leftPole, None))
                                         rowStd.append((rightPole, None))
-                                        meanRating[i].insert(0, leftPole)
-                                        meanRating[i].append(rightPole)
+                                        rowMean.insert(0, leftPole)
+                                        rowMean.append(rightPole)
                                         rowRange.insert(0, (leftPole, None))
                                         rowRange.append((rightPole, None))
                                         tableRatingRangeColor.append(rowRange)
                                         tableRatingStdColor.append(rowStd)
+                                        tableRatingMean.append(rowMean)
                                         rightPole= None
                                         leftPole= None
                                         i+= 1
@@ -731,7 +784,7 @@ def ajaxGetResults(request):
 #                                        tableWeightRangeColor.append((rangeWeight[i], rangeWeightColorMap[i]))
 #                                        i+= 1
                                     template= loader.get_template('gridMng/resultRatingWeightTables.html')
-                                    context= RequestContext(request, {'rangeTable':tableRatingRangeColor, 'rangeHeaders':header, 'rangeWeights':rangeWeight, 'rangeWeightColorMap':rangeWeightColorMap, 'rangeTableHead':'Range', 'meanWeights':meanWeight, 'meanTable':meanRating, 'meanHeaders':header, 'meanTableHead':'Mean', 'stdTable':tableRatingStdColor, 'stdHeaders':header, 'stdWeights':stdWeight, 'stdWeightColorMap':stdWeightColorMap, 'stdTableHead':'Standard Deviation' })
+                                    context= RequestContext(request, {'rangeTable':tableRatingRangeColor, 'rangeHeaders':header, 'rangeWeights':rangeWeight, 'rangeWeightColorMap':rangeWeightColorMap, 'rangeTableHead':'Range', 'meanWeights':meanWeight, 'meanTable':tableRatingMean, 'meanHeaders':header, 'meanTableHead':'Mean', 'stdTable':tableRatingStdColor, 'stdHeaders':header, 'stdWeights':stdWeight, 'stdWeightColorMap':stdWeightColorMap, 'stdTableHead':'Standard Deviation' })
                                     htmlData= template.render(context)
                                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                                 else:

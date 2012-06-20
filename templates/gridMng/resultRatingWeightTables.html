@@ -1,3 +1,5 @@
+<script src= "{{ STATIC_URL }}js/highcharts/highcharts.js" type="text/javascript"></script>
+<script src= "{{ STATIC_URL }}js/resultRatingWeightTables.js" type="text/javascript"></script>
 <div id="resultsRatingsWeightsTables">
 	<div style= "overflow: auto">
 		{% include "gridMng/resultRatingWeightTable.html" with headers=rangeHeaders table=rangeTable weights=rangeWeights weightColorMap=rangeWeightColorMap tableHead=rangeTableHead userColorMap="True" STATIC_URL=STATIC_URL %}
@@ -8,4 +10,7 @@
 	<div style= "overflow: auto">
 		{% include "gridMng/resultRatingWeightTable.html" with headers=stdHeaders table=stdTable weights=stdWeights tableHead=stdTableHead userColorMap="True"  weightColorMap=stdWeightColorMap STATIC_URL=STATIC_URL %}
 	</div>
+</div>
+<div id= "chartDisplay">
+
 </div>

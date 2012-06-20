@@ -411,4 +411,5 @@ function clearResults() {
 	$('#mySessionsContentResultDiv').empty();
 	$('#mySessionResultsDendrogram').hide();
 	$('#clearResultsButton').hide();
+	clearRatioResultCharts(); //function from resultRatingWeightTables.js
 }
