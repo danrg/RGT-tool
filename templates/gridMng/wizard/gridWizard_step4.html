@@ -38,5 +38,5 @@
    		{% endfor %}
 	{% endif %}
 {% endif %}
-<input type="hidden" name="numWeights" id="numWeights" value="{% if wizard.form.fields|length == 0 %}{{ concerns_data|length|divide_by:2 }}{% else %}{% if not concerns_data %}{{ wizard.form.fields|length }}{% else %}{{ concerns_data|length|divide_by:2 }}{% endif %}{% endif %}" />
+<input type="hidden" name="num-weights" id="num-weights" value="{% if wizard.form.fields|length == 0 %}{{ concerns_data|length|divide_by:2 }}{% else %}{% if not concerns_data %}{{ wizard.form.fields|length }}{% else %}{{ concerns_data|length|divide_by:2 }}{% endif %}{% endif %}" />
 {% endblock wizard_content %}

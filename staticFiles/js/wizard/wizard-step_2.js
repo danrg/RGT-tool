@@ -7,7 +7,7 @@ $(document).ready(function() {
 	    $('#numAlternatives').val(newNum);
 	
 	    // create the new element via clone(), and manipulate it's ID using newNum value
-	    var newElem	= '<div id="input'+newNum+'" style="margin-bottom:4px;" class="clonedInput"><input type="text" name="1-alternative'+newNum+'" id="id_1-alternative'+newNum+'" /></div>'
+	    var newElem	= '<div id="input'+newNum+'" class="cloned"><input type="text" name="1-alternative'+newNum+'" id="id_1-alternative'+newNum+'" /></div>'
 	
 	    // insert the new element after the last "duplicatable" input field
 	    $('#input' + num).after(newElem);

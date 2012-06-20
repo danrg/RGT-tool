@@ -12,23 +12,29 @@
 {% else %}
 	<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
 	<form method="post">{% csrf_token %}
-	{{ wizard.management_form }}
-	{% if wizard.form.forms %}
-	    {{ wizard.form.management_form }}
-	    {% for form in wizard.form.forms %}
-	        {{ form }}
-	    {% endfor %}
-	{% else %}
-		<div class="step-header">
-			{% block step_header %}{% endblock %}
+		{{ wizard.management_form }}
+		{% if wizard.form.forms %}
+		    {{ wizard.form.management_form }}
+		    {% for form in wizard.form.forms %}
+		        {{ form }}
+		    {% endfor %}
+		{% else %}
+			<div class="step-header">
+				{% block step_header %}{% endblock %}
+			</div>
+		    {% block wizard_content %}{% endblock %}
+		{% endif %}
+		<div id="form-menu">
+			{% if wizard.steps.prev %}
+			<div id="form-nav-menu">
+				<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">first step</button>
+				<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">prev step</button>
+			</div>
+			{% endif %}
+			<div id="form-sub-menu">
+				<input type="submit" value="submit"/>
+			</div>
 		</div>
-	    {% block wizard_content %}{% endblock %}
-	{% endif %}
-	{% if wizard.steps.prev %}
-		<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">first step</button>
-		<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">prev step</button>
-	{% endif %}
-	<input type="submit" value="submit"/>
 	</form>
 {% endif %}
 {% endblock %}
