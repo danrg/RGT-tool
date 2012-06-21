@@ -56,3 +56,7 @@ td.resultRatingWeightConcern{
 	margin-top: 20px;
 }
 
+.clickableResultValue{
+	cursor:pointer
+}
+

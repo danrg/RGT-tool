@@ -705,9 +705,12 @@ def ajaxGetResults(request):
                                     rangeWeightColorMap= __createRangeTableColorMap__(globalData[2], globalData[3], rangeWeight)
                                     stdColorMap= __createStdTableColorMap__(globalData[0], globalData[1], stdRating)
                                     stdWeightColorMap= __createStdTableColorMap__(globalData[2], globalData[3], stdWeight)
-                                    tableRatingRangeColor= [] #final table with the value to be displayed and the background color
-                                    tableRatingStdColor= [] #final table with the value to be displayed and the background color
+                                    tableRatingRangeColor= [] #final table with the value to be displayed, the background color and js code
+                                    tableRatingStdColor= [] #final table with the value to be displayed, the background color and js code
                                     tableRatingMean= [] #final table with the value to be displayed and js code
+                                    tableWeightMean= [] #final table with the weights and js code
+                                    tableWeightStd= [] #final table with the weights and js code
+                                    tableWeightRange= [] #final table with the weights and js code
                                     
                                     #now lets create the data that is needed for the javascript to generate the chart
                                     participantNames= []
@@ -718,7 +721,34 @@ def ajaxGetResults(request):
                                         i+= 1
                                     i= 0
                                     #create the data for the javascript. format should be a string --> [[name,value], [name,value], ....., [name,value]]. 
-                                    javascriptData= [] #format should be [[cell with js string data], [cell with js string data], ...]
+                                    javascriptRatioData= [] #format should be [[cell with js string data], [cell with js string data], ...]
+                                    javascriptWeightData= [] #format should be [[cell with js string data], [cell with js string data], ...]
+                                    
+                                    #first create the table for the weights
+                                    while i < len(concerns):
+                                        j= 0
+                                        temp= '['
+                                        temp+= '[\'session\','
+                                        tempWeight= concerns[i].weight
+                                        #first element is always what is in the session grid
+                                        if tempWeight != None and  tempWeight >= 1:
+                                                temp+= str(tempWeight) + ']'
+                                        else:
+                                            temp+= '0]'
+                                        #now add all other elements
+                                        while j < len(responseGridRelation):
+                                            tempWeight= responseGridRelation[j].grid.concerns_set.all()[i].weight
+                                            if tempWeight != None and  tempWeight >= 1:
+                                                temp+= ',[\'' + participantNames[j] + '\',' + str(tempWeight) + ']'
+                                            else:
+                                                temp+= ',[\'' + participantNames[j] + '\',0]'
+                                            j+= 1
+                                        temp+= ']'
+                                        javascriptWeightData.append(temp)
+                                        i+= 1
+                                    i= 0
+                                    
+                                    #now create the table for the ratios
                                     while i < len(concerns):
                                         row= []
                                         
@@ -747,7 +777,7 @@ def ajaxGetResults(request):
                                             temp+= ']'
                                             row.append(temp)
                                         k= 0
-                                        javascriptData.append(row)
+                                        javascriptRatioData.append(row)
                                         i+= 1
                                     i= 0
                                     
@@ -756,11 +786,14 @@ def ajaxGetResults(request):
                                         rowRange= []
                                         rowStd= []
                                         rowMean= []
+                                        tableWeightMean.append((meanWeight[i], javascriptWeightData[i]))
+                                        tableWeightStd.append((stdWeight[i], javascriptWeightData[i]))
+                                        tableWeightRange.append((rangeWeight[i], javascriptWeightData[i]))
                                         #create a tulip with the value that should be displayed in the td and the color of the background for each cell in the row
                                         while k < len(alternatives):
-                                            rowRange.append((rangeRating[i][k], rangeColorMap[i][k], javascriptData[i][k]))
-                                            rowStd.append((stdRating[i][k], stdColorMap[i][k], javascriptData[i][k]))
-                                            rowMean.append((meanRating[i][k], javascriptData[i][k]))
+                                            rowRange.append((rangeRating[i][k], rangeColorMap[i][k], javascriptRatioData[i][k]))
+                                            rowStd.append((stdRating[i][k], stdColorMap[i][k], javascriptRatioData[i][k]))
+                                            rowMean.append((meanRating[i][k], javascriptRatioData[i][k]))
                                             k+= 1
                                         k= 0
                                         #add the concerns to the range, mean and std tables
@@ -768,8 +801,8 @@ def ajaxGetResults(request):
                                         leftPole= concerns[i].leftPole
                                         rowStd.insert(0, (leftPole, None))
                                         rowStd.append((rightPole, None))
-                                        rowMean.insert(0, leftPole)
-                                        rowMean.append(rightPole)
+                                        rowMean.insert(0, (leftPole, None))
+                                        rowMean.append((rightPole, None))
                                         rowRange.insert(0, (leftPole, None))
                                         rowRange.append((rightPole, None))
                                         tableRatingRangeColor.append(rowRange)
@@ -784,7 +817,7 @@ def ajaxGetResults(request):
 #                                        tableWeightRangeColor.append((rangeWeight[i], rangeWeightColorMap[i]))
 #                                        i+= 1
                                     template= loader.get_template('gridMng/resultRatingWeightTables.html')
-                                    context= RequestContext(request, {'rangeTable':tableRatingRangeColor, 'rangeHeaders':header, 'rangeWeights':rangeWeight, 'rangeWeightColorMap':rangeWeightColorMap, 'rangeTableHead':'Range', 'meanWeights':meanWeight, 'meanTable':tableRatingMean, 'meanHeaders':header, 'meanTableHead':'Mean', 'stdTable':tableRatingStdColor, 'stdHeaders':header, 'stdWeights':stdWeight, 'stdWeightColorMap':stdWeightColorMap, 'stdTableHead':'Standard Deviation' })
+                                    context= RequestContext(request, {'rangeTable':tableRatingRangeColor, 'rangeHeaders':header, 'rangeWeights':tableWeightRange, 'rangeWeightColorMap':rangeWeightColorMap, 'rangeTableHead':'Range', 'meanWeights':tableWeightMean, 'meanTable':tableRatingMean, 'meanHeaders':header, 'meanTableHead':'Mean', 'stdTable':tableRatingStdColor, 'stdHeaders':header, 'stdWeights':tableWeightStd, 'stdWeightColorMap':stdWeightColorMap, 'stdTableHead':'Standard Deviation' })
                                     htmlData= template.render(context)
                                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                                 else:
@@ -805,7 +838,8 @@ def ajaxGetResults(request):
         print "Exception in user code:"
         print '-'*60
         traceback.print_exc(file=sys.stdout)
-        print '-'*60 
+        print '-'*60
+        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')  
 
 #function that will get the page that display the participants of a session
 def ajaxGetParticipatingPage(request):

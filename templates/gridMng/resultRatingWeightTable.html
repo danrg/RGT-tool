@@ -23,10 +23,12 @@
 							<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
 						{% else %}
 							{% if not forloop.last %}
-								<td class="resultRatingWeightValue"><span style="cursor:pointer" onclick= "displayChartOfRatings({{jsData}})">{{value}}</span></td>
+								<td class="resultRatingWeightValue"><span class= "clickableResultValue" onclick= "displayChartOfRatings({{jsData}})">{{value}}</span></td>
 							{% else %}
-								<td class="resultRatingWeightWeight">{{ weights.pop }}</td>
-								<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
+								{% with weights.pop as data%}
+									<td class="resultRatingWeightWeight"><span class= "clickableResultValue" onclick="displayChartOfRatings({{data.1}})">{{data.0}}</span></td>
+									<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
+								{% endwith %}
 							{% endif %}
 						{% endif %}
 					{% endfor %}
@@ -40,10 +42,12 @@
 							<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
 						{% else %}
 							{% if not forloop.last %}
-								<td class="resultRatingWeightValue" style="background-color:rgb{{color}};"><span style="cursor:pointer" onclick="displayChartOfRatings({{jsData}})">{{value}}</span></td>
+								<td class="resultRatingWeightValue" style="background-color:rgb{{color}};"><span class= "clickableResultValue" onclick="displayChartOfRatings({{jsData}})">{{value}}</span></td>
 							{% else %}
-								<td class="resultRatingWeightWeight" style="background-color:rgb{{weightColorMap.pop}};">{{ weights.pop }}</td>
-								<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
+								{% with weights.pop as data%}
+									<td class="resultRatingWeightWeight" style="background-color:rgb{{weightColorMap.pop}};"><span class= "clickableResultValue" onclick="displayChartOfRatings({{data.1}})">{{data.0}}</span></td>
+									<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
+								{% endwith %}
 							{% endif %}
 						{% endif %}
 					{% endfor %}
