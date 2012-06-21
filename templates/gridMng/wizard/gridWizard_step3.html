@@ -25,7 +25,7 @@
 <span>Select alternatives from the list...</span>
 {% endblock step_header %}
 
-{% block wizard_content %}
+{% block wizard_top_content %}
 <div class="drop" id="alt-list">
 	{% for alternative in alternatives_data|sort_dict_by_key %}
 		<div class="drag" id="{{ alternative.0 }}">{{ alternative.1 }}</div>
@@ -51,6 +51,9 @@
 <div id="conc-list-header">
 	<span>This list contains a review of the concerns that you inserted.</span>
 </div>
+{% endblock wizard_top_content %}
+
+{% block wizard_form_content %}
 <div id="conc-list">
 	{% if wizard.form.fields|length > 0 %}
 		<div id="input1" class="cloned">
@@ -73,5 +76,5 @@
 		</div>
 	{% endif %}
 </div>
-<input type="hidden" id="numConcernPairs" name="numConcernPairs" value="{{ wizard.form.fields|length|divide_by:2 }}" />
-{% endblock wizard_content %}
+<input type="hidden" name="num-concerns" value="{{ wizard.form.fields|length|divide_by:2 }}" id="num-concerns" />
+{% endblock wizard_form_content %}

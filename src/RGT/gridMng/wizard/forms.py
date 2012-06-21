@@ -9,7 +9,7 @@ class AlternativesForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(AlternativesForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
-            for x in range(int(self.data['numAlternatives'])):
+            for x in range(int(self.data['num-alternatives'])):
                 alternativeName = 'alternative%d' % (x+1)
                 # every time alternative fields are added with the name 'alternative..' and this because
                 # Django always adds '%d-' % (the number of the step with zero index) prefix in the name.
@@ -21,7 +21,7 @@ class ConcernsForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(ConcernsForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
-            for x in range(int(self.data['numConcernPairs'])):
+            for x in range(int(self.data['num-concerns'])):
                 left_concern_name = 'concern%d-left' % (x+1)
                 right_concern_name = 'concern%d-right' % (x+1)
                 # every time alternative fields are added with the name 'alternative..' and this because
@@ -47,4 +47,4 @@ class RatingsForm(forms.Form):
             for x in range(int(self.data['num-alternatives'])):
                 for z in range(int(self.data['num-concerns'])):
                     rating_name = 'rating-concern%d-alternative%d' % ((z+1), (x+1))
-                    self.fields[rating_name] = forms.CharField(widget=forms.HiddenInput(), required=False)
+                    self.fields[rating_name] = forms.CharField(widget=forms.HiddenInput())

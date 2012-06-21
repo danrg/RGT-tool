@@ -10,71 +10,49 @@
 {% endblock stylesheet %}
 
 {% block javascript %}
-<script type="text/javascript">
-$(document).ready(function() {
-	setAlternativeName($('#alternatives-list').val());
-	$('#alternatives-list').change(function(event) {
-		setAlternativeName($('#alternatives-list').val());
-		var numberOfConcerns = $('.rating-input').length;
-		var alternativeIndex = event.target.options.selectedIndex;
-		var ratingValues = new Array();
-		for (i=0;i<numberOfConcerns;i++) {
-			ratingValues[i] = $('#rating-concern'+(i+1)+'-alternative'+(alternativeIndex+1)).val();
-		}
-		$('.rating-input').each(function(index) {
-			$(this).val(ratingValues[index]);
-		});
-	});
-	$('#save-button').click(function(event) {
-		var ratingValues = new Array();
-		$('.rating-input').each(function(index) {
-			ratingValues[index] = $(this).val();
-		});
-		var alternativeIndex = $('#alternatives-list option:selected').index();
-		var numberOfConcerns = $('.rating-input').length;
-		for (i=0;i<numberOfConcerns;i++) {
-			$('#rating-concern'+(i+1)+'-alternative'+(alternativeIndex+1)).val(ratingValues[i]);
-		}
-	});
-	function setAlternativeName(text) {
-		$('#alternative-name').text(text);
-	}
-});
-</script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/wizard/wizard-step_5.js"></script>
 {% endblock javascript %}
 
 {% block step_header %}
 <span>Please select an alternative that you want to rate.</span>
 {% endblock step_header %}
 
-{% block wizard_content %}
+{% block wizard_top_content %}
 <div id="alternatives-wrapper">
 	<div id="alternatives-selection-wrapper">
-		<select id="alternatives-list">
-			{% for alternative in alternatives_data|sort_dict_by_key %}
+		<select id="alternatives-list" size="{{ alternatives_data|length }}">
+		{% for alternative in alternatives_data|sort_dict_by_key %}
+			{% if forloop.counter == 1 %}
+				<option id="{{ alternative.0 }}" selected="selected">{{ alternative.1 }}</option>
+			{% else %}
 				<option id="{{ alternative.0 }}">{{ alternative.1 }}</option>
-			{% endfor %}
+			{% endif %}
+		{% endfor %}
 		</select>
 	</div>
 </div>
-<div id="concern-list">
+<div id="concern-list-wrapper">
 	<div id="concern-list-header">
 		<span>Insert a rating for each concern, for the alternative <span id="alternative-name"></span>. Then, click the save button to temporarily save the rating values.</span><br />
 		<span>Please note that in order to successfully save the values and move to the next step, you have to press the submit button.</span><br />
 		<span>In case that you select the previous button, you will have to enter the values again.</span>
 	</div>
 	<div id="concern-list-data">
-		{% for concern in concerns_data|sort_dict_by_key %}
-			{{ concern.1 }}
-			{% if forloop.counter|divisibleby:"2" %}
-				<input type="text" id="rating{{ forloop.counter|divide_by:2 }}" class="rating-input" value="0" /><br />
-			{% endif %}
-		{% endfor %}
+	{% for concern in concerns_data|sort_dict_by_key %}
+		{{ concern.1 }}
+		{% if forloop.counter|divisibleby:"2" %}
+			{% for x in 5|get_range %}
+			<input type="radio" name="concern-{{ forloop.parentloop.counter|divide_by:2 }}" value="{{ x|add:'1' }}" id="rating-{{ forloop.parentloop.counter|divide_by:2 }}-{{ x|add:'1' }}" />
+			{% endfor %}
+			<br />
+			<!-- <input type="text" id="rating{{ forloop.counter|divide_by:2 }}" class="rating-input" value="0" /><br /> -->
+		{% endif %}
+	{% endfor %}
 	</div>
 </div>
-<div class="button-wrapper">
-	<input type="button" id="save-button" value="Save" />
-</div>
+{% endblock wizard_top_content %}
+
+{% block wizard_form_content %}
 <div class="data-wrapper">
 	{% if wizard.form.fields|length > 0 %}
 		<div id="input1" class="rca-data">
@@ -93,15 +71,15 @@ $(document).ready(function() {
 		<div id="input{{ forloop.counter }}" class="rca-data">
 			{% for concern in concerns_data|sort_dict_by_key %}
 				{% if forloop.counter|divisibleby:"2" %}
-					<input type="hidden" id="rating-concern{{ forloop.counter|divide_by:2 }}-alternative{{ forloop.parentloop.counter }}" name="rating-concern{{ forloop.counter|divide_by:2 }}-alternative{{ forloop.parentloop.counter }}" value="0" />
+					<input type="hidden" name="4-rating-concern{{ forloop.counter|divide_by:2 }}-alternative{{ forloop.parentloop.counter }}" value="0" id="id_4-rating-concern{{ forloop.counter|divide_by:2 }}-alternative{{ forloop.parentloop.counter }}" />
 				{% endif %}
 			{% endfor %}
 		</div>
 		{% endfor %}
 	{% endif %}
 	<div id="extra-data">
-		<input type="hidden" id="num-alternatives" name="num-alternatives" value="{{ alternatives_data|length }}" />
-		<input type="hidden" id="num-concerns" name="num-concerns" value="{{ concerns_data|length|divide_by:2 }}" />
+		<input type="hidden" name="num-alternatives" value="{{ alternatives_data|length }}" id="num-alternatives" />
+		<input type="hidden" name="num-concerns" value="{{ concerns_data|length|divide_by:2 }}" id="num-concerns" />
 	</div>
 </div>
-{% endblock wizard_content %}
+{% endblock wizard_form_content %}

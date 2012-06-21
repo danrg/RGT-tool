@@ -11,6 +11,10 @@
 	</div>
 {% else %}
 	<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
+	<div class="step-header">
+		{% block step_header %}{% endblock %}
+	</div>
+	{% block wizard_top_content %}{% endblock %}
 	<form method="post">{% csrf_token %}
 		{{ wizard.management_form }}
 		{% if wizard.form.forms %}
@@ -19,10 +23,7 @@
 		        {{ form }}
 		    {% endfor %}
 		{% else %}
-			<div class="step-header">
-				{% block step_header %}{% endblock %}
-			</div>
-		    {% block wizard_content %}{% endblock %}
+		    {% block wizard_form_content %}{% endblock %}
 		{% endif %}
 		<div id="form-menu">
 			{% if wizard.steps.prev %}
@@ -36,5 +37,6 @@
 			</div>
 		</div>
 	</form>
+	{% block wizard_bottom_content %}{% endblock %}
 {% endif %}
 {% endblock %}

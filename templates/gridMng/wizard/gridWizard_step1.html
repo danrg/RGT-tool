@@ -4,7 +4,7 @@
 <span>Please type the name of the grid. You have also the option to add a description.</span>
 {% endblock step_header %}
 
-{% block wizard_content %}
+{% block wizard_form_content %}
 	{% for field in wizard.form %}
 		<div class="field-wrapper">
 			<div class="field-label-wrapper">
@@ -18,4 +18,4 @@
 			</div>
 		</div>
 	{% endfor %}
-{% endblock wizard_content %}
+{% endblock wizard_form_content %}
