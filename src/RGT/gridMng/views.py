@@ -872,7 +872,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
     else:
         raise ValueError('GridObj was None')
     
-#this function will create and save a basic grid. After succefull creation the grid is returned 
+#this function will create and save a basic grid. After successful creation the grid is returned 
 def createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, createRatios):
     
     if userObj != None and gridType != None and nConcerns != None and nAlternatives != None and concernValues != None and alternativeValues != None and ratioValues != None and createRatios != None:
@@ -889,27 +889,20 @@ def createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernVa
             
             alternatives= []
             concerns= []
-            i= 0
             
-            while i < nAlternatives:
+            for i in range(int(nAlternatives)):
                 alternative= Alternatives.objects.create(grid= gridObj, name= alternativeValues[i])
                 alternatives.append(alternative)
-                i+= 1
-                
-            i= 0
-            while i < nConcerns:
+            
+            for i in range(int(nConcerns)):
                 concern= Concerns.objects.create(grid= gridObj, leftPole= concernValues[i][0], rightPole= concernValues[i][1], weight= concernValues[i][2])
                 concerns.append(concern)
-                i+= 1
-            i= 0
-            j= 0
+            print ratioValues
             if createRatios:
-                while i < nConcerns:
-                    while j < nAlternatives:
+                for i in range(int(nConcerns)):
+                    for j in range(int(nAlternatives)):
                         Ratings.objects.create(concern= concerns[i], alternative= alternatives[j], rating= ratioValues[i][j])
-                        j+= 1
-                    i+= 1
-                    j= 0
+
             return gridObj
         except:
             try:

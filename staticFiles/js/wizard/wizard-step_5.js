@@ -1,34 +1,47 @@
 $(document).ready(function() {
-	setAlternativeName($('#alternatives-list').val());
+	init();
 	$('#alternatives-list').change(function(event) {
 		setAlternativeName($('#alternatives-list').val());
-		var numberOfConcerns = $('.rating-input').length;
+		var numberOfConcerns = $('#num-concerns').val();
 		var alternativeIndex = event.target.options.selectedIndex;
 		var ratingValues = new Array();
 		for (i=0;i<numberOfConcerns;i++) {
 			ratingValues[i] = $('#id_4-rating-concern'+(i+1)+'-alternative'+(alternativeIndex+1)).val();
 		}
-		$('.rating-input').each(function(index) {
-			$(this).val(ratingValues[index]);
+		$('.rating').each(function() {
+			$(this).removeAttr('checked');
 		});
-	});
-	$('#save-button').click(function(event) {
-		var ratingValues = new Array();
-		$('.rating-input').each(function(index) {
-			ratingValues[index] = $(this).val();
-		});
-		var alternativeIndex = $('#alternatives-list option:selected').index();
-		var numberOfConcerns = $('.rating-input').length;
 		for (i=0;i<numberOfConcerns;i++) {
-			$('#id_4-rating-concern'+(i+1)+'-alternative'+(alternativeIndex+1)).val(ratingValues[i]);
+			$('#'+(i+1)+'-'+ratingValues[i]).attr('checked', 'checked');
 		}
 	});
+	$('.rating').change(function() {
+		var ratingValue = $(this).val();
+		var ratingIdAttr = $(this).attr('id');
+		var splitted = ratingIdAttr.split('-');
+		var alternativeIndex = $('#alternatives-list option:selected').index();
+		var concernIndex = splitted[0];
+		$('#id_4-rating-concern'+concernIndex+'-alternative'+(alternativeIndex+1)).val(ratingValue);
+		checkRatingsCompleted();
+	});
+	function init() {
+		setAlternativeName($('#alternatives-list').val());
+		checkRatingsCompleted();
+	}
 	function setAlternativeName(text) {
 		$('#alternative-name').text(text);
 	}
-	$('.rating-input').keyup(function(event) {
-		switch (event.keyCode) {
-		}
-		console.log(event.keyCode);
-	});
+	function checkRatingsCompleted() {
+		$('.rca-data').each(function(index) {
+			var incomplete = false;
+			$(this).children().each(function() {
+				incomplete = ($(this).val() === '0') ? true : false;
+			});
+			if (incomplete) {
+				$('#alternatives-list option[id="alternative'+(index+1)+'"]').attr('class', 'incomplete');
+			} else {
+				$('#alternatives-list option[id="alternative'+(index+1)+'"]').removeAttr('class');
+			}
+		});
+	}
 });

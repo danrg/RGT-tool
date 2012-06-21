@@ -6,7 +6,7 @@
 {% endblock javascript %}
 
 {% block step_header %}
-<span>Please insert weights for the concerns.</span>
+<p>Please insert weights for the concerns. Note that the total weight must be less than or equal to 100.</p>
 {% endblock step_header %}
 
 {% block wizard_form_content %}
@@ -47,6 +47,6 @@
 
 {% block wizard_bottom_content %}
 <div id="weight-total-wrapper">
-	<span id="weight-total">0</span>
+	<p><span id="weight-total">0</span></p>
 </div>
 {% endblock wizard_bottom_content %}

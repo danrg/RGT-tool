@@ -21,8 +21,10 @@ $(document).ready(function() {
 		});
 		if (total >= 0 && total <= 100) {
 			$('#weight-total').text(total.toString());
+			$('#submit-button').attr('disabled', false);
 		} else {
 			alert('The weight total must be greater than 0 and less than 100.');
+			$('#submit-button').attr('disabled', true);
 		}
 	}
 });
