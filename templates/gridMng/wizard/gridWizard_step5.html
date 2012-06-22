@@ -6,6 +6,9 @@
 #alternative-name {
 	font-weight: bold;
 }
+select > option.incomplete {
+	color: red;
+}
 </style>
 {% endblock stylesheet %}
 
@@ -14,7 +17,8 @@
 {% endblock javascript %}
 
 {% block step_header %}
-<span>Please select an alternative that you want to rate.</span>
+<p>Please select an alternative that you want to rate.<br />
+Alternatives marked with red color are not completed. Please make sure that you insert a rating for every concern of every alternative.</p>
 {% endblock step_header %}
 
 {% block wizard_top_content %}
@@ -33,19 +37,19 @@
 </div>
 <div id="concern-list-wrapper">
 	<div id="concern-list-header">
-		<span>Insert a rating for each concern, for the alternative <span id="alternative-name"></span>. Then, click the save button to temporarily save the rating values.</span><br />
-		<span>Please note that in order to successfully save the values and move to the next step, you have to press the submit button.</span><br />
-		<span>In case that you select the previous button, you will have to enter the values again.</span>
+		<p>Insert a rating for each concern, for the alternative <span id="alternative-name"></span>.<br />
+		Please note that in order to successfully save the values and move to the next step, you have to press the submit button.<br />
+		In case that you select the previous button, you will have to select the values of the ratings again.</p>
 	</div>
 	<div id="concern-list-data">
 	{% for concern in concerns_data|sort_dict_by_key %}
 		{{ concern.1 }}
 		{% if forloop.counter|divisibleby:"2" %}
+			<div class="rating-selection">
 			{% for x in 5|get_range %}
-			<input type="radio" name="concern-{{ forloop.parentloop.counter|divide_by:2 }}" value="{{ x|add:'1' }}" id="rating-{{ forloop.parentloop.counter|divide_by:2 }}-{{ x|add:'1' }}" />
+				<input type="radio" name="concern-{{ forloop.parentloop.counter|divide_by:2 }}" value="{{ x|add:'1' }}" id="{{ forloop.parentloop.counter|divide_by:2 }}-{{ x|add:'1' }}" class="rating" />
 			{% endfor %}
-			<br />
-			<!-- <input type="text" id="rating{{ forloop.counter|divide_by:2 }}" class="rating-input" value="0" /><br /> -->
+			</div>
 		{% endif %}
 	{% endfor %}
 	</div>
