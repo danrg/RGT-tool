@@ -107,8 +107,8 @@ class WeightsForm(forms.Form):
             except:
                 # The key does not exist (key=weight name)
                 pass
-        if total > 100:
-            raise forms.ValidationError('The weight total must be less than or equal to 100') 
+        if total != 100:
+            raise forms.ValidationError('The total weight must be equal to 100') 
         return cleaned_data
     
 class RatingsForm(forms.Form):
