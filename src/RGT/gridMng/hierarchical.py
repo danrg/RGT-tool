@@ -1000,10 +1000,16 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         
         #find the min similarity of the concern
         for cluster in clustersConcern:
-            concernClusterSimilarity.append(100 * (1 - (cluster[1] / ((len(matrix) - 1) * (maxMatrixCellValue - 1)))))
+            if cluster[1] != 0:
+                concernClusterSimilarity.append(100 * (1 - (cluster[1] / ((len(matrix) - 1) * (maxMatrixCellValue - 1)))))
+            else:
+                concernClusterSimilarity.append(100)
         #find the min similarity of the alternatives
         for cluster in clustersAlternative:
-            alternativeClusterSimilarity.append(100 * (1 - (cluster[1] / ((len(matrix[0]) - 2) * (maxMatrixCellValue - 1)))))
+            if cluster[1] != 0:
+                alternativeClusterSimilarity.append(100 * (1 - (cluster[1] / ((len(matrix[0]) - 2) * (maxMatrixCellValue - 1)))))
+            else:
+                alternativeClusterSimilarity.append(100)
         
         #calculate the ruler step size 
         concernRulerStep= (len(clustersConcern) * rulerStepIncrease) + baseRulerStep
@@ -1049,7 +1055,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         
         #determine the number of steps the concern ruler has
         temp= int(min(concernClusterSimilarity))
-        if 100 > temp >= 90:
+        if 100 >= temp >= 90:
             temp= 1
         elif 90 > temp >= 80:
             temp= 2
@@ -1074,7 +1080,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         
         #determine the number of steps the alternative ruler has
         temp= int(min(alternativeClusterSimilarity))
-        if 100 > temp >= 90:
+        if 100 >= temp >= 90:
             temp= 1
         elif 90 > temp >= 80:
             temp= 2
@@ -1353,7 +1359,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
             #calculate the offset from the beginning of the ruler that xPositionNewCluster should be
             #assumption, ruler starts from 100 thus: |100 |90 |80......
             # concernRulerStep/10 -> every step = 10% thus this calculation give us the amount of pixels that 1% represents. 100 - concernClusterSimilarity[i] -> this calculation gives us the percentage that a percentage is away from 100%.
-            xPositionNewCluster= ( (concernRulerStep/10) * ( 100 - concernClusterSimilarity[i]) ) + xConcernRulerStartPoint
+            xPositionNewCluster= int(( (concernRulerStep/10.0) * ( 100 - concernClusterSimilarity[i]) ) + xConcernRulerStartPoint)
             yPositionNewCluster= temp2 + (temp - temp2)/2
             
             for subCluser in subSetClusters:
@@ -1465,7 +1471,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
             #calculate the offset from the beginning of the ruler that xPositionNewCluster should be
             #assumption, ruler starts from 100 thus: |100 |90 |80......
             # alternativeRulerStep/10 -> every step = 10% thus this calculation give us the amount of pixels that 1% represents. 100 - concernClusterSimilarity[i] -> this calculation gives us the percentage that a percentage is away from 100%.
-            xPositionNewCluster= ( (alternativeRulerStep/10) * ( 100 - alternativeClusterSimilarity[i]) ) + xAlternativeRulerStartPoint
+            xPositionNewCluster= int(( (alternativeRulerStep/10.0) * ( 100 - alternativeClusterSimilarity[i]) ) + xAlternativeRulerStartPoint)
             yPositionNewCluster= temp2 + (temp - temp2)/2
             
             for subCluser in subSetClusters:
