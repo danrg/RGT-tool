@@ -2,7 +2,7 @@
 
 {% block title %}
 	RGT | Grids - Wizard
-{% endblock %}
+{% endblock title %}
 
 {% block content %}
 {% if not user.is_active %}
@@ -39,4 +39,4 @@
 	</form>
 	{% block wizard_bottom_content %}{% endblock %}
 {% endif %}
-{% endblock %}
+{% endblock content %}
