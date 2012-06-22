@@ -17,6 +17,7 @@ class GridWizard(SessionWizardView):
             try:
                 context.update({'alternatives_data':self.get_cleaned_data_for_step('1')})
             except:
+                #
                 pass
         elif self.steps.step1 == 4:
             # Get the concerns data from step 2 (zero index) if the process is on step 4 (one index)

@@ -27,13 +27,20 @@
 			<div class="field-input-wrapper">
 				{{ field }}
 			</div>
-			<div class="field-errors-wrapper">
-				{{ field.errors }}
-			</div>
+			{% if field.errors %}
+				<div class="field-errors-wrapper">
+					{{ field.errors }}
+				</div>
+			{% endif %}
 		</div>
 	</div>
 	{% endfor %}
 {% endif %}
 </div>
+{% if wizard.form.errors %}
+<div id="form-errors-wrapper">
+	{{ wizard.form.non_field_errors }}
+</div>
+{% endif %}
 <input type="hidden" name="num-alternatives" value="{% if wizard.form.fields|length == 0 %}1{% else %}{{ wizard.form.fields|length }}{% endif %}" id="num-alternatives" />
 {% endblock wizard_form_content %}
