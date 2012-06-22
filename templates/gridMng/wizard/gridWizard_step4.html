@@ -42,6 +42,13 @@
    		{% endfor %}
 	{% endif %}
 {% endif %}
+<div id="form-errors-wrapper">
+	<ul class="errorlist">
+	{% for error in wizard.form.non_field_errors %}
+		<li>{{ error }}</li>
+	{% endfor %}
+	</ul>
+</div>
 <input type="hidden" name="num-weights" value="{% if wizard.form.fields|length == 0 %}{{ concerns_data|length|divide_by:2 }}{% else %}{% if not concerns_data %}{{ wizard.form.fields|length }}{% else %}{{ concerns_data|length|divide_by:2 }}{% endif %}{% endif %}" id="num-weights" />
 {% endblock wizard_form_content %}
 

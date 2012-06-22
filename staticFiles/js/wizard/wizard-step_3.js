@@ -2,14 +2,16 @@ $(document).ready(function() {
 	$('.drag').draggable();
 	$('.drop').droppable({
 		drop: function(event, ui) {
+			// make the element draggable again so it can be moved to another list
 			var i = ui.draggable;
 			$(this).append(i.clone().attr('style', 'position: relative;').draggable());
+			// remove the element from the previous list
 			$(i).remove();
 		}
 	});
 	
 	$('#add-conc-but').click(function() {
-		// get references of the left and right part of the concerns thea the user inserted
+		// get references of the left and right part of the concerns the user inserted
 		var lcField = $('#left-conc');
 		var rcField = $('#right-conc');
 		// get the number of cloned inputs

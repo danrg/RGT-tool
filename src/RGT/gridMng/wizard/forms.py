@@ -21,13 +21,13 @@ class AlternativesForm(forms.Form):
     def clean(self):
         cleaned_data = super(AlternativesForm, self).clean()
         alternatives = []
-        # construct a list with the alternatives names
+        # Construct a list with the alternatives names
         for i in range(int(self.num_alternatives)):
             # In case the field with the alternative name is empty then, it is not contained in the
             # cleaned data, thats why we catch the exception
             try:
-                name = cleaned_data['alternative%d' % (i+1)]
-                alternatives.append(name)
+                alternative = cleaned_data['alternative%d' % (i+1)]
+                alternatives.append(alternative)
             except:
                 # The key does not exist (key=alternative name)
                 pass
@@ -60,16 +60,16 @@ class ConcernsForm(forms.Form):
             try:
                 # In case the field with the concern left pole name is empty then, it is not contained in the
                 # cleaned data, thats why we catch the exception
-                left = cleaned_data['concern%d-left' % (i+1)]
-                concerns.append(left)
+                concern_left = cleaned_data['concern%d-left' % (i+1)]
+                concerns.append(concern_left)
             except:
                 # The key does not exist (key=concern left pole name)
                 pass
             try:
                 # In case the field with the concern right pole name is empty then, it is not contained in the
                 # cleaned data, thats why we catch the exception
-                right = cleaned_data['concern%d-right' % (i+1)]
-                concerns.append(right)
+                concern_right = cleaned_data['concern%d-right' % (i+1)]
+                concerns.append(concern_right)
             except:
                 # The key does not exist (key=concern right pole name)
                 pass
@@ -84,12 +84,32 @@ class WeightsForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(WeightsForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
-            for x in range(int(self.data['num-weights'])):
+            self.num_weights = self.data['num-weights']
+            for x in range(int(self.num_weights)):
                 weight_name = 'weight%d' % (x+1)
                 # Every time, weight fields are added with the name 'weight..', and this because django
                 # always adds '3-' % (where 3 the number of the step with zero index) prefix in the name,
                 # with this the names are kept always the same
                 self.fields[weight_name] = forms.FloatField()
+    
+    def clean(self):
+        cleaned_data = super(WeightsForm, self).clean()
+        total = 0
+        # Calculate the total weight and if it is more than 100 then return a validation error
+        for i in range(int(self.num_weights)):
+            try:
+                weight = cleaned_data['weight%d' % (i+1)]
+                # Try to parse the values as float
+                try:
+                    total += float(weight) 
+                except:
+                    print 'error in conversion of %s' % weight
+            except:
+                # The key does not exist (key=weight name)
+                pass
+        if total > 100:
+            raise forms.ValidationError('The weight total must be less than or equal to 100') 
+        return cleaned_data
     
 class RatingsForm(forms.Form):
     # Override the init in order to dynamically add fields to the form in order to be saved,

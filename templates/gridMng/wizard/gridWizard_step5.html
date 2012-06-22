@@ -81,6 +81,11 @@ Alternatives marked with red color are not completed. Please make sure that you 
 		</div>
 		{% endfor %}
 	{% endif %}
+	{% if wizard.form.errors %}
+		<div id="form-errors-wrapper">
+			{{ wizard.form.non_field_errors }}
+		</div>
+	{% endif %}
 	<div id="extra-data">
 		<input type="hidden" name="num-alternatives" value="{{ alternatives_data|length }}" id="num-alternatives" />
 		<input type="hidden" name="num-concerns" value="{{ concerns_data|length|divide_by:2 }}" id="num-concerns" />
