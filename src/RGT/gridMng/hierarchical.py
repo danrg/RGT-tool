@@ -11,42 +11,84 @@ from PIL import Image, ImageDraw, ImageFont #@UnresolvedImport
 from RGT.settings import DENDROGRAM_FONT_LOCATION
 
 
-def hcluster(matrix):
+#calculate the linkage of the distance matrix.
+class MaxLinkageAlgorithm:
+    
+    """
+    The calculateLinkage method compares all the distances found in row[rowNumber][colNumber] and returns the one that is the largest. colNumber are the numbers found in colNumbers
+    matrix format= [    [[], [name1], [name2], [name3], ...]
+                         [[name1], value1, value2, value3, ....]
+                         [[name2], value1, value2, value3, ....]
+                         [[name3], value1, value2, value3, ....]
+                         [....]
+                    ]
+    
+    rowNumber= int
+    colNumbers= [int, int,...] -> the col number of a cell in the row of the matrix
+    return int
+    """
+    @staticmethod        
+    def calculateLinkage(matrix, rowNumber, colNumbers):
+        base= colNumbers.pop()
+        if len(colNumbers) >= 1:
+            return max(matrix[rowNumber][base], MaxLinkageAlgorithm.calculateLinkage(matrix, rowNumber, colNumbers))
+        else:
+            return matrix[rowNumber][base]
+
+# create the distance matrix based on the euclidean distance (n dimensions)    
+class EuclideanDistanceAlgorithm:
+    
+    @staticmethod 
+    def calculateDistance(matrix):
+        r= 0;
+        distanceMatrix= [[[]]];
+        nRow= len(matrix);
+        
+        #create the distance matrix, format is: 
+        """
+            [    [[], [name1], [name2], [name3], ...]
+                 [[name1], value1, value2, value3, ....]
+                 [[name2], value1, value2, value3, ....]
+                 [[name3], value1, value2, value3, ....]
+                 [....]
+            ]
+        """
+        while r < nRow:
+            columns= [[]]; # the columns that will be added to the distance matrix
+            currentRow= matrix[r];
+            nCol= len(matrix[r]);
+            distance= 0;
+            i= 0;
+            j= 1; #first columns is a string
+            #calculate the distance for all the elements of the r row of the matrix and add the result to the distance matrix
+            while i < nRow:
+                while j < nCol:
+                    temp=  (currentRow[j] - matrix[i][j]);
+                    distance+= temp * temp;
+                    j+= 1;
+                i+= 1;
+                j= 1;  
+                columns.append(sqrt(distance));
+                distance= 0;
+            i= 0;
+            distanceMatrix.append(columns);
+            distanceMatrix[r + 1][0]= [matrix[r][0]];
+            r+= 1;
+        r= 0;
+        #add the names to the first column of each row
+        while r < nRow:
+            distanceMatrix[0].append([matrix[r][0]]);
+            r+= 1;
+            
+        return distanceMatrix
+
+def hcluster(matrix, distanceAlgorithm= EuclideanDistanceAlgorithm(), linkageAlgorithm= MaxLinkageAlgorithm()):
     
     # create the distance matrix based on the euclidean distance (n dimensions)
-    distanceMatrix= [[[]]];
-    nRow= len(matrix);
-    r= 0;
-    
-    while r < nRow:
-        columns= [[]]; # the columns that will be added to the distance matrix
-        currentRow= matrix[r];
-        c= len(matrix[r]);
-        distance= 0;
-        i= 0;
-        j= 1; #first columns is a string
-        while i < nRow:
-            while j < c:
-                temp=  (currentRow[j] - matrix[i][j]);
-                distance+= temp * temp;
-                j+= 1;
-            i+= 1;
-            j= 1;  
-            columns.append(sqrt(distance));
-            distance= 0;
-        i= 0;
-        distanceMatrix.append(columns);
-        distanceMatrix[r + 1][0]= [matrix[r][0]];
-        r+= 1;
-    r= 0;
-    while r < nRow:
-        distanceMatrix[0].append([matrix[r][0]]);
-        r+= 1;
-    print distanceMatrix
+    distanceMatrix= distanceAlgorithm.calculateDistance(matrix)
     
     #now lets make the cluster
     result= []; #each position in result represent the found cluster in step n
-    #result2= [];
     
     maxSteps= 100;
     i= 0;
@@ -54,33 +96,47 @@ def hcluster(matrix):
     while i < maxSteps:
         nRow= len(distanceMatrix);
         j=1;
-        bestCluster1= -1;
-        bestCluster2= -1;
+        bestDistances= None
         distance= sys.maxint;
         
         while j < nRow:
-            k= 1;
+            k= 1 + j;
             while k < nRow:
                 temp= distanceMatrix[j][k];
                 if j != k and distance > temp:
                     distance= temp;
-                    bestCluster1= j;
-                    bestCluster2= k;
+                    bestDistances= [(j,k)]
+                elif j != k and distance == temp:
+                    #we are only checking 1/2 of the matrix, so the results will be unique
+                    bestDistances.append((j,k));
                 k+= 1;
             j+=1
-        #result2.append(distanceMatrix[bestCluster1][0] + distanceMatrix[0][bestCluster2]);
-        result.append((distanceMatrix[bestCluster1][0] + distanceMatrix[0][bestCluster2], distance));
+        tempCluster= []
+        yPositions= []
+        #get the names of all the clusters that have the same distance
+        for position in bestDistances:
+            #to check if the cluster is already present we need to remove the array around it that is because we use  distanceMatrix[0][position[1]][0], so we can get the string
+            if not distanceMatrix[0][position[1]][0] in tempCluster:
+                tempCluster+= distanceMatrix[0][position[1]]
+                yPositions.append(position[1])
+            if not distanceMatrix[position[0]][0][0] in tempCluster:
+                tempCluster+= distanceMatrix[position[0]][0]
+                yPositions.append(position[0])
+        result.append((tempCluster, distance))
 
         #now lets update the distance matrix
         j= 1;
         newCol= [[]];
         maxDistance= -1;
+        yPositions.sort() # this list needs to be sorted because later on we wills start deleting stuff so the position of the deletion must be from smaller to bigger
         while j < nRow:
-            if bestCluster1 != j and bestCluster2 != j:
-                maxDistance= max(distanceMatrix[j][bestCluster1], distanceMatrix[j][bestCluster2]);
+            if not j in yPositions:
+                maxDistance= linkageAlgorithm.calculateLinkage(distanceMatrix, j, yPositions[:]);
                 distanceMatrix[j].append(maxDistance);
-                del distanceMatrix[j][bestCluster1];
-                del distanceMatrix[j][bestCluster2 - 1];
+                k= 0
+                while k < len(yPositions):
+                    del distanceMatrix[j][yPositions[k] - k];
+                    k+= 1
                 newCol.append(maxDistance);
             j+= 1;
         
@@ -89,13 +145,18 @@ def hcluster(matrix):
         newCol[0]= result[i][0]; # result contains tuples, thus i right now i want result at position i and the 1st object in the tuple, that would be the array of names 
         distanceMatrix.append(newCol);
         
-        del distanceMatrix[bestCluster1];
-        del distanceMatrix[bestCluster2 - 1];
+        #delete the old columns that separately formed the new cluster
+        j= 0
+        while j < len(yPositions):
+            #the y position can be used as x as 1/2 of distance matrix is a reflection of the other 1/2 
+            del distanceMatrix[yPositions[j]- j];
+            j+= 1
         
         # now fix the first row of the matrix
-        del distanceMatrix[0][bestCluster1];
-        del distanceMatrix[0][bestCluster2 - 1];
-        #distanceMatrix[0].append(result[i])
+        j= 0
+        while j < len(yPositions):
+            del distanceMatrix[0][yPositions[j]-j];
+            j+= 1
         distanceMatrix[0].append(result[i][0]);
         
         #check if we have merged all the clusters if so stop
@@ -1285,7 +1346,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
                     if (subSetClusters[j])[2] > temp:
                         temp= (subSetClusters[j])[2]
                     if (subSetClusters[j])[2] < temp2:
-                        temp2= (subSetClusters[j])[1]
+                        temp2= (subSetClusters[j])[2]
                     #if (subSetClusters[j])[1] > xPositionNewCluster:
                     #    xPositionNewCluster= (subSetClusters[j])[1]
                 j+= 1
@@ -1397,7 +1458,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
                     if (subSetClusters[j])[2] > temp:
                         temp= (subSetClusters[j])[2]
                     if (subSetClusters[j])[2] < temp2:
-                        temp2= (subSetClusters[j])[1]
+                        temp2= (subSetClusters[j])[2]
                     #if (subSetClusters[j])[1] > xPositionNewCluster:
                     #    xPositionNewCluster= (subSetClusters[j])[1]
                 j+= 1
