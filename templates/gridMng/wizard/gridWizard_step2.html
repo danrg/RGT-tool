@@ -1,11 +1,14 @@
 {% extends 'gridMng/wizard/gridWizard_base.html' %}
+{% load wizard_extras %}
 
 {% block javascript %}
 <script type="text/javascript" src="{{ STATIC_URL }}js/wizard/wizard-step_2.js"></script>
 {% endblock javascript %}
 
 {% block step_header %}
-<span>Please insert the alternatives. Make sure that you press the submit button in order to confirm the selection.</span>
+<div class="step-header">
+	<span>Please insert the alternatives. Make sure that you press the submit button in order to confirm the selection.</span>
+</div>
 {% endblock step_header %}
 
 {% block wizard_top_content %}
@@ -17,9 +20,11 @@
 {% block wizard_form_content %}
 <div class="alt-list">
 	{% if wizard.form.fields|length == 0 %}
-	<div id="input1" class="cloned">
-		<input type="text" name="1-alternative1" value="" id="id_1-alternative1" />
-	</div>
+		{% for i in 3|get_range %}
+		<div id="input{{ i|add:'1' }}" class="cloned">
+			<input type="text" name="1-alternative{{ i|add:'1' }}" value="" id="id_1-alternative{{ i|add:'1' }}" />
+		</div>
+		{% endfor %}
 	{% else %}
 	{% for field in wizard.form %}
 	<div id="input{{ forloop.counter }}" class="cloned">
@@ -42,5 +47,5 @@
 	{{ wizard.form.non_field_errors }}
 </div>
 {% endif %}
-<input type="hidden" name="num-alternatives" value="{% if wizard.form.fields|length == 0 %}1{% else %}{{ wizard.form.fields|length }}{% endif %}" id="num-alternatives" />
+<input type="hidden" name="num-alternatives" value="{% if wizard.form.fields|length == 0 %}3{% else %}{{ wizard.form.fields|length }}{% endif %}" id="num-alternatives" />
 {% endblock wizard_form_content %}

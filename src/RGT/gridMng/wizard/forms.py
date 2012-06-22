@@ -23,7 +23,7 @@ class AlternativesForm(forms.Form):
         alternatives = []
         # Construct a list with the alternatives names
         for i in range(int(self.num_alternatives)):
-            # In case the field with the alternative name is empty then, it is not contained in the
+            # In case the field with the alternative name has its own validation error then, it is not contained in the
             # cleaned data, thats why we catch the exception
             try:
                 alternative = cleaned_data['alternative%d' % (i+1)]
@@ -57,17 +57,17 @@ class ConcernsForm(forms.Form):
         concerns = []
         # Construct a list with the concerns names
         for i in range(int(self.num_concerns)):
+            # In case the field with the concern left pole name has its own validation error then, it is not contained in the
+            # cleaned data, thats why we catch the exception
             try:
-                # In case the field with the concern left pole name is empty then, it is not contained in the
-                # cleaned data, thats why we catch the exception
                 concern_left = cleaned_data['concern%d-left' % (i+1)]
                 concerns.append(concern_left)
             except:
                 # The key does not exist (key=concern left pole name)
                 pass
+            # In case the field with the concern right pole name has its own validation error then, it is not contained in the
+            # cleaned data, thats why we catch the exception
             try:
-                # In case the field with the concern right pole name is empty then, it is not contained in the
-                # cleaned data, thats why we catch the exception
                 concern_right = cleaned_data['concern%d-right' % (i+1)]
                 concerns.append(concern_right)
             except:
@@ -97,13 +97,11 @@ class WeightsForm(forms.Form):
         total = 0
         # Calculate the total weight and if it is more than 100 then return a validation error
         for i in range(int(self.num_weights)):
+            # In case the field with the weight name has its own validation error then, it is not contained in the
+            # cleaned data, thats why we catch the exception
             try:
                 weight = cleaned_data['weight%d' % (i+1)]
-                # Try to parse the values as float
-                try:
-                    total += float(weight) 
-                except:
-                    print 'error in conversion of %s' % weight
+                total += float(weight) 
             except:
                 # The key does not exist (key=weight name)
                 pass

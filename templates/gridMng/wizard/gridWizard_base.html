@@ -11,9 +11,7 @@
 	</div>
 {% else %}
 	<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
-	<div class="step-header">
-		{% block step_header %}{% endblock %}
-	</div>
+	{% block step_header %}{% endblock %}
 	{% block wizard_top_content %}{% endblock %}
 	<form method="post">{% csrf_token %}
 		{{ wizard.management_form }}

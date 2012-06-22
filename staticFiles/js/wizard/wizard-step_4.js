@@ -24,16 +24,5 @@ $(document).ready(function() {
 		});
 		// update the total weight label
 		$('#weight-total').text(total.toString());
-		if (total == 100) {
-			// remove the error
-			$('#form-errors-wrapper .errorlist').children().each(function() {
-				$(this).remove();
-			});
-		} else {
-			// show the error
-			if ($('#form-errors-wrapper .errorlist').children().length < 1) {
-				$('#form-errors-wrapper .errorlist').append('<li>The total weight must be equal to 100</li>');
-			}
-		}
 	}
 });
