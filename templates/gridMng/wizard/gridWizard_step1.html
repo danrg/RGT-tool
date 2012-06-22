@@ -13,9 +13,11 @@
 			<div class="field-input-wrapper">
 				{{ field }}
 			</div>
-			<div class="field-errors-wrapper">
-				{{ field.errors }}
-			</div>
+			{% if field.errors %}
+				<div class="field-errors-wrapper">
+					{{ field.errors }}
+				</div>
+			{% endif %}
 		</div>
 	{% endfor %}
 {% endblock wizard_form_content %}

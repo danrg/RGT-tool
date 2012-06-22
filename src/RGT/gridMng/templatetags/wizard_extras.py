@@ -14,13 +14,15 @@ def divide_by(value, arg):
 
 @register.filter
 def sort_dict_by_key(dictionary):
-    # return list as [(), ()]
+    # return the dictionary sorted as list [(), ()]
     return sorted(dictionary.items()) if dictionary else None
 
 @register.filter
 def get_value_of_dict(dictionary, index):
+    # return the value of the dictionary with key 'index'
     return dictionary[index]
 
 @register.filter
 def get_range(value):
+    # return the range of the value
     return range(value)

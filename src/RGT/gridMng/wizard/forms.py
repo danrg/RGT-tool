@@ -5,48 +5,94 @@ class GeneralsForm(forms.Form):
     description = forms.CharField(widget=forms.Textarea, required=False)
     
 class AlternativesForm(forms.Form):
-    # override the init in order to dynamically add fields to the form in order to be saved,
+    # Override the init in order to dynamically add fields to the form in order to be saved,
     # the fields are saved only when the user selects submit
     def __init__(self, *args, **kwargs):
         super(AlternativesForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
-            for x in range(int(self.data['num-alternatives'])):
+            self.num_alternatives = self.data['num-alternatives']
+            for x in range(int(self.num_alternatives)):
                 alternativeName = 'alternative%d' % (x+1)
-                # every time, alternative fields are added with the name 'alternative..', and this because
-                # Django always adds '1-' % (where 1 the number of the step with zero index) prefix in the name,
+                # Every time, alternative fields are added with the name 'alternative..', and this because django
+                # always adds '1-' % (where 1 the number of the step with zero index) prefix in the name,
                 # with this the names are kept always the same
                 self.fields[alternativeName] = forms.CharField()
     
+    def clean(self):
+        cleaned_data = super(AlternativesForm, self).clean()
+        alternatives = []
+        # construct a list with the alternatives names
+        for i in range(int(self.num_alternatives)):
+            # In case the field with the alternative name is empty then, it is not contained in the
+            # cleaned data, thats why we catch the exception
+            try:
+                name = cleaned_data['alternative%d' % (i+1)]
+                alternatives.append(name)
+            except:
+                # The key does not exist (key=alternative name)
+                pass
+        # Check if there are duplicate names for the alternatives
+        if len(alternatives) != len(set(alternatives)):
+            raise forms.ValidationError('It is not allowed to have the same name for alternatives')
+        return cleaned_data
+    
 class ConcernsForm(forms.Form):
-    # override the init in order to dynamically add fields to the form in order to be saved,
+    # Override the init in order to dynamically add fields to the form in order to be saved,
     # the fields are saved only when the user selects submit
     def __init__(self, *args, **kwargs):
         super(ConcernsForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
-            for x in range(int(self.data['num-concerns'])):
+            self.num_concerns = self.data['num-concerns']
+            for x in range(int(self.num_concerns)):
                 left_concern_name = 'concern%d-left' % (x+1)
                 right_concern_name = 'concern%d-right' % (x+1)
-                # every time, concern fields are added with the names 'concern..-left' and 'concern..-right', and this because
-                # Django always adds '2-' % (where 2 the number of the step with zero index) prefix in the name,
+                # Every time, concern fields are added with the names 'concern..-left' and 'concern..-right', and this because django
+                # always adds '2-' % (where 2 the number of the step with zero index) prefix in the name,
                 # with this the names are kept always the same
                 self.fields[left_concern_name] = forms.CharField()
                 self.fields[right_concern_name] = forms.CharField()
     
+    def clean(self):
+        cleaned_data = super(ConcernsForm, self).clean()
+        concerns = []
+        # Construct a list with the concerns names
+        for i in range(int(self.num_concerns)):
+            try:
+                # In case the field with the concern left pole name is empty then, it is not contained in the
+                # cleaned data, thats why we catch the exception
+                left = cleaned_data['concern%d-left' % (i+1)]
+                concerns.append(left)
+            except:
+                # The key does not exist (key=concern left pole name)
+                pass
+            try:
+                # In case the field with the concern right pole name is empty then, it is not contained in the
+                # cleaned data, thats why we catch the exception
+                right = cleaned_data['concern%d-right' % (i+1)]
+                concerns.append(right)
+            except:
+                # The key does not exist (key=concern right pole name)
+                pass
+        # Check if there are duplicate names for the concerns names
+        if len(concerns) != len(set(concerns)):
+            raise forms.ValidationError('It is not allowed to have the same name for concerns')
+        return cleaned_data
+    
 class WeightsForm(forms.Form):
-    # override the init in order to dynamically add fields to the form in order to be saved,
+    # Override the init in order to dynamically add fields to the form in order to be saved,
     # the fields are saved only when the user selects submit
     def __init__(self, *args, **kwargs):
         super(WeightsForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
             for x in range(int(self.data['num-weights'])):
                 weight_name = 'weight%d' % (x+1)
-                # every time, weight fields are added with the name 'weight..', and this because
-                # Django always adds '3-' % (where 3 the number of the step with zero index) prefix in the name,
+                # Every time, weight fields are added with the name 'weight..', and this because django
+                # always adds '3-' % (where 3 the number of the step with zero index) prefix in the name,
                 # with this the names are kept always the same
                 self.fields[weight_name] = forms.FloatField()
     
 class RatingsForm(forms.Form):
-    # override the init in order to dynamically add fields to the form in order to be saved,
+    # Override the init in order to dynamically add fields to the form in order to be saved,
     # the fields are saved only when the user selects submit
     def __init__(self, *args, **kwargs):
         super(RatingsForm, self).__init__(*args, **kwargs)
@@ -54,7 +100,7 @@ class RatingsForm(forms.Form):
             for x in range(int(self.data['num-alternatives'])):
                 for z in range(int(self.data['num-concerns'])):
                     rating_name = 'rating-concern%d-alternative%d' % ((z+1), (x+1))
-                    # every time, rating fields are added with the name 'rating-concern..-alternative..', and this because
-                    # Django always adds '4-' % (where 4 the number of the step with zero index) prefix in the name,
+                    # Every time, rating fields are added with the name 'rating-concern..-alternative..', and this because django
+                    # always adds '4-' % (where 4 the number of the step with zero index) prefix in the name,
                     # with this the names are kept always the same
                     self.fields[rating_name] = forms.CharField(widget=forms.HiddenInput())

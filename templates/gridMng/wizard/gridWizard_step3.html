@@ -62,9 +62,11 @@
 				<div class="field-input-wrapper">
 					{{ field }}
 				</div>
-				<div class="field-errors-wrapper">
-					{{ field.errors }}
-				</div>
+				{% if field.errors %}
+					<div class="field-errors-wrapper">
+						{{ field.errors }}
+					</div>
+				{% endif %}
 			</div>
 			{% if forloop.counter|divisibleby:"2" %}
 				{% if forloop.counter|divide_by:2 < wizard.form.fields|length|divide_by:2 %}
@@ -76,5 +78,10 @@
 		</div>
 	{% endif %}
 </div>
+{% if wizard.form.errors %}
+<div id="form-errors-wrapper">
+	{{ wizard.form.non_field_errors }}
+</div>
+{% endif %}
 <input type="hidden" name="num-concerns" value="{{ wizard.form.fields|length|divide_by:2 }}" id="num-concerns" />
 {% endblock wizard_form_content %}
