@@ -7,15 +7,9 @@
 
 {% block step_header %}
 <div class="step-header">
-	<span>Please insert the alternatives. Make sure that you press the submit button in order to confirm the selection.</span>
+	<p>Please insert the alternatives. Make sure that you press the submit button in order to confirm the selection.</p>
 </div>
 {% endblock step_header %}
-
-{% block wizard_top_content %}
-<div id="btn-add-wrapper">
-   	<input type="button" id="btn-add" value="Add" />
-</div>
-{% endblock wizard_top_content %}
 
 {% block wizard_form_content %}
 <div class="alt-list">
@@ -49,3 +43,9 @@
 {% endif %}
 <input type="hidden" name="num-alternatives" value="{% if wizard.form.fields|length == 0 %}3{% else %}{{ wizard.form.fields|length }}{% endif %}" id="num-alternatives" />
 {% endblock wizard_form_content %}
+
+{% block after_wizard_form_content %}
+<div id="btn-add-wrapper">
+   	<input type="button" id="btn-add" value="Add" />
+</div>
+{% endblock after_wizard_form_content %}

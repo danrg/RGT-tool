@@ -7,8 +7,13 @@ $(document).ready(function() {
 	    // update count of alternatives
 	    $('#num-alternatives').val(newNum);
 	    // create the new element
-	    var newElem	= '<div id="input'+newNum+'" class="cloned"><input type="text" name="1-alternative'+newNum+'" id="id_1-alternative'+newNum+'" /></div>'
+	    var divId = 'input'+newNum;
+	    var inputName = '1-alternative'+newNum;
+	    var inputId = 'id_1-alternative'+newNum;
+	    var newElem	= '<div id="'+divId+'" class="cloned"><input type="text" name="'+inputName+'" id="'+inputId+'" /></div>'
 	    // insert the new element after the last input field
 	    $('#input' + num).after(newElem);
+	    // focus on the new element
+	    $('#'+inputId).focus();
 	});
 });

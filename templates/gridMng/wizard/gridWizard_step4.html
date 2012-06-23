@@ -34,7 +34,7 @@
 			</div>
 		</div>
 	{% endfor %}
-	{% if concerns_data|length|divide_by:2 > wizard.form.fields|length %}
+	{% if concerns_length > wizard.form.fields|length %}
    		{% for concern in concerns_data|sort_dict_by_key %}
    			{% if forloop.counter|divide_by:2 > wizard.form.fields|length %}
     			<div id="input{{ forloop.counter }}" class="cloned">
@@ -51,7 +51,7 @@
 	{% endfor %}
 	</ul>
 </div>
-<input type="hidden" name="num-weights" value="{% if wizard.form.fields|length == 0 %}{{ concerns_data|length|divide_by:2 }}{% else %}{% if not concerns_data %}{{ wizard.form.fields|length }}{% else %}{{ concerns_data|length|divide_by:2 }}{% endif %}{% endif %}" id="num-weights" />
+<input type="hidden" name="num-weights" value="{% if wizard.form.fields|length == 0 %}{{ concerns_length }}{% else %}{% if not concerns_data %}{{ wizard.form.fields|length }}{% else %}{{ concerns_length }}{% endif %}{% endif %}" id="num-weights" />
 {% endblock wizard_form_content %}
 
 {% block wizard_bottom_content %}

@@ -26,7 +26,7 @@ select > option.incomplete {
 {% block wizard_top_content %}
 <div id="alternatives-wrapper">
 	<div id="alternatives-selection-wrapper">
-		<select id="alternatives-list" size="{{ alternatives_data|length }}">
+		<select id="alternatives-list" size="{{ alternatives_length }}">
 		{% for alternative in alternatives_data|sort_dict_by_key %}
 			{% if forloop.counter == 1 %}
 				<option id="{{ alternative.0 }}" selected="selected">{{ alternative.1 }}</option>
@@ -64,10 +64,10 @@ select > option.incomplete {
 		<div id="input1" class="rca-data">
 		{% for field in wizard.form %}
 			{{ field }}
-			{% if forloop.counter|divisibleby:"2" %}
-				{% if forloop.counter|divide_by:2 < wizard.form.fields|length|divide_by:2 %}
+			{% if forloop.counter|divisibleby:concerns_length %}
+				{% if forloop.counter|divide_by:concerns_length < wizard.form.fields|length|divide_by:concerns_length %}
 					</div>
-					<div id="input{{ forloop.counter|divide_by:2|add:'1' }}" class="rca-data">
+					<div id="input{{ forloop.counter|divide_by:concerns_length|add:'1' }}" class="rca-data">
 				{% endif %}
 			{% endif %}
 		{% endfor %}
@@ -89,8 +89,8 @@ select > option.incomplete {
 		</div>
 	{% endif %}
 	<div id="extra-data">
-		<input type="hidden" name="num-alternatives" value="{{ alternatives_data|length }}" id="num-alternatives" />
-		<input type="hidden" name="num-concerns" value="{{ concerns_data|length|divide_by:2 }}" id="num-concerns" />
+		<input type="hidden" name="num-alternatives" value="{{ alternatives_length }}" id="num-alternatives" />
+		<input type="hidden" name="num-concerns" value="{{ concerns_length }}" id="num-concerns" />
 	</div>
 </div>
 {% endblock wizard_form_content %}
