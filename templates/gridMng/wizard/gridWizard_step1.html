@@ -1,23 +1,33 @@
 {% extends 'gridMng/wizard/gridWizard_base.html' %}
 
-{% block step_header %}
-<div class="step-header">
-	<span>Please type the name of the grid. You have also the option to add a description.</span>
+{% block stylesheet %}
+<style type="text/css">
+#form-menu {
+	margin-top: 5px;
+}
+</style>
+{% endblock stylesheet %}
+
+{% block step_info %}
+<div class="step-info">
+	<p>In this step you can type the name of the grid, as well as a description for it.</p>
 </div>
-{% endblock step_header %}
+{% endblock step_info %}
 
 {% block wizard_form_content %}
 	{% for field in wizard.form %}
 		<div class="field-wrapper">
 			<div class="field-label-wrapper">
-				{{ field.label }}	
+				{{ field.label_tag }}	
 			</div>
 			<div class="field-input-wrapper">
 				{{ field }}
 			</div>
 			{% if field.errors %}
-				<div class="field-errors-wrapper">
-					{{ field.errors }}
+				<div class="error">
+				{% for error in field.errors %}
+					<span>{{ error }}</span>
+				{% endfor %}
 				</div>
 			{% endif %}
 		</div>

@@ -6,7 +6,7 @@ MAX_RATING = 5
 
 class GeneralsForm(forms.Form):
     grid_name = forms.CharField(widget=forms.TextInput(attrs={'size':'45'}))
-    description = forms.CharField(widget=forms.Textarea, required=False)
+    description = forms.CharField(widget=forms.Textarea(), required=False)
     
 class AlternativesForm(forms.Form):
     # Override the initialize in order to dynamically add fields to the form in order to be saved,

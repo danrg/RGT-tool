@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block title %}
-	RGT | Grids - Wizard
+	RGT | Grids - Create
 {% endblock title %}
 
 {% block content %}
@@ -10,8 +10,13 @@
 		<p>Please verify your email in order to use this part of the application! Thank you!</p>
 	</div>
 {% else %}
-	<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
-	{% block step_header %}{% endblock %}
+	<div id="wizard-header">
+		<h2>Create Grid</h2>
+	</div>
+	<div id="wizard-step-header">
+		<h3>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</h3>
+	</div>
+	{% block step_info %}{% endblock %}
 	{% block wizard_top_content %}{% endblock %}
 	<form method="post">{% csrf_token %}
 		{{ wizard.management_form }}
@@ -32,7 +37,7 @@
 			</div>
 			{% endif %}
 			<div id="form-sub-menu">
-				<input type="submit" value="submit" id="submit-button" />
+				<input type="submit" value="Submit" id="submit-button" />
 			</div>
 		</div>
 	</form>
