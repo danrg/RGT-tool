@@ -4,15 +4,27 @@
 {% block stylesheet %}
 <style type="text/css">
 .drop {
-	border-style: solid;
-	border-width: 1px;
-	width: 200px;
+	-moz-box-shadow: 0 0 5px #888;
+	-webkit-box-shadow: 0 0 5px #888;
+	box-shadow: 0 0 5px #888;
+	width: 400px;
 	height: 200px;
+	margin-bottom: 5px;
+	padding: 5px;
 }
 .drag {
-	width: 100px;
-	background-color: blue;
+	padding: 5px;	
 }
+.alt-data {
+	-moz-box-shadow: 0 0 5px #888;
+	-webkit-box-shadow: 0 0 5px #888;
+	box-shadow: 0 0 5px #888;
+	padding: 3px 3px 3px 5px; 
+}
+.list-head {
+	margin-bottom: 3px;
+}
+
 #alt-list {
 	margin-top: 10px;
 }
@@ -34,6 +46,9 @@
 #form-menu {
 	margin-top: 10px;
 }
+.list-input {
+	margin-top: 7px;
+}
 </style>
 {% endblock stylesheet %}
 
@@ -50,31 +65,35 @@
 
 {% block wizard_top_content %}
 <div id="alt-list">
-	<div id="alt-list-head">
+	<div class="list-head" id="alt-list-head">
 		<h4>Alternatives List</h4>
 	</div>
 	<div class="drop" id="alt-list-data">
 		{% for alternative in alternatives_data|sort_dict_by_key %}
-			<div class="drag" id="{{ alternative.0 }}">{{ alternative.1 }}</div>
+			<div class="drag" id="{{ alternative.0 }}">
+				<div class="alt-data">
+					<span class="alt-name">{{ alternative.1 }}</span>
+				</div>
+			</div>
 		{% endfor %}
 	</div>
 </div>
 <div class="list" id="sim-list">
-	<div id="sim-list-head">
-		<p>Put similar alternatives in the list below.</p> 
+	<div class="list-head" id="sim-list-head">
+		<p>Put similar alternatives in the list below and type a phrase describing why these alternatives are similar.</p> 
 	</div>
 	<div class="drop" id="sim-list-data"></div>
-	<div id="left-conc-input">
-		<input type="text" id="left-conc" />
+	<div class="list-input" id="left-conc-input">
+		<input type="text" id="left-conc" size="50" />
 	</div>
 </div>
 <div class="list" id="diff-list">
-	<div id="diff-list-head">
-		<p>Put different alternatives in the list below.</p> 
+	<div class="list-head" id="diff-list-head">
+		<p>Put different alternatives in the list below and type a phrase describing why these alternatives differ from the others.</p> 
 	</div>
 	<div class="drop" id="diff-list-data"></div>
-	<div id="right-conc-input">
-		<input type="text" id="right-conc" />
+	<div class="list-input" id="right-conc-input">
+		<input type="text" id="right-conc" size="50" />
 	</div>
 </div>
 <div id="add-conc-but-wrapper">

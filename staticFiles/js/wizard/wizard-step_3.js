@@ -1,10 +1,19 @@
 $(document).ready(function() {
-	$('.drag').draggable();
+	$('.drag').draggable({
+		start: function(event, ui) {
+			console.log('start');
+			var i = event.target;
+			$(i).css('z-index', '1');
+		},
+		stop: function(event, ui) {
+			console.log('stop');
+		}
+	});
 	$('.drop').droppable({
 		drop: function(event, ui) {
 			// make the element draggable again so it can be moved to another list
 			var i = ui.draggable;
-			$(this).append(i.clone().attr('style', 'position: relative;').draggable());
+			$(this).append(i.clone().attr('style', 'position: relative;').attr('class', 'drag ui-draggable').draggable());
 			// remove the element from the previous list
 			$(i).remove();
 		}
