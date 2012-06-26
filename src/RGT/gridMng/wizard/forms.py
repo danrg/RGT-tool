@@ -53,8 +53,8 @@ class ConcernsForm(forms.Form):
                 # Every time, concern fields are added with the names 'concern..-left' and 'concern..-right', and this because django
                 # always adds '2-' % (where 2 the number of the step with zero index) prefix in the name,
                 # with this the names are kept always the same.
-                self.fields[left_concern_name] = forms.CharField()
-                self.fields[right_concern_name] = forms.CharField()
+                self.fields[left_concern_name] = forms.CharField(widget=forms.TextInput(attrs={'size':'50'}))
+                self.fields[right_concern_name] = forms.CharField(widget=forms.TextInput(attrs={'size':'50'}))
     
     def clean(self):
         cleaned_data = super(ConcernsForm, self).clean()

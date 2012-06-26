@@ -38,6 +38,7 @@
 }
 #conc-list #conc-list-data {
 	margin-top: 5px;
+	padding-left: 5px;
 }
 #conc-list .info {
 	font-size: 11px;
@@ -48,6 +49,18 @@
 }
 .list-input {
 	margin-top: 7px;
+}
+.cloned {
+	overflow: hidden;
+	margin-bottom: 10px;
+}
+.field-wrapper {
+	width: 275px;
+	float: left;
+}
+.sep {
+	float: left;
+	margin: 0px 5px;
 }
 </style>
 {% endblock stylesheet %}
@@ -115,11 +128,18 @@
 						{{ field }}
 					</div>
 					{% if field.errors %}
-						<div class="field-errors-wrapper">
-							{{ field.errors }}
-						</div>
+					<div class="error">
+					{% for error in field.errors %}
+						<p>{{ error }}</p>
+					{% endfor %}
+					</div>
 					{% endif %}
 				</div>
+				{% if not forloop.counter|divisibleby:"2" %}
+				<div class="sep">
+					<span>--</span>
+				</div>
+				{% endif %}
 				{% if forloop.counter|divisibleby:"2" %}
 					{% if forloop.counter|divide_by:2 < wizard.form.fields|length|divide_by:2 %}
 						</div>

@@ -18,7 +18,6 @@ $(document).ready(function() {
 			$(i).remove();
 		}
 	});
-	
 	$('#add-conc-but').click(function() {
 		// get references of the left and right part of the concerns the user inserted
 		var lcField = $('#left-conc');
@@ -42,7 +41,10 @@ $(document).ready(function() {
 			if (numOfCloned == 0) {
 				$('#conc-list-data').empty();
 			}
-			$('#conc-list-data').append('<div id="input'+newNum+'" class="cloned"><input type="text" name="'+leftName+'" value="'+leftConcValue+'" id="'+leftId+'" /><input type="text" name="'+rightName+'" value="'+rightConcValue+'" id="'+rightId+'" /></div>');
+			var leftConc = "<div class='field-wrapper'><div class='field-input-wrapper'><input id='"+leftId+"' type='text' name='"+leftName+"' value='"+leftConcValue+"' size='50' /></div></div>";
+			var rightConc = "<div class='field-wrapper'><div class='field-input-wrapper'><input id='"+rightId+"' type='text' name='"+rightName+"' value='"+rightConcValue+"'  size='50' /></div></div>"
+			var sep = "<div class='sep'><span>--</span></div>";
+			$('#conc-list-data').append('<div id="input'+newNum+'" class="cloned">'+leftConc+sep+rightConc+'</div>');
 			// put the new number of concerns
 			$('#num-concerns').val(newNum);
 			// clear the values
