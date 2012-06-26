@@ -31,14 +31,10 @@
 		{% endif %}
 		<div id="form-menu">
 			{% if wizard.steps.prev %}
-			<div id="form-nav-menu">
-				<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">first step</button>
-				<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">prev step</button>
-			</div>
+			<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">first step</button>
+			<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">prev step</button>
 			{% endif %}
-			<div id="form-sub-menu">
-				<input type="submit" value="Submit" id="submit-button" />
-			</div>
+			<input type="submit" value="Submit" id="submit-button" />
 		</div>
 	</form>
 	{% block wizard_bottom_content %}{% endblock %}

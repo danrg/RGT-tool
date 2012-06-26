@@ -27,6 +27,21 @@ input[type="button"][disabled]
 	color: gray;
 }
 
+button[type="submit"] {
+	background-color: #009CEF;
+    border: 1px solid #005aa8;
+    color: #fff;
+    border-radius: 2px;
+    text-align: center;
+
+    padding: 5px 15px 5px 15px;
+    font-size: 12px;	
+}
+
+button[type="submit"]:hover {
+	background-color: #005aa8;
+}
+
 a.button
 {
     display: inline-block;

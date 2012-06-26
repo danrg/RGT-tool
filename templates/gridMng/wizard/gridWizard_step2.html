@@ -6,17 +6,14 @@
 #alt-list {
 	margin-top: 10px;
 }
-#alt-list-data {
-	margin-left: 5px;
-}
 #alt-list-data > .cloned {
 	padding-bottom: 5px;
 }
 #alt-list-header {
 	margin-bottom: 5px;
 }
-#btn-add-wrapper {
-	margin: 5px 0px;
+#form-menu {
+	margin-top: 10px;
 }
 </style>
 {% endblock stylesheet %}
@@ -51,22 +48,22 @@
 					{{ field }}
 				</div>
 				{% if field.errors %}
-					<div class="error">
-					{% for error in field.errors %}
-						<span>{{ error }}</span>
-					{% endfor %}
-					</div>
+				<div class="error">
+				{% for error in field.errors %}
+					<p>{{ error }}</p>
+				{% endfor %}
+				</div>
 				{% endif %}
 			</div>
 		</div>
 		{% endfor %}
+	{% endif %}
 	</div>
-{% endif %}
 </div>
 {% if wizard.form.errors %}
 <div class="error">
 	{% for error in wizard.form.non_field_errors %}
-		<span>{{ error }}</span>
+		<p>{{ error }}</p>
 	{% endfor %}
 </div>
 {% endif %}

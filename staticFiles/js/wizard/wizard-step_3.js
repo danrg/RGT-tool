@@ -16,6 +16,7 @@ $(document).ready(function() {
 		var rcField = $('#right-conc');
 		// get the number of cloned inputs
 		var numOfCloned = $('.cloned').length;
+		console.log(numOfCloned);
 		// this is the new number
 		var newNum = numOfCloned + 1;
 		// get the values of the right and left concern that the user inserted
@@ -29,7 +30,10 @@ $(document).ready(function() {
 			var leftName = "2-concern"+newNum+"-left";
 			var rightName = "2-concern"+newNum+"-right";
 			// append the new concern with the left and right pole on the concern list
-			$('#conc-list').append('<div id="input'+newNum+'" class="cloned"><input type="text" name="'+leftName+'" value="'+leftConcValue+'" id="'+leftId+'" /><input type="text" name="'+rightName+'" value="'+rightConcValue+'" id="'+rightId+'" /></div>');
+			if (numOfCloned == 0) {
+				$('#conc-list-data').empty();
+			}
+			$('#conc-list-data').append('<div id="input'+newNum+'" class="cloned"><input type="text" name="'+leftName+'" value="'+leftConcValue+'" id="'+leftId+'" /><input type="text" name="'+rightName+'" value="'+rightConcValue+'" id="'+rightId+'" /></div>');
 			// put the new number of concerns
 			$('#num-concerns').val(newNum);
 			// clear the values

@@ -13,6 +13,27 @@
 	width: 100px;
 	background-color: blue;
 }
+#alt-list {
+	margin-top: 10px;
+}
+.list {
+	width: 450px;
+	float: left;
+	margin: 10px 0px;
+}
+#conc-list {
+	margin-top: 10px;
+}
+#conc-list #conc-list-data {
+	margin-top: 5px;
+}
+#conc-list .info {
+	font-size: 11px;
+	padding: 5px;
+}
+#form-menu {
+	margin-top: 10px;
+}
 </style>
 {% endblock stylesheet %}
 
@@ -21,64 +42,79 @@
 <script type="text/javascript" src="{{ STATIC_URL }}js/wizard/wizard-step_3.js"></script>
 {% endblock javascript %}
 
-{% block step_header %}
+{% block step_info %}
 <div class="step-header">
-	<p>Select alternatives from the list...</p>
+	<p>In this step you can add the concerns.</p>
 </div>
-{% endblock step_header %}
+{% endblock step_info %}
 
 {% block wizard_top_content %}
-<div class="drop" id="alt-list">
-	{% for alternative in alternatives_data|sort_dict_by_key %}
-		<div class="drag" id="{{ alternative.0 }}">{{ alternative.1 }}</div>
-	{% endfor %}
+<div id="alt-list">
+	<div id="alt-list-head">
+		<h4>Alternatives List</h4>
+	</div>
+	<div class="drop" id="alt-list-data">
+		{% for alternative in alternatives_data|sort_dict_by_key %}
+			<div class="drag" id="{{ alternative.0 }}">{{ alternative.1 }}</div>
+		{% endfor %}
+	</div>
 </div>
-<div id="sim-list-head">
-	<p>Put similar alternatives in the list below.</p> 
+<div class="list" id="sim-list">
+	<div id="sim-list-head">
+		<p>Put similar alternatives in the list below.</p> 
+	</div>
+	<div class="drop" id="sim-list-data"></div>
+	<div id="left-conc-input">
+		<input type="text" id="left-conc" />
+	</div>
 </div>
-<div class="drop" id="sim-list"></div>
-<div id="left-conc-input">
-	<input type="text" id="left-conc" />
-</div>
-<div id="dif-list-head">
-	<p>Put different alternatives in the list below.</p> 
-</div>
-<div class="drop" id="dif-list"></div>
-<div id="right-conc-input">
-	<input type="text" id="right-conc" />
+<div class="list" id="diff-list">
+	<div id="diff-list-head">
+		<p>Put different alternatives in the list below.</p> 
+	</div>
+	<div class="drop" id="diff-list-data"></div>
+	<div id="right-conc-input">
+		<input type="text" id="right-conc" />
+	</div>
 </div>
 <div id="add-conc-but-wrapper">
 	<input type="button" id="add-conc-but" value="Add" />
-</div>
-<div id="conc-list-header">
-	<p>This list contains a review of the concerns that you inserted.</p>
 </div>
 {% endblock wizard_top_content %}
 
 {% block wizard_form_content %}
 <div id="conc-list">
-	{% if wizard.form.fields|length > 0 %}
-		<div id="input1" class="cloned">
-		{% for field in wizard.form %}
-			<div class="field-wrapper">
-				<div class="field-input-wrapper">
-					{{ field }}
+	<div id="conc-list-header">
+		<p>This list below contains the concerns that you have already added. You can change their names in place.</p>
+	</div>
+	<div id="conc-list-data">
+		{% if wizard.form.fields|length > 0 %}
+			<div id="input1" class="cloned">
+			{% for field in wizard.form %}
+				<div class="field-wrapper">
+					<div class="field-input-wrapper">
+						{{ field }}
+					</div>
+					{% if field.errors %}
+						<div class="field-errors-wrapper">
+							{{ field.errors }}
+						</div>
+					{% endif %}
 				</div>
-				{% if field.errors %}
-					<div class="field-errors-wrapper">
-						{{ field.errors }}
-					</div>
+				{% if forloop.counter|divisibleby:"2" %}
+					{% if forloop.counter|divide_by:2 < wizard.form.fields|length|divide_by:2 %}
+						</div>
+						<div id="input{{ forloop.counter|divide_by:2|add:'1' }}" class="cloned">
+					{% endif %}
 				{% endif %}
+			{% endfor %}
 			</div>
-			{% if forloop.counter|divisibleby:"2" %}
-				{% if forloop.counter|divide_by:2 < wizard.form.fields|length|divide_by:2 %}
-					</div>
-					<div id="input{{ forloop.counter|divide_by:2|add:'1' }}" class="cloned">
-				{% endif %}
-			{% endif %}
-		{% endfor %}
-		</div>
-	{% endif %}
+		{% else %}
+			<div class="info">
+				<p>No concerns have been added yet.</p>
+			</div>
+		{% endif %}
+	</div>
 </div>
 {% if wizard.form.errors %}
 <div id="form-errors-wrapper">
