@@ -1,61 +1,215 @@
 {% extends 'gridMng/wizard/gridWizard_base.html' %}
 {% load wizard_extras %}
 
+{% block stylesheet %}
+<style type="text/css">
+#weight-data {
+	margin: 10px 0px;
+}
+.conc-weight-wrapper {
+	overflow: hidden;
+	margin: 5px 0px;
+}
+.conc-label {
+	float: left;
+	margin-right: 3px;
+	padding-top: 2px;
+}
+.sep {
+	float: left;
+	margin-right: 3px;
+	padding-top: 2px;
+}
+.cloned {
+	float: left;
+	margin-left: 6px;
+}
+.cloned input {
+	text-align: center;
+}
+.field-input-wrapper {
+	float: left;
+}
+.field-wrapper .error {
+	float: left;
+	margin: 4px 0px 0px 5px;
+}
+.form-errors-wrapper {
+	overflow: hidden;
+}
+#weight-total-wrapper {
+	-moz-box-shadow: 0 0 5px #999;
+	-webkit-box-shadow: 0 0 5px #999;
+	box-shadow: 0 0 5px #999;
+	overflow: hidden;
+	margin: 5px 0px;
+	max-width: 140px;
+	padding: 5px;
+}
+#weight-total-header {
+	float: left;
+	font-weight: bold;
+}
+#weight-total-label {
+	float: left;
+	margin-left: 7px;
+}
+#form-menu {
+	margin-top: 10px;
+}
+div.form-errors-wrapper .error {
+	margin: 0px;
+}
+</style>
+{% endblock stylesheet %}
+
 {% block javascript %}
 <script type="text/javascript" src="{{ STATIC_URL }}js/wizard/wizard-step_4.js"></script>
 {% endblock javascript %}
 
-{% block step_header %}
+{% block step_info %}
 <div class="step-header">
-	<p>Please insert weights for the concerns. Note that the total weight must be equal to 100.</p>
+	<p>In this step you can insert the weights for the concerns. Note that the total weight must be equal to 100.</p>
 </div>
-{% endblock step_header %}
+{% endblock step_info %}
 
 {% block wizard_form_content %}
 {% if wizard.form.fields|length == 0 %}
-	{% for concern in concerns_data|sort_dict_by_key %}
-		{{ concern }}
-		{% if forloop.counter|divisibleby:"2" %}
-			<div id="input{{ forloop.counter|divide_by:2 }}" class="cloned">
-				<input type="text" name="3-weight{{ forloop.counter|divide_by:2 }}" value="" id="id_3-weight{{ forloop.counter|divide_by:2 }}" class="weight-input" />
-			</div>
-		{% endif %}
+<table id="weight-data">
+	<thead>
+		<th>Concern Pair</th>
+		<th>Weight</th>
+	</thead>
+	<tbody>
+		<tr>
+			<td>
+			{% for concern in concerns_data|sort_dict_by_key %}
+				<div class="conc-label">
+					<span>{{ concern.1 }}</span>
+				</div>
+			{% if forloop.counter|divisibleby:"2" %}
+			</td>
+			<td>
+				<div id="input{{ forloop.counter|divide_by:2 }}" class="cloned">
+					<div class="field-wrapper">
+						<div class="field-input-wrapper">
+							<input id="id_3-weight{{ forloop.counter|divide_by:2 }}" maxlength="3" type="text" name="3-weight{{ forloop.counter|divide_by:2 }}" size="3" class="weight-input" />
+						</div>
+						{% if field.errors %}
+						<div class="error">
+						{% for error in field.errors %}
+							<p>{{ error }}</p>
+						{% endfor %}
+						</div>
+						{% endif %}
+					</div>
+				</div>
+			</td>
+			</tr>
+			{% if forloop.counter < concerns_data|length %}
+			<tr>
+			<td>
+			{% endif %}
+			{% else %}
+				<div class="sep">
+					<span>--</span>
+				</div>
+			{% endif %}
 	{% endfor %}
+	</tbody>
+</table>
 {% else %}
+<table id="weight-data">
+	<thead>
+		<th>Concern Pair</th>
+		<th>Weight</th>
+	</thead>
+	<tbody>
 	{% for field in wizard.form %}
-		<div id="input{{ forloop.counter }}" class="cloned">
-			<div class="field-wrapper">
-				<div class="field-input-wrapper">
-					{{ field }}	
+		<tr>
+			<td>
+				<div class="conc-label">
+					<span>{{ concerns_data_in_pairs|get_left_concern_value:forloop.counter }}</span>
 				</div>
-				<div class="field-errors-wrapper">
-					{{ field.errors }}
+				<div class="sep">
+					<span>--</span>
 				</div>
-			</div>
-		</div>
+				<div class="conc-label">
+					<span>{{ concerns_data_in_pairs|get_right_concern_value:forloop.counter }}</span>
+				</div>
+			</td>
+			<td>
+				<div id="input{{ forloop.counter }}" class="cloned">
+					<div class="field-wrapper">
+						<div class="field-input-wrapper">
+							{{ field }}	
+						</div>
+						{% if field.errors %}
+						<div class="error">
+						{% for error in field.errors %}
+							<p>{{ error }}</p>
+						{% endfor %}
+						</div>
+						{% endif %}
+					</div>
+				</div>
+			</td>
+		</tr>
 	{% endfor %}
 	{% if concerns_length > wizard.form.fields|length %}
    		{% for concern in concerns_data|sort_dict_by_key %}
    			{% if forloop.counter|divide_by:2 > wizard.form.fields|length %}
-    			<div id="input{{ forloop.counter }}" class="cloned">
-    				<input type="text" name="3-weight{{ forloop.counter|divide_by:2 }}" value="" id="id_3-weight{{ forloop.counter|divide_by:2 }}" class="weight-input" />
-				</div>
+   			<tr>
+   				<td>
+	   				<div class="conc-label">
+						<span>{{ concerns_data_in_pairs|divide_and_get_left_concern_value:forloop.counter }}</span>
+					</div>
+					<div class="sep">
+						<span>--</span>
+					</div>
+					<div class="conc-label">
+						<span>{{ concerns_data_in_pairs|divide_and_get_right_concern_value:forloop.counter }}</span>
+					</div>
+				</td>
+				<td>
+	    			<div id="input{{ forloop.counter|divide_by:2 }}" class="cloned">
+	    				<div class="field-wrapper">
+		    				<div class="field-input-wrapper">
+		    					<input id="id_3-weight{{ forloop.counter|divide_by:2 }}" maxlength="3" type="text" name="3-weight{{ forloop.counter|divide_by:2 }}" size="3" class="weight-input" />
+		    				</div>
+		    				{% if field.errors %}
+							<div class="error">
+							{% for error in field.errors %}
+								<p>{{ error }}</p>
+							{% endfor %}
+							</div>
+							{% endif %}
+						</div>
+					</div>
+				</td>
+			</tr>
 			{% endif %}
    		{% endfor %}
 	{% endif %}
+	</tbody>
+</table>
 {% endif %}
-<div id="form-errors-wrapper">
-	<ul class="errorlist">
-	{% for error in wizard.form.non_field_errors %}
-		<li>{{ error }}</li>
-	{% endfor %}
-	</ul>
+<div id="weight-total-wrapper">
+	<div id="weight-total-header">
+		<span>Total weight:</span>
+	</div>
+	<div id="weight-total-label">
+		<span id="weight-total">0</span>
+	</div>
 </div>
+{% if wizard.form.errors %}
+<div class="form-errors-wrapper">
+	<div class="error">
+		{% for error in wizard.form.non_field_errors %}
+			<p>{{ error }}</p>
+		{% endfor %}
+	</div>
+</div>
+{% endif %}
 <input type="hidden" name="num-weights" value="{% if wizard.form.fields|length == 0 %}{{ concerns_length }}{% else %}{% if not concerns_data %}{{ wizard.form.fields|length }}{% else %}{{ concerns_length }}{% endif %}{% endif %}" id="num-weights" />
 {% endblock wizard_form_content %}
-
-{% block wizard_bottom_content %}
-<div id="weight-total-wrapper">
-	<p><span id="weight-total">0</span></p>
-</div>
-{% endblock wizard_bottom_content %}

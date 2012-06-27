@@ -1,19 +1,13 @@
 $(document).ready(function() {
 	$('.drag').draggable({
-		start: function(event, ui) {
-			console.log('start');
-			var i = event.target;
-			$(i).css('z-index', '1');
-		},
-		stop: function(event, ui) {
-			console.log('stop');
-		}
+		revert: 'invalid'
 	});
 	$('.drop').droppable({
 		drop: function(event, ui) {
-			// make the element draggable again so it can be moved to another list
+			// get the draggable element of the event
 			var i = ui.draggable;
-			$(this).append(i.clone().attr('style', 'position: relative;').attr('class', 'drag ui-draggable').draggable());
+			// append the element to the new list and make it draggable again so it can be moved to another list
+			$(this).append(i.clone().attr('style', 'position: relative;').attr('class', 'drag ui-draggable').draggable({revert: 'invalid'}));
 			// remove the element from the previous list
 			$(i).remove();
 		}
@@ -37,13 +31,15 @@ $(document).ready(function() {
 			var rightId = "id_2-concern"+newNum+"-right";
 			var leftName = "2-concern"+newNum+"-left";
 			var rightName = "2-concern"+newNum+"-right";
-			// append the new concern with the left and right pole on the concern list
+			// if this is the first pair being added remove the 'no concerns yet' info message
 			if (numOfCloned == 0) {
 				$('#conc-list-data').empty();
 			}
+			// construct the left concern, right concern and separator fields
 			var leftConc = "<div class='field-wrapper'><div class='field-input-wrapper'><input id='"+leftId+"' type='text' name='"+leftName+"' value='"+leftConcValue+"' size='50' /></div></div>";
 			var rightConc = "<div class='field-wrapper'><div class='field-input-wrapper'><input id='"+rightId+"' type='text' name='"+rightName+"' value='"+rightConcValue+"'  size='50' /></div></div>"
 			var sep = "<div class='sep'><span>--</span></div>";
+			// append the new concern with the left and right pole on the concern list
 			$('#conc-list-data').append('<div id="input'+newNum+'" class="cloned">'+leftConc+sep+rightConc+'</div>');
 			// put the new number of concerns
 			$('#num-concerns').val(newNum);

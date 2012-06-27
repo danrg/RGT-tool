@@ -94,7 +94,7 @@ class WeightsForm(forms.Form):
                 # Every time, weight fields are added with the name 'weight..', and this because django
                 # always adds '3-' % (where 3 the number of the step with zero index) prefix in the name,
                 # with this the names are kept always the same.
-                self.fields[weight_name] = forms.FloatField()
+                self.fields[weight_name] = forms.FloatField(widget=forms.TextInput(attrs={'size':'3','maxlength':'3'}))
     
     def clean(self):
         cleaned_data = super(WeightsForm, self).clean()
@@ -104,7 +104,8 @@ class WeightsForm(forms.Form):
             # In case the field with the weight name has its own validation error then, it is not contained in the
             # cleaned data, thats why we catch the exception.
             try:
-                weight = cleaned_data['weight%d' % (i+1)]
+                weight_name = 'weight%d' % (i+1)
+                weight = cleaned_data[weight_name]
                 total += float(weight) 
             except:
                 # The key does not exist (key=weight name).
@@ -137,11 +138,11 @@ class RatingsForm(forms.Form):
                 # In case the field with the rating name has its own validation error then, it is not contained in the
                 # cleaned data, thats why we catch the exception.
                 try:
-                    rating = 'rating-concern%d-alternative%d' % ((z+1), (x+1))
+                    rating_name = 'rating-concern%d-alternative%d' % ((z+1), (x+1))
                     # Try to convert the string value into float. In case of error then a validation
                     # error is raised.
                     try:
-                        value = float(cleaned_data[rating])
+                        value = float(cleaned_data[rating_name])
                         # If the value is outside the desired limits for the ratings, then a validation
                         # error is raised.
                         if value < MIN_RATING or value > MAX_RATING:

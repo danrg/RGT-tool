@@ -16,27 +16,37 @@ class GridWizard(SessionWizardView):
             # Get the alternatives data from step 1 (zero index) if the process is on step 3 (one index)
             # in order to generate the alternatives list.
             try:
-                context.update({'alternatives_data':self.get_cleaned_data_for_step('1')})
+                alternatives_data = self.get_cleaned_data_for_step('1')
+                context.update({'alternatives_data':alternatives_data})
             except:
-                #
+                # Alternatives data do not exist 
                 pass
         # weights step
         elif self.steps.step1 == 4:
             # Get the concerns data from step 2 (zero index) if the process is on step 4 (one index)
             # in order to generate the weight inputs according to this data.
             # The length of concerns is divided by '2' because concerns are always in pairs.
-            context.update({'concerns_data':self.get_cleaned_data_for_step('2'),
-                            'concerns_length':len(self.get_cleaned_data_for_step('2'))/2})
+            # The concerns data are also passed in the template as dictionary {'index':'concern_pair'}
+            # because it is needed in order to generate the fields properly
+            concerns_data = self.get_cleaned_data_for_step('2')
+            concern_data_in_pairs = {}
+            for i in range(len(concerns_data)/2):
+                concern_data_in_pairs['%d' % (i+1)] = (concerns_data['concern%d-left' % (i+1)], concerns_data['concern%d-right' % (i+1)])
+            context.update({'concerns_data':concerns_data,
+                            'concerns_data_in_pairs':concern_data_in_pairs,
+                            'concerns_length':len(concerns_data)/2})
         # ratings step
         elif self.steps.step1 == 5:
             # Get the alternatives data from step 1 (zero index) and the concerns data from step 2 (zero index)
             # if the process is on step 5 (one index), in order to generate the alternatives list, the concerns list,
             # and the hidden fields with the number of alternatives and concerns, so the user can select rating values.
             # The length of concerns is divided by '2' because concerns are always in pairs.
-            context.update({'alternatives_data':self.get_cleaned_data_for_step('1'),
-                            'alternatives_length':len(self.get_cleaned_data_for_step('1')),
-                            'concerns_data':self.get_cleaned_data_for_step('2'),
-                            'concerns_length':len(self.get_cleaned_data_for_step('2'))/2})
+            alternatives_data = self.get_cleaned_data_for_step('1')
+            concerns_data = self.get_cleaned_data_for_step('2')
+            context.update({'alternatives_data':alternatives_data,
+                            'alternatives_length':len(alternatives_data),
+                            'concerns_data':concerns_data,
+                            'concerns_length':len(concerns_data)/2})
         return context  
 
     def done(self, form_list, **kwargs):
