@@ -155,5 +155,5 @@ class RatingsForm(forms.Form):
                     # The key does not exist (key=rating name).
                     pass
         if value_error:
-            raise forms.ValidationError('Rating values are incorrect or incomplete. Please check the values and submit again.')
+            raise forms.ValidationError('Rating values are incomplete. Please check the values and submit again.')
         return cleaned_data

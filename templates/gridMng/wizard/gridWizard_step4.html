@@ -67,6 +67,10 @@ div.form-errors-wrapper .error {
 .info {
 	margin: 10px 0px;
 }
+.conc-label-wrapper {
+	overflow: hidden;
+	min-width: 120px;
+}
 </style>
 {% endblock stylesheet %}
 
@@ -91,11 +95,13 @@ div.form-errors-wrapper .error {
 		<tbody>
 			<tr>
 				<td>
+					<div class="conc-label-wrapper">
 				{% for concern in concerns_data|sort_dict_by_key %}
 					<div class="conc-label">
 						<span>{{ concern.1 }}</span>
 					</div>
 				{% if forloop.counter|divisibleby:"2" %}
+					</div>
 				</td>
 				<td>
 					<div id="input{{ forloop.counter|divide_by:2 }}" class="cloned">
@@ -141,14 +147,16 @@ div.form-errors-wrapper .error {
 	{% for field in wizard.form %}
 		<tr>
 			<td>
-				<div class="conc-label">
-					<span>{{ concerns_data_in_pairs|get_left_concern_value:forloop.counter }}</span>
-				</div>
-				<div class="sep">
-					<span>--</span>
-				</div>
-				<div class="conc-label">
-					<span>{{ concerns_data_in_pairs|get_right_concern_value:forloop.counter }}</span>
+				<div class="conc-label-wrapper">
+					<div class="conc-label">
+						<span>{{ concerns_data_in_pairs|get_left_concern_value:forloop.counter }}</span>
+					</div>
+					<div class="sep">
+						<span>--</span>
+					</div>
+					<div class="conc-label">
+						<span>{{ concerns_data_in_pairs|get_right_concern_value:forloop.counter }}</span>
+					</div>
 				</div>
 			</td>
 			<td>
@@ -174,14 +182,16 @@ div.form-errors-wrapper .error {
    			{% if forloop.counter|divide_by:2 > wizard.form.fields|length %}
    			<tr>
    				<td>
-	   				<div class="conc-label">
-						<span>{{ concerns_data_in_pairs|divide_and_get_left_concern_value:forloop.counter }}</span>
-					</div>
-					<div class="sep">
-						<span>--</span>
-					</div>
-					<div class="conc-label">
-						<span>{{ concerns_data_in_pairs|divide_and_get_right_concern_value:forloop.counter }}</span>
+   					<div class="conc-label-wrapper">
+		   				<div class="conc-label">
+							<span>{{ concerns_data_in_pairs|divide_and_get_left_concern_value:forloop.counter }}</span>
+						</div>
+						<div class="sep">
+							<span>--</span>
+						</div>
+						<div class="conc-label">
+							<span>{{ concerns_data_in_pairs|divide_and_get_right_concern_value:forloop.counter }}</span>
+						</div>
 					</div>
 				</td>
 				<td>
