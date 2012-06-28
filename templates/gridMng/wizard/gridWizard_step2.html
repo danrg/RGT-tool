@@ -37,7 +37,7 @@
 	{% if wizard.form.fields|length == 0 %}
 		{% for i in 3|get_range %}
 		<div id="input{{ i|add:'1' }}" class="cloned">
-			<input type="text" name="1-alternative{{ i|add:'1' }}" value="" id="id_1-alternative{{ i|add:'1' }}" />
+			<input type="text" name="1-alternative{{ i|add:'1' }}" id="id_1-alternative{{ i|add:'1' }}" tabindex="{{ i|add:'1' }}" />
 		</div>
 		{% endfor %}
 	{% else %}
@@ -72,6 +72,10 @@
 
 {% block after_wizard_form_content %}
 <div id="btn-add-wrapper">
-   	<input type="button" id="btn-add" value="Add" />
+   	<input type="button" id="btn-add" value="Add" tabindex="{{ alternatives_length|add:'1' }}" />
 </div>
 {% endblock after_wizard_form_content %}
+
+{% block prev_step_but_tab %}{{ alternatives_length|add:'3' }}{% endblock prev_step_but_tab %}
+
+{% block next_step_but_tab %}{{ alternatives_length|add:'2' }}{% endblock next_step_but_tab %}

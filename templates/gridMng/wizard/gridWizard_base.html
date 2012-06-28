@@ -31,9 +31,9 @@
 		{% endif %}
 		<div id="form-menu">
 			{% if wizard.steps.prev %}
-			<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" tabindex="{% block prev_step_but_tab %}{% endblock %}">Prev Step</button>
+			<button name="wizard_goto_step" type="submit" id="btn-prev-step" value="{{ wizard.steps.prev }}" tabindex="{% block prev_step_but_tab %}{% endblock %}">Prev Step</button>
 			{% endif %}
-			<input type="submit" value="Next Step" id="submit-button" tabindex="{% block next_step_but_tab %}{% endblock %}" />
+			<input type="submit" value="Next Step" id="btn-submit" tabindex="{% block next_step_but_tab %}{% endblock %}" />
 		</div>
 	</form>
 	{% block wizard_bottom_content %}{% endblock %}

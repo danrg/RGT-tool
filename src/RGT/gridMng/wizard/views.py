@@ -11,8 +11,16 @@ class GridWizard(SessionWizardView):
     
     def get_context_data(self, form, **kwargs):
         context = super(GridWizard, self).get_context_data(form=form, **kwargs)
+        # alternatives step
+        if self.steps.step1 == 2:
+            try:
+                alternatives_data = self.get_cleaned_data_for_step('1')
+                context.update({'alternatives_length':len(alternatives_data)})
+            except:
+                # Alternatives data do not yet exist
+                pass
         # concerns step
-        if self.steps.step1 == 3:
+        elif self.steps.step1 == 3:
             # Get the alternatives data from step 1 (zero index) if the process is on step 3 (one index)
             # in order to generate the alternatives list.
             try:
