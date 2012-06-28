@@ -1,5 +1,5 @@
 function showMessageInDialogBox(text) {
-        $('#modalDialogBox').html('<p>' + text + '</p>');
+	$('#modalDialogBox').html('<p>' + text + '</p>');
     $('#modalDialogBox').dialog({
     	title: 'Information',
 		resizable: false,
@@ -7,7 +7,7 @@ function showMessageInDialogBox(text) {
 		width: 400,
 		modal: true,
 		buttons: {'Close':function(){
-			$( this ).dialog( "close" );
+				$( this ).dialog( "close" );
 			}
     	}
     });

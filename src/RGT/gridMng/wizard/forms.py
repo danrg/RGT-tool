@@ -94,7 +94,7 @@ class WeightsForm(forms.Form):
                 # Every time, weight fields are added with the name 'weight..', and this because django
                 # always adds '3-' % (where 3 the number of the step with zero index) prefix in the name,
                 # with this the names are kept always the same.
-                self.fields[weight_name] = forms.FloatField(widget=forms.TextInput(attrs={'size':'3','maxlength':'3'}))
+                self.fields[weight_name] = forms.FloatField(widget=forms.TextInput(attrs={'size':'3','maxlength':'3','tabindex':'%d'%(x+1)}))
     
     def clean(self):
         cleaned_data = super(WeightsForm, self).clean()

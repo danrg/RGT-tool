@@ -18,7 +18,7 @@
 	</div>
 	{% block step_info %}{% endblock %}
 	{% block wizard_top_content %}{% endblock %}
-	<form method="post">{% csrf_token %}
+	<form id="form" method="post">{% csrf_token %}
 		{{ wizard.management_form }}
 		{% if wizard.form.forms %}
 		    {{ wizard.form.management_form }}
@@ -31,10 +31,9 @@
 		{% endif %}
 		<div id="form-menu">
 			{% if wizard.steps.prev %}
-			<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}">first step</button>
-			<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">prev step</button>
+			<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" tabindex="{% block prev_step_but_tab %}{% endblock %}">Prev Step</button>
 			{% endif %}
-			<input type="submit" value="Submit" id="submit-button" />
+			<input type="submit" value="Next Step" id="submit-button" tabindex="{% block next_step_but_tab %}{% endblock %}" />
 		</div>
 	</form>
 	{% block wizard_bottom_content %}{% endblock %}

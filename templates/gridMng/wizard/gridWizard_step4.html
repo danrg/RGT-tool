@@ -60,6 +60,10 @@
 div.form-errors-wrapper .error {
 	margin: 0px;
 }
+#total-weight-ind {
+	font-weight: bold;
+	color: red;
+}
 </style>
 {% endblock stylesheet %}
 
@@ -69,7 +73,7 @@ div.form-errors-wrapper .error {
 
 {% block step_info %}
 <div class="step-header">
-	<p>In this step you can insert the weights for the concerns. Note that the total weight must be equal to 100.</p>
+	<p>In this step you can insert the weight for each concern pair. Note that the total weight must be equal to <span id="total-weight-ind">100</span>.</p>
 </div>
 {% endblock step_info %}
 
@@ -93,7 +97,7 @@ div.form-errors-wrapper .error {
 				<div id="input{{ forloop.counter|divide_by:2 }}" class="cloned">
 					<div class="field-wrapper">
 						<div class="field-input-wrapper">
-							<input id="id_3-weight{{ forloop.counter|divide_by:2 }}" maxlength="3" type="text" name="3-weight{{ forloop.counter|divide_by:2 }}" size="3" class="weight-input" />
+							<input id="id_3-weight{{ forloop.counter|divide_by:2 }}" maxlength="3" type="text" name="3-weight{{ forloop.counter|divide_by:2 }}" size="3" class="weight-input" value="{{ 100|divide_by:concerns_length }}" tabindex="{{ forloop.counter|divide_by:2 }}" />
 						</div>
 						{% if field.errors %}
 						<div class="error">
@@ -175,7 +179,7 @@ div.form-errors-wrapper .error {
 	    			<div id="input{{ forloop.counter|divide_by:2 }}" class="cloned">
 	    				<div class="field-wrapper">
 		    				<div class="field-input-wrapper">
-		    					<input id="id_3-weight{{ forloop.counter|divide_by:2 }}" maxlength="3" type="text" name="3-weight{{ forloop.counter|divide_by:2 }}" size="3" class="weight-input" />
+		    					<input id="id_3-weight{{ forloop.counter|divide_by:2 }}" maxlength="3" type="text" name="3-weight{{ forloop.counter|divide_by:2 }}" size="3" class="weight-input" tabindex="{{ forloop.counter|divide_by:2 }}" />
 		    				</div>
 		    				{% if field.errors %}
 							<div class="error">
@@ -213,3 +217,7 @@ div.form-errors-wrapper .error {
 {% endif %}
 <input type="hidden" name="num-weights" value="{% if wizard.form.fields|length == 0 %}{{ concerns_length }}{% else %}{% if not concerns_data %}{{ wizard.form.fields|length }}{% else %}{{ concerns_length }}{% endif %}{% endif %}" id="num-weights" />
 {% endblock wizard_form_content %}
+
+{% block prev_step_but_tab %}{{ concerns_length|add:'2' }}{% endblock prev_step_but_tab %}
+
+{% block next_step_but_tab %}{{ concerns_length|add:'1' }}{% endblock next_step_but_tab %}

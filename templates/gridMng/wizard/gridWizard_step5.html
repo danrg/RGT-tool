@@ -20,17 +20,9 @@ select > option.incomplete {
 	overflow: hidden;
 	margin: 5px 0px;
 }
-.conc-label {
-	float: left;
-	margin-right: 3px;
-}
 .sep {
 	float: left;
 	margin-right: 3px;
-}
-.rating-selection {
-	float: left;
-	margin-left: 10px;
 }
 #form-menu {
 	margin-top: 10px;
@@ -67,30 +59,41 @@ select > option.incomplete {
 	<div id="concern-list-header">
 		<p>Insert a rating for each concern, for the alternative <span id="alternative-name"></span>.</p>
 	</div>
-	<div id="concern-list-data">
-		<div class="conc-rating-wrapper">
-		{% for concern in concerns_data|sort_dict_by_key %}
-			<div class="conc-label">
-				<span>{{ concern.1 }}</span>
-			</div>
-			{% if forloop.counter|divisibleby:"2" %}
-				<div class="rating-selection">
-				{% for x in 5|get_range %}
-					<input type="radio" name="concern-{{ forloop.parentloop.counter|divide_by:2 }}" value="{{ x|add:'1' }}" id="{{ forloop.parentloop.counter|divide_by:2 }}-{{ x|add:'1' }}" class="rating" />
-				{% endfor %}
-				</div>
-				{% if forloop.counter < concerns_data|length %}
-				</div>
-				<div class="conc-rating-wrapper">
-				{% endif %}
-			{% else %}
-			<div class="sep">
-				<span>--</span>
-			</div>
-			{% endif %}
+	<table id="concern-list-data">
+		<thead>
+			<th></th>
+			<th></th>
+			<th></th>
+		</thead>
+		<tbody>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		{% for i in concerns_data_in_pairs|length|get_range %}
+			<tr>
+				<td align="center">
+					<div class="conc-label">
+						<span>{{ concerns_data_in_pairs|get_left_concern_value:forloop.counter }}</span>
+					</div>
+				</td>
+				<td align="center">
+					<div class="rating-selection">
+					{% for x in 5|get_range %}
+						<input type="radio" name="concern-{{ forloop.parentloop.counter }}" value="{{ x|add:'1' }}" id="{{ forloop.parentloop.counter }}-{{ x|add:'1' }}" class="rating" />
+					{% endfor %}
+					</div>
+				</td>
+				<td align="center">
+					<div class="conc-label">
+						<span>{{ concerns_data_in_pairs|get_right_concern_value:forloop.counter }}</span>
+					</div>
+				</td>
+			</tr>
 		{% endfor %}
 		</div>
-	</div>
+	</table>
 </div>
 {% endblock wizard_top_content %}
 

@@ -43,9 +43,13 @@ class GridWizard(SessionWizardView):
             # The length of concerns is divided by '2' because concerns are always in pairs.
             alternatives_data = self.get_cleaned_data_for_step('1')
             concerns_data = self.get_cleaned_data_for_step('2')
+            concern_data_in_pairs = {}
+            for i in range(len(concerns_data)/2):
+                concern_data_in_pairs['%d' % (i+1)] = (concerns_data['concern%d-left' % (i+1)], concerns_data['concern%d-right' % (i+1)])
             context.update({'alternatives_data':alternatives_data,
                             'alternatives_length':len(alternatives_data),
                             'concerns_data':concerns_data,
+                            'concerns_data_in_pairs':concern_data_in_pairs,
                             'concerns_length':len(concerns_data)/2})
         return context  
 

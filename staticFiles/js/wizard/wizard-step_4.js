@@ -9,6 +9,8 @@ $(document).ready(function() {
 		$('.field-input-wrapper input').each(function() {
 			$(this).attr('class', 'weight-input');
 		});
+		// focus on the first weight on load
+		$('#id_3-weight1').focus();
 		calculateTotal();
 	}
 	function calculateTotal() {

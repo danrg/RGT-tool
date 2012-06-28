@@ -1,13 +1,18 @@
 $(document).ready(function() {
 	$('.drag').draggable({
-		revert: 'invalid'
+		revert: 'invalid',
+		start: function(event, ui) {
+			$(this).css('z-index', '10000');
+		}
 	});
 	$('.drop').droppable({
 		drop: function(event, ui) {
 			// get the draggable element of the event
 			var i = ui.draggable;
 			// append the element to the new list and make it draggable again so it can be moved to another list
-			$(this).append(i.clone().attr('style', 'position: relative;').attr('class', 'drag ui-draggable').draggable({revert: 'invalid'}));
+			$(this).append(i.clone().attr('style', 'position: relative;').attr('class', 'drag ui-draggable').draggable({revert: 'invalid', start: function(event, ui) {
+				$(this).css('z-index', '10000');
+			}}));
 			// remove the element from the previous list
 			$(i).remove();
 		}
@@ -18,7 +23,6 @@ $(document).ready(function() {
 		var rcField = $('#right-conc');
 		// get the number of cloned inputs
 		var numOfCloned = $('.cloned').length;
-		console.log(numOfCloned);
 		// this is the new number
 		var newNum = numOfCloned + 1;
 		// get the values of the right and left concern that the user inserted
@@ -46,6 +50,56 @@ $(document).ready(function() {
 			// clear the values
 			lcField.val('');
 			rcField.val('');
+			// reset the alternatives
+			reset($('#sim-list-data'));
+			reset($('#diff-list-data'));
+		} else {
+			showMessageInDialogBox('Please first type the left and right pole of the concern and then press the "Add" button.');
 		}
 	});
+	$('#form').submit(function() {
+		// get references of the left and right part of the concerns the user inserted
+		var lcField = $('#left-conc');
+		var rcField = $('#right-conc');
+		// get the values of the right and left concern that the user inserted
+		var leftConcValue = lcField.val();
+		var rightConcValue = rcField.val();
+		//
+		if (leftConcValue != "" || rightConcValue != "") {
+			// get the dialog div and put the message
+			dialogDiv= getDialogDiv();
+			dialogDiv.html('<p>You have typed a concern but you have not added yet by pressing the "Add" button. If you got to next step this data will be lost. Do you still want to go to next step?</p>');
+			// show the dialog
+			dialogDiv.dialog({
+				title: 'Information',
+				resizable: false,
+				height: 150,
+				width: 450,
+				modal: true,
+				buttons: {
+					"Next Step": function() {
+						$(this).dialog("close");
+						// clear the values if user selects 'Next Step' so the form
+						//can be submitted successfully
+						lcField.val('');
+						rcField.val('');
+						$('#form').submit();
+					},
+					Cancel: function() {
+						$(this).dialog("close");
+					}
+				}
+			})
+			return false;
+		}
+	});
+	function reset(list) {
+		list.children().each(function() {
+			// first remove the alternative and then append it to the alternative list
+			$(this).remove();
+			$('#alt-list-data').append($(this).attr('style', 'position: relative;').attr('class', 'drag ui-draggable').draggable({revert: 'invalid', start: function(event, ui) {
+				$(this).css('z-index', '10000');
+			}}));
+		});
+	}
 });
