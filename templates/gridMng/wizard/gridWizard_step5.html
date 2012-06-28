@@ -27,6 +27,19 @@ select > option.incomplete {
 #form-menu {
 	margin-top: 10px;
 }
+.conc-label {
+	margin: 0px 10px;
+}
+select#alternatives-list {
+	height: 100%;
+	font-size: 12px;
+}
+#alternatives-wrapper {
+	margin-top: 10px;
+}
+#alternatives-selection-wrapper {
+	margin-top: 3px;
+}
 </style>
 {% endblock stylesheet %}
 
@@ -37,14 +50,17 @@ select > option.incomplete {
 {% block step_info %}
 <div class="step-header">
 	<p>In this step you can select an alternative, and rate it against the concerns.<br />
-	Alternatives marked with red color are not completed. Make sure that you selected a rating for every concern of every alternative.</p>
+	Alternatives marked with red color are not completed. Make sure that you have rated every alternative against each concern.</p>
 </div>
 {% endblock step_info %}
 
 {% block wizard_top_content %}
 <div id="alternatives-wrapper">
+	<div id="alt-list-header">
+		<h4>Alternatives List</h4>
+	</div>
 	<div id="alternatives-selection-wrapper">
-		<select id="alternatives-list" size="{{ alternatives_length }}">
+		<select id="alternatives-list" size="{% if alternatives_length > 4 %}{{ alternatives_length }}{% else %}4{% endif %}">
 		{% for alternative in alternatives_data|sort_dict_by_key %}
 			{% if forloop.counter == 1 %}
 				<option id="{{ alternative.0 }}" selected="selected">{{ alternative.1 }}</option>
@@ -57,7 +73,7 @@ select > option.incomplete {
 </div>
 <div id="concern-list-wrapper">
 	<div id="concern-list-header">
-		<p>Insert a rating for each concern, for the alternative <span id="alternative-name"></span>.</p>
+		<p>Select a rating for each concern, for the alternative <span id="alternative-name"></span>.</p>
 	</div>
 	<table id="concern-list-data">
 		<thead>

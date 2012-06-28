@@ -64,6 +64,9 @@ div.form-errors-wrapper .error {
 	font-weight: bold;
 	color: red;
 }
+.info {
+	margin: 10px 0px;
+}
 </style>
 {% endblock stylesheet %}
 
@@ -79,49 +82,55 @@ div.form-errors-wrapper .error {
 
 {% block wizard_form_content %}
 {% if wizard.form.fields|length == 0 %}
-<table id="weight-data">
-	<thead>
-		<th>Concern Pair</th>
-		<th>Weight</th>
-	</thead>
-	<tbody>
-		<tr>
-			<td>
-			{% for concern in concerns_data|sort_dict_by_key %}
-				<div class="conc-label">
-					<span>{{ concern.1 }}</span>
-				</div>
-			{% if forloop.counter|divisibleby:"2" %}
-			</td>
-			<td>
-				<div id="input{{ forloop.counter|divide_by:2 }}" class="cloned">
-					<div class="field-wrapper">
-						<div class="field-input-wrapper">
-							<input id="id_3-weight{{ forloop.counter|divide_by:2 }}" maxlength="3" type="text" name="3-weight{{ forloop.counter|divide_by:2 }}" size="3" class="weight-input" value="{{ 100|divide_by:concerns_length }}" tabindex="{{ forloop.counter|divide_by:2 }}" />
-						</div>
-						{% if field.errors %}
-						<div class="error">
-						{% for error in field.errors %}
-							<p>{{ error }}</p>
-						{% endfor %}
-						</div>
-						{% endif %}
-					</div>
-				</div>
-			</td>
-			</tr>
-			{% if forloop.counter < concerns_data|length %}
+	{% if concerns_length > 0 %}
+	<table id="weight-data">
+		<thead>
+			<th>Concern Pair</th>
+			<th>Weight</th>
+		</thead>
+		<tbody>
 			<tr>
-			<td>
-			{% endif %}
-			{% else %}
-				<div class="sep">
-					<span>--</span>
-				</div>
-			{% endif %}
-	{% endfor %}
-	</tbody>
-</table>
+				<td>
+				{% for concern in concerns_data|sort_dict_by_key %}
+					<div class="conc-label">
+						<span>{{ concern.1 }}</span>
+					</div>
+				{% if forloop.counter|divisibleby:"2" %}
+				</td>
+				<td>
+					<div id="input{{ forloop.counter|divide_by:2 }}" class="cloned">
+						<div class="field-wrapper">
+							<div class="field-input-wrapper">
+								<input id="id_3-weight{{ forloop.counter|divide_by:2 }}" maxlength="3" type="text" name="3-weight{{ forloop.counter|divide_by:2 }}" size="3" class="weight-input" value="{{ 100|divide_by:concerns_length }}" tabindex="{{ forloop.counter|divide_by:2 }}" />
+							</div>
+							{% if field.errors %}
+							<div class="error">
+							{% for error in field.errors %}
+								<p>{{ error }}</p>
+							{% endfor %}
+							</div>
+							{% endif %}
+						</div>
+					</div>
+				</td>
+				</tr>
+				{% if forloop.counter < concerns_data|length %}
+				<tr>
+				<td>
+				{% endif %}
+				{% else %}
+					<div class="sep">
+						<span>--</span>
+					</div>
+				{% endif %}
+		{% endfor %}
+		</tbody>
+	</table>
+	{% else %}
+	<div class="info">
+		<p>No concerns have been added yet.</p>
+	</div>
+	{% endif %}
 {% else %}
 <table id="weight-data">
 	<thead>

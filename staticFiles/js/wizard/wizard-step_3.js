@@ -57,14 +57,15 @@ $(document).ready(function() {
 			showMessageInDialogBox('Please first type the left and right pole of the concern and then press the "Add" button.');
 		}
 	});
-	$('#form').submit(function() {
+	$('#form').submit(function(event) {
 		// get references of the left and right part of the concerns the user inserted
 		var lcField = $('#left-conc');
 		var rcField = $('#right-conc');
 		// get the values of the right and left concern that the user inserted
 		var leftConcValue = lcField.val();
 		var rightConcValue = rcField.val();
-		//
+		// if one of the fields for the concerns have a value, show a dialog to the user to decide
+		// if he wants to keep the values or discard
 		if (leftConcValue != "" || rightConcValue != "") {
 			// get the dialog div and put the message
 			dialogDiv= getDialogDiv();
@@ -80,7 +81,7 @@ $(document).ready(function() {
 					"Next Step": function() {
 						$(this).dialog("close");
 						// clear the values if user selects 'Next Step' so the form
-						//can be submitted successfully
+						// can be submitted successfully
 						lcField.val('');
 						rcField.val('');
 						$('#form').submit();

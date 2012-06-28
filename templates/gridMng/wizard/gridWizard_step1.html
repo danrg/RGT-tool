@@ -8,6 +8,10 @@
 </style>
 {% endblock stylesheet %}
 
+{% block javascript %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/wizard/wizard-step_1.js"></script>
+{% endblock javascript %}
+
 {% block step_info %}
 <div class="step-info">
 	<p>In this step you can type the name of the grid, as well as a description for it.</p>
