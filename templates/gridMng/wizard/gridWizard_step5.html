@@ -11,9 +11,10 @@ select > option.incomplete {
 }
 #concern-list-wrapper {
 	margin-top: 10px;
+	margin-bottom: 15px;
 }
 #concern-list-data {
-	margin-top: 5px;
+	margin-top: 15px;
 	padding-left: 5px;
 }
 .conc-rating-wrapper {
@@ -39,6 +40,19 @@ select#alternatives-list {
 }
 #alternatives-selection-wrapper {
 	margin-top: 3px;
+}
+#content .rating-selection label {
+	padding: 0px;
+	width: 20px;
+}
+#content .rating-selection {
+	float: left;
+}
+.rating-selection-wrapper input[type="radio"] {
+	margin: 0px 1px;
+}
+div.f {
+	margin-top: 13px;
 }
 </style>
 {% endblock stylesheet %}
@@ -77,32 +91,30 @@ select#alternatives-list {
 	</div>
 	<table id="concern-list-data">
 		<thead>
-			<th></th>
-			<th></th>
-			<th></th>
+			<th align="center">Left Pole</th>
+			<th align="center">Rating</th>
+			<th align="center">Right Pole</th>
 		</thead>
 		<tbody>
-			<tr>
-				<td></td>
-				<td></td>
-				<td></td>
-			</tr>
 		{% for i in concerns_data_in_pairs|length|get_range %}
 			<tr>
 				<td align="center">
-					<div class="conc-label">
+					<div class="conc-label {% if forloop.counter == 1 %}f{% endif %}">
 						<span>{{ concerns_data_in_pairs|get_left_concern_value:forloop.counter }}</span>
 					</div>
 				</td>
 				<td align="center">
-					<div class="rating-selection">
+					<div class="rating-selection-wrapper">
 					{% for x in 5|get_range %}
-						<input type="radio" name="concern-{{ forloop.parentloop.counter }}" value="{{ x|add:'1' }}" id="{{ forloop.parentloop.counter }}-{{ x|add:'1' }}" class="rating" />
+						<div class="rating-selection">
+							<label for="{{ forloop.parentloop.counter }}-{{ x|add:'1' }}">{% if forloop.parentloop.counter == 1 %}{{ x|add:'1' }}{% endif %}</label>
+							<input type="radio" name="concern-{{ forloop.parentloop.counter }}" value="{{ x|add:'1' }}" id="{{ forloop.parentloop.counter }}-{{ x|add:'1' }}" class="rating" />
+						</div>
 					{% endfor %}
 					</div>
 				</td>
 				<td align="center">
-					<div class="conc-label">
+					<div class="conc-label {% if forloop.counter == 1 %}f{% endif %}">
 						<span>{{ concerns_data_in_pairs|get_right_concern_value:forloop.counter }}</span>
 					</div>
 				</td>
