@@ -15,6 +15,25 @@
 #form-menu {
 	margin-top: 10px;
 }
+.field-input-wrapper {
+	float: left;
+}
+.field-wrapper .error {
+	float: left;
+	margin: 4px 0px 0px 5px;
+}
+.field-wrapper {
+	overflow: hidden;
+}
+.form-errors-wrapper {
+	overflow: hidden;
+}
+div.form-errors-wrapper .error {
+	margin: 0px;
+}
+#btn-add-wrapper {
+	margin-top: 5px;
+}
 </style>
 {% endblock stylesheet %}
 
@@ -61,10 +80,12 @@
 	</div>
 </div>
 {% if wizard.form.errors %}
-<div class="error">
+<div class="form-errors-wrapper">
+	<div class="error">
 	{% for error in wizard.form.non_field_errors %}
 		<p>{{ error }}</p>
 	{% endfor %}
+	</div>
 </div>
 {% endif %}
 <input type="hidden" name="num-alternatives" value="{% if wizard.form.fields|length == 0 %}3{% else %}{{ wizard.form.fields|length }}{% endif %}" id="num-alternatives" />

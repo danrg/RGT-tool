@@ -218,9 +218,9 @@ div.form-errors-wrapper .error {
 {% if wizard.form.errors %}
 <div class="form-errors-wrapper">
 	<div class="error">
-		{% for error in wizard.form.non_field_errors %}
-			<p>{{ error }}</p>
-		{% endfor %}
+	{% for error in wizard.form.non_field_errors %}
+		<p>{{ error }}</p>
+	{% endfor %}
 	</div>
 </div>
 {% endif %}
