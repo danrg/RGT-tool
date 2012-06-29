@@ -20,7 +20,7 @@ class AlternativesForm(forms.Form):
                 # Every time, alternative fields are added with the name 'alternative..', and this because django
                 # always adds '1-' % (where 1 the number of the step with zero index) prefix in the name,
                 # with this the names are kept always the same.
-                self.fields[alternativeName] = forms.CharField(widget=forms.TextInput(attrs={'tabindex':'%d'%(x+1)}))
+                self.fields[alternativeName] = forms.CharField(widget=forms.TextInput(attrs={'tabindex':'%d'%(x+1),'size':'30'}))
     
     def clean(self):
         cleaned_data = super(AlternativesForm, self).clean()
