@@ -15,15 +15,12 @@
 #form-menu {
 	margin-top: 10px;
 }
-.field-input-wrapper {
-	float: left;
+.field-wrapper .field-input-wrapper {
+	display: inline-block;
 }
 .field-wrapper .error {
-	float: left;
+	display: inline-block;
 	margin: 4px 0px 0px 5px;
-}
-.field-wrapper {
-	overflow: hidden;
 }
 .form-errors-wrapper {
 	overflow: hidden;
@@ -56,7 +53,7 @@ div.form-errors-wrapper .error {
 	{% if wizard.form.fields|length == 0 %}
 		{% for i in 3|get_range %}
 		<div id="input{{ i|add:'1' }}" class="cloned">
-			<input type="text" name="1-alternative{{ i|add:'1' }}" id="id_1-alternative{{ i|add:'1' }}" tabindex="{{ i|add:'1' }}" />
+			<input type="text" name="1-alternative{{ i|add:'1' }}" id="id_1-alternative{{ i|add:'1' }}" tabindex="{{ i|add:'1' }}" size="30" />
 		</div>
 		{% endfor %}
 	{% else %}
