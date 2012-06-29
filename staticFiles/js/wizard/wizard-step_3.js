@@ -3,6 +3,9 @@ $(document).ready(function() {
 		revert: 'invalid',
 		start: function(event, ui) {
 			$(this).css('z-index', '10000');
+		},
+		stop: function(event, ui) {
+			$(this).css('z-index', '');
 		}
 	});
 	$('.drop').droppable({
