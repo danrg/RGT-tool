@@ -36,7 +36,7 @@
 }
 .list-wrapper {
 	width: 426px;
-	float: left;
+	display: inline-block;
 	margin: 0px 0px 5px 2px;
 }
 #conc-list {
@@ -99,22 +99,24 @@
 		{% endfor %}
 	</div>
 </div>
-<div class="list-wrapper" id="sim-list">
-	<div class="list-head" id="sim-list-head">
-		<p>For the alternatives that you have placed in this list, type a phrase describing why these are similar.</p> 
+<div class="main-list-wrapper">
+	<div class="list-wrapper" id="sim-list">
+		<div class="list-head" id="sim-list-head">
+			<p>For the alternatives that you have placed in this list, type a phrase describing why these are similar.</p> 
+		</div>
+		<div class="drop" id="sim-list-data"></div>
+		<div class="list-input" id="left-conc-input">
+			<input type="text" id="left-conc" size="50" />
+		</div>
 	</div>
-	<div class="drop" id="sim-list-data"></div>
-	<div class="list-input" id="left-conc-input">
-		<input type="text" id="left-conc" size="50" />
-	</div>
-</div>
-<div class="list-wrapper" id="diff-list">
-	<div class="list-head" id="diff-list-head">
-		<p>For the alternatives that you have placed in this list, type a phrase describing why these differ from the others.</p>
-	</div>
-	<div class="drop" id="diff-list-data"></div>
-	<div class="list-input" id="right-conc-input">
-		<input type="text" id="right-conc" size="50" />
+	<div class="list-wrapper" id="diff-list">
+		<div class="list-head" id="diff-list-head">
+			<p>For the alternatives that you have placed in this list, type a phrase describing why these differ from the others.</p>
+		</div>
+		<div class="drop" id="diff-list-data"></div>
+		<div class="list-input" id="right-conc-input">
+			<input type="text" id="right-conc" size="50" />
+		</div>
 	</div>
 </div>
 <div id="add-conc-but-wrapper">
