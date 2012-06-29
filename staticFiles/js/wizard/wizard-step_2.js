@@ -11,7 +11,7 @@ $(document).ready(function() {
 	    var divId = 'input'+newNum;
 	    var inputName = '1-alternative'+newNum;
 	    var inputId = 'id_1-alternative'+newNum;
-	    var newElem	= '<div id="'+divId+'" class="cloned"><input type="text" name="'+inputName+'" id="'+inputId+'" tabindex="'+newNum+'" /></div>'
+	    var newElem	= '<div id="'+divId+'" class="cloned"><input type="text" name="'+inputName+'" id="'+inputId+'" tabindex="'+newNum+'" size="30" /></div>'
 	    // insert the new element after the last input field
 	    $('#input' + num).after(newElem);
 	    // focus on the new element
