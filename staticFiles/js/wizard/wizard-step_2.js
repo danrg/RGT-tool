@@ -9,8 +9,8 @@ $(document).ready(function() {
 	    $('#num-alternatives').val(newNum);
 	    // create the new element
 	    var divId = 'input'+newNum;
-	    var inputName = '1-alternative'+newNum;
-	    var inputId = 'id_1-alternative'+newNum;
+	    var inputName = '1-alternative-'+newNum;
+	    var inputId = 'id_1-alternative-'+newNum;
 	    var newElem	= '<div id="'+divId+'" class="cloned"><input type="text" name="'+inputName+'" id="'+inputId+'" tabindex="'+newNum+'" size="30" /></div>'
 	    // insert the new element after the last input field
 	    $('#input' + num).after(newElem);
@@ -23,6 +23,6 @@ $(document).ready(function() {
 	});
 	function init() {
 		// focus on the first alternative input
-		$('#id_1-alternative1').focus();
+		$('#id_1-alternative-1').focus();
 	}
 });

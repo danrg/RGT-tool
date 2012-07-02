@@ -57,9 +57,9 @@ $(document).ready(function() {
 			});
 			// indicate the incomplete alternative
 			if (incomplete) {
-				$('#alternatives-list option[id="alternative'+(index+1)+'"]').attr('class', 'incomplete');
+				$('#alternatives-list option[id="alternative-'+(index+1)+'"]').attr('class', 'incomplete');
 			} else {
-				$('#alternatives-list option[id="alternative'+(index+1)+'"]').removeAttr('class');
+				$('#alternatives-list option[id="alternative-'+(index+1)+'"]').removeAttr('class');
 			}
 		});
 	}

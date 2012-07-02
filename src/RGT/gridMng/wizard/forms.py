@@ -16,7 +16,7 @@ class AlternativesForm(forms.Form):
         if len(self.data) > 0:
             self.num_alternatives = self.data['num-alternatives']
             for x in range(int(self.num_alternatives)):
-                alternativeName = 'alternative%d' % (x+1)
+                alternativeName = 'alternative-%d' % (x+1)
                 # Every time, alternative fields are added with the name 'alternative..', and this because django
                 # always adds '1-' % (where 1 the number of the step with zero index) prefix in the name,
                 # with this the names are kept always the same.
@@ -30,7 +30,7 @@ class AlternativesForm(forms.Form):
             # In case the field with the alternative name has its own validation error then, it is not contained in the
             # cleaned data, thats why we catch the exception.
             try:
-                alternative = cleaned_data['alternative%d' % (i+1)]
+                alternative = cleaned_data['alternative-%d' % (i+1)]
                 alternatives.append(alternative)
             except:
                 # The key does not exist (key=alternative name).
@@ -47,6 +47,7 @@ class ConcernsForm(forms.Form):
         super(ConcernsForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
             self.num_concerns = self.data['num-concerns']
+            self.num_acrd = self.data['num-acrd']
             for x in range(int(self.num_concerns)):
                 left_concern_name = 'concern%d-left' % (x+1)
                 right_concern_name = 'concern%d-right' % (x+1)
@@ -55,13 +56,20 @@ class ConcernsForm(forms.Form):
                 # with this the names are kept always the same.
                 self.fields[left_concern_name] = forms.CharField(widget=forms.TextInput(attrs={'size':'50'}))
                 self.fields[right_concern_name] = forms.CharField(widget=forms.TextInput(attrs={'size':'50'}))
+            for x in range(int(self.num_acrd)):
+                # 'acrd' stands for alternative-concern-relation-data
+                acrd_name = 'acrd%d' % (x+1)
+                # Every time, hidden acrd fields are added with the names 'acrd..', and this because django
+                # always adds '2-' % (where 2 the number of the step with zero index) prefix in the name,
+                # with this the names are kept always the same.
+                self.fields[acrd_name] = forms.CharField(widget=forms.HiddenInput(attrs={'class':'acrd'}),required=False)
     
     def clean(self):
         cleaned_data = super(ConcernsForm, self).clean()
         concerns = []
         # Construct a list with the concerns names.
         for i in range(int(self.num_concerns)):
-            # In case the field with the concern left pole name has its own validation error then, it is not contained in the
+            # Name does not exist or in case the field with the concern left pole name has its own validation error then, it is not contained in the
             # cleaned data, thats why we catch the exception.
             try:
                 concern_left = cleaned_data['concern%d-left' % (i+1)]
@@ -69,7 +77,7 @@ class ConcernsForm(forms.Form):
             except:
                 # The key does not exist (key=concern left pole name).
                 pass
-            # In case the field with the concern right pole name has its own validation error then, it is not contained in the
+            # Name does not exist or in case the field with the concern right pole name has its own validation error then, it is not contained in the
             # cleaned data, thats why we catch the exception.
             try:
                 concern_right = cleaned_data['concern%d-right' % (i+1)]

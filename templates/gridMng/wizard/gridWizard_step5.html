@@ -144,7 +144,9 @@ div.f {
 		<div id="input{{ forloop.counter }}" class="rca-data">
 			{% for concern in concerns_data|sort_dict_by_key %}
 				{% if forloop.counter|divisibleby:"2" %}
-					<input type="hidden" name="4-rating-concern{{ forloop.counter|divide_by:2 }}-alternative{{ forloop.parentloop.counter }}" value="0" id="id_4-rating-concern{{ forloop.counter|divide_by:2 }}-alternative{{ forloop.parentloop.counter }}" />
+					{% with key=forloop.counter|divide_by:2|concat:forloop.parentloop.counter %}
+					<input type="hidden" name="4-rating-concern{{ forloop.counter|divide_by:2 }}-alternative{{ forloop.parentloop.counter }}" value="{{ acrd|get_value_of_dict:key }}" id="id_4-rating-concern{{ forloop.counter|divide_by:2 }}-alternative{{ forloop.parentloop.counter }}" />
+					{% endwith %}
 				{% endif %}
 			{% endfor %}
 		</div>

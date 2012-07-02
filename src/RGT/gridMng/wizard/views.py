@@ -35,11 +35,21 @@ class GridWizard(SessionWizardView):
             # in order to generate the weight inputs according to this data.
             # The length of concerns is divided by '2' because concerns are always in pairs.
             # The concerns data are also passed in the template as dictionary {'index':'concern_pair'}
-            # because it is needed in order to generate the fields properly
-            concerns_data = self.get_cleaned_data_for_step('2')
+            # because it is needed in order to generate the fields properly.
+            dict_data = self.get_cleaned_data_for_step('2')
+            concerns_data = {}
+            # We only want to keep the visible fields and not the hidden. The visible fields MUST
+            # contain the string "concern".
+            for key in dict_data:
+                if "concern" in key:
+                    concerns_data[key] = dict_data[key]
             concern_data_in_pairs = {}
             for i in range(len(concerns_data)/2):
-                concern_data_in_pairs['%d' % (i+1)] = (concerns_data['concern%d-left' % (i+1)], concerns_data['concern%d-right' % (i+1)])
+                try:
+                    concern_data_in_pairs['%d' % (i+1)] = (concerns_data['concern%d-left' % (i+1)], concerns_data['concern%d-right' % (i+1)])
+                except:
+                    # The field name does not exist
+                    pass
             context.update({'concerns_data':concerns_data,
                             'concerns_data_in_pairs':concern_data_in_pairs,
                             'concerns_length':len(concerns_data)/2})
@@ -50,15 +60,35 @@ class GridWizard(SessionWizardView):
             # and the hidden fields with the number of alternatives and concerns, so the user can select rating values.
             # The length of concerns is divided by '2' because concerns are always in pairs.
             alternatives_data = self.get_cleaned_data_for_step('1')
-            concerns_data = self.get_cleaned_data_for_step('2')
+            concerns_data = {}
+            dict_data = self.get_cleaned_data_for_step('2')
+            # We want to keep the visible fields and not the hidden. The visible fields MUST
+            # contain the string "concern".
+            for key in dict_data:
+                if "concern" in key:
+                    concerns_data[key] = dict_data[key]
+            acrd = {}
+            # Construct a new dictionary with the acrd, with keys in format 'concern_index alternative_index'.
+            # acrd stands for alternative-concern-relation-data
+            for key in dict_data:
+                if "acrd" in key:
+                    # We split the key in order to get the alternative index, the concern index and the rating value.
+                    # The key has the format 'alternative_index-concern_index-rating'
+                    splitted = dict_data[key].split('-')
+                    acrd['%s%s' % (splitted[1], splitted[0])] = splitted[2]
             concern_data_in_pairs = {}
             for i in range(len(concerns_data)/2):
-                concern_data_in_pairs['%d' % (i+1)] = (concerns_data['concern%d-left' % (i+1)], concerns_data['concern%d-right' % (i+1)])
+                try:
+                    concern_data_in_pairs['%d' % (i+1)] = (concerns_data['concern%d-left' % (i+1)], concerns_data['concern%d-right' % (i+1)])
+                except:
+                    # The field name does not exist
+                    pass
             context.update({'alternatives_data':alternatives_data,
                             'alternatives_length':len(alternatives_data),
                             'concerns_data':concerns_data,
                             'concerns_data_in_pairs':concern_data_in_pairs,
-                            'concerns_length':len(concerns_data)/2})
+                            'concerns_length':len(concerns_data)/2,
+                            'acrd':acrd})
         return context  
 
     def done(self, form_list, **kwargs):
@@ -93,7 +123,7 @@ class GridWizard(SessionWizardView):
         # Get the alternative values from the form data of step 1 (zero index).
         alternative_values = []
         for i in range(int(num_alternatives)):
-            val = (step_one_data['%s-alternative%d' % (step_one_prefix, i+1)]).strip()
+            val = (step_one_data['%s-alternative-%d' % (step_one_prefix, i+1)]).strip()
             alternative_values.append(val)
         # Get the concern and weight values from the form data of step 2 for concerns, and step 3 for weights (zero index).
         concern_values = []

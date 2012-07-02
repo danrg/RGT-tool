@@ -132,7 +132,7 @@
 	<div id="conc-list-data">
 		{% if wizard.form.fields|length > 0 %}
 			<div id="input1" class="cloned">
-			{% for field in wizard.form %}
+			{% for field in wizard.form|get_non_hidden_fields %}
 				<div class="field-wrapper">
 					<div class="field-input-wrapper">
 						{{ field }}
@@ -146,7 +146,7 @@
 					{% endif %}
 				</div>
 				{% if forloop.counter|divisibleby:"2" %}
-					{% if forloop.counter|divide_by:2 < wizard.form.fields|length|divide_by:2 %}
+					{% if forloop.counter|divide_by:2 < wizard.form|get_non_hidden_fields|length|divide_by:2 %}
 						</div>
 						<div id="input{{ forloop.counter|divide_by:2|add:'1' }}" class="cloned">
 					{% endif %}
@@ -171,5 +171,19 @@
 	{% endfor %}
 </div>
 {% endif %}
-<input type="hidden" name="num-concerns" value="{{ wizard.form.fields|length|divide_by:2 }}" id="num-concerns" />
+<div id="alt-conc-rel-data">
+{% if wizard.form.fields|length > 0 %}
+	{% for field in wizard.form %}
+		{% if field.is_hidden %}
+			{{ field }}
+		{% endif %}
+	{% endfor %}
+{% endif %}
+</div>
+<div id="num-acrd-wrapper">
+	<input type="hidden" name="num-acrd" value="{{ wizard.form|get_hidden_fields|length }}" id="num-acrd" />
+</div>
+<div id="num-concerns-wrapper">
+	<input type="hidden" name="num-concerns" value="{{ wizard.form|get_non_hidden_fields|length|divide_by:2 }}" id="num-concerns" />
+</div>
 {% endblock wizard_form_content %}

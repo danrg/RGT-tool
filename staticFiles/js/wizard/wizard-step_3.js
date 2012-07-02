@@ -53,6 +53,9 @@ $(document).ready(function() {
 			// clear the values
 			lcField.val('');
 			rcField.val('');
+			// construct the acrd, acrd stands for alternative-concern-relation-data
+			constructACRD($('#sim-list-data'), newNum, 1);
+			constructACRD($('#diff-list-data'), newNum, 5);
 			// reset the alternatives
 			reset($('#sim-list-data'));
 			reset($('#diff-list-data'));
@@ -104,6 +107,24 @@ $(document).ready(function() {
 			$('#alt-list-data').append($(this).attr('style', 'position: relative;').attr('class', 'drag ui-draggable').draggable({revert: 'invalid', start: function(event, ui) {
 				$(this).css('z-index', '10000');
 			}}));
+		});
+	}
+	function constructACRD(list, concIndex, rating) {
+		list.children().each(function(index) {
+			// get the alternative index from the id of the placed alternative in the list
+			var altIndex = $(this).attr('id').split('-')[1];
+			// get the number of acrd already exist
+			var acrd = $('.acrd').length;
+			// construct id, name and value
+			var id = "id_2-acrd"+(acrd+1);
+			var name = "2-acrd"+(acrd+1);
+			var value = altIndex+"-"+concIndex+"-"+rating;
+			// construct the hidden elem
+			var elem = "<input id='"+id+"' type='hidden' class='acrd' value='"+value+"' name='"+name+"' />";
+			// append the elem in the acrd list
+			$('#alt-conc-rel-data').append(elem);
+			// increase the number of acrd
+			$('#num-acrd').val(acrd+1);
 		});
 	}
 });

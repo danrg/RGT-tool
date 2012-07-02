@@ -53,7 +53,7 @@ div.form-errors-wrapper .error {
 	{% if wizard.form.fields|length == 0 %}
 		{% for i in 3|get_range %}
 		<div id="input{{ i|add:'1' }}" class="cloned">
-			<input type="text" name="1-alternative{{ i|add:'1' }}" id="id_1-alternative{{ i|add:'1' }}" tabindex="{{ i|add:'1' }}" size="30" />
+			<input type="text" name="1-alternative-{{ i|add:'1' }}" id="id_1-alternative-{{ i|add:'1' }}" tabindex="{{ i|add:'1' }}" size="30" />
 		</div>
 		{% endfor %}
 	{% else %}
