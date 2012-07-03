@@ -2,36 +2,8 @@
 {% load wizard_extras %}
 
 {% block stylesheet %}
-<style type="text/css">
-#alt-list {
-	margin-top: 10px;
-}
-#alt-list-data > .cloned {
-	padding-bottom: 5px;
-}
-#alt-list-header {
-	margin-bottom: 5px;
-}
-#form-menu {
-	margin-top: 10px;
-}
-.field-wrapper .field-input-wrapper {
-	display: inline-block;
-}
-.field-wrapper .error {
-	display: inline-block;
-	margin: 4px 0px 0px 5px;
-}
-.form-errors-wrapper {
-	overflow: hidden;
-}
-div.form-errors-wrapper .error {
-	margin: 0px;
-}
-#btn-add-wrapper {
-	margin-top: 5px;
-}
-</style>
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/wizard/wizard-step_2.css" />
 {% endblock stylesheet %}
 
 {% block javascript %}

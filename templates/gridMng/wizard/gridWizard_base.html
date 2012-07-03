@@ -4,6 +4,10 @@
 	RGT | Grids - Create
 {% endblock title %}
 
+{% block stylesheet %}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL}}css/wizard/wizard-common.css" />
+{% endblock stylesheet %}
+
 {% block content %}
 {% if not user.is_active %}
 	<div id="verify-message">

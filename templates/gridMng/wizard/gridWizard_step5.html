@@ -2,59 +2,8 @@
 {% load wizard_extras %}
 
 {% block stylesheet %}
-<style type="text/css">
-#alternative-name {
-	font-weight: bold;
-}
-select > option.incomplete {
-	color: red;
-}
-#concern-list-wrapper {
-	margin-top: 15px;
-	margin-bottom: 15px;
-}
-#concern-list-data {
-	margin-top: 15px;
-	padding-left: 5px;
-}
-.conc-rating-wrapper {
-	overflow: hidden;
-	margin: 5px 0px;
-}
-.sep {
-	float: left;
-	margin-right: 3px;
-}
-#form-menu {
-	margin-top: 10px;
-}
-.conc-label {
-	margin: 0px 10px;
-}
-select#alternatives-list {
-	height: 100%;
-	font-size: 12px;
-}
-#alternatives-wrapper {
-	margin-top: 10px;
-}
-#alternatives-selection-wrapper {
-	margin-top: 3px;
-}
-#content .rating-selection label {
-	padding: 0px;
-	width: 20px;
-}
-#content .rating-selection {
-	float: left;
-}
-.rating-selection-wrapper input[type="radio"] {
-	margin: 0px 1px;
-}
-div.f {
-	margin-top: 13px;
-}
-</style>
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/wizard/wizard-step_5.css" />
 {% endblock stylesheet %}
 
 {% block javascript %}

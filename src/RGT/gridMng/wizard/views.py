@@ -68,7 +68,7 @@ class GridWizard(SessionWizardView):
                 if "concern" in key:
                     concerns_data[key] = dict_data[key]
             acrd = {}
-            # Construct a new dictionary with the acrd, with keys in format 'concern_index alternative_index'.
+            # Construct a new dictionary with the acrd, with keys in format 'concern_indexalternative_index'.
             # acrd stands for alternative-concern-relation-data
             for key in dict_data:
                 if "acrd" in key:

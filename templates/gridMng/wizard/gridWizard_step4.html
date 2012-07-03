@@ -2,76 +2,8 @@
 {% load wizard_extras %}
 
 {% block stylesheet %}
-<style type="text/css">
-#weight-data {
-	margin: 10px 0px;
-}
-.conc-weight-wrapper {
-	overflow: hidden;
-	margin: 5px 0px;
-}
-.conc-label {
-	float: left;
-	margin-right: 3px;
-	padding-top: 2px;
-}
-.sep {
-	float: left;
-	margin-right: 3px;
-	padding-top: 2px;
-}
-.cloned {
-	float: left;
-	margin-left: 6px;
-}
-.cloned input {
-	text-align: center;
-}
-.field-input-wrapper {
-	float: left;
-}
-.field-wrapper .error {
-	float: left;
-	margin: 4px 0px 0px 5px;
-}
-.form-errors-wrapper {
-	overflow: hidden;
-}
-#weight-total-wrapper {
-	-moz-box-shadow: 0 0 5px #999;
-	-webkit-box-shadow: 0 0 5px #999;
-	box-shadow: 0 0 5px #999;
-	overflow: hidden;
-	margin: 5px 0px;
-	max-width: 140px;
-	padding: 5px;
-}
-#weight-total-header {
-	float: left;
-	font-weight: bold;
-}
-#weight-total-label {
-	float: left;
-	margin-left: 7px;
-}
-#form-menu {
-	margin-top: 10px;
-}
-div.form-errors-wrapper .error {
-	margin: 0px;
-}
-#total-weight-ind {
-	font-weight: bold;
-	color: red;
-}
-.info {
-	margin: 10px 0px;
-}
-.conc-label-wrapper {
-	overflow: hidden;
-	min-width: 120px;
-}
-</style>
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/wizard/wizard-step_4.css" />
 {% endblock stylesheet %}
 
 {% block javascript %}

@@ -2,74 +2,8 @@
 {% load wizard_extras %}
 
 {% block stylesheet %}
-<style type="text/css">
-.drop {
-	-moz-box-shadow: 0 0 5px #999;
-	-webkit-box-shadow: 0 0 5px #999;
-	box-shadow: 0 0 5px #999;
-	width: 370px;
-	min-height: 200px;
-	margin-bottom: 5px;
-	padding: 5px;
-	margin: 10px 0px;
-	height: 100%;
-}
-.drag {
-	padding: 5px;
-}
-.alt-data {
-	-moz-box-shadow: 0 0 5px #333;
-	-webkit-box-shadow: 0 0 5px #333;
-	box-shadow: 0 0 5px #333;
-	padding: 3px 3px 3px 5px;
-	background-color: #D8D8D8;
-}
-.list-head {
-	margin-bottom: 3px;
-}
-
-#alt-list {
-	margin-top: 10px;
-}
-#alt-list #alt-list-data {
-	margin-left: 1px;
-}
-.list-wrapper {
-	width: 426px;
-	display: inline-block;
-	margin: 0px 0px 5px 1px;
-}
-#conc-list {
-	margin-top: 10px;
-}
-#conc-list #conc-list-data {
-	margin-top: 5px;
-	padding-left: 5px;
-}
-#conc-list .info {
-	font-size: 11px;
-	padding: 5px;
-}
-#form-menu {
-	margin-top: 10px;
-}
-.list-input {
-	margin-top: 7px;
-}
-.cloned {
-	overflow: hidden;
-	margin-bottom: 10px;
-}
-.field-wrapper {
-	width: 275px;
-	float: left;
-}
-.sep {
-	float: left;
-	margin: 0px 5px;
-	padding-top: 2px;
-}
-</style>
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/wizard/wizard-step_3.css" />
 {% endblock stylesheet %}
 
 {% block javascript %}

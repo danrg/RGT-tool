@@ -1,0 +1,25 @@
+#alt-list {
+	margin-top: 10px;
+}
+#alt-list-data > .cloned {
+	padding-bottom: 5px;
+}
+#alt-list-header {
+	margin-bottom: 5px;
+}
+.field-wrapper .field-input-wrapper {
+	display: inline-block;
+}
+.field-wrapper .error {
+	display: inline-block;
+	margin: 4px 0px 0px 5px;
+}
+.form-errors-wrapper {
+	overflow: hidden;
+}
+div.form-errors-wrapper .error {
+	margin: 0px;
+}
+#btn-add-wrapper {
+	margin-top: 5px;
+}
