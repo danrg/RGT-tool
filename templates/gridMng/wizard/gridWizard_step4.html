@@ -116,13 +116,17 @@
    				<td>
    					<div class="conc-label-wrapper">
 		   				<div class="conc-label">
-							<span>{{ concerns_data_in_pairs|divide_and_get_left_concern_value:forloop.counter }}</span>
+		   				{% with key=forloop.counter|divide_by:2 %}
+							<span>{{ concerns_data_in_pairs|get_left_concern_value:key }}</span>
+						{% endwith %}
 						</div>
 						<div class="sep">
 							<span>--</span>
 						</div>
 						<div class="conc-label">
-							<span>{{ concerns_data_in_pairs|divide_and_get_right_concern_value:forloop.counter }}</span>
+						{% with key=forloop.counter|divide_by:2 %}
+							<span>{{ concerns_data_in_pairs|get_right_concern_value:key }}</span>
+						{% endwith %}
 						</div>
 					</div>
 				</td>
