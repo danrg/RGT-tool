@@ -1,51 +1,51 @@
 {% extends 'layout.html' %}
 
 {% block title %}
-	RGT | Home
-{% endblock%}
+RGT | Home
+{% endblock title %}
 
 {% block stylesheet %}
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/home.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tipsy.css" />
 {% endblock stylesheet %}
 
-{% block content %}
-	<div>
-		<h2>Home</h2>
-	</div>
-	{% if not user.is_superuser %}
-		{% if not user.is_active %}
-		<div id="verify-message">
-			<p>Please verify your email! Thank you!</p>
-        <br/>
-		</div>
-		{% endif %}
-	{% endif %}
-	<div class="info" id="welcome-message">
-		<p>Welcome {{ firstName }}! Please use the menu above to navigate!</p>
-    </div>
-    <div class="info" id="gen-info">
-    	<h3>About</h3>
-    	<p>The <strong>Repertory Grid Tool</strong> project is part of the <a href="http://www.cs.rug.nl/search/" target="_blank">SEARCH Group</a> of the University of Groningen.
-    	The implementation of the tool is realized by three students of the University of Groningen as part of their Master Thesis and Research Internships.</p>
-    </div>
-    <div class="info" id="br-info">
-    	<h3>Note</h3>
-    	<div id="br-info-head">
-    		<p>Please take note that we currently only support the following browsers:</p>
-    	</div>
-    	<div id="br-info-main">
-		    <ul>
-		        <li>Microsoft Internet Explorer 9</li>
-		        <li>Mozilla FireFox 12 (or higher)</li>
-		        <li>Google Chrome 19 (or higher)</li>
-		    </ul>
-		</div>
-    </div>
-{% endblock %}
+{% block javascript %}
+<!-- <img src="{{ STATIC_URL }}icons/help.png" style="display: inline;" class="helpHover" id="help_googleChrome" /> -->
+<script type="text/javascript" src="{{ STATIC_URL }}js/tipsy.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/displayHelp.js"></script>
+{% endblock javascript %}
 
-{% block javascript%}
-    <!-- <img src="{{ STATIC_URL }}icons/help.png" style="display: inline;" class="helpHover" id="help_googleChrome" /> -->
-    <script type="text/javascript" src="{{ STATIC_URL }}js/tipsy.js"></script>
-    <link rel="Stylesheet" type="text/css" href="{{ STATIC_URL }}css/tipsy.css" />
-    <script type="text/javascript" src="{{ STATIC_URL }}js/displayHelp.js"></script>
-{% endblock %}
+{% block content %}
+<div>
+	<h2>Home</h2>
+</div>
+{% if not user.is_superuser %}
+	{% if not user.is_active %}
+	<div id="verify-message">
+		<p>Please verify your email! Thank you!</p>
+    <br/>
+	</div>
+	{% endif %}
+{% endif %}
+<div class="info" id="welcome-message">
+	<p>Welcome {{ firstName }}! Please use the menu above to navigate!</p>
+</div>
+<div class="info" id="gen-info">
+	<h3>About</h3>
+	<p>The <strong>Repertory Grid Tool</strong> project is part of the <a href="http://www.cs.rug.nl/search/" target="_blank">SEARCH Group</a> of the University of Groningen.
+	The implementation of the tool is realized by three students of the University of Groningen as part of their Master Thesis and Research Internships.</p>
+</div>
+<div class="info" id="br-info">
+	<h3>Note</h3>
+	<div id="br-info-head">
+		<p>Please take note that we currently only support the following browsers:</p>
+	</div>
+	<div id="br-info-main">
+	    <ul>
+	        <li>Microsoft Internet Explorer 9</li>
+	        <li>Mozilla FireFox 12 (or higher)</li>
+	        <li>Google Chrome 19 (or higher)</li>
+	    </ul>
+	</div>
+</div>
+{% endblock content %}

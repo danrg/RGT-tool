@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8"/>
     <title>{% block title %}{% endblock %}</title>
-    <link rel="Stylesheet" type="text/css" href="{{ STATIC_URL }}css/style.css" />
-    <link rel="Stylesheet" type="text/css" href="{{ STATIC_URL }}css/shared.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/style.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/shared.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/flick/jquery-ui-1.8.18.custom.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.loadmask.css" />
     {% block stylesheet %}{% endblock %}
@@ -14,15 +14,13 @@
 	<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.loadmask.js"></script>
 	<script type="text/javascript" src="{{ STATIC_URL }}js/dialogbox.js"></script>
 	<script type="text/javascript" src="{{ STATIC_URL }}js/loadSpinner.js"></script>
-	{% block javascript %}
-	{% endblock %}
+	{% block javascript %}{% endblock %}
 	<script type="text/javascript">
         $(window).ready(function(){
         	//preload the image used to display the waiting status of an ajax request
         	img1 = new Image();
             img1.src = "{{ STATIC_URL }}images/ajax-loader.gif";
-            {% block onloadJavascript %}
-            {% endblock %}
+            {% block onloadJavascript %}{% endblock %}
 		});
     </script>
 </head>
@@ -41,8 +39,7 @@
         <div id="workspace">
             <div id="content">
                 <div>
-                    {% block content %}
-                    {% endblock %}
+                    {% block content %}{% endblock %}
                     <div id="modalDialogBox" class="dialogBoxModal">
                     </div>
                 </div>
@@ -52,7 +49,7 @@
 </div>
 <div id="footer">
     <div>
-        Repertory Grid Tool ©2012 | <a href="/contact/">Contact Us!</a>
+        <p>Repertory Grid Tool ©2012 | <a href="/contact/">Contact Us!</a></p>
     </div>
 </div>
 </body>
