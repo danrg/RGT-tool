@@ -75,11 +75,6 @@
 {% endblock wizard_top_content %}
 
 {% block wizard_form_content %}
-{% with x=3 %}
-	{% with y=4 %}
-		{{ x }}-{{ y }}
-	{% endwith %}
-{% endwith %}
 <div class="data-wrapper">
 	{% if wizard.form.fields|length > 0 %}
 		<div id="input1" class="rca-data">
