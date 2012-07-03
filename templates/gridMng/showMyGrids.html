@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block title %}
-	RGT | Grids
+RGT | Grids
 {% endblock %}
 
 {% block stylesheet %}
@@ -9,12 +9,12 @@
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/showMyGrids.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tipsy.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smallButton.css" />
-{% endblock %}
+{% endblock stylesheet %}
 
 {% block javascript %}
 <script type="text/javascript" src="{{ STATIC_URL }}js/jshashtable-2.1_src.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/svgDendogram.js"></script>
-{% endblock %}
+{% endblock javascript %}
 
 {% block content %}
 {% if not user.is_active %}
@@ -65,7 +65,6 @@
 </div>
 <form id="form">{% csrf_token %} 
 	<div id="results">
-			
 	</div>
 	<div class="tableOptions" id="showMyGridsTableOptions">
         <input type="button" id="saveButton" onclick="saveGrid()" value="Save" />
