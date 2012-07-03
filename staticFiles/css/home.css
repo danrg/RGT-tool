@@ -1,0 +1,16 @@
+div#verify-message {
+	margin-bottom: 10px;
+}	
+div.info {
+	margin-bottom: 20px;
+}
+div#gen-info {
+	max-width: 860px;
+}
+div#br-info #br-info-head {
+	margin-bottom: 10px;
+}
+div#br-info #br-info-main ul {
+	list-style: none;
+	margin-left: 10px;
+}
