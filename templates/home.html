@@ -4,6 +4,10 @@
 	RGT | Home
 {% endblock%}
 
+{% block stylesheet %}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/home.css" />
+{% endblock stylesheet %}
+
 {% block content %}
 	{% if not user.is_superuser %}
 		{% if not user.is_active %}
@@ -13,17 +17,24 @@
 		</div>
 		{% endif %}
 	{% endif %}
-	<div id="welcome-message">
+	<div class="info" id="welcome-message">
 		<p>Welcome {{ firstName }}! Please use the menu above to navigate!</p>
-        <br />
-    <p>
-        Please take note that we currently only support the following browsers: <br/> <br/>
-        <ul style="list-style: none">
-            <li>Microsoft Internet Explorer 9</li>
-            <li>Mozilla FireFox 12 (or higher)</li>
-            <li>Google Chrome 19 (or higher)</li>
-        </ul>
-    </p>
+    </div>
+    <div class="info" id="gen-info">
+    	<p>The Repertory Grid Tool project is part of the <a href="http://www.cs.rug.nl/search/" target="_blank">SEARCH Group</a> of the University of Groningen.
+    	The implementation of the tool is realized by three students of the University of Groningen as part of their Master Thesis and Research Internships.</p>
+    </div>
+    <div class="info" id="br-info">
+    	<div id="br-info-head">
+    		<p>Please take note that we currently only support the following browsers:</p>
+    	</div>
+    	<div id="br-info-main">
+		    <ul>
+		        <li>Microsoft Internet Explorer 9</li>
+		        <li>Mozilla FireFox 12 (or higher)</li>
+		        <li>Google Chrome 19 (or higher)</li>
+		    </ul>
+		</div>
     </div>
 {% endblock %}
 
