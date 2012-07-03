@@ -1,8 +1,8 @@
 {% extends 'layout.html' %}
 
 {% block title %}
-	RGT | Sessions - Administration
-{% endblock %}
+RGT | Sessions - Administration
+{% endblock title %}
 
 {% block stylesheet %}
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/mySessionsContent.css" />
@@ -11,7 +11,7 @@
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/resultAlternativeConcernTable.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/resultRatingWeightTable.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tipsy.css" />
-{% endblock %}
+{% endblock stylesheet %}
 
 {% block content %}
 {% if not user.is_active %}
@@ -50,4 +50,4 @@
 <div id="concentDiv">
 </div>
 {% endif %}
-{% endblock %}
+{% endblock content %}

@@ -2,7 +2,12 @@
 
 {% block title %}
 	RGT | Sessions - Create
-{% endblock %}
+{% endblock title %}
+
+{% block stylesheet %}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/gridTableGeneralFunctions.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/createSession.css" />
+{% endblock stylesheet %}
 
 {% block content%}
 {% if not user.is_active %}
@@ -10,8 +15,6 @@
 		<p>Please verify your email in order to use this part of the application! Thank you!</p>
 	</div>
 {% else %}
-<link rel="stylesheet" href="{{ STATIC_URL }}css/gridTableGeneralFunctions.css" type="text/css">
-<link rel="stylesheet" href="{{ STATIC_URL }}css/createSession.css" type="text/css">
 <script>
     if (typeof showGridSessionSelection != 'function') {
         $.ajax({
@@ -24,7 +27,6 @@
 <h2>Create Session</h2>
 <p>Follow these four easy steps to create a new session.</p>
 <div id="createSessionBody">
-
     <div class="formelms">
         <h3>Step 1: Select a grid</h3>
         <label for="gridSessionSelection">Select grid name:</label>
@@ -38,19 +40,16 @@
             	<option value="noGrids">no grids available</option>
             {% endif %}
         </select>
-
         <h3>Step 2: Name the session</h3>
         <label for="sessionNameInputBox">Session name:</label>
         <input type="text" id="sessionNameInputBox"/>
-
         <h3>Step 3: Review the grid</h3>
         <div id="createSessionBasedOnGrid">
             <p style="padding:50px;text-align: center;"> Select a grid from the dropdown menu.</p>
         </div>
-
         <h3>Step 4: Confirm creation</h3>
         <input type="button" value="Create Session" onclick="createSession()"/> or <a href="/sessions/">return to index.</a>
     </div>
 </div>
 {% endif %}
-{% endblock%}
+{% endblock content %}

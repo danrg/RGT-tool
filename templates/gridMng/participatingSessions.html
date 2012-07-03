@@ -1,15 +1,15 @@
 {% extends 'layout.html' %}
 
 {% block title %}
-	RGT | Sessions - Participating
-{% endblock %}
+RGT | Sessions - Participating
+{% endblock title %}
 
 {% block stylesheet %}
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/participatingSessions.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/participatingSessionsContent.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/gridTableGeneralFunctions.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/pendingResponses.css" />
-{% endblock %}
+{% endblock stylesheet %}
 
 {% block content %}
 {% if not user.is_active %}
@@ -58,4 +58,4 @@
 <div id="participatingSessionContentDiv">
 </div>
 {% endif %}
-{% endblock %}
+{% endblock content %}
