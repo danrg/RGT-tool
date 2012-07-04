@@ -15,35 +15,41 @@ function sendResponse()
 			strD = strD + '&' + $(this).attr('name') + '=' + $(this).val();
 		});
 		var str=  'nConcerns=' + nConcerns + '&nAlternatives=' + nAlternatives + '&iteration=' + iteration + '&gridType=response&sessionUSID=' + sessionUSID + '&' + form.serialize() + strD;
-		$.post('/sessions/respond/', str, function(data){
-			try
-			{
-				if($(data).find('error').length <= 0)
+		//double function is needed here because we want access to sessionUSID
+		var callBack= function(sessionID){
+
+			return function(data){
+				try
 				{
-					var dateTime = $(data).find('dateTime').text();
-					$('#responseStatusA').attr('class', 'green');
-					$('#responseStatusSpan').text('Response was sent at: ' + dateTime);
-					if($(data).find('extra').find('nResponses').length >= 1)
+					if($(data).find('error').length <= 0)
 					{
-						$('#nReceivedResponses').text($(data).find('extra').find('nResponses').text());
-						console.log($(data).find('extra').find('nResponses').text());
+						var dateTime = $(data).find('dateTime').text();
+						$('#responseStatusA').attr('class', 'green');
+						$('#responseStatusSpan').text('Response was sent at: ' + dateTime);
+						if($(data).find('extra').find('nResponses').length >= 1)
+						{
+							$('#nReceivedResponses').text($(data).find('extra').find('nResponses').text());
+						}
+						hideLoadingSpinner($('#wrap'));
+						showMessageInDialogBox('Response was sent.');
+						removePendingSessionResponse(sessionID); //function from participatingSessions.js
+						//$('.participatingSessionsResponseHighlight').effect('highlight', {color: '#AFDCEC'}, 1500);
 					}
-					hideLoadingSpinner($('#wrap'));
-					showMessageInDialogBox('Response was sent.');
-					//$('.participatingSessionsResponseHighlight').effect('highlight', {color: '#AFDCEC'}, 1500);
+					else
+					{
+						hideLoadingSpinner($('#wrap'));
+						showMessageInDialogBox($(data).find('error').text());
+					}
 				}
-				else
+				catch(err)
 				{
+					console.log(err);
 					hideLoadingSpinner($('#wrap'));
-					showMessageInDialogBox($(data).find('error').text());
 				}
 			}
-			catch(err)
-			{
-				console.log(err);
-				hideLoadingSpinner($('#wrap'));
-			}
-		})
+		}
+
+		$.post('/sessions/respond/', str, callBack(sessionUSID));
 	}
 	catch(err)
 	{
@@ -58,7 +64,7 @@ function getResponseFromIteration(iteration)
 	var currentIteration = false;
 	try
 	{
-		
+
 		var sessionUSID= participatingGetSessionUSID(); //function is from participatingSession.js
 		if(iteration == null || iteration == '')
 		{

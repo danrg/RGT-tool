@@ -118,3 +118,16 @@ function openSession(sessionUSID)
 	$('#participatingSessionSelect').find('option[value= "' + sessionUSID + '"]').attr('selected', true);
 	showParticipatingSessionDetails();
 }
+
+function removePendingSessionResponse(sessionUSID)
+{
+	nRows= $('#pendingREsponsesTable').find('tbody').find('tr').length;
+	if(nRows <= 1)
+	{
+		$('#pendingREsponsesTable').remove();
+	}
+	else
+	{
+		$('#pendingREsponsesTable').find('#tdPendingResponses' + sessionUSID).remove();
+	}
+}
