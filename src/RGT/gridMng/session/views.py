@@ -717,7 +717,11 @@ def ajaxGetResults(request):
                                     
                                     #retrieve all the names
                                     while i < len(responseGridRelation):
-                                        participantNames.append(responseGridRelation[i].grid.user.first_name)
+                                        #the initial db didn't link a response grid to a user direcly, this has changed now, but the code needs to take care of this difference. (4/7/2012)
+                                        if responseGridRelation[i].grid.user != None:
+                                            participantNames.append(responseGridRelation[i].grid.user.first_name)
+                                        else:
+                                            participantNames.append(responseGridRelation[i].user.first_name)
                                         i+= 1
                                     i= 0
                                     #create the data for the javascript. format should be a string --> [[name,value], [name,value], ....., [name,value]]. 
@@ -977,7 +981,16 @@ def __generateAlternativeConcernResultTable__(data=[], sessionGridObj= None):
     #first find all the existing pairs of concerns
     if sessionGridObj != None:
         for concern in sessionGridObj.concerns_set.all():
-            oldConcernsPair.append((concern.leftPole.lower(), concern.rightPole.lower()))
+            lConcern= concern.leftPole
+            rConcern= concern.rightPole
+            if lConcern == None and rConcern == None:
+                pass
+            else:
+                if lConcern == None:
+                    lConcern= ""
+                if rConcern == None:
+                    rConcern= ""
+                oldConcernsPair.append((lConcern.lower(), rConcern.lower()))
         
         for alternative in sessionGridObj.alternatives_set.all():
             oldAlternatives.append(alternative.name.lower())
