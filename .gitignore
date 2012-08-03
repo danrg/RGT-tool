@@ -2,8 +2,6 @@
 *.log
 *.DS_Store
 .idea
-.project
-.pydevproject
 src/RGT/ownsettings.py
 src/sqlite.db
 src/RGT/functional_tests/fixtures/*
