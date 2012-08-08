@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import login, authenticate
 from django.views.generic.simple import redirect_to
 import datetime
+from django.utils.timezone import utc
 from recoverPassForm import RecoverPassForm
 from RGT.authentication.models import PassRecoverCode
 
@@ -57,7 +58,8 @@ def recoverPass(request, passRecoverCode=''):
             if code.linkUsed == False:
                 # check date time of the code if it has expired
                 codeDate = code.dateTime
-                dateSub = datetime.datetime.now() - codeDate
+                now = datetime.datetime.utcnow().replace(tzinfo=utc)
+                dateSub = now - codeDate
                 if (dateSub.seconds / 60 < 10):
                     form = RecoverPassForm()
                     invalidLink = False
