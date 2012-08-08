@@ -6,14 +6,7 @@ RGT | Home
 
 {% block stylesheet %}
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/home.css" />
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tipsy.css" />
 {% endblock stylesheet %}
-
-{% block javascript %}
-<!-- <img src="{{ STATIC_URL }}icons/help.png" style="display: inline;" class="helpHover" id="help_googleChrome" /> -->
-<script type="text/javascript" src="{{ STATIC_URL }}js/tipsy.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/displayHelp.js"></script>
-{% endblock javascript %}
 
 {% block content %}
 <div>
@@ -45,7 +38,7 @@ RGT | Home
 	    <ul>
 	        <li>Microsoft Internet Explorer 9</li>
 	        <li>Mozilla FireFox 12 (or higher)</li>
-	        <li>Google Chrome 19 (or higher)</li>
+	        <li>Google Chrome 19 (or higher)<!-- img src="{{ STATIC_URL }}icons/help.png" style="display: inline;" class="helpHover" id="help_googleChrome" /--></li>
 	    </ul>
 	</div>
 </div>

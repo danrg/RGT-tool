@@ -1,6 +1,10 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
-from authentication.views import *
+from authentication.views.RegistrationView import RegistrationView
+from authentication.views.LoginView import LoginView
+from authentication.views.LogoutRedirectView import LogoutRedirectView
+from authentication.views.ForgotPasswordView import ForgotPasswordView
+from authentication.views.ChangePasswordView import ChangePasswordView
 
 admin.autodiscover()
 
@@ -25,5 +29,5 @@ urlpatterns = patterns('',
     url(r'^contact/', 'RGT.contact.views.contact'),
     url(r'^grids/', include('RGT.gridMng.urls')),
     url(r'^sessions/', include('RGT.gridMng.session.urls')),
-    url(r'^help/(?P<helpMessageId>.*)/$', 'RGT.views.help'),
+    url(r'^help/(?P<helpMessageId>.*)/$', 'RGT.views.rgtHelp'),
 )

@@ -10,7 +10,7 @@ class GeneralsForm(forms.Form):
     
 class AlternativesForm(forms.Form):
     # Override the initialize in order to dynamically add fields to the form in order to be saved,
-    # the fields are saved only when the user selects submit.
+    # the fields are saved only when the user selects 'Next Step'.
     def __init__(self, *args, **kwargs):
         super(AlternativesForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
@@ -42,7 +42,7 @@ class AlternativesForm(forms.Form):
     
 class ConcernsForm(forms.Form):
     # Override the initialize in order to dynamically add fields to the form in order to be saved,
-    # the fields are saved only when the user selects submit.
+    # the fields are saved only when the user selects 'Next Step'.
     def __init__(self, *args, **kwargs):
         super(ConcernsForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
@@ -92,7 +92,7 @@ class ConcernsForm(forms.Form):
     
 class WeightsForm(forms.Form):
     # Override the initialize in order to dynamically add fields to the form in order to be saved,
-    # the fields are saved only when the user selects submit.
+    # the fields are saved only when the user selects 'Next Step'.
     def __init__(self, *args, **kwargs):
         super(WeightsForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
@@ -124,7 +124,7 @@ class WeightsForm(forms.Form):
     
 class RatingsForm(forms.Form):
     # Override the initialize in order to dynamically add fields to the form in order to be saved,
-    # the fields are saved only when the user selects submit.
+    # the fields are saved only when the user selects 'Next Step'.
     def __init__(self, *args, **kwargs):
         super(RatingsForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:

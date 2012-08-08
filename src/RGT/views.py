@@ -12,7 +12,7 @@ def home(request):
 
 
 @login_required
-def help(request, helpMessageId = ''):
+def rgtHelp(request, helpMessageId = ''):
     if helpMessageId in HELP_MESSAGES:
         return HttpResponse(createXmlSuccessResponse(HELP_MESSAGES[helpMessageId]), content_type='application/xml')
 
