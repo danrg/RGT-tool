@@ -1,6 +1,7 @@
 from django.views.generic.simple import redirect_to
 from RGT.userProfile.models import UserProfile
 from django.contrib.auth.models import User
+from django.utils.functional import SimpleLazyObject
 
 def verify(request, verifyEmailCode=''):
     if not request.user.is_authenticated():
