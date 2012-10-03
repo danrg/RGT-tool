@@ -642,7 +642,7 @@ def ajaxGetParticipatingSessionsContentGrids(request):
         print '-'*60 
 
 #this function will return the page that displays the results of a iteration from a session 
-def ajaxGetResults(request):
+def ajaxGetResults2(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
     try:
@@ -845,6 +845,126 @@ def ajaxGetResults(request):
         print '-'*60
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')  
 
+
+def ajaxGetResults(request):
+    if not request.user.is_authenticated():
+        return redirect_to(request, '/auth/login/')
+    try:
+        if request.POST.has_key('sessionUSID') and request.POST.has_key('iteration'):
+            facilitatorObj= None
+            if len(request.user.facilitator_set.all()) >= 1 :
+                facilitatorObj= request.user.facilitator_set.all()[0]
+                sessionObj= Session.objects.filter(usid= request.POST['sessionUSID'])
+                if len(sessionObj) >= 1:
+                    sessionObj= sessionObj[0]
+                    if sessionObj.facilitator == facilitatorObj:
+                        iterationObj= int(request.POST['iteration'])
+                        if sessionObj.iteration >= iterationObj:
+                            #let's find all the response grids
+                            responseGridRelation= sessionObj.responsegrid_set.filter(iteration= iterationObj)
+                            if len(responseGridRelation) >= 1:
+                                gridType= responseGridRelation[0].grid.grid_type
+                                if gridType == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
+                                    try:
+                                        #check to see if we have a sesssion grid for the iteration
+                                        concerns= None
+                                        alternatives= None
+                                        sessionGrid= SessionGrid.objects.filter(session= sessionObj, iteration= iterationObj)
+                                        if len(sessionGrid) >= 1:
+                                            sessionGrid= sessionGrid[0].grid
+                                            concerns, alternatives= __generateAlternativeConcernResultTable__(responseGridRelation, sessionGrid)
+                                        else:
+                                            concerns, alternatives= __generateAlternativeConcernResultTable__(responseGridRelation)
+                                        if len(concerns) >= 1:
+                                            template= loader.get_template('gridMng/resultAlternativeConcernTable.html')
+                                            context= RequestContext(request, {'concerns':concerns, 'alternatives':alternatives})
+                                            htmlData= template.render(context)
+                                            return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
+                                        else:
+                                            return HttpResponse(createXmlErrorResponse('No results found. This means that the participants did not provide any responses for this particular iteration.'), content_type='application/xml')
+                                    except:
+                                        print "Exception in user code:"
+                                        print '-'*60
+                                        traceback.print_exc(file=sys.stdout)
+                                        print '-'*60
+                                        return HttpResponse(createXmlErrorResponse('Unknown Error'), content_type='application/xml')
+                                elif gridType == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:
+                                    #create a list with a matrix of ratios in each position of the list.
+                                    ratioMatrixs= []
+                                    tempMatrix= []
+                                    tempRow= None
+                                    #first lets add the rations that are in the session grid to the list
+                                    concerns= sessionObj.sessiongrid_set.filter(iteration= iterationObj)[0].grid.concerns_set.all()
+                                    alternatives= sessionObj.sessiongrid_set.filter(iteration= iterationObj)[0].grid.alternatives_set.all()
+                                    nConcerns= len(concerns)
+                                    nAlternatives= len(alternatives)
+                                    nResponseGrids= len(responseGridRelation)
+                                    
+                                    i= 0
+                                    j= 0
+                                    
+                                    while i < nConcerns:
+                                        tempRow= []
+                                        while j < nAlternatives:
+                                            tempRow.append(Ratings.objects.get(concern= concerns[i], alternative= alternatives[j]).rating)
+                                            j+= 1
+                                        tempMatrix.append(tempRow)
+                                        j= 0
+                                        i+= 1
+                                    i= 0
+                                    ratioMatrixs.append(tempMatrix)
+                                    tempMatrix= []
+                                    #now lets do the same for the response grids
+                                    
+                                    i= 0
+                                    j= 0
+                                    k= 0
+                                    
+                                    while i <  nResponseGrids:
+                                        respGrid= responseGridRelation[0].grid
+                                        concerns= respGrid.concerns_set.all()
+                                        alternatives= respGrid.alternatives_set.all()
+                                        nConcerns= len(concerns)
+                                        nAlternatives= len(alternatives)
+                                        while j < nConcerns:
+                                            tempRow= []
+                                            while k < nAlternatives:
+                                                tempRow.append(Ratings.objects.get(concern= concerns[j], alternative= alternatives[k]).rating)
+                                                k+= 1
+                                            k= 0
+                                            j+= 1
+                                            tempMatrix.append(tempRow)
+                                        j= 0
+                                        i+= 1
+                                        ratioMatrixs.append(tempMatrix)
+                                        tempMatrix= []
+                                    i= 0
+                                    
+                                    #calculate the means
+                                    meanMatrix= __calcutateMeans__(ratioMatrixs)
+                                    
+                                    return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
+                                else:
+                                    return HttpResponse(createXmlErrorResponse('Unexpected type grid found'), content_type='application/xml')
+                            else:
+                                return HttpResponse(createXmlErrorResponse('No results found. This means that the participants of this session did not provide any responses for this particular iteration.'), content_type='application/xml')
+                        else:
+                            return HttpResponse(createXmlErrorResponse('Session does not contain that iteration'), content_type='application/xml')
+                    else:
+                        return HttpResponse(createXmlErrorResponse('You are not a facilitator for this session'), content_type='application/xml')
+                else:
+                    return HttpResponse(createXmlErrorResponse('Couldn\'t find session'), content_type='application/xml')
+            else:
+                return HttpResponse(createXmlErrorResponse('You are not a facilitator for this session'), content_type='application/xml')
+        else:
+            return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'), content_type='application/xml') 
+    except:
+        print "Exception in user code:"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60
+        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml') 
+
 #function that will get the page that display the participants of a session
 def ajaxGetParticipatingPage(request):
     if not request.user.is_authenticated():
@@ -967,6 +1087,40 @@ def ajaxGetSessionGrid(request):
 def test(request):
     return render_to_response('gridMng/createGrid.html', {}, context_instance=RequestContext(request))
 
+def __calcutateMeans__(ratioMatrix= None):
+    
+    if ratioMatrix == None:
+        return None
+    
+    nMatrixs= len(ratioMatrix)
+    nCols= len(ratioMatrix[0][0])
+    nRows= len(ratioMatrix[0])
+    nAvailableAnswers= 0 # used to see how many ratios are numbers in the same cell over multible ratio matrixes
+    totalRatio= 0
+    temp= None 
+    meanMatrix= []
+    i= 0
+    j= 0
+    k= 0
+    while i < nRows:
+        tempRow= []
+        while j < nCols:
+            while k < nMatrixs:
+                temp= ratioMatrix[k][i][j]
+                if temp != None:
+                    totalRatio+= temp
+                    nAvailableAnswers+= 1
+                k+= 1
+            k= 0
+            j+= 1
+            tempRow.append(totalRatio/nAvailableAnswers)
+            totalRatio= 0
+            nAvailableAnswers= 0 
+        j= 0
+        i+= 1
+        meanMatrix.append(tempRow)
+    i= 0
+    return meanMatrix
 # data is a list of ResponseGrid objs
 def __generateAlternativeConcernResultTable__(data=[], sessionGridObj= None):
     concernsResult= [] #obj that will be returned with the concerns as following:  (leftconcern, right concern, nPair, nLeftConcern, nRightConcern, isNew)
