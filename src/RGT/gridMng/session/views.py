@@ -942,7 +942,7 @@ def ajaxGetResults(request):
                                     
                                     #calculate the means
                                     meanMatrix= __calcutateMeans__(ratioMatrixs)
-                                    
+                                    rangeMatrix= __calculateRange__(ratioMatrixs)
                                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                                 else:
                                     return HttpResponse(createXmlErrorResponse('Unexpected type grid found'), content_type='application/xml')
@@ -1089,9 +1089,10 @@ def test(request):
 
 def __calcutateMeans__(ratioMatrix= None):
     
-    if ratioMatrix == None:
+    if ratioMatrix == None or ratioMatrix[0] == None or ratioMatrix[0][0] == None:
         return None
     
+    #find out the dimensions of the ratio matrix
     nMatrixs= len(ratioMatrix)
     nCols= len(ratioMatrix[0][0])
     nRows= len(ratioMatrix[0])
@@ -1107,12 +1108,14 @@ def __calcutateMeans__(ratioMatrix= None):
         while j < nCols:
             while k < nMatrixs:
                 temp= ratioMatrix[k][i][j]
+                #calculate the total ratio between all the cell in the same position of all the reponse grids
                 if temp != None:
                     totalRatio+= temp
                     nAvailableAnswers+= 1
                 k+= 1
             k= 0
             j+= 1
+            #calculate the mean
             tempRow.append(totalRatio/nAvailableAnswers)
             totalRatio= 0
             nAvailableAnswers= 0 
@@ -1121,6 +1124,83 @@ def __calcutateMeans__(ratioMatrix= None):
         meanMatrix.append(tempRow)
     i= 0
     return meanMatrix
+
+def __calculateRange__(ratioMatrix= None):
+    
+    if ratioMatrix == None or ratioMatrix[0] == None or ratioMatrix[0][0] == None:
+        return None
+    
+    nMatrixs= len(ratioMatrix)
+    nCols= len(ratioMatrix[0][0])
+    nRows= len(ratioMatrix[0])
+    globalMin= None
+    globalMax= None
+    temp= None 
+    rangeMatrix= []
+    i= 0
+    j= 0
+    k= 0
+    while i < nRows:
+        tempRow= []
+        while j < nCols:
+            while k < nMatrixs:
+                temp= ratioMatrix[k][i][j]
+                if temp != None:
+                    #if this is the first cell set the max and min to what is found in the ration matrix
+                    if globalMin == None:
+                        globalMin= temp
+                        globalMax= temp
+                    else:
+                        if temp > globalMax:
+                            globalMax= temp
+                        if temp < globalMin:
+                            globalMin= temp
+                k+= 1
+            k= 0
+            j+= 1
+            tempRow.append(globalMax - globalMin)
+            globalMax= None
+            globalMin= None
+        j= 0
+        i+= 1
+        rangeMatrix.append(tempRow)
+    i= 0
+    return rangeMatrix
+        
+def __calculateStandardDeviation(ratioMatrix= None, meanMatrix= None):
+    
+    if ratioMatrix == None or ratioMatrix[0] == None or ratioMatrix[0][0] == None or meanMatrix == None:
+        return None
+    
+    nMatrixs= len(ratioMatrix)
+    nCols= len(ratioMatrix[0][0])
+    nRows= len(ratioMatrix[0])
+    temp= None 
+    stdMatrix= []
+    nAvailableAnswers= 0
+    total= 0
+    i= 0
+    j= 0
+    k= 0
+    while i < nRows:
+        tempRow= []
+        while j < nCols:
+            while k < nMatrixs:
+                temp= ratioMatrix[k][i][j]
+                if temp != None:
+                    ratioMatrix[i][j]
+                    nAvailableAnswers+= 1
+                k+= 1
+            k= 0
+            j+= 1
+            tempRow.append()
+        j= 0
+        i+= 1
+        stdMatrix.append(tempRow)
+    i= 0
+    
+    return stdMatrix
+    
 # data is a list of ResponseGrid objs
 def __generateAlternativeConcernResultTable__(data=[], sessionGridObj= None):
     concernsResult= [] #obj that will be returned with the concerns as following:  (leftconcern, right concern, nPair, nLeftConcern, nRightConcern, isNew)
