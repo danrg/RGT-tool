@@ -890,10 +890,14 @@ def ajaxGetResults(request):
                                         return HttpResponse(createXmlErrorResponse('Unknown Error'), content_type='application/xml')
                                 elif gridType == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:
                                     #create a list with a matrix of ratios in each position of the list.
-                                    ratioMatrixs= []
+                                    ratioMatrices= []
+                                    weightMatrices= []
                                     tempMatrix= []
-                                    tempRow= None
+                                    tempRatioRow= None
+                                    tempWeightRow= None
+                                    
                                     #first lets add the rations that are in the session grid to the list
+                                    #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
                                     concerns= sessionObj.sessiongrid_set.filter(iteration= iterationObj)[0].grid.concerns_set.all()
                                     alternatives= sessionObj.sessiongrid_set.filter(iteration= iterationObj)[0].grid.alternatives_set.all()
                                     nConcerns= len(concerns)
@@ -902,47 +906,143 @@ def ajaxGetResults(request):
                                     
                                     i= 0
                                     j= 0
-                                    
+                                    tempWeightRow= []
                                     while i < nConcerns:
-                                        tempRow= []
+                                        tempRatioRow= []
+                                        tempWeightRow.append(concerns[0].weight)
                                         while j < nAlternatives:
-                                            tempRow.append(Ratings.objects.get(concern= concerns[i], alternative= alternatives[j]).rating)
+                                            tempRatioRow.append(Ratings.objects.get(concern= concerns[i], alternative= alternatives[j]).rating)
                                             j+= 1
-                                        tempMatrix.append(tempRow)
+                                        tempMatrix.append(tempRatioRow)
                                         j= 0
                                         i+= 1
                                     i= 0
-                                    ratioMatrixs.append(tempMatrix)
+                                    ratioMatrices.append(tempMatrix)
+                                    weightMatrices.append([tempWeightRow])
                                     tempMatrix= []
-                                    #now lets do the same for the response grids
+                                    tempWeightRow= []
+                                    #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
                                     
+                                    #now lets do the same for the response grids
+                                    #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
                                     i= 0
                                     j= 0
                                     k= 0
+                                    tempWeightRow= []
                                     
                                     while i <  nResponseGrids:
-                                        respGrid= responseGridRelation[0].grid
+                                        respGrid= responseGridRelation[i].grid
                                         concerns= respGrid.concerns_set.all()
                                         alternatives= respGrid.alternatives_set.all()
                                         nConcerns= len(concerns)
                                         nAlternatives= len(alternatives)
                                         while j < nConcerns:
-                                            tempRow= []
+                                            tempRatioRow= []
+                                            tempWeightRow.append(concerns[j].weight)
                                             while k < nAlternatives:
-                                                tempRow.append(Ratings.objects.get(concern= concerns[j], alternative= alternatives[k]).rating)
+                                                tempRatioRow.append(Ratings.objects.get(concern= concerns[j], alternative= alternatives[k]).rating)
                                                 k+= 1
                                             k= 0
                                             j+= 1
-                                            tempMatrix.append(tempRow)
+                                            tempMatrix.append(tempRatioRow)
                                         j= 0
                                         i+= 1
-                                        ratioMatrixs.append(tempMatrix)
+                                        weightMatrices.append([tempWeightRow])
+                                        ratioMatrices.append(tempMatrix)
                                         tempMatrix= []
+                                        tempWeightRow= []
                                     i= 0
+                                    #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
                                     
-                                    #calculate the means
-                                    meanMatrix= __calcutateMeans__(ratioMatrixs)
-                                    rangeMatrix= __calculateRange__(ratioMatrixs)
+                                    #calculate the rage, mean and std for the weight and ratio
+                                    #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
+                                    meanRatioMatrix= __calcutateMeans__(ratioMatrices)
+                                    rangeRatioMatrix= __calculateRange__(ratioMatrices)
+                                    stdRatioMatrix= __calculateStandardDeviation__(ratioMatrices, meanRatioMatrix)
+                                    meanWeightMatrix= __calcutateMeans__(weightMatrices)
+                                    rangeWeightMatrix= __calculateRange__(weightMatrices)
+                                    stdWeightMatrix= __calculateStandardDeviation__(weightMatrices, meanWeightMatrix)
+                                    #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
+                                    
+                                    #first lets  create the header
+                                    #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
+                                    header= []
+                                    for alternative in sessionObj.sessiongrid_set.filter(iteration= iterationObj)[0].grid.alternatives_set.all():
+                                        header.append(alternative.name)
+                                    #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
+                                    
+                                    #generate color map
+                                    #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
+                                    minRangeRatio, maxRangeRatio= __findMinMaxInMatrix__(rangeRatioMatrix)
+                                    minStdRatio, maxStdRatio= __findMinMaxInMatrix__(stdRatioMatrix)
+                                    
+                                    minRangeWeight, maxRangeWeight= __findMinMaxInMatrix__(rangeWeightMatrix)
+                                    minStdWeight, maxStdWeight= __findMinMaxInMatrix__(stdWeightMatrix)
+                                    
+                                    rangeRatioColorMap= __createRangeTableColorMap__(minRangeRatio, maxRangeRatio, rangeRatioMatrix)
+                                    rangeWeightColorMap= __createRangeTableColorMap__(minRangeWeight, maxRangeWeight, rangeWeightMatrix[0])
+                                    stdRatioColorMap= __createStdTableColorMap__(minStdRatio, maxStdRatio, stdRatioMatrix)
+                                    stdWeightColorMap= __createStdTableColorMap__(minStdWeight, maxStdWeight, stdWeightMatrix[0])
+                                    #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
+                                    
+                                    
+                                    #generate the js for the chart in the page
+                                    #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
+                                    participantNames= []
+                                    #retrieve all the names
+                                    while i < len(responseGridRelation):
+                                        #the initial db didn't link a response grid to a user direcly, this has changed now, but the code needs to take care of this difference. (4/7/2012)
+                                        if responseGridRelation[i].grid.user != None:
+                                            participantNames.append(responseGridRelation[i].grid.user.first_name)
+                                        else:
+                                            participantNames.append(responseGridRelation[i].user.first_name)
+                                        i+= 1
+                                    i= 0
+                                    ratioJsChartData, weightJsChartData= __createJSforRatioWeightSessionResultsChart__(ratioMatrices, weightMatrices, participantNames)
+                                    
+                                    #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
+                                    
+                                    #clue everything together now and return the page
+                                    tableRatingRangeColor= [] #final table with the value to be displayed, the background color and js code
+                                    tableRatingStdColor= [] #final table with the value to be displayed, the background color and js code
+                                    tableRatingMean= [] #final table with the value to be displayed and js code
+                                    tableWeightMean= [] #final table with the weights and js code
+                                    tableWeightStd= [] #final table with the weights and js code
+                                    tableWeightRange= [] #final table with the weights and js code
+                                    i= 0
+                                    while i < len(concerns):
+                                        rowRange= []
+                                        rowStd= []
+                                        rowMean= []
+                                        tableWeightMean.append((meanWeightMatrix[0][i], weightJsChartData[0][i]))#meanWeightMatrix[0][i], it is always [0] as in truth the matrix is not really a matrix but a 1d list
+                                        tableWeightStd.append((stdWeightMatrix[0][i], weightJsChartData[0][i]))#meanWeightMatrix[0][i], it is always [0] as in truth the matrix is not really a matrix but a 1d list
+                                        tableWeightRange.append((rangeWeightMatrix[0][i], weightJsChartData[0][i]))#meanWeightMatrix[0][i], it is always [0] as in truth the matrix is not really a matrix but a 1d list
+                                        #create a tulip with the value that should be displayed in the td and the color of the background for each cell in the row
+                                        while k < len(alternatives):
+                                            rowRange.append((rangeRatioMatrix[i][k], rangeRatioColorMap[i][k], ratioJsChartData[i][k]))
+                                            rowStd.append((stdRatioMatrix[i][k], stdRatioColorMap[i][k], ratioJsChartData[i][k]))
+                                            rowMean.append((meanRatioMatrix[i][k], ratioJsChartData[i][k]))
+                                            k+= 1
+                                        k= 0
+                                        #add the concerns to the range, mean and std tables
+                                        rightPole= concerns[i].rightPole
+                                        leftPole= concerns[i].leftPole
+                                        rowStd.insert(0, (leftPole, None))
+                                        rowStd.append((rightPole, None))
+                                        rowMean.insert(0, (leftPole, None))
+                                        rowMean.append((rightPole, None))
+                                        rowRange.insert(0, (leftPole, None))
+                                        rowRange.append((rightPole, None))
+                                        tableRatingRangeColor.append(rowRange)
+                                        tableRatingStdColor.append(rowStd)
+                                        tableRatingMean.append(rowMean)
+                                        rightPole= None
+                                        leftPole= None
+                                        i+= 1
+                                    i= 0
+                                    template= loader.get_template('gridMng/resultRatingWeightTables.html')
+                                    context= RequestContext(request, {'rangeTable':tableRatingRangeColor, 'rangeHeaders':header, 'rangeWeights':tableWeightRange, 'rangeWeightColorMap':rangeWeightColorMap, 'rangeTableHead':'Range', 'meanWeights':tableWeightMean, 'meanTable':tableRatingMean, 'meanHeaders':header, 'meanTableHead':'Mean', 'stdTable':tableRatingStdColor, 'stdHeaders':header, 'stdWeights':tableWeightStd, 'stdWeightColorMap':stdWeightColorMap, 'stdTableHead':'Standard Deviation' })
+                                    htmlData= template.render(context)
                                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                                 else:
                                     return HttpResponse(createXmlErrorResponse('Unexpected type grid found'), content_type='application/xml')
@@ -1087,15 +1187,15 @@ def ajaxGetSessionGrid(request):
 def test(request):
     return render_to_response('gridMng/createGrid.html', {}, context_instance=RequestContext(request))
 
-def __calcutateMeans__(ratioMatrix= None):
+def __calcutateMeans__(ratioMatrices= None):
     
-    if ratioMatrix == None or ratioMatrix[0] == None or ratioMatrix[0][0] == None:
+    if ratioMatrices == None or ratioMatrices[0] == None or ratioMatrices[0][0] == None:
         return None
     
     #find out the dimensions of the ratio matrix
-    nMatrixs= len(ratioMatrix)
-    nCols= len(ratioMatrix[0][0])
-    nRows= len(ratioMatrix[0])
+    nMatrixs= len(ratioMatrices)
+    nCols= len(ratioMatrices[0][0])
+    nRows= len(ratioMatrices[0])
     nAvailableAnswers= 0 # used to see how many ratios are numbers in the same cell over multible ratio matrixes
     totalRatio= 0
     temp= None 
@@ -1107,7 +1207,7 @@ def __calcutateMeans__(ratioMatrix= None):
         tempRow= []
         while j < nCols:
             while k < nMatrixs:
-                temp= ratioMatrix[k][i][j]
+                temp= ratioMatrices[k][i][j]
                 #calculate the total ratio between all the cell in the same position of all the reponse grids
                 if temp != None:
                     totalRatio+= temp
@@ -1116,7 +1216,7 @@ def __calcutateMeans__(ratioMatrix= None):
             k= 0
             j+= 1
             #calculate the mean
-            tempRow.append(totalRatio/nAvailableAnswers)
+            tempRow.append(float("{0:.3f}".format(totalRatio/nAvailableAnswers)))
             totalRatio= 0
             nAvailableAnswers= 0 
         j= 0
@@ -1125,14 +1225,14 @@ def __calcutateMeans__(ratioMatrix= None):
     i= 0
     return meanMatrix
 
-def __calculateRange__(ratioMatrix= None):
+def __calculateRange__(ratioMatrices= None):
     
-    if ratioMatrix == None or ratioMatrix[0] == None or ratioMatrix[0][0] == None:
+    if ratioMatrices == None or ratioMatrices[0] == None or ratioMatrices[0][0] == None:
         return None
     
-    nMatrixs= len(ratioMatrix)
-    nCols= len(ratioMatrix[0][0])
-    nRows= len(ratioMatrix[0])
+    nMatrixs= len(ratioMatrices)
+    nCols= len(ratioMatrices[0][0])
+    nRows= len(ratioMatrices[0])
     globalMin= None
     globalMax= None
     temp= None 
@@ -1144,7 +1244,7 @@ def __calculateRange__(ratioMatrix= None):
         tempRow= []
         while j < nCols:
             while k < nMatrixs:
-                temp= ratioMatrix[k][i][j]
+                temp= ratioMatrices[k][i][j]
                 if temp != None:
                     #if this is the first cell set the max and min to what is found in the ration matrix
                     if globalMin == None:
@@ -1167,15 +1267,16 @@ def __calculateRange__(ratioMatrix= None):
     i= 0
     return rangeMatrix
         
-def __calculateStandardDeviation(ratioMatrix= None, meanMatrix= None):
+def __calculateStandardDeviation__(ratioMatrices= None, meanMatrix= None):
     
-    if ratioMatrix == None or ratioMatrix[0] == None or ratioMatrix[0][0] == None or meanMatrix == None:
+    if ratioMatrices == None or ratioMatrices[0] == None or ratioMatrices[0][0] == None or meanMatrix == None:
         return None
     
-    nMatrixs= len(ratioMatrix)
-    nCols= len(ratioMatrix[0][0])
-    nRows= len(ratioMatrix[0])
-    temp= None 
+    nMatrixs= len(ratioMatrices)
+    nCols= len(ratioMatrices[0][0])
+    nRows= len(ratioMatrices[0])
+    temp= None
+    tempMean= 0
     stdMatrix= []
     nAvailableAnswers= 0
     total= 0
@@ -1185,21 +1286,131 @@ def __calculateStandardDeviation(ratioMatrix= None, meanMatrix= None):
     while i < nRows:
         tempRow= []
         while j < nCols:
+            tempMean= meanMatrix[i][j]
             while k < nMatrixs:
-                temp= ratioMatrix[k][i][j]
+                temp= ratioMatrices[k][i][j]
                 if temp != None:
-                    ratioMatrix[i][j]
+                    temp-= tempMean
+                    temp= temp**2
+                    total+= temp
                     nAvailableAnswers+= 1
                 k+= 1
             k= 0
             j+= 1
-            tempRow.append()
+            tempRow.append(float("{0:.3f}".format(sqrt(total/nAvailableAnswers))))
+            temp= None
+            total= 0
+            nAvailableAnswers= 0
         j= 0
         i+= 1
         stdMatrix.append(tempRow)
     i= 0
     
     return stdMatrix
+
+def __findMinMaxInMatrix__(matrix= None):
+    
+    if matrix == None or matrix[0] == None:
+        return None
+    
+    nRows= len(matrix)
+    nCols= len(matrix[0])
+    minValue= None
+    maxValue= None
+    temp= None
+    
+    i= 0
+    j= 0
+    
+    while i < nRows:
+        while j < nCols:
+            temp= matrix[i][j]
+            if minValue == None:
+                minValue= temp
+                maxValue= temp
+            else:
+                if temp > maxValue:
+                    maxValue= temp
+                if temp < minValue:
+                    minValue= temp
+            j+= 1
+        j= 0
+        i+= 1
+    i= 0
+    
+    return (minValue, maxValue)
+
+def __createJSforRatioWeightSessionResultsChart__(ratioMatrices= None, weightMatrices= None, participantNames= None):
+    
+    if ratioMatrices == None or weightMatrices == None:
+        return None
+    #create the data for the javascript. format should be a string --> [[name,value], [name,value], ....., [name,value]].
+    javascriptRatioData= [] #format should be [[cell with js string data], [cell with js string data], ...]
+    javascriptWeightData= [] #format should be [[cell with js string data], [cell with js string data], ...]
+    i= 0
+    j= 0
+    k= 0
+    temp= None
+    nConcerns= len(ratioMatrices[0])
+    nResponseGrids= len(ratioMatrices) - 1
+    nAlternatives= len(ratioMatrices[0][0])
+    
+    #first create the table for the weights
+    while i < nConcerns:
+        temp= '['
+        temp+= '[\'session\','
+        tempWeight= weightMatrices[0][0][i]
+        #first element is always what is in the session grid
+        if tempWeight != None and  tempWeight >= 1:
+            temp+= str(tempWeight) + ']'
+        else:
+            temp+= '0]'
+        #now add all other elements
+        j= 0
+        while j < nResponseGrids:
+            tempWeight= weightMatrices[j + 1] #j+1 because the session grid weights are in position 0
+            if tempWeight != None and  tempWeight >= 1:
+                temp+= ',[\'' + participantNames[j] + '\',' + str(tempWeight) + ']'
+            else:
+                temp+= ',[\'' + participantNames[j] + '\',0]'
+            j+= 1
+        temp+= ']'
+        javascriptWeightData.append(temp)
+        i+= 1
+    i= 0
+    k= 0
+    #now create the table for the ratios
+    while i < nConcerns:
+        row= []
+        while k < nAlternatives:
+            temp= '['
+            j= 0
+            #first element is always what is in the session grid
+            temp+= '[\'session\','
+            tempRating= ratioMatrices[0][i][k]
+            if tempRating != None and  tempRating >= 1:
+                temp+= str(tempRating) + ']'
+            else:
+                temp+= '0]'
+            #now add all other elements
+            while j < nResponseGrids:
+                tempRating= ratioMatrices[j + 1][i][k] #j+1 because the session grid ratios are in position 0
+                if tempRating != None and  tempRating >= 1:
+                    temp+= ',[\'' + participantNames[j] + '\',' + str(tempRating) + ']'
+                else:
+                    temp+= ',[\'' + participantNames[j] + '\',0]'
+                j+= 1
+                temp+= ']'
+                row.append(temp)
+            k+= 1
+        k= 0
+        javascriptRatioData.append(row)
+        i+= 1
+    i= 0
+    
+    return (javascriptRatioData, javascriptWeightData)
+        
+                
     
 # data is a list of ResponseGrid objs
 def __generateAlternativeConcernResultTable__(data=[], sessionGridObj= None):
