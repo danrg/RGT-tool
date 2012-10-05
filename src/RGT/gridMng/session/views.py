@@ -973,16 +973,16 @@ def ajaxGetResults(request):
                                     
                                     #generate color map
                                     #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
-                                    minRangeRatio, maxRangeRatio= __findMinMaxInMatrix__(rangeRatioMatrix)
-                                    minStdRatio, maxStdRatio= __findMinMaxInMatrix__(stdRatioMatrix)
+                                    #minMaxRangeRatio= __findMinMaxInMatrix__(rangeRatioMatrix)
+                                    minMaxRangeWeight= __findMinMaxInMatrix__(stdRatioMatrix)
                                     
-                                    minRangeWeight, maxRangeWeight= __findMinMaxInMatrix__(rangeWeightMatrix)
-                                    minStdWeight, maxStdWeight= __findMinMaxInMatrix__(stdWeightMatrix)
+                                    #minMaxStdRatio= __findMinMaxInMatrix__(rangeWeightMatrix)
+                                    minMaxStdWeight= __findMinMaxInMatrix__(stdWeightMatrix)
                                     
-                                    rangeRatioColorMap= __createRangeTableColorMap__(minRangeRatio, maxRangeRatio, rangeRatioMatrix)
-                                    rangeWeightColorMap= __createRangeTableColorMap__(minRangeWeight, maxRangeWeight, rangeWeightMatrix[0])
-                                    stdRatioColorMap= __createStdTableColorMap__(minStdRatio, maxStdRatio, stdRatioMatrix)
-                                    stdWeightColorMap= __createStdTableColorMap__(minStdWeight, maxStdWeight, stdWeightMatrix[0])
+                                    rangeRatioColorMap= __createRangeTableColorMap__(4, 0, rangeRatioMatrix) # for as the max range is 1-5= 4 (as right now the user can only use the numbers between 1 and 5)
+                                    rangeWeightColorMap= __createRangeTableColorMap__(minMaxRangeWeight[1], 0, rangeWeightMatrix[0])
+                                    stdRatioColorMap= __createStdTableColorMap__(5, 0, stdRatioMatrix)
+                                    stdWeightColorMap= __createStdTableColorMap__(minMaxStdWeight[1], 0, stdWeightMatrix[0])
                                     #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
                                     
                                     
@@ -1010,15 +1010,20 @@ def ajaxGetResults(request):
                                     tableWeightStd= [] #final table with the weights and js code
                                     tableWeightRange= [] #final table with the weights and js code
                                     i= 0
-                                    while i < len(concerns):
+
+                                    #reverse the weight color maps, this is done because we use pop in the template!!!
+                                    rangeWeightColorMap.reverse()
+                                    stdWeightColorMap.reverse()
+                                    
+                                    while i < nConcerns:
                                         rowRange= []
                                         rowStd= []
                                         rowMean= []
-                                        tableWeightMean.append((meanWeightMatrix[0][i], weightJsChartData[0][i]))#meanWeightMatrix[0][i], it is always [0] as in truth the matrix is not really a matrix but a 1d list
-                                        tableWeightStd.append((stdWeightMatrix[0][i], weightJsChartData[0][i]))#meanWeightMatrix[0][i], it is always [0] as in truth the matrix is not really a matrix but a 1d list
-                                        tableWeightRange.append((rangeWeightMatrix[0][i], weightJsChartData[0][i]))#meanWeightMatrix[0][i], it is always [0] as in truth the matrix is not really a matrix but a 1d list
+                                        tableWeightMean.append((meanWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[i]))#meanWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                                        tableWeightStd.append((stdWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[i]))#stdWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                                        tableWeightRange.append((rangeWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[i]))#rangeWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
                                         #create a tulip with the value that should be displayed in the td and the color of the background for each cell in the row
-                                        while k < len(alternatives):
+                                        while k < nAlternatives:
                                             rowRange.append((rangeRatioMatrix[i][k], rangeRatioColorMap[i][k], ratioJsChartData[i][k]))
                                             rowStd.append((stdRatioMatrix[i][k], stdRatioColorMap[i][k], ratioJsChartData[i][k]))
                                             rowMean.append((meanRatioMatrix[i][k], ratioJsChartData[i][k]))
@@ -1368,7 +1373,7 @@ def __createJSforRatioWeightSessionResultsChart__(ratioMatrices= None, weightMat
         #now add all other elements
         j= 0
         while j < nResponseGrids:
-            tempWeight= weightMatrices[j + 1] #j+1 because the session grid weights are in position 0
+            tempWeight= weightMatrices[j + 1][0][i] #j+1 because the session grid weights are in position 0
             if tempWeight != None and  tempWeight >= 1:
                 temp+= ',[\'' + participantNames[j] + '\',' + str(tempWeight) + ']'
             else:
@@ -1378,7 +1383,6 @@ def __createJSforRatioWeightSessionResultsChart__(ratioMatrices= None, weightMat
         javascriptWeightData.append(temp)
         i+= 1
     i= 0
-    k= 0
     #now create the table for the ratios
     while i < nConcerns:
         row= []
@@ -1400,8 +1404,8 @@ def __createJSforRatioWeightSessionResultsChart__(ratioMatrices= None, weightMat
                 else:
                     temp+= ',[\'' + participantNames[j] + '\',0]'
                 j+= 1
-                temp+= ']'
-                row.append(temp)
+            temp+= ']'
+            row.append(temp)
             k+= 1
         k= 0
         javascriptRatioData.append(row)
@@ -1483,6 +1487,7 @@ def __generateAlternativeConcernResultTable__(data=[], sessionGridObj= None):
             alternativeResult.append((key, value, True))
         
     return (concernsResult, alternativeResult)
+
 
 # data is a list of ResponseGrid objs
 def __generateWeightRatingResultTables__(sessionGrid=None, data=[], calculateWithWeight=False):
@@ -1683,9 +1688,11 @@ def __createRangeTableColorMap__(globalMax, globalMin, rangeTable):
     
     #start color
     colorStart= (240, 72, 74)
-       
-    maxRange= globalMax - globalMin
-    return  __createColorMap__(100, maxRange, colorStart, colorEnd, rangeTable)
+    
+    #part of the old code (used with the old ajaxGetResults function)   
+    #maxRange= globalMax - globalMin
+    
+    return  __createColorMap__(100, globalMax, colorStart, colorEnd, rangeTable)
 
 def __createStdTableColorMap__(globalMax, globalMin, stdTable):
     #end color
@@ -1694,12 +1701,15 @@ def __createStdTableColorMap__(globalMax, globalMin, stdTable):
     #start color
     colorStart= (240, 72, 74)
     
-    mean= (globalMax + globalMin)/2
-    maxStd= sqrt(((globalMax - mean)**2 + (globalMin - mean)**2)/2)
-    return  __createColorMap__(100, maxStd, colorStart, colorEnd, stdTable)   
+    #part of the old code (used with the old ajaxGetResults function)
+    #mean= (globalMax + globalMin)/2
+    #maxStd= sqrt(((globalMax - mean)**2 + (globalMin - mean)**2)/2)
+    
+
+    return  __createColorMap__(100, globalMax, colorStart, colorEnd, stdTable)   
 
 def __createColorMap__(colorStep, maxValue, startColor, endColor, table):
-    
+    #code from http://www.designchemical.com/blog/index.php/jquery/jquery-tutorial-create-a-flexible-data-heat-map/
     yr, yg, yb= startColor
     xr, xg, xb= endColor
     colorMap= []
@@ -1709,22 +1719,27 @@ def __createColorMap__(colorStep, maxValue, startColor, endColor, table):
         if type(row) == type([]): 
             for value in row:
                 if maxValue != 0:
-                    pos= ceil((value/maxValue)*100)
-                    red = ceil((xr + (( pos * (yr - xr)) / (colorStep-1))))        
-                    green = ceil((xg + (( pos * (yg - xg)) / (colorStep-1))))       
-                    blue = ceil((xb + (( pos * (yb - xb)) / (colorStep-1))))
-                    colorRow.append((int(red), int(green), int(blue)))
+                    if maxValue <= value:
+                        colorRow.append(startColor)
+                    else:
+                        pos= ceil((value/maxValue)*100)
+                        red = ceil((xr + (( pos * (yr - xr)) / (colorStep-1))))        
+                        green = ceil((xg + (( pos * (yg - xg)) / (colorStep-1))))       
+                        blue = ceil((xb + (( pos * (yb - xb)) / (colorStep-1))))
+                        colorRow.append((int(red), int(green), int(blue)))
                 else:
                     colorRow.append(endColor)
             colorMap.append(colorRow)
         else:
             if maxValue != 0:
-                pos= ceil((row/maxValue)*100)
-                red = ceil((xr + (( pos * (yr - xr)) / (colorStep-1))))        
-                green = ceil((xg + (( pos * (yg - xg)) / (colorStep-1))))       
-                blue = ceil((xb + (( pos * (yb - xb)) / (colorStep-1))))
-                #colorRow.append((int(red), int(green), int(blue)))
-                colorMap.append((int(red), int(green), int(blue)))
+                if maxValue <= row:
+                    colorMap.append(startColor)
+                else:
+                    pos= ceil((row/maxValue)*100)
+                    red = ceil((xr + (( pos * (yr - xr)) / (colorStep-1))))        
+                    green = ceil((xg + (( pos * (yg - xg)) / (colorStep-1))))       
+                    blue = ceil((xb + (( pos * (yb - xb)) / (colorStep-1))))
+                    colorMap.append((int(red), int(green), int(blue)))
             else:
                 colorMap.append(endColor)
     return colorMap
