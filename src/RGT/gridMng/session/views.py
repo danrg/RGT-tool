@@ -642,7 +642,7 @@ def ajaxGetParticipatingSessionsContentGrids(request):
         print '-'*60 
 
 #this function will return the page that displays the results of a iteration from a session 
-def ajaxGetResults2(request):
+def ajaxGetResults_old(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
     try:
