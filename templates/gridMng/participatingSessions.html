@@ -49,6 +49,10 @@ RGT | Sessions - Participating
 		    <input type="button" onclick="joinSession()" value="Join Session" />
 		</div>
 	</div>
+	{% comment %} 
+		Table that is displayed only if there is a request in a session that the user is participating.
+		The table contains the name of the session that is waiting for an answer of the participant.
+	{% endcomment %}
 	<div id="participatingSessionsPendingResponsesDiv">
 		{% if pedingResponsesTable %}
 			{%include "gridMng/pendingResponses.html"%}
