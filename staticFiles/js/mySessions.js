@@ -25,6 +25,8 @@ function showMySession()
 						hideLoadingSpinner(loadingDiv);
 						hasTableBeenSaved= true;
 						masterFormString = $('#form').serialize();
+						//initialize anything that should be initialize after the content page has loaded
+						initializeMySessionsContent(); // from mySessionsContent.js
 					}
 					else
 					{

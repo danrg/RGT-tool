@@ -1,4 +1,6 @@
 var urlStaticFiles= '/static/';
+var intervalId= null;
+var participantTableRefreshTime= 900000; //15 min refresh time
 
 if( typeof createDendogram != 'function')
 {
@@ -16,6 +18,35 @@ if( typeof createSvgMenu != 'function')
 		dataType: 'script',
 		async:   false 
 	});
+}
+
+
+
+//function definitions
+
+/**
+ * Initialize anything that needs to be done after the content page has loaded
+ */
+function initializeMySessionsContent()
+{
+	//set the refresh time of the participant table
+	if(intervalId != null)
+	{
+		clearInterval(intervalId);
+	}
+	intervalId= setInterval(function(){refreshParticipantTable()}, participantTableRefreshTime);
+}
+
+/**
+ * check if the session is in the R/W, A/C or Invitation state, if so refresh the participating users
+ */
+function refreshParticipantTable()
+{
+	var sessionStatus= $('#currentIterationStatus').html();
+	if(sessionStatus == 'Invitation' || sessionStatus == 'A/C' || sessionStatus == 'R/W')
+	{
+		getParticipantPage();
+	}
 }
 
 function startSession()
