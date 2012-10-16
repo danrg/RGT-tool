@@ -65,7 +65,7 @@ function createSession()
 		var gridUSID= $("#gridSessionSelection option:selected").val();
 		var sessionName= $("#sessionNameInputBox").val();
 		var str= 'gridUSID=' + gridUSID + '&sessionName=' + sessionName;
-		$.post('/sessions/create/', str, function(data){
+		var jqxhr= $.post('/sessions/create/', str, function(data){
 			try
 			{
 				if($(data).find('error').length <= 0)
@@ -79,7 +79,11 @@ function createSession()
 					//$('#createSessionDialog').dialog('open');
 					hideLoadingSpinner(loadingDiv);
 					$("#gridSessionSelection").val('0');
-					showMessageInDialogBox($(data).find('htmlData').text()); //function from gridNavigation
+					showMessageInDialogBox($(data).find('htmlData').text(), function(){
+						//redirect to the session page
+						window.location.href= "/sessions/";
+					}); //function from dialogbox.js
+					
 				}
 				else
 				{
@@ -94,6 +98,11 @@ function createSession()
 				hideLoadingSpinner(loadingDiv);
 				console.log(err);
 			}
+		});
+		//in case we have an error 500 or something like that the loader should still be closed
+		jqxhr.error(function(){
+			hideLoadingSpinner(loadingDiv);
+			showMessageInDialogBox("Unknown server error");
 		});
 	}
 	catch(err)

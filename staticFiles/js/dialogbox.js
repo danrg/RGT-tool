@@ -1,4 +1,8 @@
 function showMessageInDialogBox(text) {
+	showMessageInDialogBox(text, null);
+}
+
+function showMessageInDialogBox(text, closeFunction) {
 	$('#modalDialogBox').html('<p>' + text + '</p>');
     $('#modalDialogBox').dialog({
     	title: 'Information',
@@ -8,6 +12,10 @@ function showMessageInDialogBox(text) {
 		modal: true,
 		buttons: {'Close':function(){
 				$( this ).dialog( "close" );
+				if(closeFunction != null)
+				{
+					closeFunction();
+				}
 			}
     	}
     });

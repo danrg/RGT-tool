@@ -66,7 +66,7 @@ function showParticipatingSessionDetails()
 		if(sessionUSID != null && sessionUSID != 'noSession' && sessionUSID != '' )
 		{	
 			var str= 'sessionUSID=' + sessionUSID;
-			$.post('/sessions/participate/', str, function(data){
+			var jqxhr= $.post('/sessions/participate/', str, function(data){
 				try
 				{
 					if($(data).find('error').length <= 0)
@@ -92,6 +92,11 @@ function showParticipatingSessionDetails()
 					hideLoadingSpinner(loadingDiv);
 					console.log(err);
 				}
+			});
+			//in case we have an error 500 or something like that the loader should still be closed
+			jqxhr.error(function(){
+				hideLoadingSpinner(loadingDiv);
+				showMessageInDialogBox("Unknown server error");
 			});
 		}
 		else

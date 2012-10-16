@@ -34,7 +34,7 @@ RGT | Sessions - Participating
 		</script>
 		<label for="participatingSessionSelect">Select session:</label><select id="participatingSessionSelect" onchange= "showParticipatingSessionDetails()">
 			{%if not hasSessions%}
-				<option id= "noSessionOption">No session available</option>
+				<option id= "noSessionOption" value= "noSession">No session available</option>
 			{% else %}
 				<option value="noSession"> </option>
 			{% endif %}
