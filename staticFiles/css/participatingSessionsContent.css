@@ -10,6 +10,16 @@
     margin: 15px auto auto;
 }
 
+#participatingPreviousIterationGridDiv{
+    width: 1000px;
+    overflow: auto;
+    -moz-box-shadow: 0 0 5px #888;
+    -webkit-box-shadow: 0 0 5px #888;
+    box-shadow: 0 0 5px #888;
+    padding-bottom: 15px;
+    margin: 15px auto auto;
+}
+
 #participatingSessionGridAnswerDiv{
     width: 1000px;
     overflow: auto;
@@ -24,6 +34,12 @@
 	text-align: center;
 	margin-top: 5px;
 	margin-bottom: 0px;
+}
+
+#participatingSessionPreviousIterationGridHeader {
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 0px;
 }
 
 #participatingSessionSuggestionGridHeader {
