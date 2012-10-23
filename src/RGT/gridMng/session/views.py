@@ -333,16 +333,27 @@ def ajaxGetParticipatingSessionContentPage(request):
                 state= sessionObj.state
                 iteration= sessionObj.iteration
                 iterations= []
-                iterationRW= 0
-                niterationRW= 0
+                previousResponseRelationGrid= None
+                
+#                iterationRW= 0
+#                niterationRW= 0
                 #lets create a list of iteration that i have responded
                 responseGridRelations= ResponseGrid.objects.filter(session= sessionObj, user= request.user)
+                gridTablesData= __generateParticipatingSessionsGridsData__(sessionObj, iteration, responseGridRelations)
                 if len(responseGridRelations) >= 1:
                     for responseGridRelation in responseGridRelations:
-                        if responseGridRelation.grid.grid_type ==Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:
-                            iterationRW+=1
+#                        if responseGridRelation.grid.grid_type ==Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:
+#                            iterationRW+=1
                         iterations.append(responseGridRelation.iteration)
-                        niterationRW= responseGridRelation.iteration
+#                        niterationRW= responseGridRelation.iteration
+                #check to see if there is a previous response that i can display
+#                if iteration >= 2:
+#                    previousResponseRelation= responseGridRelations.filter(iteration= iteration - 1)
+#                    if len(previousResponseRelation) >= 1:
+#                        if previousResponseRelation[0] != None and __isGridStateEqualSessionState__(state, previousResponseRelation[0].grid) and (previousResponseRelation[0].grid.grid_type == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT or previousResponseRelation[0].grid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN):
+#                            previousResponseRelationGrid= previousResponseRelation[0].grid
+                if gridTablesData.has_key('previousResponseGrid'):
+                    previousResponseRelationGrid= gridTablesData['previousResponseGrid']
                 if state.name == SessionState.CHECK:
                     template= loader.get_template('gridMng/participatingSessionsContent.html')
                     context= RequestContext(request, {'displaySessionGrid': False, 'displayResponseGrid': False, 'sessionStatus':'Checking previous results', 'responseStatus':'-----', 'sessionStatusClass':'green', 'responseStatusClass':'green', 'iteration':iteration, 'iterations':iterations})
@@ -376,47 +387,87 @@ def ajaxGetParticipatingSessionContentPage(request):
                         #i didn't respond, so display a page with the correct settings to answer it
                         if state.name == SessionState.AC:
                             #first get the current session grid to display to the user
-                            dic= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
+                            #sessionGridTable= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
+                            sessionGridTable= gridTablesData['sessionGridTable']
                             template= loader.get_template('gridMng/participatingSessionsContent.html')
-                            context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Alternative and concerns', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
-                                                              'responseTable': dic['table'], 'responseTableHeader':dic['tableHeader'], 'responseWeights':dic['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':True, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True, 'responseDoesNotShowLegend': True})
+                            context= None
+                            if previousResponseRelationGrid == None:
+                                context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Alternative and concerns', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+                                                                  'responseTable': sessionGridTable['table'], 'responseTableHeader':sessionGridTable['tableHeader'], 'responseWeights':sessionGridTable['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':True, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True, 'responseDoesNotShowLegend': True})
+                            else:
+                                previousResponseGrid= gridTablesData['previousResponseGrid']
+                                context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Alternative and concerns', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayPreviousResponseGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+                                                                  'previousResponseTable' : previousResponseGrid['table'], 'previousResponseTableHeader': previousResponseGrid['tableHeader'], 'previousResponseWeights':previousResponseGrid['weights'][:], 'previousResponseChangeRatingsWeights':False, 'previousResponseChangeCornAlt':False, 'previousResponseCheckForTableIsSave':False, 'previousResponseShowRatingWhileFalseChangeRatingsWeights':False, 'previousResponseTableId':randomStringGenerator(), 'previousResponseDoesNotShowLegend': True,
+                                                                  'responseTable': sessionGridTable['table'], 'responseTableHeader':sessionGridTable['tableHeader'], 'responseWeights':sessionGridTable['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':True, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True, 'responseDoesNotShowLegend': True})
                             htmlData= template.render(context)
                             return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-                        else:
-                            if state.name == SessionState.RW and iterationRW == 0:
-                                # punitha two grid and a response grid appears here only if the iteration for change ratings has happened for 2nd time or more.
-                                dic= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
-                                template= loader.get_template('gridMng/participatingSessionsContent.html')
-                                context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
-                                                                  'responseTable': dic['table'], 'responseTableHeader':dic['tableHeader'], 'responseWeights':dic['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True })
-                                htmlData= template.render(context)
-                                return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-                            elif state.name == SessionState.RW and iterationRW >= 1:
-                                responseGrid2= request.user.responsegrid_set.filter(user= request.user, iteration= niterationRW, session=sessionObj)
-                                dic= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
-                                dic2= __generateGridTable__(responseGrid2[0].grid)
-                                template= loader.get_template('gridMng/participatingSessionsContent.html')
-                                context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displaySessionGrid2': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
-                                                                  'table2' : dic2['table'], 'tableHeader2': dic2['tableHeader'], 'weights2':dic2['weights'][:], 'changeRatingsWeights2':False, 'changeCornAlt2':False, 'checkForTableIsSave2':False, 'showRatingWhileFalseChangeRatingsWeights2':True, 'tableId2':randomStringGenerator(), 'doesNotShowLegend2': True,
-                                                                  'responseTable': dic['table'], 'responseTableHeader':dic['tableHeader'], 'responseWeights':dic['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True })
-                                htmlData= template.render(context)
-                                return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
+#                        else:
+#                            if state.name == SessionState.RW and iterationRW == 0:
+#                                # punitha two grid and a response grid appears here only if the iteration for change ratings has happened for 2nd time or more.
+#                                sessionGridTable= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
+#                                template= loader.get_template('gridMng/participatingSessionsContent.html')
+#                                context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+#                                                                  'responseTable': sessionGridTable['table'], 'responseTableHeader':sessionGridTable['tableHeader'], 'responseWeights':sessionGridTable['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True })
+#                                htmlData= template.render(context)
+#                                return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
+#                            elif state.name == SessionState.RW and iterationRW >= 1:
+#                                responseGrid2= request.user.responsegrid_set.filter(user= request.user, iteration= niterationRW, session=sessionObj)
+#                                sessionGridTable= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
+#                                dic2= __generateGridTable__(responseGrid2[0].grid)
+#                                template= loader.get_template('gridMng/participatingSessionsContent.html')
+#                                context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayPreviousResponseGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+#                                                                  'table2' : dic2['table'], 'tableHeader2': dic2['tableHeader'], 'weights2':dic2['weights'][:], 'changeRatingsWeights2':False, 'changeCornAlt2':False, 'checkForTableIsSave2':False, 'showRatingWhileFalseChangeRatingsWeights2':True, 'tableId2':randomStringGenerator(), 'doesNotShowLegend2': True,
+#                                                                  'responseTable': sessionGridTable['table'], 'responseTableHeader':sessionGridTable['tableHeader'], 'responseWeights':sessionGridTable['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True })
+#                                htmlData= template.render(context)
+                        elif state.name == SessionState.RW:
+                            #sessionGridTable= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
+                            sessionGridTable= gridTablesData['sessionGridTable']
+                            template= loader.get_template('gridMng/participatingSessionsContent.html')
+                            context= None
+                            if previousResponseRelationGrid == None:
+                                context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+                                                                  'responseTable': sessionGridTable['table'], 'responseTableHeader':sessionGridTable['tableHeader'], 'responseWeights':sessionGridTable['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True })
+                            else:
+                                previousResponseGridTable= gridTablesData['previousResponseGrid']
+                                context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayPreviousResponseGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+                                                                  'previousResponseTable' : previousResponseGridTable['table'], 'previousResponseTableHeader': previousResponseGridTable['tableHeader'], 'previousResponseWeights':previousResponseGridTable['weights'][:], 'previousResponseChangeRatingsWeights':False, 'previousResponseChangeCornAlt':False, 'previousResponseCheckForTableIsSave':False, 'previousResponseShowRatingWhileFalseChangeRatingsWeights':True, 'previousResponseTableId':randomStringGenerator(), 'previousResponseDoesNotShowLegend': True,
+                                                                  'responseTable': sessionGridTable['table'], 'responseTableHeader':sessionGridTable['tableHeader'], 'responseWeights':sessionGridTable['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True })
+                            htmlData= template.render(context)
+                            return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                     else:
                         #if i did respond show me my response and the current session grid so if i changed my mind i still can change the response
                         if state.name == SessionState.AC:
-                            dic= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
-                            dic2= __generateGridTable__(responseGrid[0].grid)
+                            #sessionGridTable= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
+                            sessionGridTable= gridTablesData['sessionGridTable']
+                            #dic2= __generateGridTable__(responseGrid[0].grid)
+                            currentResponseGridTable= gridTablesData['currentResponseGridTable']
+                            previousResponseGridTable= gridTablesData['previousResponseGrid']
                             template= loader.get_template('gridMng/participatingSessionsContent.html')
-                            context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Alternative and concerns', 'responseStatus':'Response was sent at: ', 'responseWasSent':True, 'sessionStatusClass':'green', 'responseStatusClass':'green', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
-                                                              'responseTable': dic2['table'], 'responseTableHeader':dic2['tableHeader'], 'responseWeights':dic2['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':True, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'dateTime':responseGrid[0].grid.dateTime, 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True, 'responseDoesNotShowLegend': True })
+                            context= None
+                            if previousResponseRelationGrid == None:
+                                context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Alternative and concerns', 'responseStatus':'Response was sent at: ', 'responseWasSent':True, 'sessionStatusClass':'green', 'responseStatusClass':'green', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+                                                                  'responseTable': currentResponseGridTable['table'], 'responseTableHeader':currentResponseGridTable['tableHeader'], 'responseWeights':currentResponseGridTable['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':True, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'dateTime':responseGrid[0].grid.dateTime, 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True, 'responseDoesNotShowLegend': True })
+                            else:
+                                context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Alternative and concerns', 'responseStatus':'Response was sent at: ', 'responseWasSent':True, 'sessionStatusClass':'green', 'responseStatusClass':'green', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayPreviousResponseGrid': True ,'displayResponseGrid': True, 'doesNotShowLegend': True,
+                                                                  'previousResponseTable' : previousResponseGridTable['table'], 'previousResponseTableHeader': previousResponseGridTable['tableHeader'], 'previousResponseWeights':previousResponseGridTable['weights'][:], 'previousResponseChangeRatingsWeights':False, 'previousResponseChangeCornAlt':False, 'previousResponseCheckForTableIsSave':False, 'previousResponseShowRatingWhileFalseChangeRatingsWeights':False, 'previousResponseTableId':randomStringGenerator(), 'previousResponseDoesNotShowLegend': True,
+                                                                  'responseTable': currentResponseGridTable['table'], 'responseTableHeader':currentResponseGridTable['tableHeader'], 'responseWeights':currentResponseGridTable['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':True, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'dateTime':responseGrid[0].grid.dateTime, 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True, 'responseDoesNotShowLegend': True })
                             htmlData= template.render(context)
                             return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                         elif state.name == SessionState.RW:
-                            dic= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
-                            dic2= __generateGridTable__(responseGrid[0].grid)
+                            #sessionGridTable= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
+                            sessionGridTable= gridTablesData['sessionGridTable']
+                            #dic2= __generateGridTable__(responseGrid[0].grid)
+                            currentResponseGridTable= gridTablesData['currentResponseGridTable']
+                            previousResponseGridTable= gridTablesData['previousResponseGrid']
                             template= loader.get_template('gridMng/participatingSessionsContent.html')
-                            context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'showRatingWhileFalseChangeRatingsWeights':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'Response was sent at: ', 'responseWasSent':True, 'sessionStatusClass':'green', 'responseStatusClass':'green', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
-                                                              'responseTable': dic2['table'], 'responseTableHeader':dic2['tableHeader'], 'responseWeights':dic2['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'dateTime':responseGrid[0].grid.dateTime, 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True })
+                            context = None
+                            if previousResponseRelationGrid == None:
+                                context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'showRatingWhileFalseChangeRatingsWeights':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'Response was sent at: ', 'responseWasSent':True, 'sessionStatusClass':'green', 'responseStatusClass':'green', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+                                                                  'responseTable': currentResponseGridTable['table'], 'responseTableHeader':currentResponseGridTable['tableHeader'], 'responseWeights':currentResponseGridTable['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'dateTime':responseGrid[0].grid.dateTime, 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True })
+                            else:
+                                context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'showRatingWhileFalseChangeRatingsWeights':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'Response was sent at: ', 'responseWasSent':True, 'sessionStatusClass':'green', 'responseStatusClass':'green', 'iteration':iteration, 'iterations':iterations, 'displaySessionGrid': True, 'displayPreviousResponseGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+                                                                  'previousResponseTable' : previousResponseGridTable['table'], 'previousResponseTableHeader': previousResponseGridTable['tableHeader'], 'previousResponseWeights':previousResponseGridTable['weights'][:], 'previousResponseChangeRatingsWeights':False, 'previousResponseChangeCornAlt':False, 'previousResponseCheckForTableIsSave':False, 'previousResponseShowRatingWhileFalseChangeRatingsWeights':True, 'previousResponseTableId':randomStringGenerator(), 'previousResponseDoesNotShowLegend': True,
+                                                                  'responseTable': currentResponseGridTable['table'], 'responseTableHeader':currentResponseGridTable['tableHeader'], 'responseWeights':currentResponseGridTable['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'dateTime':responseGrid[0].grid.dateTime, 'nParticipants':nParticipants, 'nReceivedResponses':nResponses, 'showNParticipantsAndResponces': True })
                             htmlData= template.render(context)
                             return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                     return HttpResponse(createXmlErrorResponse('Unable to identify current session state'), content_type='application/xml')
@@ -594,71 +645,114 @@ def ajaxGetParticipatingSessionsContentGrids(request):
         if request.POST.has_key('iteration') and request.POST.has_key('sessionUSID'):
             sessionObj= Session.objects.filter(usid=request.POST['sessionUSID'])
             if len(sessionObj) >= 1:
+                iteration_= int(request.POST['iteration'])
                 sessionObj= sessionObj[0]
-                iteration= int(request.POST['iteration'])
-                iterationRW= 0
-                niterationRW= 0
-                responseGridRelations= ResponseGrid.objects.filter(session= sessionObj, user= request.user)
-                if len(responseGridRelations) >= 1:
-                    for responseGridRelation in responseGridRelations:
-                        if responseGridRelation.grid.grid_type ==Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:
-                            iterationRW+=1
-                        niterationRW= responseGridRelation.iteration
+                #check if the iteration is valid
+                if iteration_ > sessionObj.iteration or iteration_ < 0:
+                    return HttpResponse(createXmlErrorResponse('Invalid iteration value'), content_type='application/xml')
+                gridTablesData=  __generateParticipatingSessionsGridsData__(sessionObj, iteration_, ResponseGrid.objects.filter(session= sessionObj, user= request.user))
+                previousResponseGridTable= None
+                if gridTablesData.has_key('previousResponseGrid'):
+                    previousResponseGridTable= gridTablesData['previousResponseGrid']
+#                iterationRW= 0
+#                niterationRW= 0
+#                responseGridRelations= ResponseGrid.objects.filter(session= sessionObj, user= request.user)
+#                if len(responseGridRelations) >= 1:
+#                    for responseGridRelation in responseGridRelations:
+#                        if responseGridRelation.grid.grid_type ==Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:
+#                            iterationRW+=1
+#                        niterationRW= responseGridRelation.iteration
                 if len(request.user.userparticipatesession_set.filter(session= sessionObj)) >= 1:
-                    responseGridRelation= ResponseGrid.objects.filter(session= sessionObj, iteration= iteration, user= request.user)
+                    responseGridRelation= ResponseGrid.objects.filter(session= sessionObj, iteration= iteration_, user= request.user)
                     #check to see if the user has already send an response grid
                     if len(responseGridRelation) >= 1:
                         #if he has sent an response grid display it again and let him edit it
                         responseGridRelation= responseGridRelation[0]
-                        dic= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
-                        dic2= __generateGridTable__(responseGridRelation.grid)
+                        sessionGridTable= gridTablesData['sessionGridTable']
+                        currentResponseGridTable= gridTablesData['currentResponseGridTable']
                         template= loader.get_template('gridMng/participatingSessionsContentGrids.html')
                         context= None
                         if responseGridRelation.grid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
-                            if iteration == sessionObj.iteration:
-                                context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
-                                                                  'responseTable': dic2['table'], 'responseTableHeader':dic2['tableHeader'], 'responseWeights':dic2['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':True, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':False, 'responseTableId':randomStringGenerator(), 'responseDoesNotShowLegend': True })
+                            #check to see if the user should be allowed to change the response
+                            if iteration_ == sessionObj.iteration:
+                                #check to see if the previous response grid should be displayed or not
+                                if previousResponseGridTable == None:
+                                    context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
+                                                                      'responseTable': currentResponseGridTable['table'], 'responseTableHeader':currentResponseGridTable['tableHeader'], 'responseWeights':currentResponseGridTable['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':True, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':False, 'responseTableId':randomStringGenerator(), 'responseDoesNotShowLegend': True })
+                                else:
+                                    context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayPreviousResponseGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
+                                                                      'previousResponseTable' : previousResponseGridTable['table'], 'previousResponseTableHeader': previousResponseGridTable['tableHeader'], 'previousResponseWeights':previousResponseGridTable['weights'][:], 'previousResponseChangeRatingsWeights':False, 'previousResponseChangeCornAlt':False, 'previousResponseCheckForTableIsSave':False, 'previousResponseShowRatingWhileFalseChangeRatingsWeights':False, 'previousResponseTableId':randomStringGenerator(), 'previousResponseDoesNotShowLegend': True,
+                                                                      'responseTable': currentResponseGridTable['table'], 'responseTableHeader':currentResponseGridTable['tableHeader'], 'responseWeights':currentResponseGridTable['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':True, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':False, 'responseTableId':randomStringGenerator(), 'responseDoesNotShowLegend': True })
                             else:
-                                context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
-                                                                  'responseTable': dic2['table'], 'responseTableHeader':dic2['tableHeader'], 'responseWeights':dic2['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':False, 'responseTableId':randomStringGenerator(), 'responseDoesNotShowLegend': True })
+                                if previousResponseGridTable == None:
+                                    context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
+                                                                      'responseTable': currentResponseGridTable['table'], 'responseTableHeader':currentResponseGridTable['tableHeader'], 'responseWeights':currentResponseGridTable['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':False, 'responseTableId':randomStringGenerator(), 'responseDoesNotShowLegend': True })
+                                else:
+                                    context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayPreviousResponseGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
+                                                                      'previousResponseTable' : previousResponseGridTable['table'], 'previousResponseTableHeader': previousResponseGridTable['tableHeader'], 'previousResponseWeights':previousResponseGridTable['weights'][:], 'previousResponseChangeRatingsWeights':False, 'previousResponseChangeCornAlt':False, 'previousResponseCheckForTableIsSave':False, 'previousResponseShowRatingWhileFalseChangeRatingsWeights':False, 'previousResponseTableId':randomStringGenerator(), 'previousResponseDoesNotShowLegend': True,
+                                                                      'responseTable': currentResponseGridTable['table'], 'responseTableHeader':currentResponseGridTable['tableHeader'], 'responseWeights':currentResponseGridTable['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':False, 'responseTableId':randomStringGenerator(), 'responseDoesNotShowLegend': True })
                         else:
-                            if iteration == sessionObj.iteration:
-                                context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'showRatingWhileFalseChangeRatingsWeights':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
-                                                                  'responseTable': dic2['table'], 'responseTableHeader':dic2['tableHeader'], 'responseWeights':dic2['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':True, 'responseTableId':randomStringGenerator()})
+                            #check to see if the user should be allowed to change the response
+                            if iteration_ == sessionObj.iteration:
+                                #check to see if the previous response grid should be displayed or not
+                                if previousResponseGridTable == None:
+                                    context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'showRatingWhileFalseChangeRatingsWeights':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
+                                                                      'responseTable': currentResponseGridTable['table'], 'responseTableHeader':currentResponseGridTable['tableHeader'], 'responseWeights':currentResponseGridTable['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':True, 'responseTableId':randomStringGenerator()})
+                                else:
+                                    context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'showRatingWhileFalseChangeRatingsWeights':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayPreviousResponseGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
+                                                                      'previousResponseTable' : previousResponseGridTable['table'], 'previousResponseTableHeader': previousResponseGridTable['tableHeader'], 'previousResponseWeights':previousResponseGridTable['weights'][:], 'previousResponseChangeRatingsWeights':False, 'previousResponseChangeCornAlt':False, 'previousResponseCheckForTableIsSave':False, 'previousResponseShowRatingWhileFalseChangeRatingsWeights':True, 'previousResponseTableId':randomStringGenerator(), 'previousResponseDoesNotShowLegend': True,
+                                                                      'responseTable': currentResponseGridTable['table'], 'responseTableHeader':currentResponseGridTable['tableHeader'], 'responseWeights':currentResponseGridTable['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':True, 'responseTableId':randomStringGenerator()})
                             else:
-                                context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'showRatingWhileFalseChangeRatingsWeights':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
-                                                                  'responseTable': dic2['table'], 'responseTableHeader':dic2['tableHeader'], 'responseWeights':dic2['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':True, 'responseTableId':randomStringGenerator()})
+                                if previousResponseGridTable == None:
+                                    context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'showRatingWhileFalseChangeRatingsWeights':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
+                                                                      'responseTable': currentResponseGridTable['table'], 'responseTableHeader':currentResponseGridTable['tableHeader'], 'responseWeights':currentResponseGridTable['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':True, 'responseTableId':randomStringGenerator()})
+                                else:
+                                    context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'displaySessionGrid':True, 'showRatingWhileFalseChangeRatingsWeights':True, 'tableId':randomStringGenerator(), 'displaySessionGrid': True, 'displayPreviousResponseGrid': True, 'displayResponseGrid': True, 'hideSaveResponseButton':True, 'doesNotShowLegend': True,
+                                                                      'previousResponseTable' : previousResponseGridTable['table'], 'previousResponseTableHeader': previousResponseGridTable['tableHeader'], 'previousResponseWeights':previousResponseGridTable['weights'][:], 'previousResponseChangeRatingsWeights':False, 'previousResponseChangeCornAlt':False, 'previousResponseCheckForTableIsSave':False, 'previousResponseShowRatingWhileFalseChangeRatingsWeights':True, 'previousResponseTableId':randomStringGenerator(), 'previousResponseDoesNotShowLegend': True,
+                                                                      'responseTable': currentResponseGridTable['table'], 'responseTableHeader':currentResponseGridTable['tableHeader'], 'responseWeights':currentResponseGridTable['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseShowRatingWhileFalseChangeRatingsWeights':True, 'responseTableId':randomStringGenerator()})
                         htmlData= template.render(context)
                         return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                     else:
                         #if he hasn't send a response grid check to see if he still can send it and if so display it
-                        if iteration == sessionObj.iteration:
+                        sessionGridTable= gridTablesData['sessionGridTable']
+                        if iteration_ == sessionObj.iteration:
                             if sessionObj.state.name == SessionState.AC:
-                                dic= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
+                                #sessionGridTable= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
                                 template= loader.get_template('gridMng/participatingSessionsContentGrids.html')
                                 context= None
-                                context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Alternative and concerns', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
-                                                                  'responseTable': dic['table'], 'responseTableHeader':dic['tableHeader'], 'responseWeights':dic['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':True, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'responseDoesNotShowLegend': True })
+                                if previousResponseGridTable == None:
+                                    context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Alternative and concerns', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration_, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+                                                                      'responseTable': sessionGridTable['table'], 'responseTableHeader':sessionGridTable['tableHeader'], 'responseWeights':sessionGridTable['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':True, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'responseDoesNotShowLegend': True })
+                                else:
+                                    context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':False, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Alternative and concerns', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration_, 'displaySessionGrid': True, 'displayPreviousResponseGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+                                                                      'previousResponseTable' : previousResponseGridTable['table'], 'previousResponseTableHeader': previousResponseGridTable['tableHeader'], 'previousResponseWeights':previousResponseGridTable['weights'][:], 'previousResponseChangeRatingsWeights':False, 'previousResponseChangeCornAlt':False, 'previousResponseCheckForTableIsSave':False, 'previousResponseShowRatingWhileFalseChangeRatingsWeights2':False, 'previousResponseTableId':randomStringGenerator(), 'previousResponseDoesNotShowLegend': True,
+                                                                      'responseTable': sessionGridTable['table'], 'responseTableHeader':sessionGridTable['tableHeader'], 'responseWeights':sessionGridTable['weights'], 'responseChangeRatingsWeights':False, 'responseChangeCornAlt':True, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator(), 'responseDoesNotShowLegend': True })
                                 htmlData= template.render(context)
                                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-                            elif sessionObj.state.name == SessionState.RW and iterationRW >= 1:
-                                # two grid and a response grid appears here only if the change ratings has happened for 2nd time or more.
-                                responseGrid2= request.user.responsegrid_set.filter(user= request.user, iteration= niterationRW, session=sessionObj)
-                                dic= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
+#                            elif sessionObj.state.name == SessionState.RW and iterationRW >= 1:
+#                                # two grid and a response grid appears here only if the change ratings has happened for 2nd time or more.
+#                                responseGrid2= request.user.responsegrid_set.filter(user= request.user, iteration= niterationRW, session=sessionObj)
+#                                sessionGridTable= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
+#                                template= loader.get_template('gridMng/participatingSessionsContentGrids.html')
+#                                dic2= __generateGridTable__(responseGrid2[0].grid)
+#                                context= None
+#                                context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'displaySessionGrid': True,'displayPreviousResponseGrid':True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+#                                                                  'table2' : dic2['table'], 'tableHeader2': dic2['tableHeader'], 'weights2':dic2['weights'][:], 'changeRatingsWeights2':False, 'changeCornAlt2':False, 'checkForTableIsSave2':False, 'showRatingWhileFalseChangeRatingsWeights2':True, 'tableId2':randomStringGenerator(), 'doesNotShowLegend2': True,
+#                                                                  'responseTable': sessionGridTable['table'], 'responseTableHeader':sessionGridTable['tableHeader'], 'responseWeights':sessionGridTable['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator() })
+#                                htmlData= template.render(context)
+#                                return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
+#                            elif sessionObj.state.name == SessionState.RW and iterationRW == 0:
+                            elif sessionObj.state.name == SessionState.RW:
+                                #sessionGridTable= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration_].grid)
                                 template= loader.get_template('gridMng/participatingSessionsContentGrids.html')
-                                dic2= __generateGridTable__(responseGrid2[0].grid)
                                 context= None
-                                context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'displaySessionGrid': True,'displaySessionGrid2':True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
-                                                                  'table2' : dic2['table'], 'tableHeader2': dic2['tableHeader'], 'weights2':dic2['weights'][:], 'changeRatingsWeights2':False, 'changeCornAlt2':False, 'checkForTableIsSave2':False, 'showRatingWhileFalseChangeRatingsWeights2':True, 'tableId2':randomStringGenerator(), 'doesNotShowLegend2': True,
-                                                                  'responseTable': dic['table'], 'responseTableHeader':dic['tableHeader'], 'responseWeights':dic['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator() })
-                                htmlData= template.render(context)
-                                return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-                            elif sessionObj.state.name == SessionState.RW and iterationRW == 0:
-                                dic= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
-                                template= loader.get_template('gridMng/participatingSessionsContentGrids.html')
-                                context= None
-                                context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
-                                                                  'responseTable': dic['table'], 'responseTableHeader':dic['tableHeader'], 'responseWeights':dic['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator() })
+                                if previousResponseGridTable == None:
+                                    context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration_, 'displaySessionGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+                                                                      'responseTable': sessionGridTable['table'], 'responseTableHeader':sessionGridTable['tableHeader'], 'responseWeights':sessionGridTable['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator() })
+                                else:
+                                    context= RequestContext(request, {'table' : sessionGridTable['table'], 'tableHeader': sessionGridTable['tableHeader'], 'weights':sessionGridTable['weights'][:], 'changeRatingsWeights':False, 'changeCornAlt':False, 'checkForTableIsSave':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'displaySessionGrid':True, 'tableId':randomStringGenerator(), 'sessionStatus':'Waiting for Ratings and Weights', 'responseStatus':'No response was sent', 'sessionStatusClass':'green', 'responseStatusClass':'red', 'iteration':iteration_, 'displaySessionGrid': True, 'displayPreviousResponseGrid': True, 'displayResponseGrid': True, 'doesNotShowLegend': True,
+                                                                      'previousResponseTable' : previousResponseGridTable['table'], 'previousResponseTableHeader': previousResponseGridTable['tableHeader'], 'previousResponseWeights':previousResponseGridTable['weights'][:], 'previousResponseChangeRatingsWeights':False, 'previousResponseChangeCornAlt':False, 'previousResponseCheckForTableIsSave':False, 'previousResponseShowRatingWhileFalseChangeRatingsWeights':True, 'previousResponseTableId':randomStringGenerator(), 'previousResponseDoesNotShowLegend': True,
+                                                                      'responseTable': sessionGridTable['table'], 'responseTableHeader':sessionGridTable['tableHeader'], 'responseWeights':sessionGridTable['weights'], 'responseChangeRatingsWeights':True, 'responseChangeCornAlt':False, 'responseCheckForTableIsSave':False, 'responseTableId':randomStringGenerator() })
                                 htmlData= template.render(context)
                                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                             else:
@@ -677,7 +771,7 @@ def ajaxGetParticipatingSessionsContentGrids(request):
         print '-'*60
         traceback.print_exc(file=sys.stdout)
         print '-'*60
-
+ 
 #this function will return the page that displays the results of a iteration from a session
 def ajaxGetResults_old(request):
     if not request.user.is_authenticated():
@@ -1869,4 +1963,39 @@ def __validateAltConResponse__(request):
         #print 'Error request is missing arguments: nAlternatives: ' + str(request.POST.has_key('nAlternatives')) + ' nConcerns: ' + str(request.POST.has_key('nConcerns'))
         raise KeyError('Invalid request, request is missing argument(s)', 'Error request is missing arguments: nAlternatives: ' + str(request.POST.has_key('nAlternatives')) + ' nConcerns: ' + str(request.POST.has_key('nConcerns')))
 
+def __isGridStateEqualSessionState__(sesssionState, gridObj):
+    
+    if sesssionState.name == SessionState.AC:
+        if gridObj.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
+            return True
+    elif sesssionState.name == SessionState.RW:
+        if gridObj.grid_type == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:
+            return True
+    return False
 
+#This function will generate the data that is needed for the participatingSessionsContentGrids.html template
+#returns a dictionary that MAY contain the following keys:  previousResponseGrid, sessionGridTable, currentResponseGridTable
+def __generateParticipatingSessionsGridsData__(sessionObj, iteration_, responseGridRelation):
+    data= {}
+    currentResponseGridRelation= responseGridRelation.filter(iteration= iteration_)
+    
+    #a session grid must always be present, if something goes wrong here the calling function should deal with it
+    data['sessionGridTable']= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration_].grid)
+    
+    #check to see if a previous response grid should be displayed or not
+    if iteration_ >= 2 and iteration_ - 1 > 0:
+        previousResponseGridRelation= responseGridRelation.filter(iteration= iteration_ - 1)
+        previousResponseGrid= None
+        if len(previousResponseGridRelation) >= 1:
+            previousResponseGrid=  previousResponseGridRelation[0].grid
+            if previousResponseGrid != None and __isGridStateEqualSessionState__(sessionObj.state, previousResponseGrid) and (previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT or previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN):
+                #generate the data for the previous response grid
+                data['previousResponseGrid']= __generateGridTable__(previousResponseGridRelation[0].grid)
+            
+    #generate response grid data
+    #check to see if the user has already send a response grid
+    if len(currentResponseGridRelation) >= 1:
+        #if he has sent an response generate the data for the grid
+        data['currentResponseGridTable']= __generateGridTable__(currentResponseGridRelation[0].grid)
+    
+    return data        

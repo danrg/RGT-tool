@@ -1,12 +1,4 @@
 <div id= "participationSessionsContentGridsDiv">
-    {% if displaySessionGrid2 %}
-        <div id="participatingPreviousIterationGridDiv">
-            <h4 id= "participatingSessionPreviousIterationGridHeader">Your response Grid from previous iteration</h4>
-                {% if table2 %}
-                    {% include "gridMng/gridTable.html" with table=table2 tableHeader=tableHeader2 weights=weights2 changeRatingsWeights=changeRatingsWeights2 changeCornAlt=changeCornAlt2 checkForTableIsSave=checkForTableIsSave2 showRatingWhileFalseChangeRatingsWeights=showRatingWhileFalseChangeRatingsWeights2 tableId=tableId2 doesNotShowLegend=doesNotShowLegend2 only %}
-                {% endif %}
-        </div>
-    {% endif %}v
     {% if displaySessionGrid %}
         <div id="participatingSessionGridDiv">
             <h4 id= "participatingSessionCurrentSessionGridHeader"></h4>
@@ -14,6 +6,14 @@
                 {% include "gridMng/gridTable.html" %}
             {% endif %}
     </div>
+    {% endif %}
+    {% if displayPreviousResponseGrid %}
+        <div id="participatingPreviousIterationGridDiv">
+            <h4 id= "participatingSessionPreviousIterationGridHeader">Your response Grid from previous iteration</h4>
+                {% if previousResponseTable %}
+                    {% include "gridMng/gridTable.html" with table=previousResponseTable tableHeader=previousResponseTableHeader weights=previousResponseWeights changeRatingsWeights=previousResponseChangeRatingsWeights changeCornAlt=previousResponseChangeCornAlt checkForTableIsSave=previousResponseCheckForTableIsSave showRatingWhileFalseChangeRatingsWeights=previousResponseShowRatingWhileFalseChangeRatingsWeights tableId=previousResponseTableId doesNotShowLegend=previousResponseDoesNotShowLegend only %}
+                {% endif %}
+        </div>
     {% endif %}
     {% if displayResponseGrid %}
         <div id= "participatingSessionGridAnswerDiv">
