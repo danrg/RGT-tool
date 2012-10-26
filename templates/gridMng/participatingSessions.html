@@ -33,12 +33,12 @@ RGT | Sessions - Participating
 			}
 		</script>
 		<label for="participatingSessionSelect">Select session:</label><select id="participatingSessionSelect" onchange= "showParticipatingSessionDetails()">
-			{%if not hasSessions%}
+			{%if not data.hasSessions%}
 				<option id= "noSessionOption" value= "noSession">No session available</option>
 			{% else %}
 				<option value="noSession"> </option>
 			{% endif %}
-			{% for usid, name in sessions %}
+			{% for usid, name in data.sessions %}
 				<option value="{{ usid }}">{{ name }}</option>
 			{% endfor %}
 		</select>

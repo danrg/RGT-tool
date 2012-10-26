@@ -26,17 +26,17 @@ if( typeof sendResponse != 'function')
     <tbody>
     <tr>
         <td>Current iteration</td>
-        <td id="participantSessionIteration">{{iteration}}</td>
+        <td id="participantSessionIteration">{{data.iteration}}</td>
     </tr>
     <tr>
         <td>Session status</td>
-        <td>{{sessionStatus}}</td>
+        <td>{{data.sessionStatus}}</td>
     </tr>
     <tr>
     	<td>Number of participants that responded</td>
     	<td>
-    		{% if showNParticipantsAndResponces %}
-    			<span id= "nReceivedResponses">{{nReceivedResponses}}</span>/{{nParticipants}}
+    		{% if data.showNParticipantsAndResponces %}
+    			<span id= "nReceivedResponses">{{data.nReceivedResponses}}</span>/{{data.nParticipants}}
     		{% else %}
     			-----
     		{% endif %}
@@ -44,20 +44,20 @@ if( typeof sendResponse != 'function')
     </tr>
     <tr>
         <td class= "participatingSessionsResponseHighlight">Response status</td>
-        <td id="responseStatusSpan" class= 'participatingSessionsResponseHighlight'>{{ responseStatus }}{% if dateTime %}{% localtime on %}{{ dateTime|date:"Y-m-d H:i:s" }}{% endlocaltime %}{% endif %}</td>
+        <td id="responseStatusSpan" class= 'participatingSessionsResponseHighlight'>{{ data.responseStatus }}{% if data.dateTime %}{% localtime on %}{{ data.dateTime|date:"Y-m-d H:i:s" }}{% endlocaltime %}{% endif %}</td>
     </tr>
     <tr>
         <td>Show your response from iteration</td>
         <td>
             <select id= "responseSelection" onchange= "getResponseFromIteration()"> <!-- Add a question mark icon here with tooltip explaining what this does-->
-                {% if not iterations %}
+                {% if not data.iterations %}
                 <option value="null">N/A</option>
                 {% else %}
                 <option value="null">    </option>
-                {% for i in iterations %}
-                {% if i != iteration %}
-                <option value="{{i}}">{{i}}</option>
-                {% endif %}
+                {% for i in data.iterations %}
+	                {% if i != data.iteration %}
+	                	<option value="{{i}}">{{i}}</option>
+	                {% endif %}
                 {% endfor %}
                 <option value="current">Cur</option>
                 {% endif %}
@@ -71,7 +71,7 @@ if( typeof sendResponse != 'function')
 	{% include "gridMng/participatingSessionsContentGrids.html" %}
 </div>
 <div id="responseOptionsDiv">
-	{% if responseTable and not hideSaveResponseButton %}
+	{% if responseTable and not data.hideSaveResponseButton %}
 		<input type="button" id="sendResponseButton" onclick="sendResponse()" value="Send Response" />
 		<input type="button" id="participatingSessionsContentUndoAllButton" onclick="getResponseFromIteration('current')" value="Undo All" />
 	{% endif %}

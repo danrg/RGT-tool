@@ -36,9 +36,9 @@ RGT | Sessions - Administration
 	</script>
 	<!-- header just after the menu (create session, my session, etc) -->
 	<label for= "mySessionsSelect">Select session:</label><select id="mySessionsSelect" onchange= "showMySession()">
-	{% if sessions %}
+	{% if data.sessions %}
 		<option value="noSessions">&nbsp;</option>
-		{% for name,usid in sessions  %}
+		{% for name,usid in data.sessions  %}
 			<option value="{{ usid }}">{{ name }}</option>
 		{% endfor %}
 	{% else %}

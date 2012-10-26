@@ -27,24 +27,24 @@
 		    <tbody>
 		    	<tr>
 		            <td>Session Name:</td>
-		            <td>{{sessionName}}</td>
+		            <td>{{data.sessionName}}</td>
 		        </tr>
 		        <tr>
 		            <td>Invitation key</td>
-		            <td>{{invitationKey}}</td>
+		            <td>{{data.invitationKey}}</td>
 		        </tr>
 		        <tr>
 		            <td>Current iteration</td>
-		            <td id="iteration">{{iteration}}</td>
+		            <td id="iteration">{{data.iteration}}</td>
 		        </tr>
 		        <tr>
 		            <td>Current iteration status</td>
-		            <td id="currentIterationStatus">{{state}}</td>
+		            <td id="currentIterationStatus">{{data.state}}</td>
 		        </tr>
 		        <tr>
 		            <td>Show results from iteration</td>
 		            <td>		<select id="mySessionsContentSessionIterationSelect" onchange="mySessionsShowResults()" style="width:230px">
-		                {%for key,value in iterationValueType.items %}
+		                {%for key,value in data.iterationValueType.items %}
 		                	{% if key == 0 %}
 		                		<option value="{{key}}"></option>
 		                	{% else %}
@@ -62,23 +62,23 @@
 </div>
 <!-- navigation menus -->
 <div id="mainNavigationDiv">
-	{% if not isSessionClose %}
+	{% if not data.isSessionClose %}
         <table>
             <tr>
-				{% if not hasSessionStarted %}
+				{% if not data.hasSessionStarted %}
                     <td><input type="button" onclick="startSession()" value="Start Session"/></td>
 				{% endif %}
-				{% if showRequestButtons %}
+				{% if data.showRequestButtons %}
                     <td><input type="button" onclick="requestAlternativeConcerns()" value="Request Alt/Con" /></td>
                     <td><input type="button" onclick="requestRatings()" value="Request Ratings"/></td>
 				{% endif %}
-				{% if showFinishButton %}
+				{% if data.showFinishButton %}
                     <td><input type="button" onclick="finishCurrentRequest()" value="Finish Request" /></td>
 				{% endif %}
-				{% if hasSessionStarted and showCloseSessionButton %}
+				{% if data.hasSessionStarted and data.showCloseSessionButton %}
                     <td><input type="button" onclick="finishSession()" value="End Session"/></td>
 				{% endif %}
-				{% if hasSessionStarted %}
+				{% if data.hasSessionStarted %}
 					<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show Dendrogram"/></td>
 				{% endif %}
             </tr>
@@ -101,7 +101,7 @@
 					{% include "gridMng/gridTable.html" %}
 				</form>
 			</div>
-			{% if savaGridSession %}
+			{% if data.savaGridSession %}
 				<div id="sessionGridOptions">
 					<input type="button" id="saveButton" onclick="saveSessionGrid()" value="Save Changes" />
 					<input type= "button" id= "mySessionsContentUndoAllButton" value="undo all" onclick= "getSessionGrid()" />

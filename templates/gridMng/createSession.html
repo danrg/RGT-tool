@@ -31,9 +31,9 @@
         <h3>Step 1: Select a grid</h3>
         <label for="gridSessionSelection">Select grid name:</label>
         <select id="gridSessionSelection" onchange="showGridSessionSelection()">
-            {% if grids %}
+            {% if data.grids %}
             	<option value="noGrids">&nbsp;</option>
-            	{% for grid in grids %}
+            	{% for grid in data.grids %}
             		<option value="{{ grid.usid }}">{{ grid.name }}</option>
             	{% endfor %}
             {% else %}

@@ -10,7 +10,7 @@
 	           </tr>
 	           </thead>
 			<tbody>
-				{% for leftC, rightC, nPair, nLeftC, nRightC, isNew in concerns %}
+				{% for leftC, rightC, nPair, nLeftC, nRightC, isNew in data.concerns %}
 					{%	comment %} header for the tr {% endcomment %}
 					{% if forloop.first %}
 					<tr class= "resultAlternativeConcernRow">
@@ -47,7 +47,7 @@
 	               </tr>
 	           </thead>
 			<tbody>
-				{% for alternaive, nTime, isNew in alternatives %}
+				{% for alternaive, nTime, isNew in data.alternatives %}
 					{%	comment %} header for the tr {% endcomment %}
 					{% if forloop.first %}
 					<tr class= "resultAlternativeConcernRow">
