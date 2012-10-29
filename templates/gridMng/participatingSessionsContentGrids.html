@@ -1,5 +1,5 @@
 <div id= "participationSessionsContentGridsDiv">
-    {% if displaySessionGrid %}
+    {% if data.displaySessionGrid %}
         <div id="participatingSessionGridDiv">
             <h4 id= "participatingSessionCurrentSessionGridHeader"></h4>
             {% if table %}
@@ -7,7 +7,7 @@
             {% endif %}
     </div>
     {% endif %}
-    {% if displayPreviousResponseGrid %}
+    {% if data.displayPreviousResponseGrid %}
         <div id="participatingPreviousIterationGridDiv">
             <h4 id= "participatingSessionPreviousIterationGridHeader">Your response Grid from previous iteration</h4>
                 {% if previousResponseTable %}
@@ -15,7 +15,7 @@
                 {% endif %}
         </div>
     {% endif %}
-    {% if displayResponseGrid %}
+    {% if data.displayResponseGrid %}
         <div id= "participatingSessionGridAnswerDiv">
             <h4 id= "participatingSessionSuggestionGridHeader">Your Suggestion Grid</h4>
             <form id="participatingSessionResponseGridForm">
