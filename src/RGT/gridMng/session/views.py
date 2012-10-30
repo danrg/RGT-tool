@@ -27,6 +27,9 @@ from RGT.gridMng.template.participatingSessionsData import ParticipatingSessions
 from RGT.gridMng.template.participatingSessionsContentData import ParticipatingSessionsContentData
 from RGT.gridMng.template.resultAlternativeConcernTableData import ResultAlternativeConcernTableData
 from RGT.gridMng.template.participatingSessionsContentGridsData import ParticipatingSessionsContentGridsData
+from RGT.gridMng.template.resultRatingWeightTableData import ResultRatingWeightTableData
+from RGT.gridMng.template.resultRatingWeightTablesData import ResultRatingWeightTablesData
+from RGT.gridMng.template.participantsData import ParticipantsData
 import uuid
 import sys
 import traceback
@@ -89,7 +92,7 @@ def ajaxGetMySessionContentPage(request):
                     #get the users
                     #participants= sessionObj.getParticipators()
                     templateData= MySessionsContentData()
-                    participants= __createPaticipantPanelData__(sessionObj)
+                    templateData.participantTableData= ParticipantsData(__createPaticipantPanelData__(sessionObj))
                     hidden= []
                     iteration= sessionObj.iteration
                     dic= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid)
@@ -122,25 +125,25 @@ def ajaxGetMySessionContentPage(request):
                     #now lets see what we have to return
                     if sessionObj.state.name == SessionState.INITIAL:
                         templateData.state= 'Invitation'
-                        context= RequestContext(request, {'data': templateData, 'participants': participants, 'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'hiddenFields':hidden, 'changeRatingsWeights':False, 'changeCornAlt':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'iterationValues':iterationValues, 'tableId':randomStringGenerator()})
+                        context= RequestContext(request, {'data': templateData, 'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'hiddenFields':hidden, 'changeRatingsWeights':False, 'changeCornAlt':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'iterationValues':iterationValues, 'tableId':randomStringGenerator()})
 
                     elif sessionObj.state.name == SessionState.AC:
                         templateData.state= 'A/C'
                         templateData.hasSessionStarted= True
                         templateData.showFinishButton= True
-                        context= RequestContext(request, {'data': templateData, 'participants':participants, 'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'hiddenFields':hidden, 'changeRatingsWeights':False, 'changeCornAlt':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'iterationValues':iterationValues, 'tableId':randomStringGenerator()})
+                        context= RequestContext(request, {'data': templateData, 'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'hiddenFields':hidden, 'changeRatingsWeights':False, 'changeCornAlt':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'iterationValues':iterationValues, 'tableId':randomStringGenerator()})
 
                     elif sessionObj.state.name == SessionState.RW:
                         templateData.state= 'R/W'
                         templateData.hasSessionStarted= True
                         templateData.showFinishButton= True
-                        context= RequestContext(request, {'data': templateData, 'participants':participants, 'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'hiddenFields':hidden, 'changeRatingsWeights':False, 'changeCornAlt':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'iterationValues':iterationValues, 'tableId':randomStringGenerator()})
+                        context= RequestContext(request, {'data': templateData, 'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'hiddenFields':hidden, 'changeRatingsWeights':False, 'changeCornAlt':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'iterationValues':iterationValues, 'tableId':randomStringGenerator()})
 
                     elif sessionObj.state.name == SessionState.FINISH:
                         templateData.state= 'Closed'
                         templateData.isSessionClose= True
                         templateData.hasSessionStarted= True
-                        context= RequestContext(request, {'data': templateData, 'participants':participants, 'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'hiddenFields':hidden, 'changeRatingsWeights':False, 'changeCornAlt':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'iterationValues':iterationValues, 'tableId':randomStringGenerator()})
+                        context= RequestContext(request, {'data': templateData, 'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'hiddenFields':hidden, 'changeRatingsWeights':False, 'changeCornAlt':False, 'showRatingWhileFalseChangeRatingsWeights':True, 'iterationValues':iterationValues, 'tableId':randomStringGenerator()})
 
                     elif sessionObj.state.name == SessionState.CHECK:
                         templateData.state= 'Check Values'
@@ -148,7 +151,7 @@ def ajaxGetMySessionContentPage(request):
                         templateData.showRequestButtons= True
                         templateData.showCloseSessionButton= True
                         templateData.savaGridSession= True
-                        context= RequestContext(request, {'data': templateData, 'participants':participants, 'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'hiddenFields':hidden, 'changeRatingsWeights':True, 'changeCornAlt':True, 'iterationValues':iterationValues, 'checkForTableIsSave':True , 'tableId':randomStringGenerator()})
+                        context= RequestContext(request, {'data': templateData, 'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'hiddenFields':hidden, 'changeRatingsWeights':True, 'changeCornAlt':True, 'iterationValues':iterationValues, 'checkForTableIsSave':True , 'tableId':randomStringGenerator()})
 
                     htmlData= template.render(context)
                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
@@ -1002,8 +1005,38 @@ def ajaxGetResults(request):
                                         leftPole= None
                                         i+= 1
                                     i= 0
+                                    
+                                    #put all the data into objects for the template
+                                    rangeData= ResultRatingWeightTableData()
+                                    meanData= ResultRatingWeightTableData()
+                                    stdData= ResultRatingWeightTableData()
+                                    
+                                    rangeData.table= tableRatingRangeColor
+                                    rangeData.headers= header
+                                    rangeData.weights= tableWeightRange
+                                    rangeData.weightColorMap= rangeWeightColorMap
+                                    rangeData.tableHead= 'Range'
+                                    rangeData.useColorMap= True
+                                    
+                                    meanData.table= tableRatingMean
+                                    meanData.headers= header
+                                    meanData.weights= tableWeightMean
+                                    meanData.tableHead= 'Mean' 
+                                    
+                                    stdData.table= tableRatingStdColor
+                                    stdData.headers= header
+                                    stdData.weights= tableWeightStd
+                                    stdData.weightColorMap= stdWeightColorMap
+                                    stdData.tableHead= 'Standard Deviation'
+                                    stdData.useColorMap= True
+                                    
+                                    templateData= ResultRatingWeightTablesData()
+                                    templateData.rangeData= rangeData
+                                    templateData.meanData= meanData
+                                    templateData.stdData= stdData
+                                    
                                     template= loader.get_template('gridMng/resultRatingWeightTables.html')
-                                    context= RequestContext(request, {'rangeTable':tableRatingRangeColor, 'rangeHeaders':header, 'rangeWeights':tableWeightRange, 'rangeWeightColorMap':rangeWeightColorMap, 'rangeTableHead':'Range', 'meanWeights':tableWeightMean, 'meanTable':tableRatingMean, 'meanHeaders':header, 'meanTableHead':'Mean', 'stdTable':tableRatingStdColor, 'stdHeaders':header, 'stdWeights':tableWeightStd, 'stdWeightColorMap':stdWeightColorMap, 'stdTableHead':'Standard Deviation' })
+                                    context= RequestContext(request, {'data': templateData})
                                     htmlData= template.render(context)
                                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                                 else:
@@ -1042,9 +1075,10 @@ def ajaxGetParticipatingPage(request):
                 facilitatorObj= request.user.facilitator_set.all()
                 if len(facilitatorObj) >= 1 and sessionObj.facilitator == facilitatorObj[0]:
                     #get all the users that reponded to the request
-                    participantData= __createPaticipantPanelData__(sessionObj)
+                    templateData= ParticipantsData()
+                    templateData.participants= __createPaticipantPanelData__(sessionObj)
                     template= loader.get_template('gridMng/participants.html')
-                    context= RequestContext(request, {'participants':participantData})
+                    context= RequestContext(request, {'data':templateData})
                     htmlData= template.render(context)
                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                 else:
@@ -1515,7 +1549,7 @@ def __createPaticipantPanelData__(sessionObj):
     participantData= []
     for user in sessionObj.getParticipators():
         #create the list with the user and the class of the css the should be coupled with the user in the html template
-        #but first check if the session is in a state where there is no data the can be requested or responded
+        #but first check if the session is in a state where there is no data that can be requested or responded
         if sessionObj.state.name == SessionState.FINISH or sessionObj.state.name == SessionState.INITIAL or sessionObj.state.name == SessionState.CHECK:
             participantData.append((user, 'respondedRequest'))
         else:

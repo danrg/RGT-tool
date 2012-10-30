@@ -1,5 +1,5 @@
 <table border="0" class="resultRatingWeightTable">
-	{% if tableHead %}
+	{% if data.tableHead %}
 		<thead>
 			<tr>
 				<td colspan="{{headers|length|add:"3"}}" class="resultRatingWeightHead">{{tableHead}}</td>
@@ -9,14 +9,14 @@
 	<tbody>
 		<tr>
 			<td></td>
-			{% for header in headers%}
+			{% for header in data.headers%}
 				<td class="resultRatingWeightAlternatives"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{header}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
 			{% endfor %}
 			<td class="resultRatingWeightAlternatives">weight</td>
 			<td></td>
 		</tr>
-		{% if not userColorMap %}
-			{% for row in table %}
+		{% if not data.useColorMap %}
+			{% for row in data.table %}
 				<tr class="resultRatingWeightTr">
 					{%for value, jsData in row%}
 						{% if forloop.first%}
@@ -25,8 +25,8 @@
 							{% if not forloop.last %}
 								<td class="resultRatingWeightValue"><span class= "clickableResultValue" onclick= "displayChartOfRatings({{jsData}})">{{value}}</span></td>
 							{% else %}
-								{% with weights.pop as data%}
-									<td class="resultRatingWeightWeight"><span class= "clickableResultValue" onclick="displayChartOfRatings({{data.1}})">{{data.0}}</span></td>
+								{% with data.weights.pop as weightData%}
+									<td class="resultRatingWeightWeight"><span class= "clickableResultValue" onclick="displayChartOfRatings({{weightData.1}})">{{weightData.0}}</span></td>
 									<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
 								{% endwith %}
 							{% endif %}
@@ -35,7 +35,7 @@
 				</tr>
 			{% endfor%}
 		{% else %}
-			{% for row in table %}
+			{% for row in data.table %}
 				<tr class="resultRatingWeightTr">
 					{%for value, color, jsData in row%}
 						{% if forloop.first %}
@@ -44,8 +44,8 @@
 							{% if not forloop.last %}
 								<td class="resultRatingWeightValue" style="background-color:rgb{{color}};"><span class= "clickableResultValue" onclick="displayChartOfRatings({{jsData}})">{{value}}</span></td>
 							{% else %}
-								{% with weights.pop as data%}
-									<td class="resultRatingWeightWeight" style="background-color:rgb{{weightColorMap.pop}};"><span class= "clickableResultValue" onclick="displayChartOfRatings({{data.1}})">{{data.0}}</span></td>
+								{% with data.weights.pop as weightData%}
+									<td class="resultRatingWeightWeight" style="background-color:rgb{{data.weightColorMap.pop}};"><span class= "clickableResultValue" onclick="displayChartOfRatings({{weightData.1}})">{{weightData.0}}</span></td>
 									<td class="resultRatingWeightConcern"><div class="resultRatingWeighTableSpacers">&nbsp;</div>{{value}}<div class="resultRatingWeighTableSpacers">&nbsp;</div></td>
 								{% endwith %}
 							{% endif %}

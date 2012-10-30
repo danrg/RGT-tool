@@ -1,3 +1,4 @@
+
 class MySessionsContentData(object):
 
     sessionName= None
@@ -5,6 +6,7 @@ class MySessionsContentData(object):
     iteration= None
     state= None
     iterationValueType= None #data used to generate the menu the facilitator uses to select the results of previous iterations. format is {{'stateNameKey':SessionState, 'stateName':'state name'}, ......}
+    participantTableData= None #ParticipantsData object, used to grid the table where the facilitator can see who joined the section or responded a request
     isSessionClose= False
     hasSessionStarted= False
     showRequestButtons= False

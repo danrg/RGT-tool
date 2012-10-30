@@ -57,7 +57,7 @@
 		</table>
 	</div>
 	<div id="sessionParticipants">
-		{% include "gridMng/participants.html"%}
+		{% include "gridMng/participants.html" with data=data.participantTableData STATIC_URL=STATIC_URL%}
 	</div>
 </div>
 <!-- navigation menus -->
