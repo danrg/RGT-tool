@@ -1,13 +1,13 @@
 <div class="gridTrableContainerDiv">
 	<div class= "mainGridDiv" style="display: inline-table">
-		<table id="{{tableId}}" border="0" class= "gridTable" >
+		<table id="{{data.tableId}}" border="0" class= "gridTable" >
 			<tbody>
 				{% comment %} first row is the cell menu row of the table {% endcomment %}
 				<tr>
 						<td><label class="gridSizePlaceholder" style="min-width:40px; min-height:20px; float:right; visibility: hidden;">l</label></td> <!-- make sure the table doesn't change sizes -->
 						<td><!-- skip --></td>
-						{% for header in tableHeader%}
-							{% if changeCornAlt %}
+						{% for header in data.tableHeader%}
+							{% if data.changeCornAlt %}
 								<td class= "colMenu" onmouseover="showColMenu($(this))">
 									<div class= "colMenuDiv">
 										<a><img class= "deleteImage" src="{{ STATIC_URL }}icons/delete.png" alt="" onclick= "removeCol($(this).parents('td'))"/></a>
@@ -27,16 +27,16 @@
 						<td><!-- skip --></td> 
 						{% comment %} grid table menu, max of 5 to 6 buttons {% endcomment %}
 						<td>
-							{% if not doesNotShowLegend %}
+							{% if not data.doesNotShowLegend %}
 								<div class= "gridTableExtraOptionsMenuDiv" style="display: none;">
 									<img src= "/static/icons/legend.png" class= "gridTableToggleLegendImg" onclick= "toggleGridLegend($(this))" title= "toggle legend"/>
 								</div>
 							{% endif %}
 						</td>
-						{% for header in tableHeader %}
+						{% for header in data.tableHeader %}
 							<td class= "alternativeCell" onmouseover="showColMenu($(this))" >
-								{% if changeCornAlt %}
-									{% if checkForTableIsSave %}
+								{% if data.changeCornAlt %}
+									{% if data.checkForTableIsSave %}
 										<input class= "tableHeader" type="text" id="alternative_{{forloop.counter}}_name" name="alternative_{{forloop.counter}}_name" value="{{ header }}" onchange="isTextEmpty($(this));isTableSaved()"/>
 									{% else %}
 										<input class= "tableHeader" type="text" id="alternative_{{forloop.counter}}_name" name="alternative_{{forloop.counter}}_name" value="{{ header }}"/>
@@ -52,20 +52,20 @@
 						</td>
 						<td>
 							<div>
-								{% if checkForTableIsSave %}
+								{% if data.checkForTableIsSave %}
 									<img title="Current showing table has not been modified since retrieving its values." class="tableStatus" alt="" src="{{ STATIC_URL }}icons/table_saved.png">
 								{% endif %}
 							</div>
 						</td>
 						<td><!-- skip --></td>
 				</tr>
-				{% for row in table %}
+				{% for row in data.table %}
 					{% comment %} data rows {% endcomment %}
 					<tr class="gridRow">
 						{% for ratio in row %}
 								{% if forloop.first %}
 									{% comment %} left row menu {% endcomment %}
-									{% if changeCornAlt %}
+									{% if data.changeCornAlt %}
 									<td onmouseover="displayRowMenu($(this))">
 										<div class="gridRowMenu leftRowMenuDiv">
 											<a><img class= "deleteImage" src="{{ STATIC_URL }}icons/delete.png" alt="" onclick= "removeRow($(this).parents('td'))"/></a>
@@ -76,8 +76,8 @@
 									<td></td>
 									{% endif %}
 									{% comment %} concern {% endcomment %}
-									{% if changeCornAlt %}
-										{% if checkForTableIsSave %}
+									{% if data.changeCornAlt %}
+										{% if data.checkForTableIsSave %}
 											<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class="tableHeader" type="text" id="concern_{{forloop.parentloop.counter}}_left" name="concern_{{forloop.parentloop.counter}}_left" value="{{ ratio }}" onchange="isTextEmpty($(this));isTableSaved()" /></td>
 										{% else %}
 											<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class="tableHeader" type="text" id="concern_{{forloop.parentloop.counter}}_left" name="concern_{{forloop.parentloop.counter}}_left" value="{{ ratio }}"/></td>
@@ -88,14 +88,14 @@
 									{% else %}{% if not forloop.last %}
 										<td class= "ratioCell" onmouseover="displayRowMenu($(this));showColMenu($(this))" >
 											<div>
-											{% if changeRatingsWeights %}
-												{% if checkForTableIsSave %}
+											{% if data.changeRatingsWeights %}
+												{% if data.checkForTableIsSave %}
 													<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="{{ ratio }}" onchange="isTextEmpty($(this));isTableSaved();rationRangeValidation($(this))"/>
 												{% else %}
 													<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="{{ ratio }}" onchange="rationRangeValidation($(this))"/>
 												{% endif %}
 											{% else %}
-												{% if showRatingWhileFalseChangeRatingsWeights %}
+												{% if data.showRatingWhileFalseChangeRatingsWeights %}
 													<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="{{ ratio }}" disabled="disabled" readonly/>
 												{% else %}
 												 	<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="" disabled="disabled" readonly/>
@@ -107,23 +107,23 @@
 									{% comment %} end normal cells{% endcomment %}
 									{% comment %} weight {% endcomment%}
 									<td onmouseover="displayRowMenu($(this))">
-										{% if changeRatingsWeights %}
-											{% if checkForTableIsSave %}
-												<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "{{weights.pop}}" onchange="calculateTotalWeight($(this).parents('.gridTrableContainerDiv'));isTextEmpty($(this));isTableSaved()"/>
+										{% if data.changeRatingsWeights %}
+											{% if data.checkForTableIsSave %}
+												<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "{{data.weights.pop}}" onchange="calculateTotalWeight($(this).parents('.gridTrableContainerDiv'));isTextEmpty($(this));isTableSaved()"/>
 											{% else %}
-												<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "{{weights.pop}}" onchange="calculateTotalWeight($(this).parents('.gridTrableContainerDiv'))"/>
+												<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "{{data.weights.pop}}" onchange="calculateTotalWeight($(this).parents('.gridTrableContainerDiv'))"/>
 											{% endif %}
 										{% else %}
-											{% if showRatingWhileFalseChangeRatingsWeights %}
-												<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "{{weights.pop}}" disabled="disabled" readonly/>
+											{% if data.showRatingWhileFalseChangeRatingsWeights %}
+												<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "{{data.weights.pop}}" disabled="disabled" readonly/>
 											{% else %}
 												<input type="text" id="weight_concern{{forloop.parentloop.counter}}"  name="weight_concern{{forloop.parentloop.counter}}" value= "" disabled="disabled" readonly/>
 											{% endif %}
 										{% endif %}
 									</td>
 									{% comment %} concerns right {% endcomment %}
-									{% if changeCornAlt %}
-										{% if checkForTableIsSave %}
+									{% if data.changeCornAlt %}
+										{% if data.checkForTableIsSave %}
 											<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class= "tableHeader" type="text" id="concern_{{forloop.parentloop.counter}}_right" name="concern_{{forloop.parentloop.counter}}_right" value="{{ ratio }}" onchange="isTextEmpty($(this));isTableSaved()"/></td>
 										{% else %}
 											<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class= "tableHeader" type="text" id="concern_{{forloop.parentloop.counter}}_right" name="concern_{{forloop.parentloop.counter}}_right" value="{{ ratio }}"/></td>
@@ -132,7 +132,7 @@
 										<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class= "tableHeader" type="text" id="concern_{{forloop.parentloop.counter}}_right" name="concern_{{forloop.parentloop.counter}}_right" value="{{ ratio }}" disabled="disabled" readonly/></td>
 									{% endif %}
 									{% comment %} right row menu {% endcomment %}
-									{% if changeCornAlt %}
+									{% if data.changeCornAlt %}
 									<td onmouseover="displayRowMenu($(this))">
 										<div class="gridRowMenu rightRowMenuDiv">
 											<a><img class= "deleteImage" src="{{ STATIC_URL }}icons/delete.png" alt="" onclick= "removeRow($(this).parents('td'))"/></a>
@@ -155,7 +155,7 @@
 	{% comment %} the dummie div is used so when playing the toggle animation the grid table won't jump around{% endcomment %}
 	<div class= "dummieTableLegendDiv">
 		<div class="tableLegendDiv" >
-			{% if not doesNotShowLegend %}
+			{% if not data.doesNotShowLegend %}
 				<table class= "tablegend">
 					<thead>
 						<tr>
@@ -189,15 +189,15 @@
 			{% endif %}
 		</div>
 	</div>
-	{% if not changeRatingsWeights %}
+	{% if not data.changeRatingsWeights %}
 		<input type= "hidden" value= "false" id="changeRatingsWeights">
-		{% if showRatingWhileFalseChangeRatingsWeights %}
+		{% if data.showRatingWhileFalseChangeRatingsWeights %}
 			<input type= "hidden" value= "true" id="showRatingWhileFalseChangeRatingsWeights">
 		{% endif %}
 	{% endif %}
 	{%comment%}non mandatory hidden field {% endcomment %}
-	{% if hiddenFields %}
-		{% for value, id in hiddenFields %}
+	{% if data.hiddenFields %}
+		{% for value, id in data.hiddenFields %}
 			<input type="hidden" value="{{value}}" id="{{id}}" name="{{id}}"/>
 		{% endfor %}
 	{%endif%}

@@ -68,10 +68,10 @@ if( typeof sendResponse != 'function')
 </table>
 <!-- div with all the content -->
 <div id="participationSessionsContentDiv">
-	{% include "gridMng/participatingSessionsContentGrids.html" %}
+	{% include "gridMng/participatingSessionsContentGrids.html" with data=data.participatingSessionsContentGridsData STATIC_URL=STATIC_URL only %}
 </div>
 <div id="responseOptionsDiv">
-	{% if responseTable and not data.hideSaveResponseButton %}
+	{% if not data.hideSaveResponseButton %}
 		<input type="button" id="sendResponseButton" onclick="sendResponse()" value="Send Response" />
 		<input type="button" id="participatingSessionsContentUndoAllButton" onclick="getResponseFromIteration('current')" value="Undo All" />
 	{% endif %}

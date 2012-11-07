@@ -98,7 +98,7 @@
 			<div id="sessionGridDiv">
 				<form id="form">
                     {% csrf_token %}
-					{% include "gridMng/gridTable.html" %}
+					{% include "gridMng/gridTable.html" with data=data.tableData STATIC_URL=STATIC_URL %}
 				</form>
 			</div>
 			{% if data.savaGridSession %}
