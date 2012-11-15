@@ -54,8 +54,8 @@ RGT | Sessions - Participating
 		The table contains the name of the session that is waiting for an answer of the participant.
 	{% endcomment %}
 	<div id="participatingSessionsPendingResponsesDiv">
-		{% if data.pedingResponsesTable %}
-			{%include "gridMng/pendingResponses.html"%}
+		{% if data.pendingResponses.pedingResponsesTable %}
+			{%include "gridMng/pendingResponses.html" with data=data.pendingResponses STATIC_URL=STATIC_URL%}
 		{% endif %}
 	</div>
 </div>

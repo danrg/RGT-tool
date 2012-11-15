@@ -34,7 +34,7 @@ RGT | Grids - Create
 			    <input type="text" id="gridName" name="gridName"/>
 			    <h3>Step 2: Enter grid data</h3>
 				<div id= "gridData" style="display: inline;">
-					{% include "gridMng/createMyGridBase.html" %}
+					{% include "gridMng/createMyGridBase.html" with data=data.templateCreateMyGridBase STATIC_URL=STATIC_URL %}
 				</div>
 			    <h3>Step 3: Save the grid</h3>
 			    <input onclick="createGrid()" type="button" value="Save" />

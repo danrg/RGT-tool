@@ -16,21 +16,24 @@ from RGT.gridMng.session.state import State as SessionState
 from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
 from RGT.gridMng.error.wrongState import WrongState
 from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
-from RGT.gridMng.views import __generateGridTable__, __createDendogram__
 from RGT.gridMng.utility import createXmlErrorResponse, createXmlSuccessResponse, randomStringGenerator, createXmlForComboBox, validateName, createXmlForNumberOfResponseSent, createDateTimeTag
 from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid__
 from math import sqrt, ceil
-from RGT.gridMng.template.createSessionData import CreateSessionData
-from RGT.gridMng.template.mySessionsData import MySessionsData
-from RGT.gridMng.template.mySessionsContentData import MySessionsContentData
-from RGT.gridMng.template.participatingSessionsData import ParticipatingSessionsData
-from RGT.gridMng.template.participatingSessionsContentData import ParticipatingSessionsContentData
-from RGT.gridMng.template.resultAlternativeConcernTableData import ResultAlternativeConcernTableData
-from RGT.gridMng.template.participatingSessionsContentGridsData import ParticipatingSessionsContentGridsData
-from RGT.gridMng.template.resultRatingWeightTableData import ResultRatingWeightTableData
-from RGT.gridMng.template.resultRatingWeightTablesData import ResultRatingWeightTablesData
-from RGT.gridMng.template.participantsData import ParticipantsData
+from RGT.gridMng.template.session.createSessionData import CreateSessionData
+from RGT.gridMng.template.session.mySessionsData import MySessionsData
+from RGT.gridMng.template.session.mySessionsContentData import MySessionsContentData
+from RGT.gridMng.template.session.participatingSessionsData import ParticipatingSessionsData
+from RGT.gridMng.template.session.participatingSessionsContentData import ParticipatingSessionsContentData
+from RGT.gridMng.template.session.resultAlternativeConcernTableData import ResultAlternativeConcernTableData
+from RGT.gridMng.template.session.participatingSessionsContentGridsData import ParticipatingSessionsContentGridsData
+from RGT.gridMng.template.session.resultRatingWeightTableData import ResultRatingWeightTableData
+from RGT.gridMng.template.session.resultRatingWeightTablesData import ResultRatingWeightTablesData
+from RGT.gridMng.template.session.participantsData import ParticipantsData
 from RGT.gridMng.template.gridTableData import GridTableData
+from RGT.gridMng.template.session.pedingResponsesData import PedingResponsesData
+
+from RGT.gridMng.utility import generateGridTable, createDendogram 
+
 import uuid
 import sys
 import traceback
@@ -95,7 +98,7 @@ def ajaxGetMySessionContentPage(request):
                     templateData= MySessionsContentData()
                     templateData.participantTableData= ParticipantsData(__createPaticipantPanelData__(sessionObj))
                     iteration= sessionObj.iteration
-                    gridTemplateData= GridTableData(__generateGridTable__(sessionObj.sessiongrid_set.all()[iteration].grid))
+                    gridTemplateData= GridTableData(generateGridTable(sessionObj.sessiongrid_set.all()[iteration].grid))
                     gridTemplateData.tableId= randomStringGenerator()
                     templateData.tableData= gridTemplateData
                     iterationValueType = {}
@@ -279,7 +282,9 @@ def getParticipatingSessionsPage(request):
         templateDate.hasSessions= True
     
     templateDate.sessions= sessions
-    templateDate.pedingResponsesTable= __createPendingResponseData__(request.user)
+    pendingResponses= PedingResponsesData()
+    pendingResponses.pedingResponsesTable= __createPendingResponseData__(request.user)
+    templateDate.pendingResponses= pendingResponses
 
     context= RequestContext(request, {'data': templateDate})
     return render(request, 'gridMng/participatingSessions.html', context)
@@ -1080,7 +1085,7 @@ def ajaxGenerateSessionDendrogram(request):
                     if len(sessionGridRelation) >= 1:
                         sessionGridRelation= sessionGridRelation[0]
                         try:
-                            imgData= __createDendogram__(sessionGridRelation.grid)
+                            imgData= createDendogram(sessionGridRelation.grid)
                             return HttpResponse(imgData, content_type='application/xml')
                         except Exception as error:
                             if len(error.args) >= 1:
@@ -1119,7 +1124,7 @@ def ajaxGetSessionGrid(request):
                 gridObj= SessionGrid.objects.filter(session= sessionObj, iteration= sessionObj.iteration)
                 if len(gridObj) >= 1:
                     gridObj= gridObj[0].grid
-                    templateData= GridTableData(__generateGridTable__(gridObj))
+                    templateData= GridTableData(generateGridTable(gridObj))
                     templateData.tableId= randomStringGenerator()
                     #if the state is not check then return a table where nothing can be changed, else return a table that can be changed
                     if sessionObj.state.name == State.objects.getCheckState().name:
@@ -1607,7 +1612,7 @@ def __generateParticipatingSessionsGridsData__(sessionObj, iteration_, responseG
     currentResponseGridRelation= responseGridRelation.filter(iteration= iteration_)
     
     #a session grid must always be present, if something goes wrong here the calling function should deal with it
-    data['sessionGridTable']= __generateGridTable__(sessionObj.sessiongrid_set.all()[iteration_].grid)
+    data['sessionGridTable']= generateGridTable(sessionObj.sessiongrid_set.all()[iteration_].grid)
     
     #check to see if a previous response grid should be displayed or not
     if iteration_ >= 2 and iteration_ - 1 > 0:
@@ -1617,12 +1622,12 @@ def __generateParticipatingSessionsGridsData__(sessionObj, iteration_, responseG
             previousResponseGrid=  previousResponseGridRelation[0].grid
             if previousResponseGrid != None and __isGridStateEqualSessionState__(sessionObj.state, previousResponseGrid) and (previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT or previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN):
                 #generate the data for the previous response grid
-                data['previousResponseGrid']= __generateGridTable__(previousResponseGridRelation[0].grid)
+                data['previousResponseGrid']= generateGridTable(previousResponseGridRelation[0].grid)
             
     #generate response grid data
     #check to see if the user has already send a response grid
     if len(currentResponseGridRelation) >= 1:
         #if he has sent an response generate the data for the grid
-        data['currentResponseGridTable']= __generateGridTable__(currentResponseGridRelation[0].grid)
+        data['currentResponseGridTable']= generateGridTable(currentResponseGridRelation[0].grid)
     
     return data        

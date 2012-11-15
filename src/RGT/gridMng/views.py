@@ -14,11 +14,18 @@ from RGT.gridMng.models import Facilitator
 from RGT.gridMng.models import Session
 from RGT.gridMng.utility import createXmlErrorResponse, createXmlSuccessResponse, randomStringGenerator, validateName, convertSvgTo, getImageError,\
     createDateTimeTag
-from RGT.gridMng.hierarchical import hcluster, drawDendogram2, transpose, drawDendogram3
+
 from RGT.gridMng.session.state import State
+from RGT.gridMng.template.showGridsData import ShowGridsData
+from RGT.gridMng.template.gridTableData import GridTableData
+from RGT.gridMng.template.createMyGridBaseData import CreateMyGridBaseData
+from RGT.gridMng.template.createMyGridData import CreateMyGridData
+
+from RGT.gridMng.utility import generateGridTable, createDendogram
+
 import sys, os
 import traceback
-import base64
+
 from io import BytesIO
 from types import StringType
 
@@ -31,23 +38,22 @@ def getCreateMyGridPage(request):
             if request.REQUEST['tableOnly'] == 'true':
                 tableOnly= True
     
-        hidden= []
-        defaultNConcerns= 3
-        defaultNAlternatives= 2
-        defaultWeightValue= 1.0
-    
-        table= [[""] * (defaultNAlternatives + 2) ] * defaultNConcerns
-        header= [""] * defaultNAlternatives 
-        concernWeights= [defaultWeightValue] * defaultNConcerns
-    
-        #hidden.append(( defaultNConcerns, 'nConcerns'))
-        #hidden.append(( defaultNAlternatives, 'nAlternatives'))
-        context= RequestContext(request, {'table' : table, 'tableHeader': header, 'weights':concernWeights, 'hiddenFields': hidden, 'changeRatingsWeights':True, 'changeCornAlt':True, 'tableId':randomStringGenerator() })
+        gridTableTemplate= GridTableData(generateGridTable(None))
+        gridTableTemplate.changeRatingsWeights= True
+        gridTableTemplate.changeCornAlt= True
+        gridTableTemplate.tableId= randomStringGenerator()
+             
+        context= None 
+        #RequestContext(request, {'data': gridTableTemplate })
         if tableOnly:
             template= loader.get_template('gridMng/createMyGridBase.html')
+            templateData= CreateMyGridBaseData(gridTableTemplate)
+            context= RequestContext(request, {'data': templateData })
             htmlData= template.render(context)
             return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
         else:
+            templateData= CreateMyGridData(CreateMyGridBaseData(gridTableTemplate))
+            context= RequestContext(request, {'data': templateData })
             return render(request, 'gridMng/createMyGrid.html', context_instance=context)
 
     except:
@@ -130,20 +136,15 @@ def getShowGridPage(request):
         return redirect_to(request, '/auth/login/')
 
     user1= request.user
-    grids= user1.grid_set.all();
+    templateData= ShowGridsData()
+    templateData.grids= user1.grid_set.all();
 
-    if len(grids) <= 0:
-        grids= None
+    if len(templateData.grids) <= 0:
+        templateData.grids= None
 
-    context= RequestContext(request, {'grids' : grids})
+    context= RequestContext(request, {'data' : templateData})
 
     return render(request, 'gridMng/showMyGrids.html', context_instance = context)
-
-def getGridNavigationPage(request):
-    if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
-
-    return render_to_response('gridMng/gridNavigation.html', {}, context_instance=RequestContext(request))
 
 def ajaxGetGrid(request):
     if not request.user.is_authenticated():
@@ -214,12 +215,15 @@ def ajaxGetGrid(request):
         if len(gridObj) > 0:
             gridObj= gridObj[0]
             try:
-                dic= __generateGridTable__(gridObj);
+                templateData= GridTableData(generateGridTable(gridObj))
+                templateData.tableId= randomStringGenerator()
+                templateData.changeRatingsWeights= changeRatingsWeights
+                templateData.changeCornAlt= changeCornAlt
+                templateData.showRatingWhileFalseChangeRatingsWeights= showRatingWhileFalseChangeRatingsWeights
+                templateData.checkForTableIsSave= checkForTableIsSave
+                #dic= __generateGridTable__(gridObj)
                 template= loader.get_template('gridMng/gridTable.html')
-                context= RequestContext(request, {'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'],
-                                                  'changeRatingsWeights':changeRatingsWeights, 'changeCornAlt':changeCornAlt,
-                                                  'showRatingWhileFalseChangeRatingsWeights':showRatingWhileFalseChangeRatingsWeights,
-                                                  'checkForTableIsSave':checkForTableIsSave, 'tableId':randomStringGenerator() })
+                context= RequestContext(request, {'data': templateData})
                 htmlData= template.render(context)
                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                 #return render_to_response('gridMng/gridTable.html', {'table' : table, 'tableHeader': header, 'hiddenFields': hidden, 'weights':concernWeights, 'showRatings':showRatings, 'readOnly':readOnly, 'checkForTableIsSave':checkForTableIsSave }, context_instance=RequestContext(request))
@@ -355,7 +359,7 @@ def ajaxGenerateDendogram(request):
                     return HttpResponse(grid1.dendogram, content_type='application/xml')
                 else:
                     try:     
-                        imgData= __createDendogram__(grid1)
+                        imgData= createDendogram(grid1)
                         return HttpResponse(imgData, content_type='application/xml')
                     except:
                         print "Exception in user code:"
@@ -461,55 +465,6 @@ def ajaxConvertSvgTo(request):
         response['Content-Length'] = fpInMemory.tell() if fpInMemory else None
         response['Content-Disposition'] = 'attachment; filename=error.jpg'
         return response         
-    
-def __generateGridTable__(gridObj):
-    table= []
-    header= []
-    i= 0;
-    j= 0;
-    concerns= gridObj.concerns_set.all()
-    alternatives= gridObj.alternatives_set.all()
-    nConcern= gridObj.concerns_set.all().count()
-    nAlternatives= gridObj.alternatives_set.all().count()
-    concernWeights= []
-    while i < nConcern:
-        row= []
-        if concerns[i].leftPole == None:
-            row.append('')
-        else:
-            row.append(concerns[i].leftPole)
-        while j < nAlternatives:
-            ratio= Ratings.objects.filter(concern= concerns[i], alternative= alternatives[j])
-            if len(ratio) >= 1:
-                ratio= ratio[0]
-                if ratio.rating != None:
-                    row.append(ratio.rating)
-                else:
-                    row.append('')
-            else:
-                row.append('')
-            j+= 1
-        if concerns[i].rightPole == None:
-            row.append('')
-        else:
-            row.append(concerns[i].rightPole)
-        if concerns[i].weight != None:
-            concernWeights.append(concerns[i].weight)
-        else:
-            concernWeights.append('')
-        table.append(row)
-        j= 0
-        i+= 1
-    concernWeights.reverse() #this is needed because the list will be poped during the template execution
-    i=0;
-    while i < nAlternatives:
-        header.append(alternatives[i].name)
-        i+= 1
-    dic= {};
-    dic['table']= table
-    dic['tableHeader']= header
-    dic['weights']= concernWeights
-    return dic
 
 def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
 
@@ -650,85 +605,7 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
     return (nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues)
     
     
-def __createDendogram__(gridObj):
- 
-    #lets create a matrix that the hierarchical module understands
-    matrixFull= [] # this is the compleet matrix, it will be used to create the table in the picture
-    matrixConcern= []
-    matrixAlternatives= [] #matrix that will be transposed
-    concerns= gridObj.concerns_set.all()
-    alternatives= gridObj.alternatives_set.all()
-    maxValueOfAlternative = -1 # this is to save time later on as i need to loop trough all the alternatives right now so i can check for max value
-                        
-    if len(concerns) > 1:
-        for concernObj in concerns:
-            row= []
-            ratio= None
-            weight= concernObj.weight
-            if concernObj.leftPole != None:
-                row.append(str(concernObj.leftPole))
-                if len(alternatives) >= 1:
-                    for alternativeObj in alternatives:
-                        ratio= (Ratings.objects.get(concern= concernObj, alternative= alternativeObj)).rating
-                        if ratio != None:
-                            ratio*= weight
-                            row.append(ratio)
-                            if ratio > maxValueOfAlternative:
-                                maxValueOfAlternative= ratio
-                        else:
-                            raise ValueError('Ratings must be complete in order to generate a dendrogram.')
-                else:
-                    raise ValueError('No alternatives were found.')
-            else:
-                raise ValueError('Concerns must be complete in order to generate a dendrogram.')
-            matrixConcern.append(row)
-            matrixAlternatives.append(row[1:])
-            row= row[0:] #create new obj of row
-            if concernObj.rightPole != None:
-                row.append(str(concernObj.rightPole))
-            else:
-                raise ValueError('Concerns must be complete in order to generate a dendrogram.')
-            matrixFull.append(row)
-    else:
-        raise ValueError('More than one concerns must be present in order to generate a dendrogram.')
-    #lets transpose the matrix so we calculate the dendrogram for the alternatives
-    matrixAlternatives= transpose(matrixAlternatives)
-    i= 0;
-    temp= [[]]
-    while i < len(alternatives):
-        if alternatives[i].name != None:
-            matrixAlternatives[i].insert(0, str(alternatives[i].name))
-            temp.append(str(alternatives[i].name))
-            #print alternatives[i].name
-            i+= 1;
-        else:
-            raise ValueError('Invalid alternative name: ' + alternatives[i].name)
-    temp.append([])
-    matrixFull.insert(0, temp)
-    concenrClusters= hcluster(matrixConcern)
-    alternativeClusters= hcluster(matrixAlternatives)
-    img= drawDendogram3(concenrClusters, alternativeClusters, matrixFull, maxValueOfAlternative)
-    try:
-        if True:
-            imgData= img.toxml()
-            gridObj.dendogram= imgData
-            gridObj.save()
-            return imgData
-        else:
-            fp1= BytesIO()
-            img.save(fp1, format= "PNG")
-            imgData= fp1.getvalue()
-            fp1.close()
-            imgData= base64.b64encode(imgData)
-            gridObj.dendogram= imgData
-            gridObj.save()
-            return imgData
-    except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
-        raise Exception('Unknown error, couldn\'t create the dendogram')
+
 
 #intern function used to update a grid
 def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, isConcernAlternativeResponseGrid):

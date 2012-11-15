@@ -34,7 +34,7 @@ RGT | Grids
 </script>
 <h2>Grid Management</h2>
 <div id="information">
-	{% if grids %}
+	{% if data.grids %}
 		<p>Select and display any of your current grids, or create a new one either <a href="/grids/create/">in place</a> or by using a <a href="/grids/create/wizard/">wizard</a>.</p>
 	{% else %}
 		<p>You do not have any grids yet. Please create one either <a href="/grids/create/">in place</a> or by using a <a href="/grids/create/wizard/">wizard</a>.</p>
@@ -45,9 +45,9 @@ RGT | Grids
 		<tr>
 			<td>
 				<label for="showGridSelection">Select grid:</label><select id="showGridSelection" onchange="showMyGrid(false)">
-					{% if grids %}
+					{% if data.grids %}
 						<option value= "noGrids">&nbsp;</option>
-						{% for grid in grids %}
+						{% for grid in data.grids %}
 							<option value= "{{ grid.usid }}">{{ grid.name }}</option>
 						{% endfor %}
 					{% else %}
