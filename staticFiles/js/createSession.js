@@ -62,9 +62,10 @@ function createSession()
 	showLoadingSpinner(loadingDiv, 'Creating...');
 	try
 	{
-		var gridUSID= $("#gridSessionSelection option:selected").val();
+        var showResults= $('input:radio[name=showResults]:checked').val();
+        var gridUSID= $("#gridSessionSelection option:selected").val();
 		var sessionName= $("#sessionNameInputBox").val();
-		var str= 'gridUSID=' + gridUSID + '&sessionName=' + sessionName;
+        var str= 'gridUSID=' + gridUSID + '&sessionName=' + sessionName + '&showResults=' + showResults;
 		var jqxhr= $.post('/sessions/create/', str, function(data){
 			try
 			{
