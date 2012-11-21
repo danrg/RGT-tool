@@ -164,6 +164,7 @@ class Session(models.Model):
     iteration= models.IntegerField(default= 0)
     name= models.CharField(max_length= 30)
     state= models.ForeignKey(State)
+    showResult= models.CharField(max_length=1)
     invitationKey= models.TextField(null= True)
     description= models.TextField(null= True)
     
