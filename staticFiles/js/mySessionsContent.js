@@ -161,7 +161,10 @@ function finishSession() {
 	showLoadingSpinner($('#wrap'), 'Please wait...');
 	try
 	{
-		var str= 'sessionUSID=' + mySessionsGetSessionUSID() + '&newState=finish'; //mySessionsGetSessionUSID is from mySessions.js
+        var form= $('#sessionGridDiv').find('form');
+        var table= getGridTable($('#sessionGridDiv'));
+        var iteration= $('#iteration').text();
+        var str= 'sessionUSID=' + mySessionsGetSessionUSID() + '&newState=finish' + '&nConcerns=' + getNumberOfConcerns(table) + '&nAlternatives='+ getNumberOfAlternatives(table) + '&gridType=session' + '&iteration=' + iteration + '&' + form.serialize();
 		$.post('/sessions/state/', str, function(data){
 			try
 			{
