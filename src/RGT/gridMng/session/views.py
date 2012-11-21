@@ -1054,6 +1054,7 @@ def ajaxGetResponseResults(request):
             sessionObj= Session.objects.filter(usid= request.POST['sessionUSID'])
             if len(sessionObj) >= 1:
                 sessionObj= sessionObj[0]
+                showResultsYes= 'Y'
                 if sessionObj.showResult == showResultsYes:
                     iterationObj= int(request.POST['iteration'])
                     if sessionObj.iteration >= iterationObj:
