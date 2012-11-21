@@ -76,3 +76,31 @@ if( typeof sendResponse != 'function')
 		<input type="button" id="participatingSessionsContentUndoAllButton" onclick="getResponseFromIteration('current')" value="Undo All" />
 	{% endif %}
 </div>
+<table class="grid" id="resultDetails">
+    <tbody>
+    <tr>
+        <td>Show the results from iteration</td>
+        <td>
+            <select id= "resultSelection" onchange= "sessionsShowResults()"> <!-- Add a question mark icon here with tooltip explaining what this does-->
+                {% if not iterations %}
+                    <option value="null">N/A</option>
+                {% else %}
+                    <option value="null">    </option>
+                    {% for i in iterations %}
+                        {% if i != iteration %}
+                            <option value="{{i}}">{{i}}</option>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </select>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div id="sessionsResultsDiv">
+    <div id="sessionsContentResultDiv">
+    </div>
+    <div id="sessionContentResultsOptions">
+        <input type="button" id="clearResultsButton" onclick="clearResults()" value="Clear Results" style="display: none;" />
+    </div>
+</div>
