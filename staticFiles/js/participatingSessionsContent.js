@@ -118,3 +118,37 @@ function getResponseFromIteration(iteration)
 		hideLoadingSpinner($('#wrap'));
 	}
 }
+
+function sessionsGetSessionUSID()
+{
+    return $("#participatingSessionSelect option:selected").val();
+}
+
+function sessionsShowResults()
+{
+    var selectedOption = $('#resultSelection option:selected');
+    var iteration= selectedOption.val();
+    if (iteration > 0) {
+        var sessionUSID= sessionsGetSessionUSID();
+        var str= 'sessionUSID=' + sessionUSID + '&iteration=' + iteration;
+        //get the result tables
+        $.post('/sessions/responseResults/', str, function(data){
+            if($(data).find('error').length <= 0)
+            {
+                $('#sessionsContentResultDiv').html($(data).find('htmlData').text());
+                $('#clearResultsButton').show();
+            }
+            else
+            {
+                clearResults();
+                showMessageInDialogBox($(data).find('error').text());
+            }
+        });
+    }
+}
+
+function clearResults() {
+    $('#sessionsContentResultDiv').empty();
+    $('#clearResultsButton').hide();
+    clearRatioResultCharts(); //function from resultRatingWeightTables.js
+}
