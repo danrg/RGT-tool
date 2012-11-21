@@ -793,3 +793,96 @@ def createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernVa
             raise
     else:
         raise ValueError('One or more variables were None')
+
+def __saveSessionGridAsUserGrid__(request):
+
+    for key in request.REQUEST.keys():
+        print 'key: ' + key + ' values: ' + request.REQUEST[key]
+    print '------'
+
+    user1= request.user
+    gridObj= None
+    isConcernAlternativeResponseGrid= False
+
+    #lets determine what type of grid we are dealing with here
+    if request.POST.has_key('gridType'):
+        gridType= request.POST['gridType']
+        if gridType == 'session':
+            gridType= Grid.GridType.USER_GRID
+            userObj= request.user
+            gridName= 'None'
+            if request.POST.has_key('sessionUSID') and request.POST.has_key('iteration'):
+                facilitatorObj= Facilitator.objects.isFacilitator(request.user)
+                if facilitatorObj :
+                    session= facilitatorObj.session_set.filter(usid= request.POST['sessionUSID'])
+                    if len(session) >= 1:
+                        session= session[0]
+                        gridName= 'Session_' + session.name
+                        sessionGridRelation= session.sessiongrid_set.filter(iteration= request.POST['iteration'])
+                        if len(sessionGridRelation) >= 1:
+                            gridObj= sessionGridRelation[0].grid
+                        else:
+                            return False
+                    else:
+                        return False
+                else:
+                    return False
+            else:
+                return False
+        elif gridType == 'response':
+            return False
+        elif gridType == 'user':
+            gridObj= Grid.objects.get(user= user1, usid= request.POST['gridUSID'])
+    else:
+        try:
+            gridObj= Grid.objects.get(user= user1, usid= request.POST['gridUSID'])
+        except:
+            pass
+
+    if request.POST.has_key('gridName'):
+        gridCheckNameResult= validateName(request.POST['gridName'])
+        if  type(gridCheckNameResult) == StringType:
+            gridObj.name= gridCheckNameResult
+        else:
+            #if the grid name isn't a string than it is an error
+            return gridCheckNameResult
+            #because django will save stuff to the database even if .save() is not called, we need to validate everything before starting to create the objects that will be used to populate the db
+    obj= None
+    try:
+        obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
+    except KeyError as error:
+        print "Exception in user code:"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60
+        return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+    except ValueError as error:
+        print "Exception in user code:"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60
+        return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+    except:
+        print "Exception in user code:"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60
+        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+    nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj
+
+    #update the grid
+    if gridObj != None:
+        try:
+            isGridCreated= createGrid(userObj ,gridType, gridName, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, True)
+            if isGridCreated:
+                return True
+        except:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+            return False
+    else:
+        return False
+
+
