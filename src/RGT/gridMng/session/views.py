@@ -17,7 +17,7 @@ from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
 from RGT.gridMng.error.wrongState import WrongState
 from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
 from RGT.gridMng.utility import createXmlErrorResponse, createXmlSuccessResponse, randomStringGenerator, createXmlForComboBox, validateName, createXmlForNumberOfResponseSent, createDateTimeTag
-from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid__
+from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid__, __saveSessionGridAsUserGrid__
 from math import sqrt, ceil
 from RGT.gridMng.template.session.createSessionData import CreateSessionData
 from RGT.gridMng.template.session.mySessionsData import MySessionsData
@@ -192,6 +192,7 @@ def ajaxCreateSession(request):
         sessionGrid= None
         facilitator1= None
         newSession= None
+        showResults= 'Y'
         sessionGridName= 'untitled' #default name
         try:
             gridObj= Grid.objects.get(user= user1, usid= gridUSID)
@@ -202,6 +203,14 @@ def ajaxCreateSession(request):
                     sessionGridName= result
                 else:
                     return result
+
+            if request.POST.has_key('showResults'):
+                temp1= request.POST['showResults']
+                result1 = validateName(temp1)
+                if type(result1) == StringType:
+                    showResults= result1
+                else:
+                    return result1
         except:
             hasError= True
             errorMsg= 'grid was not found'
@@ -216,7 +225,7 @@ def ajaxCreateSession(request):
                     #now copy the grid
                 try:
                     state1= State.objects.getInitialState()
-                    newSession= Session.objects.create(usid=randomStringGenerator(20), facilitator= facilitator1, iteration= 0, name= sessionGridName, state= state1, invitationKey= str(uuid.uuid4()))
+                    newSession= Session.objects.create(usid=randomStringGenerator(20), facilitator= facilitator1, iteration= 0, name= sessionGridName, showResult= showResults, state= state1, invitationKey= str(uuid.uuid4()))
                     try:
                         sessionGrid= Grid.objects.duplicateGrid(gridObj, gridType= Grid.GridType.SESSION_GRID)
                         if sessionGrid:
@@ -335,9 +344,17 @@ def ajaxChangeSessionState(request):
             if len(session) >= 1:
                 try:
                     session= session[0]
+                    name= request.POST['newState']
                     stateObj= State.objects.filter(name= request.POST['newState'])
                     if len(stateObj) >= 1:
                         stateObj= stateObj[0]
+                        if name == 'finish':
+                            isSessionGridSavedasUserGrid= False
+                            isSessionGridSavedasUserGrid= __saveSessionGridAsUserGrid__(request)
+                            if isSessionGridSavedasUserGrid:
+                                pass   # session grid saved as user grid
+                            else:
+                                pass   # session grid not saved as user grid
                         session.changeState(stateObj)
                         return ajaxGetMySessionContentPage(request)
                     else:
@@ -1020,6 +1037,254 @@ def ajaxGetResults(request):
                     return HttpResponse(createXmlErrorResponse('Couldn\'t find session'), content_type='application/xml')
             else:
                 return HttpResponse(createXmlErrorResponse('You are not a facilitator for this session'), content_type='application/xml')
+        else:
+            return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'), content_type='application/xml')
+    except:
+        print "Exception in user code:"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60
+        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+
+def ajaxGetResponseResults(request):
+    if not request.user.is_authenticated():
+        return redirect_to(request, '/auth/login/')
+    try:
+        if request.POST.has_key('sessionUSID') and request.POST.has_key('iteration'):
+            sessionObj= Session.objects.filter(usid= request.POST['sessionUSID'])
+            if len(sessionObj) >= 1:
+                sessionObj= sessionObj[0]
+                if sessionObj.showResult == showResultsYes:
+                    iterationObj= int(request.POST['iteration'])
+                    if sessionObj.iteration >= iterationObj:
+                        #let's find all the response grids
+                        responseGridRelation= sessionObj.responsegrid_set.filter(iteration= iterationObj)
+                        if len(responseGridRelation) >= 1:
+                            gridType= responseGridRelation[0].grid.grid_type
+                            if gridType == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
+                                try:
+                                    #check to see if we have a sesssion grid for the iteration
+                                    templateData= ResultAlternativeConcernTableData()
+                                    sessionGrid= SessionGrid.objects.filter(session= sessionObj, iteration= iterationObj)
+                                    if len(sessionGrid) >= 1:
+                                        sessionGrid= sessionGrid[0].grid
+                                        templateData.concerns, templateData.alternatives= __generateAlternativeConcernResultTable__(responseGridRelation, sessionGrid)
+                                    else:
+                                        templateData.concerns, templateData.alternatives= __generateAlternativeConcernResultTable__(responseGridRelation)
+                                    if len(templateData.concerns) >= 1:
+                                        template= loader.get_template('gridMng/resultAlternativeConcernTable.html')
+                                        context= RequestContext(request, {'data': templateData})
+                                        htmlData= template.render(context)
+                                        return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
+                                    else:
+                                        return HttpResponse(createXmlErrorResponse('No results found. This means that the participants did not provide any responses for this particular iteration.'), content_type='application/xml')
+                                except:
+                                    print "Exception in user code:"
+                                    print '-'*60
+                                    traceback.print_exc(file=sys.stdout)
+                                    print '-'*60
+                                    return HttpResponse(createXmlErrorResponse('Unknown Error'), content_type='application/xml')
+                            elif gridType == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:
+                                #create a list with a matrix of ratios in each position of the list.
+                                ratioMatrices= []
+                                weightMatrices= []
+                                tempMatrix= []
+                                tempRatioRow= None
+                                tempWeightRow= None
+
+                                #first lets add the rations that are in the session grid to the list
+                                #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
+                                concerns= sessionObj.sessiongrid_set.filter(iteration= iterationObj)[0].grid.concerns_set.all()
+                                alternatives= sessionObj.sessiongrid_set.filter(iteration= iterationObj)[0].grid.alternatives_set.all()
+                                nConcerns= len(concerns)
+                                nAlternatives= len(alternatives)
+                                nResponseGrids= len(responseGridRelation)
+
+                                i= 0
+                                j= 0
+                                tempWeightRow= []
+                                while i < nConcerns:
+                                    tempRatioRow= []
+                                    tempWeightRow.append(concerns[i].weight)
+                                    while j < nAlternatives:
+                                        tempRatioRow.append(Ratings.objects.get(concern= concerns[i], alternative= alternatives[j]).rating)
+                                        j+= 1
+                                    tempMatrix.append(tempRatioRow)
+                                    j= 0
+                                    i+= 1
+                                i= 0
+                                ratioMatrices.append(tempMatrix)
+                                weightMatrices.append([tempWeightRow])
+                                tempMatrix= []
+                                tempWeightRow= []
+                                #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
+
+                                #now lets do the same for the response grids
+                                #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
+                                i= 0
+                                j= 0
+                                k= 0
+                                tempWeightRow= []
+
+                                while i < nResponseGrids:
+                                    respGrid= responseGridRelation[i].grid
+                                    concerns= respGrid.concerns_set.all()
+                                    alternatives= respGrid.alternatives_set.all()
+                                    nConcerns= len(concerns)
+                                    nAlternatives= len(alternatives)
+                                    while j < nConcerns:
+                                        tempRatioRow= []
+                                        tempWeightRow.append(concerns[j].weight)
+                                        while k < nAlternatives:
+                                            tempRatioRow.append(Ratings.objects.get(concern= concerns[j], alternative= alternatives[k]).rating)
+                                            k+= 1
+                                        k= 0
+                                        j+= 1
+                                        tempMatrix.append(tempRatioRow)
+                                    j= 0
+                                    i+= 1
+                                    weightMatrices.append([tempWeightRow])
+                                    ratioMatrices.append(tempMatrix)
+                                    tempMatrix= []
+                                    tempWeightRow= []
+                                i= 0
+                                #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
+
+                                #calculate the rage, mean and std for the weight and ratio
+                                #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
+                                meanRatioMatrix= __calcutateMeans__(ratioMatrices)
+                                rangeRatioMatrix= __calculateRange__(ratioMatrices)
+                                stdRatioMatrix= __calculateStandardDeviation__(ratioMatrices, meanRatioMatrix)
+                                meanWeightMatrix= __calcutateMeans__(weightMatrices)
+                                rangeWeightMatrix= __calculateRange__(weightMatrices)
+                                stdWeightMatrix= __calculateStandardDeviation__(weightMatrices, meanWeightMatrix)
+                                #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
+
+                                #first lets create the header
+                                #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
+                                header= []
+                                for alternative in sessionObj.sessiongrid_set.filter(iteration= iterationObj)[0].grid.alternatives_set.all():
+                                    header.append(alternative.name)
+                                    #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
+
+                                #generate color map
+                                #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
+                                #minMaxRangeRatio= __findMinMaxInMatrix__(rangeRatioMatrix)
+                                minMaxRangeWeight= __findMinMaxInMatrix__(stdRatioMatrix)
+
+                                #minMaxStdRatio= __findMinMaxInMatrix__(rangeWeightMatrix)
+                                minMaxStdWeight= __findMinMaxInMatrix__(stdWeightMatrix)
+
+                                rangeRatioColorMap= __createRangeTableColorMap__(4, 0, rangeRatioMatrix) # for as the max range is 1-5= 4 (as right now the user can only use the numbers between 1 and 5)
+                                rangeWeightColorMap= __createRangeTableColorMap__(minMaxRangeWeight[1], 0, rangeWeightMatrix[0])
+                                stdRatioColorMap= __createStdTableColorMap__(4, 0, stdRatioMatrix)
+                                stdWeightColorMap= __createStdTableColorMap__(minMaxStdWeight[1], 0, stdWeightMatrix[0])
+                                #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
+
+
+                                #generate the js for the chart in the page
+                                #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
+                                participantNames= []
+                                #retrieve all the names
+                                while i < len(responseGridRelation):
+                                    #the initial db didn't link a response grid to a user direcly, this has changed now, but the code needs to take care of this difference. (4/7/2012)
+                                    if responseGridRelation[i].grid.user != None:
+                                        participantNames.append(responseGridRelation[i].grid.user.first_name)
+                                    else:
+                                        participantNames.append(responseGridRelation[i].user.first_name)
+                                    i+= 1
+                                i= 0
+                                ratioJsChartData, weightJsChartData= __createJSforRatioWeightSessionResultsChart__(ratioMatrices, weightMatrices, participantNames)
+
+                                #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
+
+                                #clue everything together now and return the page
+                                tableRatingRangeColor= [] #final table with the value to be displayed, the background color and js code
+                                tableRatingStdColor= [] #final table with the value to be displayed, the background color and js code
+                                tableRatingMean= [] #final table with the value to be displayed and js code
+                                tableWeightMean= [] #final table with the weights and js code
+                                tableWeightStd= [] #final table with the weights and js code
+                                tableWeightRange= [] #final table with the weights and js code
+                                i= 0
+
+                                #reverse the weight color maps, this is done because we use pop in the template!!!
+                                rangeWeightColorMap.reverse()
+                                stdWeightColorMap.reverse()
+
+                                while i < nConcerns:
+                                    rowRange= []
+                                    rowStd= []
+                                    rowMean= []
+                                    tableWeightMean.append((meanWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[i]))#meanWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                                    tableWeightStd.append((stdWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[i]))#stdWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                                    tableWeightRange.append((rangeWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[i]))#rangeWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                                    #create a tulip with the value that should be displayed in the td and the color of the background for each cell in the row
+                                    while k < nAlternatives:
+                                        rowRange.append((rangeRatioMatrix[i][k], rangeRatioColorMap[i][k], ratioJsChartData[i][k]))
+                                        rowStd.append((stdRatioMatrix[i][k], stdRatioColorMap[i][k], ratioJsChartData[i][k]))
+                                        rowMean.append((meanRatioMatrix[i][k], ratioJsChartData[i][k]))
+                                        k+= 1
+                                    k= 0
+                                    #add the concerns to the range, mean and std tables
+                                    rightPole= concerns[i].rightPole
+                                    leftPole= concerns[i].leftPole
+                                    rowStd.insert(0, (leftPole, None))
+                                    rowStd.append((rightPole, None))
+                                    rowMean.insert(0, (leftPole, None))
+                                    rowMean.append((rightPole, None))
+                                    rowRange.insert(0, (leftPole, None))
+                                    rowRange.append((rightPole, None))
+                                    tableRatingRangeColor.append(rowRange)
+                                    tableRatingStdColor.append(rowStd)
+                                    tableRatingMean.append(rowMean)
+                                    rightPole= None
+                                    leftPole= None
+                                    i+= 1
+                                i= 0
+
+                                #put all the data into objects for the template
+                                rangeData= ResultRatingWeightTableData()
+                                meanData= ResultRatingWeightTableData()
+                                stdData= ResultRatingWeightTableData()
+
+                                rangeData.table= tableRatingRangeColor
+                                rangeData.headers= header
+                                rangeData.weights= tableWeightRange
+                                rangeData.weightColorMap= rangeWeightColorMap
+                                rangeData.tableHead= 'Range'
+                                rangeData.useColorMap= True
+
+                                meanData.table= tableRatingMean
+                                meanData.headers= header
+                                meanData.weights= tableWeightMean
+                                meanData.tableHead= 'Mean'
+
+                                stdData.table= tableRatingStdColor
+                                stdData.headers= header
+                                stdData.weights= tableWeightStd
+                                stdData.weightColorMap= stdWeightColorMap
+                                stdData.tableHead= 'Standard Deviation'
+                                stdData.useColorMap= True
+
+                                templateData= ResultRatingWeightTablesData()
+                                templateData.rangeData= rangeData
+                                templateData.meanData= meanData
+                                templateData.stdData= stdData
+
+                                template= loader.get_template('gridMng/resultRatingWeightTables.html')
+                                context= RequestContext(request, {'data': templateData})
+                                htmlData= template.render(context)
+                                return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
+                            else:
+                                return HttpResponse(createXmlErrorResponse('Unexpected type grid found'), content_type='application/xml')
+                        else:
+                            return HttpResponse(createXmlErrorResponse('No results found. This means that the participants of this session did not provide any responses for this particular iteration.'), content_type='application/xml')
+                    else:
+                        return HttpResponse(createXmlErrorResponse('Session does not contain that iteration'), content_type='application/xml')
+                else:
+                    return HttpResponse(createXmlErrorResponse('Results are not available for the Participants'), content_type='application/xml')
+            else:
+                return HttpResponse(createXmlErrorResponse('Couldn\'t find session'), content_type='application/xml')
         else:
             return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'), content_type='application/xml')
     except:
