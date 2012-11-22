@@ -82,12 +82,12 @@ if( typeof sendResponse != 'function')
         <td>Show the results from iteration</td>
         <td>
             <select id= "resultSelection" onchange= "sessionsShowResults()"> <!-- Add a question mark icon here with tooltip explaining what this does-->
-                {% if not iterations %}
+                {% if not data.iterations %}
                     <option value="null">N/A</option>
                 {% else %}
                     <option value="null">    </option>
-                    {% for i in iterations %}
-                        {% if i != iteration %}
+                    {% for i in data.iterations %}
+                        {% if i != data.iteration %}
                             <option value="{{i}}">{{i}}</option>
                         {% endif %}
                     {% endfor %}
