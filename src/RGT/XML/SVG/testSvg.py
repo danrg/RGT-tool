@@ -13,7 +13,8 @@ if __name__ == '__main__':
            stroke: #006600;
            fill:   #00cc00;
         }""")
-    lineNode.setXmlSpace('default')
+    lineNode.setOnMouseOut('llaa')
+    lineNode.setSystemLanguage('en')
     root.appendChild(cssNode)
     root.appendChild(lineNode)
     print doc.toxml()
