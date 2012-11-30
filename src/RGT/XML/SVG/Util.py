@@ -5,6 +5,7 @@ from xml.dom.minidom import getDOMImplementation, Element, Document, DOMImplemen
 import xml.dom
 from RGT.XML.SVG.graphicNode import GraphicNode
 from RGT.XML.SVG.scriptNode import ScriptNode
+from RGT.XML.SVG.svgNode import SvgNode
 
 def createSvgRoot(width= None, height= None):
     impl= getDOMImplementation()
@@ -47,39 +48,14 @@ def createSvgLine(xmlDoc, x1= None, y1= None, x2= None, y2= None, color= None, s
 class SvgDOMImplementation(DOMImplementation):
 
     def createSvgDocument(self):
-        namespaceURI= None
+        #namespaceURI= None
         doctype= None
-        qualifiedName= 'svg'
+        #qualifiedName= 'svg'
         
         doc = SvgDocument()
 
-        add_root_element = True
-
-        if not qualifiedName and add_root_element:
-            # The spec is unclear what to raise here; SyntaxErr
-            # would be the other obvious candidate. Since Xerces raises
-            # InvalidCharacterErr, and since SyntaxErr is not listed
-            # for createDocument, that seems to be the better choice.
-            # XXX: need to check for illegal characters here and in
-            # createElement.
-
-            # DOM Level III clears this up when talking about the return value
-            # of this function.  If namespaceURI, qName and DocType are
-            # Null the document is returned without a document element
-            # Otherwise if doctype or namespaceURI are not None
-            # Then we go back to the above problem
-            raise xml.dom.InvalidCharacterErr("Element with no name")
-
-        if add_root_element:
-            prefix, localname = _nssplit(qualifiedName)
-            if prefix == "xml" \
-               and namespaceURI != "http://www.w3.org/XML/1998/namespace":
-                raise xml.dom.NamespaceErr("illegal use of 'xml' prefix")
-            if prefix and not namespaceURI:
-                raise xml.dom.NamespaceErr(
-                    "illegal use of prefix without namespaces")
-            element = doc.createElementNS(namespaceURI, qualifiedName)
-            doc.appendChild(element)
+        element = doc.createSvgNode()
+        doc.appendChild(element)
 
 
         doc.doctype = doctype
@@ -114,6 +90,9 @@ class SvgDocument (Document):
     def createJavaScriptNode(self, jsData):
         jsNode= JavaScriptNode(self, jsData)
         return jsNode
+    
+    def createSvgNode(self):
+        return SvgNode(self)
     
     #copy from minidom, removed the part that writes the <?xml version="1.0" ?> and the encoding
     def writexml(self, writer, indent="", addindent="", newl="",

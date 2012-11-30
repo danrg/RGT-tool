@@ -7,6 +7,9 @@ if __name__ == '__main__':
 #    lineNode= doc.createElement('line')
 #    root.appendChild(lineNode)
     root= doc.documentElement
+    root.setX('10px')
+    root.setOnError('lalal')
+    root.setFill('red')
     lineNode= doc.createLineNode(5, 10)
     lineNode.setStyle('stroke: #000000; fill:#00ff00;')
     cssNode= doc.createJavaScriptNode("""circle {
