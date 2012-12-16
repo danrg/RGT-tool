@@ -11,7 +11,6 @@ from RGT.gridMng.models import Alternatives
 from RGT.gridMng.models import Concerns
 from RGT.gridMng.models import Ratings
 from RGT.gridMng.models import Facilitator
-from RGT.gridMng.models import Session
 from RGT.gridMng.utility import createXmlErrorResponse, createXmlSuccessResponse, randomStringGenerator, validateName, convertSvgTo, getImageError,\
     createDateTimeTag
 
@@ -20,8 +19,11 @@ from RGT.gridMng.template.showGridsData import ShowGridsData
 from RGT.gridMng.template.gridTableData import GridTableData
 from RGT.gridMng.template.createMyGridBaseData import CreateMyGridBaseData
 from RGT.gridMng.template.createMyGridData import CreateMyGridData
+from django.db import IntegrityError
+from RGT.gridMng.error.unablaToCreateUSID import UnablaToCreateUSID
 
 from RGT.gridMng.utility import generateGridTable, createDendogram
+from RGT.settings import GRID_USID_KEY_LENGTH
 
 import sys, os
 import traceback
@@ -757,10 +759,34 @@ def createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernVa
             gridObj= Grid.objects.create(user= userObj, grid_type= gridType)
             if gridName != None:
                 gridObj.name= gridName
-            gridObj.usid = randomStringGenerator(20)
+            gridObj.usid = randomStringGenerator(GRID_USID_KEY_LENGTH)
             gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
             #gridObj.dateTime = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-            gridObj.save()
+            try:
+                gridObj.save()
+            except IntegrityError as error:
+                # check to see if the usid is duplicated or not
+                results= Grid.objects.filter(usid= gridObj.usid)
+                if len(results) >= 1:
+                    #in this case the key was duplicated, so lets try to create a new key
+                    maxAttempts= 5
+                    wasGridSaved= False
+                    while maxAttempts >= 0:
+                        maxAttempts-= 1
+                        key= randomStringGenerator(GRID_USID_KEY_LENGTH)
+                        #check to see if this key is unique
+                        results= Grid.objects.filter(usid= key)
+                        if len(results) <= 0:
+                            gridObj.usid= key
+                            gridObj.save()
+                            wasGridSaved= True
+                            break
+                    if wasGridSaved == False:
+                        #in case we can not create a unique key, raise an error
+                        raise UnablaToCreateUSID('Unable to create unique suid for the grid ' + gridName)
+                    else:
+                        #the integratyError was not caused by a duplicated suid so, raise it again
+                        raise error
             #gridObj= Grid.objects.create(user= userObj, name= gridName)
             #print 'nAlternatives: ' + str(nAlternatives)
             

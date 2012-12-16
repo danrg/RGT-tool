@@ -180,3 +180,7 @@ AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend', 'RGT.aut
 AUTH_PROFILE_MODULE = 'userProfile.UserProfile'
 
 from ownsettings import *
+
+######## RGT specific variables ########
+GRID_USID_KEY_LENGTH= 20
+SESSION_USID_KEY_LENGTH= 20
