@@ -6,6 +6,7 @@ import xml.dom
 from RGT.XML.SVG.graphicNode import GraphicNode
 from RGT.XML.SVG.scriptNode import ScriptNode
 from RGT.XML.SVG.svgNode import SvgNode
+from RGT.XML.SVG.descNode import DescNode
 
 def createSvgRoot(width= None, height= None):
     impl= getDOMImplementation()
@@ -93,6 +94,9 @@ class SvgDocument (Document):
     
     def createSvgNode(self):
         return SvgNode(self)
+    
+    def createDescNode(self):
+        return DescNode(self)
     
     #copy from minidom, removed the part that writes the <?xml version="1.0" ?> and the encoding
     def writexml(self, writer, indent="", addindent="", newl="",
