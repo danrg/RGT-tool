@@ -6,8 +6,6 @@ from RGT.XML.SVG.Attribs.sizeAttributes import SizeAttributes
 class MaskNode(ContainerNode, PositionAttributes, SizeAttributes, ConditionalProcessingAttributes):
 
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
-    ATTRIBUTE_WIDTH= 'width'
-    ATTRIBUTE_HEIGHT= 'height'
     ATTRIBUTE_MASK_UNITS= 'maskUnits'
     ATTRIBUTE_MASK_CONTENT_UNITS= 'maskContentUnits'
 

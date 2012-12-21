@@ -4,7 +4,7 @@ from types import StringType
 class SizeAttributes(BasicSvgAttribute):
 
     ATTRIBUTE_WIDTH= 'width'
-    ATTRIBUTE_HEIGH= 'height'
+    ATTRIBUTE_HEIGHT= 'height'
 
     def __init__(self):
         BasicSvgAttribute.__init__(self)
@@ -20,7 +20,7 @@ class SizeAttributes(BasicSvgAttribute):
         if data != None:
             if type(data) is not StringType:
                 data= str(data)
-            self._setNodeAttribute(self.ATTRIBUTE_HEIGH, data)
+            self._setNodeAttribute(self.ATTRIBUTE_HEIGHT, data)
 
     def getWidth(self):
         node= self._getNodeAttribute(self.ATTRIBUTE_WIDTH)
@@ -29,7 +29,7 @@ class SizeAttributes(BasicSvgAttribute):
         return None
     
     def getHeight(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_HEIGH)
+        node= self._getNodeAttribute(self.ATTRIBUTE_HEIGHT)
         if node != None:
             return node.nodeValue
         return None
