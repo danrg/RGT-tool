@@ -4,10 +4,13 @@ from RGT.XML.SVG.Attribs.documentEventAttributes import DocumentEventAttributes
 from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from RGT.XML.SVG.Attribs.sizeAttributes import SizeAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 
 class SvgNode(StructuralNode, PositionAttributes, SizeAttributes, ConditionalProcessingAttributes, DocumentEventAttributes):
 
+    svgNodeType= BasicSvgNode.SVG_SVG_NODE
+    
     ATTRIBUTE_VIEWBOX= 'viewBox'
     ATTRIBUTE_PRESERVEASPECTRATIO= 'preserveAspectRatio'
     ATTRIBUTE_ZOOMANDPAN= 'zoomAndPan'

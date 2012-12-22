@@ -1,15 +1,15 @@
-from RGT.XML.SVG.baseTextNode import BaseTextNode
+from RGT.XML.SVG.baseEditableTextNode import BaseEditableTextNode
 from RGT.XML.SVG.Attribs.xlinkAttributes import XlinkAttributes
 from types import StringType
 
-class TextPathNode(BaseTextNode, XlinkAttributes):
+class TextPathNode(BaseEditableTextNode, XlinkAttributes):
 
     ATTRIBUTE_START_OFFSET= 'startOffset'
     ATTRIBUTE_METHOD= 'method'
     ATTRIBUTE_SPACING= 'spacing'
 
     def __init__(self, ownerDoc):
-        BaseTextNode.__init__(self, ownerDoc, 'textPath')
+        BaseEditableTextNode.__init__(self, ownerDoc, 'textPath')
         XlinkAttributes.__init__(self)
     
     def setStartOffset(self, data):

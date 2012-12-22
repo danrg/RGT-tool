@@ -3,15 +3,19 @@ from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from RGT.XML.SVG.Attribs.sizeAttributes import SizeAttributes
 from types import StringType
 
-class MyClass(BaseShapeNode, PositionAttributes, SizeAttributes):
+class RectNode(BaseShapeNode, PositionAttributes, SizeAttributes):
 
     ATTRIBUTE_RX= 'rx'
     ATTRIBUTE_RY= 'ry'
     
-    def __init__(self, ownerDoc):
+    def __init__(self, ownerDoc, x= None, y= None, height= None, width= None):
         BaseShapeNode.__init__(self, ownerDoc, 'rect')
         PositionAttributes.__init__(self)
         SizeAttributes.__init__(self)
+        self.setX(x)
+        self.setY(y)
+        self.setHeight(height)
+        self.setWidth(width)
     
     def setRx(self, data):
         if data != None:

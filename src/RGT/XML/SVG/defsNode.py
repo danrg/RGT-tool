@@ -4,6 +4,7 @@ from types import StringType
 
 class DefsNode(StructuralNode, ConditionalProcessingAttributes):
     
+    
     ATTRIBUTE_TRANSFORM= 'transform'
     
     

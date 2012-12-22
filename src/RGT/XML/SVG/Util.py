@@ -1,49 +1,11 @@
 '''
 This file contains all the needed functions to create the svg xml nodes
 '''
-from xml.dom.minidom import getDOMImplementation, Element, Document, DOMImplementation, Node
-import xml.dom
+from xml.dom.minidom import Document, DOMImplementation
 from RGT.XML.SVG.graphicNode import GraphicNode
 from RGT.XML.SVG.scriptNode import ScriptNode
 from RGT.XML.SVG.svgNode import SvgNode
 from RGT.XML.SVG.descNode import DescNode
-
-def createSvgRoot(width= None, height= None):
-    impl= getDOMImplementation()
-    xmlDoc= impl.createDocument(None, "svg", None)
-    changeSvgRootAttribute(xmlDoc, width, height)
-    root= xmlDoc.documentElement
-    versionNode= xmlDoc.createAttribute('version')
-    versionNode.nodeValue= '1.1'
-    root.setAttributeNode(versionNode)
-    return xmlDoc
-        
-#if the attribute hasn't been set yeat it will be created
-def changeSvgRootAttribute(xmlDoc, width= None, height= None):
-    if xmlDoc != None:
-        if width != None and width >= 0:
-            root= xmlDoc.documentElement
-            widthNode= root.getAttributeNode('width')
-            if widthNode == None:
-                widthNode= xmlDoc.createAttribute('width')
-                widthNode.nodeValue= str(width) + 'px'
-                root.setAttributeNode(widthNode)
-            else:
-                widthNode.nodeValue= str(width) + 'px'
-        if height != None and height >= 0:
-            root= xmlDoc.documentElement
-            heightNode= root.getAttributeNode('height')
-            if heightNode == None:
-                heightNode= xmlDoc.createAttribute('height')
-                heightNode.nodeValue= str(height) + 'px'
-                root.setAttributeNode(heightNode)
-            else:
-                heightNode.nodeValue= str(height) + 'px'
-
-def createSvgLine(xmlDoc, x1= None, y1= None, x2= None, y2= None, color= None, stroke_width= None):
-    if xmlDoc != None:
-        lineNode= xmlDoc.createElement('line')
-
 
 #class copied from minidom
 class SvgDOMImplementation(DOMImplementation):

@@ -1,48 +1,43 @@
-from RGT.XML.SVG.basicSvgNode import BasicSvgNode
-from xml.dom.minidom import Node
+from RGT.XML.SVG.baseScriptNode import BaseScriptNode
+from RGT.XML.SVG.Attribs.xlinkAttributes import XlinkAttributes
+from types import StringType
 
-class ScriptNode(BasicSvgNode):
+class ScriptNode(BaseScriptNode, XlinkAttributes):
     
-    def __init__(self, ownerDoc, tagName):
-        BasicSvgNode.__init__(self, ownerDoc, tagName)
+    ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
+    ATTRIBUTE_TYPE= 'type'
 
-    def setData(self, data):
+    def __init__(self, ownerDoc):
+        BaseScriptNode.__init__(self, ownerDoc, 'script')
+        XlinkAttributes.__init__(self)
     
-        foundCDataNode= False
+    def setExternalResourcesRequired(self, data):
+        allowedValues= ['true', 'false']
         
-        #check to see if we have a child node (text node) 
-        if len(self.childNodes) >= 1:
-            for child in self.childNodes:
-                #search for the first cdata node and interpret it as being the node that contains the data
-                if child.nodeType == Node.CDATA_SECTION_NODE:
-                    child.data= data
-                    foundCDataNode= True
-                    break
-                
-            if foundCDataNode == False:
-                textNode= self.ownerDocument.createCDATASection(data)
-                self.appendChild(textNode) 
-        else:
-            textNode= self.ownerDocument.createCDATASection(data)
-            self.appendChild(textNode)
+        if data != None:
+            if data not in allowedValues:
+                values= ''
+                for value in allowedValues:
+                    values+= value + ', '
+                values= values[0: len(values)-2]
+                raise ValueError('Value not allowed, only ' + values + 'are allowed')
+            else:
+                self._setNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED, data)
     
-    def getData(self):
-        
-        if len(self.childNodes) >= 1:
-            for child in self.childNodes:
-                #search for the first text node and interpret it as being the node that contains the css data
-                if child.nodeType == Node.CDATA_SECTION_NODE:
-                    return child.data
-        
+    def setType(self, data):
+        if data != None:
+            if type(data) is not StringType:
+                data= str(data)
+            self._setNodeAttribute(self.ATTRIBUTE_TYPE, data)
+            
+    def getExternalResourcesRequired(self):
+        node= self._getNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED)
+        if node != None:
+            return node.nodeValue
         return None
     
-    def appendChild(self, node):
-        
-        if node.nodeType == Node.CDATA_SECTION_NODE:
-            if len(self.childNodes) == 0:
-                BasicSvgNode.appendChild(self, node)
-            else:
-                raise Exception('only one CDATA node can be present, use the getData and setData to change the data')
-        else:
-            raise Exception('only CDATA nodes can be added')
-        
+    def getType(self):
+        node= self._getNodeAttribute(self.ATTRIBUTE_TYPE)
+        if node != None:
+            return node.nodeValue
+        return None  

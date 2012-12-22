@@ -6,7 +6,7 @@ from RGT.XML.SVG.Attribs.classAttribute import ClassAttribute
 from RGT.XML.SVG.Attribs.styleAttribute import StyleAttribute
 from types import StringType
 
-class ImageNode(BasicSvgNode, ConditionalProcessingAttributes, GraphicalEventAttributes, PresentationAttributes, StyleAttribute, ClassAttribute):
+class PathNode(BasicSvgNode, ConditionalProcessingAttributes, GraphicalEventAttributes, PresentationAttributes, StyleAttribute, ClassAttribute):
     
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_TRANSFORM= 'transform'

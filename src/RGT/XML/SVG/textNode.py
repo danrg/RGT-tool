@@ -1,8 +1,8 @@
-from RGT.XML.SVG.baseTextNode import BaseTextNode
+from RGT.XML.SVG.baseEditableTextNode import BaseEditableTextNode
 from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from types import StringType
 
-class TextNode(BaseTextNode, PositionAttributes):
+class TextNode(BaseEditableTextNode, PositionAttributes):
     
     ATTRIBUTE_TRANSFORM= 'transform'
     ATTRIBUTE_LENGTH_ADJUST= 'lengthAdjust'
@@ -11,9 +11,12 @@ class TextNode(BaseTextNode, PositionAttributes):
     ATTRIBUTE_ROTATE= 'rotate'
     ATTRIBUTE_TEXT_LENGTH= 'textLength'
     
-    def __init__(self, ownerDoc):
-        BaseTextNode.__init__(self, ownerDoc, 'text')
+    def __init__(self, ownerDoc, x= None, y= None, text= None):
+        BaseEditableTextNode.__init__(self, ownerDoc, 'text')
         PositionAttributes.__init__(self)
+        self.setX(x)
+        self.setY(y)
+        self.setText(text)
     
     def setTransform(self, data):
         if data != None:

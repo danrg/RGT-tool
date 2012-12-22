@@ -7,8 +7,11 @@ class CircleNode(BaseShapeNode):
     ATTRIBUTE_CY= 'cy'
     ATTRIBUTE_R= 'r'
 
-    def __init__(self, ownerDoc):
+    def __init__(self, ownerDoc, cx= None, cy= None, r= None):
         BaseShapeNode.__init__(self, ownerDoc, 'circle')
+        self.setCx(cx)
+        self.setCy(cy)
+        self.setR(r)
         
     def setCx(self, data):
         if data != None:

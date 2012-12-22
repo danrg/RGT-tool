@@ -8,8 +8,10 @@ class EllipseNode(BaseShapeNode):
     ATTRIBUTE_RX= 'rx'
     ATTRIBUTE_RY= 'ry'
     
-    def __init__(self, ownerDoc):
+    def __init__(self, ownerDoc, rx= None, ry= None):
         BaseShapeNode.__init__(self, ownerDoc, 'ellipse')
+        self.setRx(rx)
+        self.setRy(ry)
     
     def setCx(self, data):
         if data != None:

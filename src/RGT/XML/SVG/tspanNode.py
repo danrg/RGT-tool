@@ -1,8 +1,8 @@
-from RGT.XML.SVG.baseTextNode import BaseTextNode
+from RGT.XML.SVG.baseEditableTextNode import BaseEditableTextNode
 from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from types import StringType
 
-class TspanNode(BaseTextNode, PositionAttributes):
+class TspanNode(BaseEditableTextNode, PositionAttributes):
 
     ATTRIBUTE_LENGTH_ADJUST= 'lengthAdjust'
     ATTRIBUTE_DX= 'dx'
@@ -10,9 +10,11 @@ class TspanNode(BaseTextNode, PositionAttributes):
     ATTRIBUTE_ROTATE= 'rotate'
     ATTRIBUTE_TEXT_LENGTH= 'textLength'
 
-    def __init__(self, ownerDoc):
-        BaseTextNode.__init__(self, ownerDoc, 'tspan')
+    def __init__(self, ownerDoc, x= None, y= None):
+        BaseEditableTextNode.__init__(self, ownerDoc, 'tspan')
         PositionAttributes.__init__(self)
+        self.setX(x)
+        self.setY(y)
         
     def setLengthAdjust(self, data):
         allowedValues= ['spacing', 'spacingAndGlyphs']

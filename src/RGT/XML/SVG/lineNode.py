@@ -1,15 +1,19 @@
 from RGT.XML.SVG.baseShapeNode import BaseShapeNode
 from types import StringType
 
-class MyClass(BaseShapeNode):
+class LineNode(BaseShapeNode):
 
     ATTRIBUTE_X1= 'x1'
     ATTRIBUTE_Y1= 'y1'
     ATTRIBUTE_X2= 'x2'
     ATTRIBUTE_Y2= 'y2'
 
-    def __init__(self, ownerDoc):
+    def __init__(self, ownerDoc, x1= None, y1= None, x2= None, y2= None):
         BaseShapeNode.__init__(self, ownerDoc, 'line')
+        self.setX1(x1)
+        self.setY1(y1)
+        self.setX2(x2)
+        self.setY2(y2)
     
     def setX1(self, data):
         if data != None:

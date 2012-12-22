@@ -1,8 +1,11 @@
 from RGT.XML.SVG.structuralNode import StructuralNode
 from RGT.XML.SVG.Attribs.conditionalProcessingAttributes import ConditionalProcessingAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
-class SvgGNode(StructuralNode, ConditionalProcessingAttributes):
+class GNode(StructuralNode, ConditionalProcessingAttributes):
+    
+    svgNodeType= BasicSvgNode.SVG_G_NODE
     
     ATTRIBUTE_TRANSFORM= 'transform'
     
