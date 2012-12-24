@@ -6,6 +6,8 @@ from types import StringType
 
 class FontNode(BasicSvgNode):
     
+    svgNodeType= BasicSvgNode.SVG_FONT_NODE
+    
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_HORIZ_ORIGIN_X= 'horiz-origin-x'
     ATTRIBUTE_HORIZ_ORIGIN_Y= 'horiz-origin-y'

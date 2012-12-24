@@ -1,15 +1,18 @@
-from RGT.XML.SVG.containerNode import ContainerNode
+from RGT.XML.SVG.baseContainerNode import BaseContainerNode
 from RGT.XML.SVG.Attribs.conditionalProcessingAttributes import ConditionalProcessingAttributes
 from RGT.XML.SVG.Attribs.graphicalEventAttributes import GraphicalEventAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
-class SwitchNode(ContainerNode, ConditionalProcessingAttributes, GraphicalEventAttributes):
+class SwitchNode(BaseContainerNode, ConditionalProcessingAttributes, GraphicalEventAttributes):
 
+    svgNodeType= BasicSvgNode.SVG_SWITCH_NODE
+    
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_TRANSFORM= 'transform'
 
     def __init__(self, ownerDoc):
-        ContainerNode.__init__(self, ownerDoc, 'switch')
+        BaseContainerNode.__init__(self, ownerDoc, 'switch')
         ConditionalProcessingAttributes.__init__(self)
         GraphicalEventAttributes.__init__(self)
         

@@ -1,11 +1,14 @@
-from RGT.XML.SVG.containerNode import ContainerNode
+from RGT.XML.SVG.baseContainerNode import BaseContainerNode
 from RGT.XML.SVG.Attribs.conditionalProcessingAttributes import ConditionalProcessingAttributes
 from RGT.XML.SVG.Attribs.xlinkAttributes import XlinkAttributes
 from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from RGT.XML.SVG.Attribs.sizeAttributes import SizeAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
-class MyClass(ContainerNode, PositionAttributes, SizeAttributes, ConditionalProcessingAttributes, XlinkAttributes):
+class PatternNode(BaseContainerNode, PositionAttributes, SizeAttributes, ConditionalProcessingAttributes, XlinkAttributes):
+
+    svgNodeType= BasicSvgNode.SVG_PATTERN_NODE
 
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_VIEW_BOX= 'viewBox'
@@ -17,7 +20,7 @@ class MyClass(ContainerNode, PositionAttributes, SizeAttributes, ConditionalProc
     ATTRIBUTE_PATTERN_TRANSFORM= 'patternTransform'
 
     def __init__(self, ownerDoc):
-        ContainerNode.__init__(self, ownerDoc, 'pattern')
+        BaseContainerNode.__init__(self, ownerDoc, 'pattern')
         PositionAttributes.__init__(self)
         SizeAttributes.__init__(self)
         ConditionalProcessingAttributes.__init__(self)

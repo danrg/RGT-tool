@@ -1,8 +1,11 @@
 from RGT.XML.SVG.baseScriptNode import BaseScriptNode
 from RGT.XML.SVG.Attribs.xlinkAttributes import XlinkAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class ScriptNode(BaseScriptNode, XlinkAttributes):
+    
+    svgNodeType= BasicSvgNode.SVG_SCRIPT_NODE
     
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_TYPE= 'type'

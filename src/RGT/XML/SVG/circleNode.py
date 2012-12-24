@@ -1,7 +1,10 @@
 from RGT.XML.SVG.baseShapeNode import BaseShapeNode
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class CircleNode(BaseShapeNode):
+    
+    svgNodeType= BasicSvgNode.SVG_CIRCLE_NODE
     
     ATTRIBUTE_CX= 'cx'
     ATTRIBUTE_CY= 'cy'

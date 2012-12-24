@@ -9,6 +9,8 @@ from types import StringType
 
 class FilterNode(BasicSvgNode, PresentationAttributes, XlinkAttributes, ClassAttribute, StyleAttribute, PositionAttributes, SizeAttributes):
 
+    svgNodeType= BasicSvgNode.SVG_FILTER_NODE
+
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_FILTER_RES= 'filterRes'
     ATTRIBUTE_FILTER_UNITS= 'filterUnits'

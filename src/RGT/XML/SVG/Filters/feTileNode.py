@@ -1,7 +1,10 @@
 from RGT.XML.SVG.Filters.baseFilterNode import BaseFilterNode
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class FeTileNode(BaseFilterNode):
+
+    svgNodeType= BasicSvgNode.SVG_FE_TILE_NODE
 
     ATTRIBUTE_IN= 'in'
 

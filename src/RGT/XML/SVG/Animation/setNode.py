@@ -2,8 +2,11 @@ from RGT.XML.SVG.Animation.baseAnimationNode import BaseAnimationNode
 from RGT.XML.SVG.Attribs.animationEventAttributes import AnimationEventAttributes
 from RGT.XML.SVG.Attribs.animationAttributeTargetAttributes import AnimationAttributeTargetAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class SetNode(BaseAnimationNode, AnimationAttributeTargetAttributes, AnimationEventAttributes):
+    
+    svgNodeType= BasicSvgNode.SVG_SET_NODE
     
     ATTRIBUTE_TO= 'to'
 

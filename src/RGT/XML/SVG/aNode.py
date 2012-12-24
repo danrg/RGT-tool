@@ -1,10 +1,13 @@
-from RGT.XML.SVG.containerNode import ContainerNode
+from RGT.XML.SVG.baseContainerNode import BaseContainerNode
 from RGT.XML.SVG.Attribs.conditionalProcessingAttributes import ConditionalProcessingAttributes
 from RGT.XML.SVG.Attribs.graphicalEventAttributes import GraphicalEventAttributes
 from RGT.XML.SVG.Attribs.xlinkAttributes import XlinkAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
-class ANode(ContainerNode, ConditionalProcessingAttributes, GraphicalEventAttributes, XlinkAttributes):
+class ANode(BaseContainerNode, ConditionalProcessingAttributes, GraphicalEventAttributes, XlinkAttributes):
+
+    svgNodeType= BasicSvgNode.SVG_A_NODE
 
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_TRANSFORM= 'transform'
@@ -12,7 +15,7 @@ class ANode(ContainerNode, ConditionalProcessingAttributes, GraphicalEventAttrib
     
 
     def __init__(self, ownerDoc):
-        ContainerNode.__init__(self, ownerDoc, 'a')
+        BaseContainerNode.__init__(self, ownerDoc, 'a')
         ConditionalProcessingAttributes.__init__(self)
         GraphicalEventAttributes.__init__(self)
         XlinkAttributes.__init__(self)

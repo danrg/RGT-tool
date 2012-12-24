@@ -6,6 +6,8 @@ from types import StringType
 
 class StopNode(BasicSvgNode, PresentationAttributes, ClassAttribute, StyleAttribute):
     
+    svgNodeType= BasicSvgNode.SVG_STOP_NODE
+    
     ATTRIBUTE_OFFSET= 'offset'
 
     def __init__(self, ownerDoc):

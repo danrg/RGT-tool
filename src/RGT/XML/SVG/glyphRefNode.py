@@ -8,6 +8,8 @@ from types import StringType
 
 class GlyphRefNode(BasicSvgNode, PresentationAttributes, XlinkAttributes, ClassAttribute, StyleAttribute, PositionAttributes):
 
+    svgNodeType= BasicSvgNode.SVG_GLYPH_REF_NODE
+
     ATTRIBUTE_DX= 'dx'
     ATTRIBUTE_DY= 'dy'
     ATTRIBUTE_GLYPH_REF= 'glyphRef'

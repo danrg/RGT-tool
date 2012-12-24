@@ -7,6 +7,8 @@ from types import StringType
 
 class ClipPathNode(BasicSvgNode, ConditionalProcessingAttributes, PresentationAttributes, ClassAttribute, StyleAttribute):
 
+    svgNodeType= BasicSvgNode.SVG_CLIP_PATH_NODE
+
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_TRANSFORM= 'transform'
     ATTRIBUTE_CLIP_PATH_UNITS= 'clipPathUnits'

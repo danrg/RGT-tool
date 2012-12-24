@@ -1,7 +1,10 @@
-from RGT.XML.SVG.containerNode import ContainerNode
+from RGT.XML.SVG.baseContainerNode import BaseContainerNode
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
-class MarkerNode(ContainerNode):
+class MarkerNode(BaseContainerNode):
+
+    svgNodeType= BasicSvgNode.SVG_MARKER_NODE
 
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_VIEW_BOX= 'viewBox'
@@ -14,7 +17,7 @@ class MarkerNode(ContainerNode):
     ATTRIBUTE_ORIENT= 'orient'
 
     def __init__(self, ownderDoc):
-        ContainerNode.__init__(self, ownderDoc, 'marker')
+        BaseContainerNode.__init__(self, ownderDoc, 'marker')
         
     
     def setExternalResourcesRequired(self, data):

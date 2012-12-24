@@ -1,15 +1,17 @@
-from RGT.XML.SVG.structuralNode import StructuralNode
+from RGT.XML.SVG.baseStructuralNode import BaseStructuralNode
 from RGT.XML.SVG.Attribs.conditionalProcessingAttributes import ConditionalProcessingAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
-class DefsNode(StructuralNode, ConditionalProcessingAttributes):
+class DefsNode(BaseStructuralNode, ConditionalProcessingAttributes):
     
+    svgNodeType= BasicSvgNode.SVG_DEFS_NODE
     
     ATTRIBUTE_TRANSFORM= 'transform'
     
     
     def __init__(self, ownerDoc):
-        StructuralNode.__init__(self, ownerDoc, 'defs')
+        BaseStructuralNode.__init__(self, ownerDoc, 'defs')
         ConditionalProcessingAttributes.__init__(self)    
     
     

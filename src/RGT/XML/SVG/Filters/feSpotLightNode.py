@@ -4,6 +4,8 @@ from types import StringType
 
 class FeSpotLightNode(BasicSvgNode, PositionAttributes):
     
+    svgNodeType= BasicSvgNode.SVG_FE_SPOT_LIGHT_NODE
+    
     ATTRIBUTE_Z= 'z'
     ATTRIBUTE_POINTS_AT_X= 'pointsAtX'
     ATTRIBUTE_POINTS_AT_Y= 'pointsAtY'
@@ -11,9 +13,14 @@ class FeSpotLightNode(BasicSvgNode, PositionAttributes):
     ATTRIBUTE_SPECULAR_EXPONENT= 'specularExponent'
     ATTRIBUTE_LIMITING_CONE_ANGLE= 'limitingConeAngle'
 
-    def __init__(self, ownerDoc):
+    def __init__(self, ownerDoc, x= None, y= None, z= None, specularExponent= None, limitingConeAngle= None):
         BasicSvgNode.__init__(self, ownerDoc, 'feSpotLight')
         PositionAttributes.__init__(self)
+        self.setX(x)
+        self.setY(y)
+        self.setZ(z)
+        self.setSpecularExponent(specularExponent)
+        self.setLimitingConeAngle(limitingConeAngle)
     
     def setZ(self, data):
         if data != None:

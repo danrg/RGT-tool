@@ -1,7 +1,10 @@
 from RGT.XML.SVG.Filters.baseFilterNode import BaseFilterNode
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class FeColorMatrixNode(BaseFilterNode):
+   
+    svgNodeType= BasicSvgNode.SVG_FE_COLOR_MATRIX_NODE
    
     ATTRIBUTE_IN= 'in'
     ATTRIBUTE_TYPE= 'type'

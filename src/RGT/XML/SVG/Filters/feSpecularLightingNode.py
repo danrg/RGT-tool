@@ -1,8 +1,11 @@
 from RGT.XML.SVG.Filters.baseFilterNode import BaseFilterNode
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class FeSpecularLightingNode(BaseFilterNode):
 
+    svgNodeType= BasicSvgNode.SVG_FE_SPECULAR_LIGHTING_NODE
+    
     ATTRIBUTE_IN= 'in'
     ATTRIBUTE_SURFACE_SCALE= 'surfaceScale'
     ATTRIBUTE_SPECULAR_CONSTANT= 'specularConstant'

@@ -4,6 +4,8 @@ from types import StringType
 
 class ColorProfileNode(BasicSvgNode, XlinkAttributes):
 
+    svgNodeType= BasicSvgNode.SVG_COLOR_PROFILE_NODE
+
     ATTRIBUTE_LOCAL= 'local'
     ATTRIBUTE_NAME= 'name'
     ATTRIBUTE_RENDERING_INTENT= 'rendering-intent'

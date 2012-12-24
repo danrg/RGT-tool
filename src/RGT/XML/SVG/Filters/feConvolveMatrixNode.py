@@ -1,8 +1,11 @@
 from RGT.XML.SVG.Filters.baseFilterNode import BaseFilterNode
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class FeConvolveMatrixNode(BaseFilterNode):
 
+    svgNodeType= BasicSvgNode.SVG_FE_CONVOLVE_MATRIX_NODE
+    
     ATTRIBUTE_IN= 'in'
     ATTRIBUTE_ORDER= 'order'
     ATTRIBUTE_KERNEL_MATRIX= 'kernelMatrix'

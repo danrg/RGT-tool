@@ -3,11 +3,15 @@ from types import StringType
 
 class FeDistantLightNode(BasicSvgNode):
     
+    svgNodeType= BasicSvgNode.SVG_FE_DISTANT_LIGHT_NODE
+    
     ATTRIBUTE_AZIMUTH= 'azimuth'
     ATTRIBUTE_ELEVATION= 'elevation'
 
-    def __init__(self, ownerDoc):
+    def __init__(self, ownerDoc, azimuth= None, elevation= None):
         BasicSvgNode.__init__(self, ownerDoc, 'feDistantLight')
+        self.setAzimuth(azimuth)
+        self.setElevation(elevation)
     
     def setAzimuth(self, data):
         if data != None:

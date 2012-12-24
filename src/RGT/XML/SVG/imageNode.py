@@ -11,6 +11,8 @@ from types import StringType
 
 class ImageNode(BasicSvgNode, ConditionalProcessingAttributes, GraphicalEventAttributes, XlinkAttributes, PresentationAttributes, ClassAttribute, StyleAttribute, PositionAttributes, SizeAttributes):
 
+    svgNodeType= BasicSvgNode.SVG_IMAGE_NODE
+
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_PRESERVE_ASPECT_RATIO= 'preserveAspectRatio'
     ATTRIBUTE_TRANSFORM= 'transform'

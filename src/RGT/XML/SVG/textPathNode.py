@@ -1,9 +1,12 @@
 from RGT.XML.SVG.baseEditableTextNode import BaseEditableTextNode
 from RGT.XML.SVG.Attribs.xlinkAttributes import XlinkAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class TextPathNode(BaseEditableTextNode, XlinkAttributes):
 
+    svgNodeType= BasicSvgNode.SVG_TEX_PATH_NODE
+    
     ATTRIBUTE_START_OFFSET= 'startOffset'
     ATTRIBUTE_METHOD= 'method'
     ATTRIBUTE_SPACING= 'spacing'

@@ -1,8 +1,11 @@
 from RGT.XML.SVG.baseEditableTextNode import BaseEditableTextNode
 from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class TextNode(BaseEditableTextNode, PositionAttributes):
+    
+    svgNodeType= BasicSvgNode.SVG_TEXT_NODE
     
     ATTRIBUTE_TRANSFORM= 'transform'
     ATTRIBUTE_LENGTH_ADJUST= 'lengthAdjust'

@@ -4,9 +4,11 @@ from RGT.XML.SVG.Attribs.animationAttributeTargetAttributes import AnimationAttr
 from RGT.XML.SVG.Attribs.animationValueAttributes import AnimationValueAttributes
 from RGT.XML.SVG.Attribs.animationAdditionAttributes import AnimationAdditionAttributes
 from RGT.XML.SVG.Attribs.presentationAttributes import PresentationAttributes
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class AnimateColorNode(BaseAnimationNode, AnimationAdditionAttributes, AnimationAttributeTargetAttributes, AnimationEventAttributes, AnimationValueAttributes, PresentationAttributes):
 
+    svgNodeType= BasicSvgNode.SVG_ANIMATE_COLOR_NODE
 
     def __init__(self, ownerDoc):
         BaseAnimationNode.__init__(self, ownerDoc, 'animateColor')

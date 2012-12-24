@@ -2,8 +2,11 @@ from RGT.XML.SVG.baseTextNode import BaseTextNode
 from RGT.XML.SVG.Attribs.xlinkAttributes import XlinkAttributes
 from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class AltGlyphNode(BaseTextNode, XlinkAttributes, PositionAttributes):
+
+    svgNodeType= BasicSvgNode.SVG_ALT_GLYPH_NODE
 
     ATTRIBUTE_DX= 'dx'
     ATTRIBUTE_DY= 'dy'

@@ -3,7 +3,7 @@ from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from RGT.XML.SVG.Attribs.sizeAttributes import SizeAttributes
 from types import StringType
 
-class FilterPrimitiveAttributes(BasicSvgAttribute, PositionAttributes, SizeAttributes):
+class FilterPrimitiveAttributes(PositionAttributes, SizeAttributes, BasicSvgAttribute):
 
     ATTRIBUTE_RESULT= 'result'
 

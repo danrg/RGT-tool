@@ -3,8 +3,11 @@ from RGT.XML.SVG.Attribs.animationEventAttributes import AnimationEventAttribute
 from RGT.XML.SVG.Attribs.animationValueAttributes import AnimationValueAttributes
 from RGT.XML.SVG.Attribs.animationAdditionAttributes import AnimationAdditionAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class AnimateMotionNode(BaseAnimationNode, AnimationAdditionAttributes, AnimationEventAttributes, AnimationValueAttributes):
+    
+    svgNodeType= BasicSvgNode.SVG_ANIMATE_MOTION_NODE
     
     ATTRIBUTE_PATH= 'path'
     ATTRIBUTE_KEY_POINTS= 'keyPoints'

@@ -1,7 +1,10 @@
 from RGT.XML.SVG.baseGlyph import BaseGlyph
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class GlyphNode(BaseGlyph):
+
+    svgNodeType= BasicSvgNode.SVG_GLYPH_NODE
 
     ATTRIBUTE_UNICODE= 'unicode'
     ATTRIBUTE_GLYPH_NAME= 'glyph-name'

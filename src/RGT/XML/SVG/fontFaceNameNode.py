@@ -3,6 +3,8 @@ from types import StringType
 
 class FontFaceNameNode(BasicSvgNode):
     
+    svgNodeType= BasicSvgNode.SVG_FONT_FACE_NAME_NODE
+    
     ATTRIBUTE_NAME= 'name'
 
     def __init__(self, ownerDoc):

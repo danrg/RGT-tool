@@ -1,7 +1,10 @@
 from RGT.XML.SVG.baseGradientNode import BaseGradientNode
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class RadialGradientNode(BaseGradientNode):
+
+    svgNodeType= BasicSvgNode.SVG_RADIAL_GRADIENT_NODE
 
     ATTRIBUTE_CX= 'cx'
     ATTRIBUTE_CY= 'cy'

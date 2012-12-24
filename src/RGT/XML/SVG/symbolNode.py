@@ -1,14 +1,17 @@
-from RGT.XML.SVG.structuralNode import StructuralNode
+from RGT.XML.SVG.baseStructuralNode import BaseStructuralNode
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
-class SymbolNode(StructuralNode):
+class SymbolNode(BaseStructuralNode):
+    
+    svgNodeType= BasicSvgNode.SVG_SYMBOL_NODE
     
     ATTRIBUTE_PRESERVEASPECTRATIO= 'preserveAspectRatio'
     ATTRIBUTE_VIEWBOX= 'viewBox'
 
 
     def __init__(self, ownderDoc):
-        StructuralNode.__init__(self, ownderDoc)
+        BaseStructuralNode.__init__(self, ownderDoc, 'symbol')
         
     
     def setPreserveAspectRatio(self, data):

@@ -3,6 +3,8 @@ from types import StringType
 
 class FeMergeNodeNode(BasicSvgNode):
 
+    svgNodeType= BasicSvgNode.SVG_FE_MERGE_NODE_NODE
+
     ATTRIBUTE_IN= 'in'
 
     def __init__(self, ownerDoc):

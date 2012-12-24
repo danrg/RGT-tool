@@ -1,7 +1,10 @@
 from RGT.XML.SVG.Filters.baseFilterNode import BaseFilterNode
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class FeTurbulenceNode(BaseFilterNode):
+    
+    svgNodeType= BasicSvgNode.SVG_FE_TURBULENCE_NODE
     
     ATTRIBUTE_BASE_FREQUENCY= 'baseFrequency'
     ATTRIBUTE_NUM_OCTAVES= 'numOctaves'

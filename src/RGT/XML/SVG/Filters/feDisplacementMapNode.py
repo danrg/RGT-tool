@@ -1,7 +1,10 @@
 from RGT.XML.SVG.Filters.baseFilterNode import BaseFilterNode
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class FeDisplacementMapNode(BaseFilterNode):
+
+    svgNodeType= BasicSvgNode.SVG_FE_DISPLACEMENT_MAP_NODE
 
     ATTRIBUTE_IN= 'in'
     ATTRIBUTE_IN2= 'in2'

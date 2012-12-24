@@ -2,8 +2,11 @@ from RGT.XML.SVG.baseShapeNode import BaseShapeNode
 from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from RGT.XML.SVG.Attribs.sizeAttributes import SizeAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class RectNode(BaseShapeNode, PositionAttributes, SizeAttributes):
+
+    svgNodeType= BasicSvgNode.SVG_RECT_NODE
 
     ATTRIBUTE_RX= 'rx'
     ATTRIBUTE_RY= 'ry'

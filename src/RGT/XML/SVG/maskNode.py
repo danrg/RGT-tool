@@ -1,16 +1,19 @@
-from RGT.XML.SVG.containerNode import ContainerNode
+from RGT.XML.SVG.baseContainerNode import BaseContainerNode
 from RGT.XML.SVG.Attribs.conditionalProcessingAttributes import ConditionalProcessingAttributes
 from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from RGT.XML.SVG.Attribs.sizeAttributes import SizeAttributes
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
-class MaskNode(ContainerNode, PositionAttributes, SizeAttributes, ConditionalProcessingAttributes):
+class MaskNode(BaseContainerNode, PositionAttributes, SizeAttributes, ConditionalProcessingAttributes):
+
+    svgNodeType= BasicSvgNode.SVG_MASK_NODE
 
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_MASK_UNITS= 'maskUnits'
     ATTRIBUTE_MASK_CONTENT_UNITS= 'maskContentUnits'
 
     def __init__(self, ownerDoc):
-        ContainerNode.__init__(self, ownerDoc, 'mask')
+        BaseContainerNode.__init__(self, ownerDoc, 'mask')
         PositionAttributes.__init__(self)
         SizeAttributes.__init__(self)
         ConditionalProcessingAttributes.__init__(self)

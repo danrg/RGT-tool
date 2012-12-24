@@ -10,6 +10,8 @@ from types import StringType
 
 class ForeignObjectNode(BasicSvgNode, ConditionalProcessingAttributes, GraphicalEventAttributes, PresentationAttributes, ClassAttribute, StyleAttribute, PositionAttributes, SizeAttributes):
     
+    svgNodeType= BasicSvgNode.SVG_FOREIGN_OBJECT_NODE
+    
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_TRANSFORM= 'transform'
 

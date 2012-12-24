@@ -1,8 +1,11 @@
 from RGT.XML.SVG.baseEditableTextNode import BaseEditableTextNode
 from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class TspanNode(BaseEditableTextNode, PositionAttributes):
+
+    svgNodeType= BasicSvgNode.SVG_TSPAN_NODE
 
     ATTRIBUTE_LENGTH_ADJUST= 'lengthAdjust'
     ATTRIBUTE_DX= 'dx'

@@ -7,11 +7,13 @@ class CursorNode(BasicSvgNode, ConditionalProcessingAttributes, XlinkAttributes,
 
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
 
-    def __init__(self, ownerDoc):
+    def __init__(self, ownerDoc, x= None, y= None):
         BasicSvgNode.__init__(self, ownerDoc, 'cursor')
         ConditionalProcessingAttributes.__init__(self)
         XlinkAttributes.__init__(self)
         PositionAttributes.__init__(self)
+        self.setX(x)
+        self.setY(y)
         
     def setExternalResourcesRequired(self, data):
         allowedValues= ['true', 'false']

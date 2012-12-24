@@ -8,6 +8,8 @@ from types import StringType
 
 class PathNode(BasicSvgNode, ConditionalProcessingAttributes, GraphicalEventAttributes, PresentationAttributes, StyleAttribute, ClassAttribute):
     
+    svgNodeType= BasicSvgNode.SVG_PATH_NODE
+    
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_TRANSFORM= 'transform'
     ATTRIBUTE_D= 'd'

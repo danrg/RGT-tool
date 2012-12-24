@@ -3,6 +3,8 @@ from types import StringType
 
 class VkernNode(BasicSvgNode):
     
+    svgNodeType= BasicSvgNode.SVG_VKERN_NODE
+    
     ATTRIBUTE_U1= 'u1'
     ATTRIBUTE_G1= 'g1'
     ATTRIBUTE_U2= 'u2'

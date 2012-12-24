@@ -1,7 +1,10 @@
 from RGT.XML.SVG.baseScriptNode import BaseScriptNode
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class StyleNode(BaseScriptNode):
+
+    svgNodeType= BasicSvgNode.SVG_STYLE_NODE
 
     ATTRIBUTE_TYPE= 'type'
     ATTRIBUTE_MEDIA= 'media'

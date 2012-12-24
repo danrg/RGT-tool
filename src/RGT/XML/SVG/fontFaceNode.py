@@ -3,6 +3,8 @@ from types import StringType
 
 class FontFaceNode(BasicSvgNode):
     
+    svgNodeType= BasicSvgNode.SVG_FONT_FACE_NODE
+    
     ATTRIBUTE_FONT_FAMILY= 'font-family'
     ATTRIBUTE_FONT_SIZE= 'font-size'
     ATTRIBUTE_FONT_STRETCH= 'font-stretch'
@@ -42,7 +44,7 @@ class FontFaceNode(BasicSvgNode):
     ATTRIBUTE_OVERLINE_THICKNESS= 'overline-thickness'
 
     def __init__(self, ownerDoc):
-        BasicSvgNode.__init__(self, ownerDoc, 'font-face’')
+        BasicSvgNode.__init__(self, ownerDoc, 'font-face')
     
     def setFontFamily(self, data):
         if data != None:

@@ -4,11 +4,16 @@ from types import StringType
 
 class FePointLightNode(BasicSvgNode, PositionAttributes):
     
+    svgNodeType= BasicSvgNode.SVG_FE_POINT_LIGHT_NODE
+    
     ATTRIBUTE_Z= 'z'
 
-    def __init__(self, ownerDoc):
+    def __init__(self, ownerDoc, x= None, y= None, z= None):
         BasicSvgNode.__init__(self, ownerDoc, 'fePointLight')
         PositionAttributes.__init__(self)
+        self.setX(x)
+        self.setY(y)
+        self.setZ(z)
     
     def setZ(self, data):
         if data != None:

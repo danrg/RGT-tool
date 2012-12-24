@@ -3,6 +3,8 @@ from types import StringType
 
 class ViewNode(BasicSvgNode):
 
+    svgNodeType= BasicSvgNode.SVG_VIEW_NODE
+
     ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
     ATTRIBUTE_VIEW_BOX= 'viewBox'
     ATTRIBUTE_PRESERVE_ASPECT_RATIO= 'preserveAspectRatio'

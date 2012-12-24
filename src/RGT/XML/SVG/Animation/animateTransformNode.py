@@ -3,8 +3,11 @@ from RGT.XML.SVG.Attribs.animationEventAttributes import AnimationEventAttribute
 from RGT.XML.SVG.Attribs.animationAttributeTargetAttributes import AnimationAttributeTargetAttributes
 from RGT.XML.SVG.Attribs.animationValueAttributes import AnimationValueAttributes
 from RGT.XML.SVG.Attribs.animationAdditionAttributes import AnimationAdditionAttributes
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class AnimateTransformNode(BaseAnimationNode, AnimationAdditionAttributes, AnimationAttributeTargetAttributes, AnimationEventAttributes, AnimationValueAttributes):
+    
+    svgNodeType= BasicSvgNode.SVG_ANIMATE_TRANSFORM_NODE
     
     ATTRIBUTE_TYPE= 'type'
 

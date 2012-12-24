@@ -1,4 +1,4 @@
-from RGT.XML.SVG.structuralNode import StructuralNode
+from RGT.XML.SVG.baseStructuralNode import BaseStructuralNode
 from RGT.XML.SVG.Attribs.conditionalProcessingAttributes import ConditionalProcessingAttributes
 from RGT.XML.SVG.Attribs.documentEventAttributes import DocumentEventAttributes
 from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
@@ -7,7 +7,7 @@ from types import StringType
 from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 
-class SvgNode(StructuralNode, PositionAttributes, SizeAttributes, ConditionalProcessingAttributes, DocumentEventAttributes):
+class SvgNode(BaseStructuralNode, PositionAttributes, SizeAttributes, ConditionalProcessingAttributes, DocumentEventAttributes):
 
     svgNodeType= BasicSvgNode.SVG_SVG_NODE
     
@@ -21,7 +21,7 @@ class SvgNode(StructuralNode, PositionAttributes, SizeAttributes, ConditionalPro
 
 
     def __init__(self, ownerDoc):
-        StructuralNode.__init__(self, ownerDoc)
+        BaseStructuralNode.__init__(self, ownerDoc, 'svg')
         PositionAttributes.__init__(self)
         SizeAttributes.__init__(self)
         ConditionalProcessingAttributes.__init__(self)

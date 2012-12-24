@@ -1,7 +1,10 @@
 from RGT.XML.SVG.Filters.baseFilterNode import BaseFilterNode
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class FeOffsetNode(BaseFilterNode):
+    
+    svgNodeType= BasicSvgNode.SVG_FE_OFFSET_NODE
     
     ATTRIBUTE_IN= 'in'
     ATTRIBUTE_DX= 'dx'

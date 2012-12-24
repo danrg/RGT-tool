@@ -6,13 +6,13 @@ from RGT.XML.SVG.Attribs.styleAttribute import StyleAttribute
 from types import StringType
 from RGT.XML.SVG.Attribs.Error.valueParsingError import ValueParsingError
 
-class StructuralNode(BasicSvgNode, GraphicalEventAttributes, PresentationAttributes, ClassAttribute, StyleAttribute):
+class BaseStructuralNode(BasicSvgNode, GraphicalEventAttributes, PresentationAttributes, ClassAttribute, StyleAttribute):
 
     ATTRIBUTE_EXTERNALRESOURCESREQUIRED= 'externalResourcesRequired'
     
     
-    def __init__(self, ownerDoc):
-        BasicSvgNode.__init__(self, ownerDoc, 'svg')
+    def __init__(self, ownerDoc, tagName):
+        BasicSvgNode.__init__(self, ownerDoc, tagName)
         PresentationAttributes.__init__(self)
         ClassAttribute.__init__(self)
         StyleAttribute.__init__(self)

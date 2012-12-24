@@ -1,16 +1,19 @@
-from RGT.XML.SVG.structuralNode import StructuralNode
+from RGT.XML.SVG.baseStructuralNode import BaseStructuralNode
 from RGT.XML.SVG.Attribs.conditionalProcessingAttributes import ConditionalProcessingAttributes
 from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from RGT.XML.SVG.Attribs.sizeAttributes import SizeAttributes
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
-class UseNode(StructuralNode, PositionAttributes, SizeAttributes, ConditionalProcessingAttributes):
+class UseNode(BaseStructuralNode, PositionAttributes, SizeAttributes, ConditionalProcessingAttributes):
+    
+    svgNodeType= BasicSvgNode.SVG_USE_NODE
     
     ATTRIBUTE_TRANSFORM= 'transform'
     ATTRIBUTE_XLING_HREF= 'xlink:href'
 
     def __init__(self, ownerDoc):
-        StructuralNode.__init__(self, ownerDoc, 'use')
+        BaseStructuralNode.__init__(self, ownerDoc, 'use')
         PositionAttributes.__init__(self)
         SizeAttributes.__init__(self)
         ConditionalProcessingAttributes.__init__(self)

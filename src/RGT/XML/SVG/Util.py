@@ -2,7 +2,7 @@
 This file contains all the needed functions to create the svg xml nodes
 '''
 from xml.dom.minidom import Document, DOMImplementation
-from RGT.XML.SVG.graphicNode import GraphicNode
+#from RGT.XML.SVG.graphicNode import GraphicNode
 from RGT.XML.SVG.scriptNode import ScriptNode
 from RGT.XML.SVG.svgNode import SvgNode
 from RGT.XML.SVG.descNode import DescNode
@@ -41,10 +41,10 @@ class SvgDocument (Document):
     def __init__(self):
         Document.__init__(self)
     
-    def createLineNode(self, x1= None, y1= None, x2= None, y2= None):
-        #Document.__init__(self)
-        lineNode= LineNode(self, x1, y1, x2, y2)
-        return lineNode
+#    def createLineNode(self, x1= None, y1= None, x2= None, y2= None):
+#        #Document.__init__(self)
+#        lineNode= LineNode(self, x1, y1, x2, y2)
+#        return lineNode
     
     def createCssStyleNode(self, cssData):
         cssNode= CssStyleNode(self, cssData)
@@ -66,52 +66,52 @@ class SvgDocument (Document):
         for node in self.childNodes:
             node.writexml(writer, indent, addindent, newl)
      
-class LineNode(GraphicNode):
-    
-    def __init__(self, ownerDoc, x1= None, y1= None, x2= None, y2= None):
-        GraphicNode.__init__(self, ownerDoc, 'line')
-        if (x1 or x2 or y1 or y2) and ownerDoc == None:
-            raise Exception('ownerDoc can not be None went trying to set line parameters')
-        self.setX1(x1)
-        self.setY1(y1)
-        self.setX2(x2)
-        self.setY2(y2)
-    
-    def setX1(self,  x):
-        if x != None and x >= 0:
-            self._setNodeAttribute('x1', str(x))
-                
-    def setY1(self, y):
-        if y != None and y >= 0:
-            self._setNodeAttribute('y1', str(y))
-            
-    def setX2(self, x):
-        if x != None and x >= 0:
-            self._setNodeAttribute('x2', str(x))
-    
-    def setY2(self, y):
-        if y != None and y >= 0:
-            self._setNodeAttribute('y2', str(y))
-            
-    def getX1(self):
-        x1Node= self._getNodeAttribute('x1')
-        if x1Node != None and x1Node != '':
-            return int(x1Node.nodeValue)
-        
-    def getY1(self):
-        y1Node= self._getNodeAttribute('y1')
-        if y1Node != None and y1Node != '':
-            return int(y1Node.nodeValue)
-    
-    def getX2(self):
-        x2Node= self._getNodeAttribute('x2')
-        if x2Node != None and x2Node != '':
-            return int(x2Node.nodeValue)
-    
-    def getY2(self):
-        y2Node= self._getNodeAttribute('y2')
-        if y2Node != None and y2Node != '':
-            return int(y2Node.nodeValue)
+#class LineNode(GraphicNode):
+#    
+#    def __init__(self, ownerDoc, x1= None, y1= None, x2= None, y2= None):
+#        GraphicNode.__init__(self, ownerDoc, 'line')
+#        if (x1 or x2 or y1 or y2) and ownerDoc == None:
+#            raise Exception('ownerDoc can not be None went trying to set line parameters')
+#        self.setX1(x1)
+#        self.setY1(y1)
+#        self.setX2(x2)
+#        self.setY2(y2)
+#    
+#    def setX1(self,  x):
+#        if x != None and x >= 0:
+#            self._setNodeAttribute('x1', str(x))
+#                
+#    def setY1(self, y):
+#        if y != None and y >= 0:
+#            self._setNodeAttribute('y1', str(y))
+#            
+#    def setX2(self, x):
+#        if x != None and x >= 0:
+#            self._setNodeAttribute('x2', str(x))
+#    
+#    def setY2(self, y):
+#        if y != None and y >= 0:
+#            self._setNodeAttribute('y2', str(y))
+#            
+#    def getX1(self):
+#        x1Node= self._getNodeAttribute('x1')
+#        if x1Node != None and x1Node != '':
+#            return int(x1Node.nodeValue)
+#        
+#    def getY1(self):
+#        y1Node= self._getNodeAttribute('y1')
+#        if y1Node != None and y1Node != '':
+#            return int(y1Node.nodeValue)
+#    
+#    def getX2(self):
+#        x2Node= self._getNodeAttribute('x2')
+#        if x2Node != None and x2Node != '':
+#            return int(x2Node.nodeValue)
+#    
+#    def getY2(self):
+#        y2Node= self._getNodeAttribute('y2')
+#        if y2Node != None and y2Node != '':
+#            return int(y2Node.nodeValue)
 
 class CssStyleNode(ScriptNode):
     

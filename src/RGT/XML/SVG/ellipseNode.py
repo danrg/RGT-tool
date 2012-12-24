@@ -1,7 +1,10 @@
 from RGT.XML.SVG.baseShapeNode import BaseShapeNode
 from types import StringType
+from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
 class EllipseNode(BaseShapeNode):
+
+    svgNodeType= BasicSvgNode.SVG_ELLIPSE_NODE
 
     ATTRIBUTE_CX= 'cx'
     ATTRIBUTE_CY= 'cy'
