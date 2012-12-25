@@ -6,7 +6,7 @@ class BasicSvgNode(Element, CoreAttributes):
     
     allowNoSvgChildNode= False
     svgNodeType= None
-    _allowedSvgChildNodes= {}
+    _allowedSvgChildNodes= set()
     
     #Svg node definitions
     SVG_SVG_NODE= 1

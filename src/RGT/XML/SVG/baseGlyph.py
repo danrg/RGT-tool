@@ -1,7 +1,7 @@
-from RGT.XML.SVG.containerNode import ContainerNode
+from RGT.XML.SVG.baseContainerNode import BaseContainerNode
 from types import StringType
 
-class BaseGlyph(ContainerNode):
+class BaseGlyph(BaseContainerNode):
 
     ATTRIBUTE_D= 'd'
     ATTRIBUTE_HORIZ_ADV_X= 'horiz-adv-x'
@@ -10,7 +10,7 @@ class BaseGlyph(ContainerNode):
     ATTRIBUTE_VERT_ADV_Y= 'vert-adv-y'
 
     def __init__(self, ownerDoc, tagName):
-        ContainerNode.__init__(self, ownerDoc, tagName)
+        BaseContainerNode.__init__(self, ownerDoc, tagName)
         
     
     def setD(self, data):
