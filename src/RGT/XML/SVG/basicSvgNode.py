@@ -1,10 +1,11 @@
 from xml.dom.minidom import Element
 from RGT.XML.SVG.Attribs.coreAttributes import CoreAttributes
-from xml.dom import Node
+from xml.dom import Node, HierarchyRequestErr
 
 class BasicSvgNode(Element, CoreAttributes):
     
-    allowNoSvgChildNode= False
+    allowNoSvgChildNode= False #used to allow other then svg nodes to be appended, also used to check if a node is a SVG nod. This attribute is not used current  for node checking
+    allowAllSvgNodesAsChildNodes= False
     svgNodeType= None
     _allowedSvgChildNodes= set()
     
@@ -122,3 +123,15 @@ class BasicSvgNode(Element, CoreAttributes):
         if codes.has_key(code) == True:
             return codes[code]
         return None
+    
+    def appendChild(self, node):
+        if hasattr(node, 'allowNoSvgChildNode'):
+            if not self.allowAllSvgNodesAsChildNodes:
+                if not (node.svgNodeType in self._allowedSvgChildNodes):
+                    raise HierarchyRequestErr(
+                "%s cannot be child of %s" % (repr(node), repr(self)))
+                else:
+                    Element.appendChild(self, node)
+        Element.appendChild(self, node)
+            
+            

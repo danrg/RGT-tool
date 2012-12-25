@@ -19,6 +19,10 @@ class ClipPathNode(BasicSvgNode, ConditionalProcessingAttributes, PresentationAt
         PresentationAttributes.__init__(self)
         ClassAttribute.__init__(self)
         StyleAttribute.__init__(self)
+        #add groups
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_ANIMATION_ELEMENTS, self.SVG_GROUP_DESCRIPTIVE_ELEMENTS, self.SVG_GROUP_SHAPE_ELEMENTS)
+        #ad individual nodes
+        self._allowedSvgChildNodes.update({self.SVG_TEXT_NODE, self.SVG_USE_NODE})
       
     def setExternalResourcesRequired(self, data):
         allowedValues= ['true', 'false']

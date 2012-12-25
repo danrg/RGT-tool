@@ -6,4 +6,5 @@ class FontFaceSrcNode(BasicSvgNode):
 
     def __init__(self, ownerDoc):
         BasicSvgNode.__init__(self, ownerDoc, 'font-face-src')
+        self._allowedSvgChildNodes.update({self.SVG_FONT_FACE_NAME_NODE, self.SVG_FONT_FACE_URI_NODE})
         

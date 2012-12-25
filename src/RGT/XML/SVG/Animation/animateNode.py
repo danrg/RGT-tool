@@ -15,4 +15,3 @@ class AnimateNode(BaseAnimationNode, AnimationAttributeTargetAttributes, Animati
         AnimationValueAttributes.__init__(self)
         AnimationAdditionAttributes.__init__(self)
         PresentationAttributes.__init__(self)
-        

@@ -23,6 +23,7 @@ class PathNode(BasicSvgNode, ConditionalProcessingAttributes, GraphicalEventAttr
         PresentationAttributes.__init__(self)
         ClassAttribute.__init__(self)
         StyleAttribute.__init__(self)
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_ANIMATION_ELEMENTS, self.SVG_GROUP_DESCRIPTIVE_ELEMENTS)
     
     def setExternalResourcesRequired(self, data):
         allowedValues= ['true', 'false']

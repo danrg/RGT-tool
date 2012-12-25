@@ -14,6 +14,7 @@ class ViewNode(BasicSvgNode):
 
     def __init__(self, ownerDoc):
         BasicSvgNode.__init__(self, ownerDoc, 'view')
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS)
         
     def setExternalResourcesRequired(self, data):
         allowedValues= ['true', 'false']

@@ -89,6 +89,7 @@ from RGT.XML.SVG.radialGradientNode import RadialGradientNode
 from RGT.XML.SVG.patternNode import PatternNode
 from RGT.XML.SVG.stopNode import StopNode
 
+#class copied from minidom
 class SvgDOMImplementation(DOMImplementation):
    
         def createSvgDocument(self):
@@ -106,6 +107,7 @@ class SvgDOMImplementation(DOMImplementation):
             doc.implementation = self
             return doc
 
+#class copied from minidom
 class SvgDocument(Document):
     
     implementation = SvgDOMImplementation

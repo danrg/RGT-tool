@@ -6,4 +6,5 @@ class AltGlyphItemNode(BasicSvgNode):
 
     def __init__(self, ownerDoc):
         BasicSvgNode.__init__(self, ownerDoc, 'altGlyphItem')
+        self._allowedSvgChildNodes.add(self.SVG_GLYPH_REF_NODE)
         

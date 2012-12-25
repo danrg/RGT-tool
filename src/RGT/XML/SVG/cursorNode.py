@@ -14,6 +14,7 @@ class CursorNode(BasicSvgNode, ConditionalProcessingAttributes, XlinkAttributes,
         PositionAttributes.__init__(self)
         self.setX(x)
         self.setY(y)
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS)
         
     def setExternalResourcesRequired(self, data):
         allowedValues= ['true', 'false']

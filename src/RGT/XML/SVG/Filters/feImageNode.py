@@ -14,6 +14,7 @@ class FeImageNode(BaseFilterNode, XlinkAttributes):
     def __init__(self, ownerDoc):
         BaseFilterNode.__init__(self, ownerDoc, 'feImage')
         XlinkAttributes.__init__(self)
+        self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_SET_NODE, self.SVG_ANIMATE_TRANSFORM_NODE})
         
     def setExternalResourcesRequired(self, data):
         allowedValues= ['true', 'false']

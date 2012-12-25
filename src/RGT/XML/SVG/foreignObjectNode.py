@@ -24,6 +24,7 @@ class ForeignObjectNode(BasicSvgNode, ConditionalProcessingAttributes, Graphical
         StyleAttribute.__init__(self)
         PositionAttributes.__init__(self)
         SizeAttributes.__init__(self)
+        self.allowAllSvgNodesAsChildNodes= True
     
     def setExternalResourcesRequired(self, data):
         allowedValues= ['true', 'false']

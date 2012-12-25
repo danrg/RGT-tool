@@ -9,6 +9,7 @@ class FeMergeNodeNode(BasicSvgNode):
 
     def __init__(self, ownerDoc):
         BasicSvgNode.__init__(self, ownerDoc, 'feMergeNode')
+        self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_SET_NODE})
         
     def setIn(self, data):
         if data != None:

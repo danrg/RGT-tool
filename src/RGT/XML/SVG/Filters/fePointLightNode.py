@@ -14,6 +14,7 @@ class FePointLightNode(BasicSvgNode, PositionAttributes):
         self.setX(x)
         self.setY(y)
         self.setZ(z)
+        self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_SET_NODE})
     
     def setZ(self, data):
         if data != None:

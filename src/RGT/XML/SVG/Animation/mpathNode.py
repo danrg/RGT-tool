@@ -10,6 +10,7 @@ class MpathNode(BasicSvgNode, XlinkAttributes):
     def __init__(self, ownerDoc):
         BasicSvgNode.__init__(self, ownerDoc, 'mpath')
         XlinkAttributes.__init__(self)
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS)
         
         
     def setExternalResourcesRequired(self, data):

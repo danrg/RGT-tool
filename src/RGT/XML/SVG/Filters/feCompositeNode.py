@@ -16,6 +16,7 @@ class FeCompositeNode(BaseFilterNode):
 
     def __init__(self, ownerDoc):
         BaseFilterNode.__init__(self, ownerDoc, 'feComposite')
+        self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_SET_NODE})
         
     def setIn(self, data):
         if data != None:

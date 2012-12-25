@@ -18,6 +18,7 @@ class AltGlyphNode(BaseTextNode, XlinkAttributes, PositionAttributes):
         BaseTextNode.__init__(self, ownerDoc, 'altGlyph')
         XlinkAttributes.__init__(self)
         PositionAttributes.__init__(self)
+        self.allowAllSvgNodesAsChildNodes= True
     
     def setDx(self, data):
         if data != None:

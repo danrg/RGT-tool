@@ -13,6 +13,7 @@ class BaseAnimationNode(BasicSvgNode):
         ConditionalProcessingAttributes.__init__(self)
         XlinkAttributes.__init__(self)
         AnimationTimingAttributes.__init__(self)
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS)
     
     def setExternalResourcesRequired(self, data):
         allowedValues= ['true', 'false']

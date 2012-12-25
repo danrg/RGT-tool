@@ -45,6 +45,10 @@ class FontFaceNode(BasicSvgNode):
 
     def __init__(self, ownerDoc):
         BasicSvgNode.__init__(self, ownerDoc, 'font-face')
+        #add groups
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS)
+        #add individual nodes
+        self._allowedSvgChildNodes.add(self.SVG_FONT_FACE_SRC_NODE)
     
     def setFontFamily(self, data):
         if data != None:

@@ -9,4 +9,4 @@ class TrefNode(BaseTextNode, XlinkAttributes):
     def __init__(self, ownerDoc):
         BaseTextNode.__init__(self, ownerDoc, 'tref')
         XlinkAttributes.__init__(self)
-        
+        self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_ANIMATE_COLOR_NODE, self.SVG_SET_NODE})

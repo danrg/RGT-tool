@@ -7,4 +7,5 @@ class TitleNode(BaseInformationNode):
 
     def __init__(self, ownerDoc):
         BaseInformationNode.__init__(self, ownerDoc, 'title')
+        self.allowAllSvgNodesAsChildNodes= True
         

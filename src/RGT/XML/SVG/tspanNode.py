@@ -18,6 +18,8 @@ class TspanNode(BaseEditableTextNode, PositionAttributes):
         PositionAttributes.__init__(self)
         self.setX(x)
         self.setY(y)
+        self._allowedSvgChildNodes.update({self.SVG_A_NODE, self.SVG_ALT_GLYPH_NODE, self.SVG_ANIMATE_NODE, self.SVG_ANIMATE_COLOR_NODE,
+                                           self.SVG_SET_NODE, self.SVG_TREF_NODE, self.SVG_TSPAN_NODE})
         
     def setLengthAdjust(self, data):
         allowedValues= ['spacing', 'spacingAndGlyphs']

@@ -19,6 +19,8 @@ class AnimateMotionNode(BaseAnimationNode, AnimationAdditionAttributes, Animatio
         AnimationAdditionAttributes.__init__(self)
         AnimationEventAttributes.__init__(self)
         AnimationValueAttributes.__init__(self)
+        #add individual nodes
+        self._allowedSvgChildNodes.add(self.SVG_MPATH_NODE)
     
     def setPath(self, data):
         if data != None:

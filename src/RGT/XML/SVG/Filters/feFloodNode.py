@@ -7,4 +7,5 @@ class FeFloodNode(BaseFilterNode):
 
     def __init__(self, ownerDoc):
         BaseFilterNode.__init__(self, ownerDoc, 'feFlood')
+        self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_SET_NODE, self.SVG_ANIMATE_COLOR_NODE})
         

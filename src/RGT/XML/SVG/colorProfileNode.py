@@ -13,6 +13,7 @@ class ColorProfileNode(BasicSvgNode, XlinkAttributes):
     def __init__(self, ownerDoc):
         BasicSvgNode.__init__(self, ownerDoc, 'color-profile')
         XlinkAttributes.__init__(self)
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS)
     
     def setLocal(self, data):
         if data != None:

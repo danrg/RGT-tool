@@ -6,6 +6,7 @@ class BaseEditableTextNode(BaseTextNode):
 
     def __init__(self, ownerDoc, tagName):
         BaseTextNode.__init__(self, ownerDoc, tagName)
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS)
     
     def setText(self, text):
         if text != None:

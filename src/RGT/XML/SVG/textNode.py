@@ -20,6 +20,10 @@ class TextNode(BaseEditableTextNode, PositionAttributes):
         self.setX(x)
         self.setY(y)
         self.setText(text)
+        #add groups
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_ANIMATION_ELEMENTS, self.SVG_GROUP_TEXT_CONTENT_CHILD_ELEMENTS)
+        #add individual nodes
+        self._allowedSvgChildNodes.add(self.SVG_A_NODE)
     
     def setTransform(self, data):
         if data != None:

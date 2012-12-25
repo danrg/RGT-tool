@@ -7,4 +7,5 @@ class FeMergeNode(BaseFilterNode):
     
     def __init__(self, ownerDoc):
         BaseFilterNode.__init__(self, ownerDoc, 'feMerge')
+        self._allowedSvgChildNodes.add(self.SVG_FE_MERGE_NODE_NODE)
         

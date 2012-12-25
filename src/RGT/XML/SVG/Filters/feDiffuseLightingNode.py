@@ -13,6 +13,7 @@ class FeDiffuseLightingNode(BaseFilterNode):
 
     def __init__(self, ownerDoc):
         BaseFilterNode.__init__(self, ownerDoc, 'feDiffuseLighting')
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS, self.SVG_GROUP_LIGHT_SOURCE_ELEMENTS)
     
     def setIn(self, data):
         if data != None:

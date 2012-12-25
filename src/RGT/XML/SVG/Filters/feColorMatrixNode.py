@@ -12,6 +12,7 @@ class FeColorMatrixNode(BaseFilterNode):
 
     def __init__(self, ownerDoc):
         BaseFilterNode.__init__(self, ownerDoc, 'feColorMatrix')
+        self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_SET_NODE})
     
     def setIn(self, data):
         if data != None:

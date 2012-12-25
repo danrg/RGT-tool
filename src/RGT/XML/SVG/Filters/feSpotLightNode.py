@@ -21,6 +21,7 @@ class FeSpotLightNode(BasicSvgNode, PositionAttributes):
         self.setZ(z)
         self.setSpecularExponent(specularExponent)
         self.setLimitingConeAngle(limitingConeAngle)
+        self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_SET_NODE})
     
     def setZ(self, data):
         if data != None:

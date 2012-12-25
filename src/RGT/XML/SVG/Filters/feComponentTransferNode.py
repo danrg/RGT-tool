@@ -10,6 +10,7 @@ class FeComponentTransferNode(BaseFilterNode):
 
     def __init__(self, ownerDoc):
         BaseFilterNode.__init__(self, ownerDoc, 'feComponentTransfer')
+        self._allowedSvgChildNodes.update({self.SVG_FE_FUNC_A_NODE, self.SVG_FE_FUNC_B_NODE, self.SVG_FE_FUNC_G_NODE, self.SVG_FE_FUNC_R_NODE})
         
     
     def setIn(self, data):

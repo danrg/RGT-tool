@@ -21,6 +21,10 @@ class FontNode(BasicSvgNode):
         PresentationAttributes.__init__(self)
         ClassAttribute.__init__(self)
         StyleAttribute.__init__(self)
+        #add groups
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS)
+        #add individual nodes
+        self._allowedSvgChildNodes.update({self.SVG_FONT_FACE_NODE, self.SVG_GLYPH_NODE, self.SVG_HKERN_NODE, self.SVG_MISSING_GLYPH_NODE, self.SVG_VKERN_NODE})
         
     def setExternalResourcesRequired(self, data):
         allowedValues= ['true', 'false']

@@ -14,6 +14,7 @@ class FeSpecularLightingNode(BaseFilterNode):
 
     def __init__(self, ownerDoc):
         BaseFilterNode.__init__(self, ownerDoc, 'feSpecularLighting')
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS, self.SVG_GROUP_LIGHT_SOURCE_ELEMENTS)
         
     
     def setIn(self, data):

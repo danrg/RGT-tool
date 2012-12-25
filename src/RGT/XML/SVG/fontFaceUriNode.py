@@ -9,3 +9,4 @@ class FontFaceUriNode(BasicSvgNode, XlinkAttributes):
     def __init__(self, ownerDoc):
         BasicSvgNode.__init__(self, ownerDoc, 'font-face-uri')
         XlinkAttributes.__init__(self)
+        self._allowedSvgChildNodes.add(self.SVG_FONT_FACE_FORMAT_NODE)

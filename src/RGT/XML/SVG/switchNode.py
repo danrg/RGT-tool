@@ -15,6 +15,11 @@ class SwitchNode(BaseContainerNode, ConditionalProcessingAttributes, GraphicalEv
         BaseContainerNode.__init__(self, ownerDoc, 'switch')
         ConditionalProcessingAttributes.__init__(self)
         GraphicalEventAttributes.__init__(self)
+        #add groups
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_ANIMATION_ELEMENTS, self.SVG_GROUP_DESCRIPTIVE_ELEMENTS, self.SVG_GROUP_SHAPE_ELEMENTS)
+        #add indivudual elements
+        self._allowedSvgChildNodes.update({self.SVG_A_NODE, self.SVG_FOREIGN_OBJECT_NODE, self.SVG_G_NODE, self.SVG_IMAGE_NODE,
+                                           self.SVG_SVG_NODE, self.SVG_SWITCH_NODE, self.SVG_TEXT_NODE, self.SVG_USE_NODE})
         
     def setExternalResourcesRequired(self, data):
         allowedValues= ['true', 'false']

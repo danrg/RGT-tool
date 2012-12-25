@@ -15,6 +15,7 @@ class StopNode(BasicSvgNode, PresentationAttributes, ClassAttribute, StyleAttrib
         PresentationAttributes.__init__(self)
         ClassAttribute.__init__(self)
         StyleAttribute.__init__(self)
+        self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_ANIMATE_COLOR_NODE, self.SVG_SET_NODE})
     
     def setOffset(self, data):
         if data != None:

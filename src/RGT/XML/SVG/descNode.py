@@ -7,6 +7,7 @@ class DescNode(BaseInformationNode):
 
     def __init__(self, ownerDoc):
         BaseInformationNode.__init__(self, ownerDoc, 'desc')
+        self.allowAllSvgNodesAsChildNodes= True
         
     
 

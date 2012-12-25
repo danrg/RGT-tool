@@ -18,6 +18,10 @@ class BaseGradientNode(BasicSvgNode, PresentationAttributes, XlinkAttributes, Cl
         XlinkAttributes.__init__(self)
         ClassAttribute.__init__(self)
         StyleAttribute.__init__(self)
+        #add groups
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS)
+        #add individual nodes
+        self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_ANIMATE_TRANSFORM_NODE, self.SVG_SET_NODE, self.SVG_STOP_NODE})
         
     
     def setExternalResourcesRequired(self, data):

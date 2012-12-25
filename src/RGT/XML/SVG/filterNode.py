@@ -24,7 +24,11 @@ class FilterNode(BasicSvgNode, PresentationAttributes, XlinkAttributes, ClassAtt
         StyleAttribute.__init__(self)
         PositionAttributes.__init__(self)
         SizeAttributes.__init__(self)
-    
+        #add groups
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS, self.SVG_GROUP_FILTER_PRIMITIVE_ELEMENTS)
+        #add individual nodes
+        self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_SET_NODE})
+        
     def setExternalResourcesRequired(self, data):
         allowedValues= ['true', 'false']
         
