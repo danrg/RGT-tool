@@ -18,6 +18,7 @@ class SvgNode(BaseStructuralNode, PositionAttributes, SizeAttributes, Conditiona
     ATTRIBUTE_BASEPROFILE= 'baseProfile'
     ATTRIBUTE_CONTENTSCRIPTTYPE= 'contentScriptType'
     ATTRIBUTE_CONTENTSTYLETYPE= 'contentStyleType'
+    ATTRIBUTE_XMLNS= 'xmlns'
 
 
     def __init__(self, ownerDoc):
@@ -75,6 +76,12 @@ class SvgNode(BaseStructuralNode, PositionAttributes, SizeAttributes, Conditiona
             if type(data) is not StringType:
                 data= str(data)
             self._setNodeAttribute(self.ATTRIBUTE_CONTENTSTYLETYPE, data)
+            
+    def setXmlns(self, data):
+        if data != None:
+            if type(data) is not StringType:
+                data= str(data)
+            self._setNodeAttribute(self.ATTRIBUTE_XMLNS, data)
     
     def getViewBox(self):
         node= self._getNodeAttribute(self.ATTRIBUTE_VIEWBOX)
@@ -114,6 +121,12 @@ class SvgNode(BaseStructuralNode, PositionAttributes, SizeAttributes, Conditiona
     
     def getContentStyleType(self):
         node= self._getNodeAttribute(self.ATTRIBUTE_CONTENTSTYLETYPE)
+        if node != None:
+            return node.nodeValue
+        return None
+    
+    def getXmlns(self):
+        node= self._getNodeAttribute(self.ATTRIBUTE_XMLNS)
         if node != None:
             return node.nodeValue
         return None

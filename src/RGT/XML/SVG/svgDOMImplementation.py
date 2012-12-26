@@ -168,7 +168,7 @@ class SvgDocument(Document):
         return PolygonNode(self, points)
     
     def createSvgTextNode(self, x= None, y= None, text= None):
-        return TextNode(self)
+        return TextNode(self, x, y, text)
     
     def createTspanNode(self, x= None, y= None):
         return TspanNode(self, x, y)

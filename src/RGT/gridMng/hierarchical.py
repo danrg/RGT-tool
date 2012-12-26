@@ -6,7 +6,8 @@ Created on Feb 17, 2012
 from math import sqrt, floor
 import sys
 
-from xml.dom.minidom import getDOMImplementation
+#from xml.dom.minidom import getDOMImplementation
+from RGT.XML.SVG.svgDOMImplementation import SvgDOMImplementation
 from PIL import Image, ImageDraw, ImageFont #@UnresolvedImport
 from RGT.settings import DENDROGRAM_FONT_LOCATION
 
@@ -254,6 +255,7 @@ def drawDendogram(clusters= []):
 def transpose(lists):
     if not lists: return []
     return map(lambda *row: list(row), *lists)
+
 
 #this function will have the percentage rule, size (width) will also be based on the amount of cluster
 def drawDendogram2(clustersConcern= [], clustersAlternative= [], matrix= [[]], maxMatrixCellValue= 1):
@@ -899,9 +901,19 @@ def drawDendogram2(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
             allClusters.append((cluster[0], xPositionNewCluster, yPositionNewCluster))
             i+= 1
         """
+
 #prototype function that will be used to create an image using xml      
 def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], maxMatrixCellValue= 1):
         #cluster format is: [([element1, elemet2], distance), ([element1, elemet2, element3], distance), ......]
+        
+        #########################
+        ########Important########
+        #########################
+        #Svg In SVG, text is positioned (unlike the <rect> element) with its lower left corner 
+        #at the coordinates specified in the x and y attributes.
+        #Because all of the code was originaly create as to make a png ping and later on we switched to
+        #svg the text y should be + height of the text - 4 as this provides the best results of aligment
+        
         
         #########################
         ###changeable settings###
@@ -968,9 +980,12 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         dicMatrixConcernToWordEndPosition= {} #this is use to map words in the table that was drawn to where the last pixel is of the left, we need this to map the words of the concern dendogram
         cellAlternativesXPositions= {} #middle position of the cell that corresponds to the given alternative
         percentageWordSize= f.getsize(str(100))
-        impl= getDOMImplementation()
-        xmlDoc= impl.createDocument(None, "gridVisualization", None)
-        topElement= xmlDoc.documentElement
+        #impl= getDOMImplementation()
+        impl= SvgDOMImplementation()
+        #xmlDoc= impl.createDocument(None, "gridVisualization", None)
+        xmlDoc= impl.createSvgDocument()
+        #topElement= xmlDoc.documentElement
+        root= xmlDoc.documentElement
         
         ###table variables###
             ###word variables###
@@ -1188,38 +1203,47 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         #depth= len(clustersConcern)
         #scaling= float(w - 150)/depth
         
-        # define the global properties of the image
-        propertiesNode= xmlDoc.createElement('properties')
-        #image width
-        tempNode= xmlDoc.createElement('width');
-        tempNode.appendChild(xmlDoc.createTextNode(str(w)))
-        propertiesNode.appendChild(tempNode)
-        #image height
-        tempNode= xmlDoc.createElement('height')
-        tempNode.appendChild(xmlDoc.createTextNode(str(h)))
-        propertiesNode.appendChild(tempNode)      
-        #global shadow
-        if useGlobalShadow:
-            shadowNode= xmlDoc.createElement('shadow')
-            shadowXOffSetNode= xmlDoc.createElement('xOffSet')
-            shadowYOffSetNode= xmlDoc.createElement('yOffSet')
-            shadowBlurSizeNode= xmlDoc.createElement('blurSize')
-            
-            shadowXOffSetNode.appendChild(xmlDoc.createTextNode(str(shadowXOffset)))
-            shadowYOffSetNode.appendChild(xmlDoc.createTextNode(str(shadowYOffset)))
-            shadowBlurSizeNode.appendChild(xmlDoc.createTextNode(str(shadowBlurSize)))
-            
-            shadowNode.appendChild(shadowXOffSetNode)
-            shadowNode.appendChild(shadowYOffSetNode)
-            shadowNode.appendChild(shadowBlurSizeNode)
-            
-            propertiesNode.appendChild(shadowNode)
-            
-        topElement.appendChild(propertiesNode) 
+        #set the svg image size
+        root.setWidth(str(w) + 'px')
+        root.setHeight(str(h) + 'px')
+        root.setXmlns('http://www.w3.org/2000/svg')
+        root.setVersion('1.1')
+        
+        
+#        # define the global properties of the image
+#        propertiesNode= xmlDoc.createElement('properties')
+#        #image width
+#        tempNode= xmlDoc.createElement('width');
+#        tempNode.appendChild(xmlDoc.createTextNode(str(w)))
+#        propertiesNode.appendChild(tempNode)
+#        #image height
+#        tempNode= xmlDoc.createElement('height')
+#        tempNode.appendChild(xmlDoc.createTextNode(str(h)))
+#        propertiesNode.appendChild(tempNode)      
+#        #global shadow
+#        if useGlobalShadow:
+#            shadowNode= xmlDoc.createElement('shadow')
+#            shadowXOffSetNode= xmlDoc.createElement('xOffSet')
+#            shadowYOffSetNode= xmlDoc.createElement('yOffSet')
+#            shadowBlurSizeNode= xmlDoc.createElement('blurSize')
+#            
+#            shadowXOffSetNode.appendChild(xmlDoc.createTextNode(str(shadowXOffset)))
+#            shadowYOffSetNode.appendChild(xmlDoc.createTextNode(str(shadowYOffset)))
+#            shadowBlurSizeNode.appendChild(xmlDoc.createTextNode(str(shadowBlurSize)))
+#            
+#            shadowNode.appendChild(shadowXOffSetNode)
+#            shadowNode.appendChild(shadowYOffSetNode)
+#            shadowNode.appendChild(shadowBlurSizeNode)
+#            
+#            propertiesNode.appendChild(shadowNode)
+#            
+#        topElement.appendChild(propertiesNode) 
             
         
         #define the main node for the table
-        tableNode= xmlDoc.createElement('dendogramTable')
+        #tableGroupNode= xmlDoc.createElement('dendogramTable')
+        tableGroupNode= xmlDoc.createGNode()
+        tempNode= None
         #lets draw stuff now
         
         ################
@@ -1228,7 +1252,11 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         
         yTableStartPosition= yTableTopOffset +  percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset
         xtableStartPosition= xWordToTableOffset + xWordTableOffset + leftConcernMaxWordWidth
-        tableNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition, yTableStartPosition, xtableStartPosition + ( tableCellWidth * (len(matrix[0]) - 2)), yTableStartPosition, tableLineColor, tableLineThickness))
+        #tableGroupNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition, yTableStartPosition, xtableStartPosition + ( tableCellWidth * (len(matrix[0]) - 2)), yTableStartPosition, tableLineColor, tableLineThickness))
+        tempNode= xmlDoc.createLineNode(xtableStartPosition, yTableStartPosition, xtableStartPosition + ( tableCellWidth * (len(matrix[0]) - 2)), yTableStartPosition)
+        tempNode.setStyle('stroke:' +  createColorRGBString(tableLineColor))
+        tempNode.setStrokeWidth(tableLineThickness)
+        tableGroupNode.appendChild(tempNode)
         #draw.line([(xtableStartPosition, yTableStartPosition), (xtableStartPosition + ( tableCellWidth * (len(matrix[0]) - 2)), yTableStartPosition)], fill= tableLineColor, width= tableLineThickness)
         #remember to add + tableLineThickness to the start position to account for the line thickness, that also goes for the right, left and bottom
         
@@ -1239,28 +1267,51 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
             row= matrix[i]
             #draw the left word
             wordSize= f.getsize(row[0])
-            tableNode.appendChild(__createXmlTextNode__(xmlDoc, xtableStartPosition - xWordToTableOffset - wordSize[0], yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2), row[0], wordSize[0], wordSize[1], fontName, fontSize, tableWordColor))
+            tempNode= xmlDoc.createSvgTextNode(xtableStartPosition - xWordToTableOffset - wordSize[0], (yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2)) + wordSize[0], row[0])
+            tempNode.setFontFamily(fontName)
+            tempNode.setFontSize(str(fontSize) + 'px')
+            tempNode.setStyle('fill:' + createColorRGBString(tableWordColor))
+            tableGroupNode.appendChild(tempNode)
+            #tableGroupNode.appendChild(__createXmlTextNode__(xmlDoc, xtableStartPosition - xWordToTableOffset - wordSize[0], yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2), row[0], wordSize[0], wordSize[1], fontName, fontSize, tableWordColor))
             #draw.text((xtableStartPosition - xWordToTableOffset - wordSize[0], yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2) ), row[0], font= f, fill= tableWordColor)
             while j < len(row) - 2:
                 if j == 0:
                     #draw the left line
-                    tableNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition, yTableStartPosition + ( (i - 1) * tableCellHeight), xtableStartPosition, yTableStartPosition + ( i * tableCellHeight), tableLineColor, tableLineThickness))
+                    tempNode= xmlDoc.createLineNode(xtableStartPosition, yTableStartPosition + ( (i - 1) * tableCellHeight), xtableStartPosition, yTableStartPosition + ( i * tableCellHeight))
+                    tempNode.setStrokeWidth(tableLineThickness)
+                    tempNode.setStyle('stroke:' +  createColorRGBString(tableLineColor))
+                    tableGroupNode.appendChild(tempNode)
+                    #tableGroupNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition, yTableStartPosition + ( (i - 1) * tableCellHeight), xtableStartPosition, yTableStartPosition + ( i * tableCellHeight), tableLineColor, tableLineThickness))
                     #draw.line([(xtableStartPosition , yTableStartPosition + ( (i - 1) * tableCellHeight)), ( xtableStartPosition, yTableStartPosition + ( i * tableCellHeight) )], fill= tableLineColor, width= tableLineThickness)
                 #draw the values of the cells
                 cell= row[j + 1]
                 wordSize= f.getsize(str(cell))
                 xCellValue= xtableStartPosition + (j * tableCellWidth) + floor((tableCellWidth - wordSize[0])/2)
                 yCellValue= yTableStartPosition + ((i-1) * tableCellHeight) + floor((tableCellHeight - wordSize[1])/2)
-                tableNode.appendChild(__createXmlTextNode__(xmlDoc, xCellValue, yCellValue, str(cell), wordSize[0], wordSize[1], fontName, fontSize, tableCellWordColor))
+                tempNode= xmlDoc.createSvgTextNode(xCellValue, yCellValue + wordSize[0], str(cell))
+                tempNode.setFontFamily(fontName)
+                tempNode.setFontSize(str(fontSize) + 'px')
+                tempNode.setStyle('fill:' + createColorRGBString(tableCellWordColor))
+                tableGroupNode.appendChild(tempNode)
+                #tableGroupNode.appendChild(__createXmlTextNode__(xmlDoc, xCellValue, yCellValue, str(cell), wordSize[0], wordSize[1], fontName, fontSize, tableCellWordColor))
                 #draw.text((xCellValue, yCellValue), str(cell), font= f, fill= tableCellWordColor)
                 if j == len(row) - 3:
                     #draw right line
-                    tableNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + ( (i - 1) * tableCellHeight), xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + (i * tableCellHeight), tableLineColor, tableLineThickness))
+                    tempNode= xmlDoc.createLineNode(xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + ( (i - 1) * tableCellHeight), xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + (i * tableCellHeight))
+                    tempNode.setStrokeWidth(tableLineThickness)
+                    tempNode.setStyle('stroke:' + createColorRGBString(tableLineColor))
+                    tableGroupNode.appendChild(tempNode)
+                    #tableGroupNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + ( (i - 1) * tableCellHeight), xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + (i * tableCellHeight), tableLineColor, tableLineThickness))
                     #draw.line([(xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + ( (i - 1) * tableCellHeight)), ( xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + (i * tableCellHeight) )], fill= tableLineColor, width= tableLineThickness)
                 j+= 1
             #draw the right word
             wordSize= f.getsize(row[len(row) - 1])
-            tableNode.appendChild(__createXmlTextNode__(xmlDoc, xtableStartPosition + (tableCellWidth * (len(row) - 2)) +  xWordToTableOffset + tableLineThickness, yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2), row[len(row) - 1], wordSize[0], wordSize[1], fontName, fontSize, tableWordColor))
+            tempNode= xmlDoc.createSvgTextNode(xtableStartPosition + (tableCellWidth * (len(row) - 2)) +  xWordToTableOffset + tableLineThickness, (yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2)) + wordSize[0], row[len(row) - 1])
+            tempNode.setFontFamily(fontName)
+            tempNode.setFontSize(str(fontSize) + 'px')
+            tempNode.setStyle('fill:' + createColorRGBString(tableWordColor))
+            tableGroupNode.appendChild(tempNode)
+            #tableGroupNode.appendChild(__createXmlTextNode__(xmlDoc, xtableStartPosition + (tableCellWidth * (len(row) - 2)) +  xWordToTableOffset + tableLineThickness, yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2), row[len(row) - 1], wordSize[0], wordSize[1], fontName, fontSize, tableWordColor))
             #draw.text( ( xtableStartPosition + (tableCellWidth * (len(row) - 2)) +  xWordToTableOffset + tableLineThickness, yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2) ), row[len(row) - 1], font= f, fill= tableWordColor)
             dicMatrixConcernToWordEndPosition[row[0]]=  (wordSize[0] + xtableStartPosition + (tableCellWidth * (len(row) - 2)) +  xWordToTableOffset + tableLineThickness, yTableStartPosition + (tableCellHeight * (i - 1)) + (wordSize[1]/2) )
             dicMatrixConcernToWordEndPosition[row[len(row) - 1]]= dicMatrixConcernToWordEndPosition[row[0]]
@@ -1270,10 +1321,15 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
             i+= 1
         #draw the bottom line
         yTableBottom= yTableStartPosition + (tableCellHeight * (len(matrix) - 1) )
-        tableNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition, yTableBottom, xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ), yTableBottom, tableLineColor, tableLineThickness))
+        tempNode= xmlDoc.createLineNode(xtableStartPosition, yTableBottom, xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ), yTableBottom)
+        tempNode.setStrokeWidth(tableLineThickness)
+        tempNode.setStyle('stroke:' + createColorRGBString(tableLineColor))
+        tableGroupNode.appendChild(tempNode)
+        #tableGroupNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition, yTableBottom, xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ), yTableBottom, tableLineColor, tableLineThickness))
         #draw.line([(xtableStartPosition, yTableBottom ), (xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ) , yTableBottom )], fill= tableLineColor, width= tableLineThickness)
         
-        topElement.appendChild(tableNode)
+        #topElement.appendChild(tableGroupNode)
+        root.appendChild(tableGroupNode)
           
         ####### end table draw #########
         
@@ -1281,7 +1337,8 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         ###Concern dendogram draw###
         ############################
         
-        dendogramConcernsNode= xmlDoc.createElement('dendogramConcerns')
+        #dendogramConcernsGroup= xmlDoc.createElement('dendogramConcerns')
+        dendogramConcernsGroup= xmlDoc.createGNode()
         
         #lets first draw all the individual items, the last sub-cluster should contain all of them
         allClusters= [] # format is ([item1, item2,...], positionX, positionY)
@@ -1298,21 +1355,38 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         temp= []
         for cluster in allClusters:
             newX= xConcernRulerStartPoint #xOffsetWordToLine + cluster[1] + (rightConcenrMaxX - cluster[1]) + xOffsetLineToRuler
-            dendogramConcernsNode.appendChild(__createXmlLineNode__(xmlDoc, cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2], concernDendogramLineColor, 1))
+            tempNode= xmlDoc.createLineNode(cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2])
+            tempNode.setStrokeWidth(1)
+            tempNode.setStyle('stroke:' + createColorRGBString(concernDendogramLineColor))
+            dendogramConcernsGroup.appendChild(tempNode)
+            #dendogramConcernsGroup.appendChild(__createXmlLineNode__(xmlDoc, cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2], concernDendogramLineColor, 1))
             #draw.line([(cluster[1] + xOffsetWordToLine, cluster[2]), ( newX , cluster[2])], fill= concernDendogramLineColor)
             temp.append((cluster[0], newX, cluster[2]))
         allClusters= temp;
         #now lets draw the ruler
-        dendogramConcernsNode.appendChild(__createXmlLineNode__(xmlDoc, xConcernRulerStartPoint, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, xConcernRulerStartPoint + concernRulerLength, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, concernRulerColor, 1))
+        tempNode= xmlDoc.createLineNode(xConcernRulerStartPoint, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, xConcernRulerStartPoint + concernRulerLength, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset)
+        tempNode.setStrokeWidth(1)
+        tempNode.setStyle('stroke:' + createColorRGBString(concernDendogramLineColor))
+        dendogramConcernsGroup.appendChild(tempNode)
+        #dendogramConcernsGroup.appendChild(__createXmlLineNode__(xmlDoc, xConcernRulerStartPoint, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, xConcernRulerStartPoint + concernRulerLength, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, concernRulerColor, 1))
         #draw.line( [(xConcernRulerStartPoint, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset), (xConcernRulerStartPoint + concernRulerLength, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset)], fill= concernRulerColor)
         i= 0
         #draw the markers of the ruler
         while i <= nConcernRulerSteps:
             percentage= str(100 - (i * 10))
             wordSize= f.getsize(percentage)
-            dendogramConcernsNode.appendChild(__createXmlTextNode__(xmlDoc, xConcernRulerStartPoint + (concernRulerStep * i) -  (wordSize[0] / 2), yConcernRulerOffset, percentage, wordSize[0], wordSize[1], fontName, fontSize, concernRulerPerncetageColor))
+            tempNode= xmlDoc.createSvgTextNode(xConcernRulerStartPoint + (concernRulerStep * i) -  (wordSize[0] / 2), yConcernRulerOffset, percentage)
+            tempNode.setFontFamily(fontName)
+            tempNode.setFontSize(str(fontSize) + 'px')
+            tempNode.setStyle('fill:' + createColorRGBString(concernRulerPerncetageColor))
+            dendogramConcernsGroup.appendChild(tempNode)
+            #dendogramConcernsGroup.appendChild(__createXmlTextNode__(xmlDoc, xConcernRulerStartPoint + (concernRulerStep * i) -  (wordSize[0] / 2), yConcernRulerOffset, percentage, wordSize[0], wordSize[1], fontName, fontSize, concernRulerPerncetageColor))
             #draw.text(( xConcernRulerStartPoint + (concernRulerStep * i) -  (f.getsize(percentage)[0] / 2) , yConcernRulerOffset ), text= percentage, fill= concernRulerPerncetageColor, font= f)
-            dendogramConcernsNode.appendChild(__createXmlLineNode__(xmlDoc, xConcernRulerStartPoint + (concernRulerStep * i), percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, xConcernRulerStartPoint + (concernRulerStep * i), percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset + rulerVerticalLineSize, concernRulerColor, 1))
+            tempNode= xmlDoc.createLineNode(xConcernRulerStartPoint + (concernRulerStep * i), percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, xConcernRulerStartPoint + (concernRulerStep * i), percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset + rulerVerticalLineSize)
+            tempNode.setStrokeWidth(1)
+            tempNode.setStyle('stroke:' + createColorRGBString(concernRulerColor))
+            dendogramConcernsGroup.appendChild(tempNode)
+            #dendogramConcernsGroup.appendChild(__createXmlLineNode__(xmlDoc, xConcernRulerStartPoint + (concernRulerStep * i), percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, xConcernRulerStartPoint + (concernRulerStep * i), percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset + rulerVerticalLineSize, concernRulerColor, 1))
             #draw.line( [ (xConcernRulerStartPoint + (concernRulerStep * i) , percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset), ( (xConcernRulerStartPoint + (concernRulerStep * i)), percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset + rulerVerticalLineSize) ], fill= concernRulerColor)
             i+= 1
         
@@ -1363,7 +1437,11 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
             yPositionNewCluster= temp2 + (temp - temp2)/2
             
             for subCluser in subSetClusters:
-                dendogramConcernsNode.appendChild(__createXmlLineNode__(xmlDoc, subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster, concernDendogramLineColor, 1))
+                tempNode= xmlDoc.createLineNode(subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster)
+                tempNode.setStrokeWidth(1)
+                tempNode.setStyle('stroke:' + createColorRGBString(concernDendogramLineColor))
+                dendogramConcernsGroup.appendChild(tempNode)
+                #dendogramConcernsGroup.appendChild(__createXmlLineNode__(xmlDoc, subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster, concernDendogramLineColor, 1))
                 #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, yPositionNewCluster)], fill= concernDendogramLineColor)
                 #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, subCluser[2])], fill=(255,0,0))
                 #draw.line((xPositionNewCluster, subCluser[2], xPositionNewCluster, yPositionNewCluster), fill=(255,0,0))
@@ -1373,14 +1451,16 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
             #now add the new cluster to allClusters
             allClusters.append((cluster[0], xPositionNewCluster, yPositionNewCluster))
             i+= 1
-        topElement.appendChild(dendogramConcernsNode)
+        #topElement.appendChild(dendogramConcernsGroup)
+        root.appendChild(dendogramConcernsGroup)
         ####### end concern dendogram draw #########
         
         ################################
         ###Alternative dendogram draw###
         ################################
         
-        dendogramAlternativesNode= xmlDoc.createElement('dendogramAlternative')
+        #dendogramAlternativesGroup= xmlDoc.createElement('dendogramAlternative')
+        dendogramAlternativesGroup= xmlDoc.createGNode()
         
         allClusters= [] # format is ([item1, item2,...], positionX, positionY)
         i= 0;
@@ -1392,16 +1472,29 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         maxWordLength= -1
         for cluster in allClusters:
             (width, height)= f.getsize(cluster[0])
-            dendogramAlternativesNode.appendChild(__createXmlTextNode__(xmlDoc, cluster[1], cluster[2], cluster[0], width, height, fontName, fontSize, alternativeWordColor))
+            tempNode= xmlDoc.createSvgTextNode(cluster[1], cluster[2], cluster[0])
+            tempNode.setFontFamily(fontName)
+            tempNode.setFontSize(str(fontSize) + 'px')
+            tempNode.setStyle('fill:' + createColorRGBString(alternativeWordColor))
+            dendogramAlternativesGroup.appendChild(tempNode)
+            #dendogramAlternativesGroup.appendChild(__createXmlTextNode__(xmlDoc, cluster[1], cluster[2], cluster[0], width, height, fontName, fontSize, alternativeWordColor))
             #draw.text((cluster[1], cluster[2]), cluster[0], font= f, fill= alternativeWordColor );
             # now reset the y position to the middle of the word and the x to the end of the word, this is the point where the line will start
             temp.append(( cluster[0], cluster[1] + width, cluster[2] + (height/2) ))
             if maxWordLength < width:
                 maxWordLength= width
             #draw the lines that connect the table with the alternative names
-            dendogramAlternativesNode.appendChild(__createXmlLineNode__(xmlDoc, cellAlternativesXPositions[cluster[0]], yTableBottom + 1, cellAlternativesXPositions[cluster[0]], cluster[2] + (height/2), tableToAlternativesConnectionLineColor, 1))
+            tempNode= xmlDoc.createLineNode(cellAlternativesXPositions[cluster[0]], yTableBottom + 1, cellAlternativesXPositions[cluster[0]], cluster[2] + (height/2))
+            tempNode.setStrokeWidth(1)
+            tempNode.setStyle('stroke:' + createColorRGBString(tableToAlternativesConnectionLineColor))
+            dendogramAlternativesGroup.appendChild(tempNode)
+            #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, cellAlternativesXPositions[cluster[0]], yTableBottom + 1, cellAlternativesXPositions[cluster[0]], cluster[2] + (height/2), tableToAlternativesConnectionLineColor, 1))
             #draw.line([(cellAlternativesXPositions[cluster[0]] , yTableBottom + 1), (cellAlternativesXPositions[cluster[0]], cluster[2] + (height/2))], fill= tableToAlternativesConnectionLineColor)
-            dendogramAlternativesNode.appendChild(__createXmlLineNode__(xmlDoc, cellAlternativesXPositions[cluster[0]],  cluster[2] + (height/2), cluster[1] - 2,  cluster[2] + (height/2), tableToAlternativesConnectionLineColor, 1))
+            tempNode= xmlDoc.createLineNode(cellAlternativesXPositions[cluster[0]], cluster[2] + (height/2), cluster[1] - 2, cluster[2] + (height/2))
+            tempNode.setStrokeWidth(1)
+            tempNode.setStyle('stroke:' + createColorRGBString(tableToAlternativesConnectionLineColor))
+            dendogramAlternativesGroup.appendChild(tempNode)
+            #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, cellAlternativesXPositions[cluster[0]],  cluster[2] + (height/2), cluster[1] - 2,  cluster[2] + (height/2), tableToAlternativesConnectionLineColor, 1))
             #draw.line([(cellAlternativesXPositions[cluster[0]] , cluster[2] + (height/2)), (cluster[1] - 2, cluster[2] + (height/2))], fill= tableToAlternativesConnectionLineColor)
         allClusters= temp
         xAlternativeRulerStartPoint= maxWordLength + xOffsetWordToLine + xOffsetLineToRuler + xtableStartPosition +  (tableCellWidth * (len(matrix[0]) - 2) )
@@ -1410,21 +1503,39 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         temp= []
         for cluster in allClusters:
             newX= xAlternativeRulerStartPoint
-            dendogramAlternativesNode.appendChild(__createXmlLineNode__(xmlDoc, cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2], alternativeDendogramLineColor, 1))
+            tempNode= xmlDoc.createLineNode(cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2])
+            tempNode.setStrokeWidth(1)
+            tempNode.setStyle('stroke:' + createColorRGBString(alternativeDendogramLineColor))
+            dendogramAlternativesGroup.appendChild(tempNode)
+            #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2], alternativeDendogramLineColor, 1))
             #draw.line([(cluster[1] + xOffsetWordToLine, cluster[2]), ( newX , cluster[2])], fill= alternativeDendogramLineColor)
             temp.append((cluster[0], newX, cluster[2]))
         allClusters= temp;
         #now lets draw the ruler
-        dendogramAlternativesNode.appendChild(__createXmlLineNode__(xmlDoc, xAlternativeRulerStartPoint, yAlternativeRulerStartPoint, xAlternativeRulerStartPoint + alternativeRulerLength, yAlternativeRulerStartPoint, alternativeRulerColor, 1))
+        newX= xAlternativeRulerStartPoint
+        tempNode= xmlDoc.createLineNode(xAlternativeRulerStartPoint, yAlternativeRulerStartPoint, xAlternativeRulerStartPoint + alternativeRulerLength, yAlternativeRulerStartPoint)
+        tempNode.setStrokeWidth(1)
+        tempNode.setStyle('stroke:' + createColorRGBString(alternativeRulerColor))
+        dendogramAlternativesGroup.appendChild(tempNode)
+        #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, xAlternativeRulerStartPoint, yAlternativeRulerStartPoint, xAlternativeRulerStartPoint + alternativeRulerLength, yAlternativeRulerStartPoint, alternativeRulerColor, 1))
         #draw.line( [(xAlternativeRulerStartPoint, yAlternativeRulerStartPoint), (xAlternativeRulerStartPoint + alternativeRulerLength, yAlternativeRulerStartPoint)], fill= alternativeRulerColor)
         i= 0
         #draw the markers of the ruler
         while i <= nAlternativRulerSteps:
             percentage= str(100 - (i * 10))
             wordSize= f.getsize(percentage)
-            dendogramAlternativesNode.appendChild(__createXmlTextNode__(xmlDoc, xAlternativeRulerStartPoint + (alternativeRulerStep * i) -  (wordSize[0] / 2), yAlternativeRulerStartPoint -  yAlternativePercentageToRulerOffset - wordSize[1], percentage, wordSize[0], wordSize[1], fontName, fontSize, alternativeRulerPerncetageColor))
+            tempNode= xmlDoc.createSvgTextNode(xAlternativeRulerStartPoint + (alternativeRulerStep * i) -  (wordSize[0] / 2), yAlternativeRulerStartPoint -  yAlternativePercentageToRulerOffset - wordSize[1], percentage)
+            tempNode.setFontFamily(fontName)
+            tempNode.setFontSize(str(fontSize) + 'px')
+            tempNode.setStyle('fill:' + createColorRGBString(alternativeRulerPerncetageColor))
+            dendogramAlternativesGroup.appendChild(tempNode)
+            #dendogramAlternativesGroup.appendChild(__createXmlTextNode__(xmlDoc, xAlternativeRulerStartPoint + (alternativeRulerStep * i) -  (wordSize[0] / 2), yAlternativeRulerStartPoint -  yAlternativePercentageToRulerOffset - wordSize[1], percentage, wordSize[0], wordSize[1], fontName, fontSize, alternativeRulerPerncetageColor))
             #draw.text(( xAlternativeRulerStartPoint + (alternativeRulerStep * i) -  (wordSize[0] / 2) , yAlternativeRulerStartPoint -  yAlternativePercentageToRulerOffset - wordSize[1]), text= percentage, fill= alternativeRulerPerncetageColor, font= f)
-            dendogramAlternativesNode.appendChild(__createXmlLineNode__(xmlDoc, xAlternativeRulerStartPoint + (alternativeRulerStep * i), yAlternativeRulerStartPoint, xAlternativeRulerStartPoint + (alternativeRulerStep * i), yAlternativeRulerStartPoint + rulerVerticalLineSize, alternativeRulerColor, 1))
+            tempNode= xmlDoc.createLineNode(xAlternativeRulerStartPoint + (alternativeRulerStep * i), yAlternativeRulerStartPoint, xAlternativeRulerStartPoint + (alternativeRulerStep * i), yAlternativeRulerStartPoint + rulerVerticalLineSize)
+            tempNode.setStrokeWidth(1)
+            tempNode.setStyle('stroke:' + createColorRGBString(alternativeRulerColor))
+            dendogramAlternativesGroup.appendChild(tempNode)
+            #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, xAlternativeRulerStartPoint + (alternativeRulerStep * i), yAlternativeRulerStartPoint, xAlternativeRulerStartPoint + (alternativeRulerStep * i), yAlternativeRulerStartPoint + rulerVerticalLineSize, alternativeRulerColor, 1))
             #draw.line( [ (xAlternativeRulerStartPoint + (alternativeRulerStep * i) , yAlternativeRulerStartPoint), ( (xAlternativeRulerStartPoint + (alternativeRulerStep * i)), yAlternativeRulerStartPoint + rulerVerticalLineSize) ], fill= alternativeRulerColor)
             i+= 1
         
@@ -1475,7 +1586,11 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
             yPositionNewCluster= temp2 + (temp - temp2)/2
             
             for subCluser in subSetClusters:
-                dendogramAlternativesNode.appendChild(__createXmlLineNode__(xmlDoc, subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster, alternativeDendogramLineColor, 1))
+                tempNode= xmlDoc.createLineNode(subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster)
+                tempNode.setStrokeWidth(1)
+                tempNode.setStyle('stroke:' + createColorRGBString(alternativeDendogramLineColor))
+                dendogramAlternativesGroup.appendChild(tempNode)
+                #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster, alternativeDendogramLineColor, 1))
                 #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, yPositionNewCluster)], fill= alternativeDendogramLineColor)
                 #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, subCluser[2])], fill=(255,0,0))
                 #draw.line((xPositionNewCluster, subCluser[2], xPositionNewCluster, yPositionNewCluster), fill=(255,0,0))
@@ -1485,106 +1600,111 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
             #now add the new cluster to allClusters
             allClusters.append((cluster[0], xPositionNewCluster, yPositionNewCluster))
             i+= 1
-        topElement.appendChild(dendogramAlternativesNode)
+        #topElement.appendChild(dendogramAlternativesGroup)
+        root.appendChild(dendogramAlternativesGroup)
         ####### end alternative dendogram draw #########
         
         #lets return the image
         return xmlDoc
-    
-""" 
-color is a tulp with 4 positions, (red, blue, green, alpha)
-"""
-def __createXmlLineNode__(xmlDoc, startX, startY, endX, endY, color=(0,0,0,100), width= 1):
-    
-    lineNode= xmlDoc.createElement('line') #main node
-    startXNode= xmlDoc.createElement('startX')
-    startYNode= xmlDoc.createElement('startY')
-    endXNode= xmlDoc.createElement('endX')
-    endYNode= xmlDoc.createElement('endY')
-    widthNode= xmlDoc.createElement('width')
-    
-    widthNode.appendChild(xmlDoc.createTextNode(str(width)))
-    startXNode.appendChild(xmlDoc.createTextNode(str(startX)))
-    startYNode.appendChild(xmlDoc.createTextNode(str(startY)))
-    endXNode.appendChild(xmlDoc.createTextNode(str(endX)))
-    endYNode.appendChild(xmlDoc.createTextNode(str(endY)))
-    colorNode= __createXmlColorNode__(xmlDoc, color)
-    
-    lineNode.appendChild(widthNode)
-    lineNode.appendChild(startXNode)
-    lineNode.appendChild(startYNode)
-    lineNode.appendChild(endXNode)
-    lineNode.appendChild(endYNode)
-    lineNode.appendChild(colorNode)
-    
-    return lineNode
 
-def __createXmlTextNode__(xmlDoc, topLeftX, topLeftY, text, width, height, fontName, fontSize, fontFillColor=(0,0,0,100)):
+# returns a string with: 'rgb(number,number,number)'
+def createColorRGBString(color):
+    return 'rgb(' + str(color[0]) + ',' + str(color[1]) + ',' + str(color[2]) + ')'
     
-    textNode= xmlDoc.createElement('text') #main node
-    topLeftXNode= xmlDoc.createElement('x')
-    topLeftYNode= xmlDoc.createElement('y')
-    textValueNode= xmlDoc.createElement('textValue')
-    widthNode= xmlDoc.createElement('width')
-    heightNode= xmlDoc.createElement('height')
-    fontNode= __createXmlFontNode__(xmlDoc, fontName, fontSize, fontFillColor)
-    
-    topLeftXNode.appendChild(xmlDoc.createTextNode(str(topLeftX)))
-    topLeftYNode.appendChild(xmlDoc.createTextNode(str(topLeftY)))
-    textValueNode.appendChild(xmlDoc.createTextNode(text))
-    widthNode.appendChild(xmlDoc.createTextNode(str(width)))
-    heightNode.appendChild(xmlDoc.createTextNode(str(height)))
-    
-    textNode.appendChild(topLeftXNode)
-    textNode.appendChild(topLeftYNode)
-    textNode.appendChild(textValueNode)
-    textNode.appendChild(widthNode)
-    textNode.appendChild(heightNode)
-    textNode.appendChild(fontNode)
-    
-    return textNode
-
-def __createXmlFontNode__ (xmlDoc, fontName, fontSize, fontFillColor):
-    
-    fontNode= xmlDoc.createElement('font') #main node
-    nameNode= xmlDoc.createElement('name')
-    sizeNode= xmlDoc.createElement('size')
-    fillNode= xmlDoc.createElement('fill')
-    
-    nameNode.appendChild(xmlDoc.createTextNode(fontName))
-    sizeNode.appendChild(xmlDoc.createTextNode(str(fontSize)))
-    fillNode.appendChild(__createXmlColorNode__(xmlDoc ,fontFillColor))
-    
-    fontNode.appendChild(nameNode)
-    fontNode.appendChild(sizeNode)
-    fontNode.appendChild(fillNode)
-    
-    return fontNode
-    
-    
-""" 
-color is a tulp with 4 positions, (red, blue, green, alpha)
-"""
-def __createXmlColorNode__(xmlDoc, color= (0,0,0,100)):
-    
-    colorNode= xmlDoc.createElement('color') #main node
-    redNode= xmlDoc.createElement('red')
-    blueNode= xmlDoc.createElement('blue')
-    greenNode= xmlDoc.createElement('green')
-    alphaNode= xmlDoc.createElement('alpha')
-    
-    redNode.appendChild(xmlDoc.createTextNode(str(color[0])))
-    blueNode.appendChild(xmlDoc.createTextNode(str(color[1])))
-    greenNode.appendChild(xmlDoc.createTextNode(str(color[2])))
-    if len(color) >= 4:    
-        alphaNode.appendChild(xmlDoc.createTextNode(str(color[3])))
-    else:
-        alphaNode.appendChild(xmlDoc.createTextNode('100'))
-    
-    colorNode.appendChild(redNode)
-    colorNode.appendChild(blueNode)
-    colorNode.appendChild(greenNode)
-    colorNode.appendChild(alphaNode)
-    
-    return colorNode
+#""" 
+#color is a tulp with 4 positions, (red, blue, green, alpha)
+#"""
+#def __createXmlLineNode__(xmlDoc, startX, startY, endX, endY, color=(0,0,0,100), width= 1):
+#    
+#    lineNode= xmlDoc.createElement('line') #main node
+#    startXNode= xmlDoc.createElement('startX')
+#    startYNode= xmlDoc.createElement('startY')
+#    endXNode= xmlDoc.createElement('endX')
+#    endYNode= xmlDoc.createElement('endY')
+#    widthNode= xmlDoc.createElement('width')
+#    
+#    widthNode.appendChild(xmlDoc.createTextNode(str(width)))
+#    startXNode.appendChild(xmlDoc.createTextNode(str(startX)))
+#    startYNode.appendChild(xmlDoc.createTextNode(str(startY)))
+#    endXNode.appendChild(xmlDoc.createTextNode(str(endX)))
+#    endYNode.appendChild(xmlDoc.createTextNode(str(endY)))
+#    colorNode= __createXmlColorNode__(xmlDoc, color)
+#    
+#    lineNode.appendChild(widthNode)
+#    lineNode.appendChild(startXNode)
+#    lineNode.appendChild(startYNode)
+#    lineNode.appendChild(endXNode)
+#    lineNode.appendChild(endYNode)
+#    lineNode.appendChild(colorNode)
+#    
+#    return lineNode
+#
+#def __createXmlTextNode__(xmlDoc, topLeftX, topLeftY, text, width, height, fontName, fontSize, fontFillColor=(0,0,0,100)):
+#    
+#    textNode= xmlDoc.createElement('text') #main node
+#    topLeftXNode= xmlDoc.createElement('x')
+#    topLeftYNode= xmlDoc.createElement('y')
+#    textValueNode= xmlDoc.createElement('textValue')
+#    widthNode= xmlDoc.createElement('width')
+#    heightNode= xmlDoc.createElement('height')
+#    fontNode= __createXmlFontNode__(xmlDoc, fontName, fontSize, fontFillColor)
+#    
+#    topLeftXNode.appendChild(xmlDoc.createTextNode(str(topLeftX)))
+#    topLeftYNode.appendChild(xmlDoc.createTextNode(str(topLeftY)))
+#    textValueNode.appendChild(xmlDoc.createTextNode(text))
+#    widthNode.appendChild(xmlDoc.createTextNode(str(width)))
+#    heightNode.appendChild(xmlDoc.createTextNode(str(height)))
+#    
+#    textNode.appendChild(topLeftXNode)
+#    textNode.appendChild(topLeftYNode)
+#    textNode.appendChild(textValueNode)
+#    textNode.appendChild(widthNode)
+#    textNode.appendChild(heightNode)
+#    textNode.appendChild(fontNode)
+#    
+#    return textNode
+#
+#def __createXmlFontNode__ (xmlDoc, fontName, fontSize, fontFillColor):
+#    
+#    fontNode= xmlDoc.createElement('font') #main node
+#    nameNode= xmlDoc.createElement('name')
+#    sizeNode= xmlDoc.createElement('size')
+#    fillNode= xmlDoc.createElement('fill')
+#    
+#    nameNode.appendChild(xmlDoc.createTextNode(fontName))
+#    sizeNode.appendChild(xmlDoc.createTextNode(str(fontSize)))
+#    fillNode.appendChild(__createXmlColorNode__(xmlDoc ,fontFillColor))
+#    
+#    fontNode.appendChild(nameNode)
+#    fontNode.appendChild(sizeNode)
+#    fontNode.appendChild(fillNode)
+#    
+#    return fontNode
+#    
+#    
+#""" 
+#color is a tulp with 4 positions, (red, blue, green, alpha)
+#"""
+#def __createXmlColorNode__(xmlDoc, color= (0,0,0,100)):
+#    
+#    colorNode= xmlDoc.createElement('color') #main node
+#    redNode= xmlDoc.createElement('red')
+#    blueNode= xmlDoc.createElement('blue')
+#    greenNode= xmlDoc.createElement('green')
+#    alphaNode= xmlDoc.createElement('alpha')
+#    
+#    redNode.appendChild(xmlDoc.createTextNode(str(color[0])))
+#    blueNode.appendChild(xmlDoc.createTextNode(str(color[1])))
+#    greenNode.appendChild(xmlDoc.createTextNode(str(color[2])))
+#    if len(color) >= 4:    
+#        alphaNode.appendChild(xmlDoc.createTextNode(str(color[3])))
+#    else:
+#        alphaNode.appendChild(xmlDoc.createTextNode('100'))
+#    
+#    colorNode.appendChild(redNode)
+#    colorNode.appendChild(blueNode)
+#    colorNode.appendChild(greenNode)
+#    colorNode.appendChild(alphaNode)
+#    
+#    return colorNode
     
