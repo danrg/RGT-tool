@@ -1267,7 +1267,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
             row= matrix[i]
             #draw the left word
             wordSize= f.getsize(row[0])
-            tempNode= xmlDoc.createSvgTextNode(xtableStartPosition - xWordToTableOffset - wordSize[0], (yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2)) + wordSize[0], row[0])
+            tempNode= xmlDoc.createSvgTextNode(xtableStartPosition - xWordToTableOffset - wordSize[0], (yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2)) + (wordSize[1] - 4), row[0])
             tempNode.setFontFamily(fontName)
             tempNode.setFontSize(str(fontSize) + 'px')
             tempNode.setStyle('fill:' + createColorRGBString(tableWordColor))
@@ -1288,7 +1288,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
                 wordSize= f.getsize(str(cell))
                 xCellValue= xtableStartPosition + (j * tableCellWidth) + floor((tableCellWidth - wordSize[0])/2)
                 yCellValue= yTableStartPosition + ((i-1) * tableCellHeight) + floor((tableCellHeight - wordSize[1])/2)
-                tempNode= xmlDoc.createSvgTextNode(xCellValue, yCellValue + wordSize[0], str(cell))
+                tempNode= xmlDoc.createSvgTextNode(xCellValue, yCellValue + (wordSize[1] - 4), str(cell))
                 tempNode.setFontFamily(fontName)
                 tempNode.setFontSize(str(fontSize) + 'px')
                 tempNode.setStyle('fill:' + createColorRGBString(tableCellWordColor))
@@ -1306,7 +1306,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
                 j+= 1
             #draw the right word
             wordSize= f.getsize(row[len(row) - 1])
-            tempNode= xmlDoc.createSvgTextNode(xtableStartPosition + (tableCellWidth * (len(row) - 2)) +  xWordToTableOffset + tableLineThickness, (yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2)) + wordSize[0], row[len(row) - 1])
+            tempNode= xmlDoc.createSvgTextNode(xtableStartPosition + (tableCellWidth * (len(row) - 2)) +  xWordToTableOffset + tableLineThickness, (yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2)) + (wordSize[1] - 4), row[len(row) - 1])
             tempNode.setFontFamily(fontName)
             tempNode.setFontSize(str(fontSize) + 'px')
             tempNode.setStyle('fill:' + createColorRGBString(tableWordColor))
@@ -1375,7 +1375,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         while i <= nConcernRulerSteps:
             percentage= str(100 - (i * 10))
             wordSize= f.getsize(percentage)
-            tempNode= xmlDoc.createSvgTextNode(xConcernRulerStartPoint + (concernRulerStep * i) -  (wordSize[0] / 2), yConcernRulerOffset, percentage)
+            tempNode= xmlDoc.createSvgTextNode(xConcernRulerStartPoint + (concernRulerStep * i) -  (wordSize[0] / 2), yConcernRulerOffset + (wordSize[1] - 4), percentage)
             tempNode.setFontFamily(fontName)
             tempNode.setFontSize(str(fontSize) + 'px')
             tempNode.setStyle('fill:' + createColorRGBString(concernRulerPerncetageColor))
@@ -1472,7 +1472,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         maxWordLength= -1
         for cluster in allClusters:
             (width, height)= f.getsize(cluster[0])
-            tempNode= xmlDoc.createSvgTextNode(cluster[1], cluster[2], cluster[0])
+            tempNode= xmlDoc.createSvgTextNode(cluster[1], cluster[2] + (wordSize[1] - 4), cluster[0])
             tempNode.setFontFamily(fontName)
             tempNode.setFontSize(str(fontSize) + 'px')
             tempNode.setStyle('fill:' + createColorRGBString(alternativeWordColor))
@@ -1524,7 +1524,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         while i <= nAlternativRulerSteps:
             percentage= str(100 - (i * 10))
             wordSize= f.getsize(percentage)
-            tempNode= xmlDoc.createSvgTextNode(xAlternativeRulerStartPoint + (alternativeRulerStep * i) -  (wordSize[0] / 2), yAlternativeRulerStartPoint -  yAlternativePercentageToRulerOffset - wordSize[1], percentage)
+            tempNode= xmlDoc.createSvgTextNode(xAlternativeRulerStartPoint + (alternativeRulerStep * i) -  (wordSize[0] / 2), yAlternativeRulerStartPoint -  yAlternativePercentageToRulerOffset - wordSize[1] + (wordSize[1] - 4), percentage)
             tempNode.setFontFamily(fontName)
             tempNode.setFontSize(str(fontSize) + 'px')
             tempNode.setStyle('fill:' + createColorRGBString(alternativeRulerPerncetageColor))
