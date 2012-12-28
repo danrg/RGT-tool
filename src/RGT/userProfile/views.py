@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from RGT.userProfile.userProfileForm import UserProfileForm
-from RGT.gridMng.utility import createXmlSuccessResponse
+from RGT.gridMng.response.xml.htmlResponseUtil import createXmlSuccessResponse
 
 def ajaxGetDisplayHelpState(request):
     profile= request.user.get_profile()

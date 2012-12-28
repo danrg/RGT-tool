@@ -269,12 +269,11 @@ function getDendogram()
 						{
 							$('#dendrogram').show();
 							clearSvgImg('dendogramDiv');
-							//createDendogram('dendogramDiv', data);
-							//import contents of the svg document into this document
-							var importedSVGRootElement = document.importNode(data.documentElement,true);
-							//append the imported SVG root element to the appropriate HTML element
-							$("#dendogramDiv").append(importedSVGRootElement);
-							createSvgMenu($('#dendogramDiv'), {saveItemAs: true, saveItemAsUrl: '/grids/download/dendrogram/', saveItemAsArguments:{gridUSID: gridUSID, convertTo:'svg'}});
+							// extra the svg data from the xml file
+							var svg= $.parseXML($(data).find('svgData').text());
+							createDendogram('dendogramDiv', svg);
+							//createSvgMenu($('#dendogramDiv'), {saveItemAs: true, saveItemAsUrl: '/grids/download/dendrogram/', saveItemAsArguments:{gridUSID: gridUSID, convertTo:'svg'}});
+							createSvgMenu($('#dendogramDiv'), null);
 							$('#dendrogramTitle').text('Dendrogram of grid: '+ $('#gridName').val());
 							hideLoadingSpinner($('#dendogramDiv'));
 						}

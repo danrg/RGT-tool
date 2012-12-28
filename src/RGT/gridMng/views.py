@@ -11,9 +11,9 @@ from RGT.gridMng.models import Alternatives
 from RGT.gridMng.models import Concerns
 from RGT.gridMng.models import Ratings
 from RGT.gridMng.models import Facilitator
-from RGT.gridMng.utility import createXmlErrorResponse, createXmlSuccessResponse, randomStringGenerator, validateName, convertSvgTo, getImageError,\
-    createDateTimeTag
-
+from RGT.gridMng.utility import randomStringGenerator, validateName, convertSvgTo, getImageError
+from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag
+from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.session.state import State
 from RGT.gridMng.template.showGridsData import ShowGridsData
 from RGT.gridMng.template.gridTableData import GridTableData
@@ -365,11 +365,14 @@ def ajaxGenerateDendogram(request):
                     f.write(xml)
                     f.close()
                     #end test
-                    return HttpResponse(grid1.dendogram, content_type='application/xml')
+                    imgData= createDendogram(grid1)
+                    responseData= createSvgResponse(imgData, None)
+                    return HttpResponse(responseData, content_type='application/xml')
                 else:
                     try:     
                         imgData= createDendogram(grid1)
-                        return HttpResponse(imgData, content_type='application/xml')
+                        responseData= createSvgResponse(imgData, None)
+                        return HttpResponse(responseData, content_type='application/xml')
                     except:
                         print "Exception in user code:"
                         print '-'*60

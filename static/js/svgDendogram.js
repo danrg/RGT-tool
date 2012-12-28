@@ -43,6 +43,19 @@ function getSvgString(svgElement)
 	return  serializer.serializeToString(svgElement[0]);
 }
 
+/**
+ * This function will create/add the svg image to the div
+ * @param divId String with the div id
+ * @param xmlData String xml document
+ */
+function createDendogram(divId, xmlData)
+{
+	//import contents of the svg document into this document
+	var importedSVGRootElement = document.importNode(xmlData.documentElement, true);
+	//append the imported SVG root element to the appropriate HTML element
+	$('#' + divId).append(importedSVGRootElement);
+}
+
 //function createDendogram(divId, xmlData)
 //{
 //	$('#' + divId).svg();

@@ -18,7 +18,8 @@ from RGT.gridMng.error.wrongState import WrongState
 from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
 from RGT.gridMng.error.wrongGridType import WrongGridType
 from RGT.gridMng.error.wrongSessionIteration import WrongSessionIteration
-from RGT.gridMng.utility import createXmlErrorResponse, createXmlSuccessResponse, randomStringGenerator, createXmlForComboBox, validateName, createXmlForNumberOfResponseSent, createDateTimeTag
+from RGT.gridMng.utility import randomStringGenerator, validateName
+from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createXmlForComboBox, createXmlForNumberOfResponseSent, createDateTimeTag
 from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid__
 from math import sqrt, ceil
 from RGT.gridMng.template.session.createSessionData import CreateSessionData
