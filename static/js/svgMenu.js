@@ -3,7 +3,11 @@
  * This function requires that the svg tag be inside a wrap div tag without any elements inside it (excluding the svg tag),
  * the wrap div should positioned as relative so the menu can work properly.
  * @param wrapDiv the jquery obj representing the div
- * @param options Options is not mandatory. Available options are: showSaveButton: boolean, showClearButton: boolean, saveButtonFunction: function
+ * @param options Options is not mandatory. Available options are: showSaveButton: boolean, showClearButton: boolean, saveButtonFunction: function, 
+ * saveItemAs: boolean, saveItemAsArguments: object with this format: {attribute: value, attribute: value, ...}, saveItemAsUrl: string
+ * 
+ * saveItemAsUrl: url that should be called to request something from the server and is mandatory when using saveItemAs: true
+ * Observation: when using saveItemAsArguments the data will in that object will be sent to the server
  */
 function createSvgMenu(wrapDiv, options)
 {
@@ -12,6 +16,9 @@ function createSvgMenu(wrapDiv, options)
 	var saveButtonFunction= null;
 	var showSaveButton= true;
 	var showClearButton= true;
+	var checkSaveButtonFunction= true;
+	var saveItemAsArg= null;
+	var saveItemAsUrl= null;
 
 	//path of the images
 	var saveButtonImg= '/static/icons/save.png';
@@ -57,10 +64,26 @@ function createSvgMenu(wrapDiv, options)
 		}
 		else
 		{
-			//default is to shoe the button
+			//default is to show the button
 			menuContent+= '<img src="' + clearButtonImg + '" id="clearButtonImg" />'
 		}
-		if('saveButtonFunction' in options)
+		/* if saveItemAsArguments is true we will use the default saveItemAsArguments function, 
+		 * else check if the saveButtonFunction is defined and if that fails, use
+		 * the default function
+		 */
+		if('saveItemAs' in options && 'saveItemAsUrl' in options)
+		{
+			if(options['saveItemAs'] != null and options['saveItemAs'] == true && options['saveItemAsUrl'] != null)
+			{
+				saveItemAsUrl= options['saveItemAsUrl'];
+				if ('saveItemAsArguments' in options)
+				{
+					saveItemAsArg= options['saveItemAsArguments'];
+					checkSaveButtonFunction= false;
+				}
+			}
+		}
+		if('saveButtonFunction' in options && checkSaveButtonFunction)
 		{
 			if(options['saveButtonFunction'] != null)
 			{
@@ -102,6 +125,11 @@ function createSvgMenu(wrapDiv, options)
 	if(showSaveButton)
 	{
 		button= menuDiv.find('#saveButtonImg');
+		//check if we are going to use the saveDendogram function or not
+		if(saveItemAsUrl != null)
+		{
+			button.click(function(){downloadItemAs($(this), saveItemAsUrl, saveItemAsArg)});
+		}
 		button.click(function(){saveButtonFunction($(this))});
 		button.hover(
 				function(){
@@ -140,6 +168,7 @@ function createSvgMenu(wrapDiv, options)
 
 /**
  * Default function used to save the svg
+ * @param imgObj: object representing the <img> which was pressed to call this function
  */
 function saveSvgAs(imgObj)
 {
@@ -152,11 +181,12 @@ function saveSvgAs(imgObj)
 			var svg= getSvgFromDiv(tagData.parent('div').parent('div'));
 			if($(data).find('error').length <= 0)
 			{
+				
 				var modalDiv= getDialogDiv();
 				modalDiv.html($(data).find('htmlData').text());
-				var input = $('<input>').attr("type", "hidden").attr("name", "data").val(svg.toSVG()); 
+				var input = $('<input>').attr("type", "hidden").attr("name", "data").val(getSvgString(svg)); 
 				modalDiv.find('form').append($(input))
-				$('#modalDialogBox').dialog({
+				modalDiv.dialog({
 			    	title: 'Download',
 					resizable: false,
 					width:400,
@@ -174,4 +204,54 @@ function saveSvgAs(imgObj)
 		}
 	}
 	$.post('/grids/download/', '', callBack(imgObj));
+}
+
+/**
+ * Default function used to request a download of something from the server
+ * @param imgObj object representing the <img> which was pressed to call this function
+ * @param url url (string) that will be called by the post function
+ * @param parameters obect with the arguments that should be passed to the server, format: { argumentName: value, argumentName: value, ......}
+ */
+function downloadItemAs(imgObj, url, parameters)
+{
+	//the double function is used here so the tagData obj will be able to be used inside the function that will handle the post response
+	var callBack= function(imgObj2, parameters2)
+	{
+		return function(data)
+		{
+			var svg= getSvgFromDiv(imgObj2.parent('div').parent('div'));
+			if($(data).find('error').length <= 0)
+			{
+				
+				var modalDiv= getDialogDiv();
+				modalDiv.html($(data).find('htmlData').text());
+				var form= modalDiv.find('form');
+				var temp= null;
+				if (parameters2 != null)
+				{	
+					for(attrib in parameters2)
+					{
+						temp= $('<input>').attr("type", "hidden").attr("name", attrib).val(parameters2[attrib]);
+						form.append($(temp));
+					}
+				}
+				
+				modalDiv.dialog({
+			    	title: 'Download',
+					resizable: false,
+					width:400,
+					modal: true,
+					buttons: {'Download':function(){
+						sendDownloadSvgForm();
+						}
+			    	}
+			    });
+			}
+			else
+			{
+				showMessageInDialogBox($(data).html('error').text());
+			}
+		}
+	}
+	$.post(url, '', callBack(imgObj, parameters));
 }

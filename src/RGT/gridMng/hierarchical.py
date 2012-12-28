@@ -924,8 +924,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         f = ImageFont.truetype(DENDROGRAM_FONT_LOCATION, fontSize)
 
         fontName= 'arial'  #this variable is used by the client to know which font it should use when creating the picture 
-        imageBackgroundColor= None #value in rbg
-        useGlobalShadow= True
+        useShadow= True
         
         ###shadow settings###
         shadowXOffset= 3 #value in pixels
@@ -1007,6 +1006,9 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         alternativeRulerLength= -1 #@UnusedVariable
         nConcernRulerSteps= -1 #@UnusedVariable
         nAlternativRulerSteps= -1 #@UnusedVariable
+        
+        ##xml variables##
+        shadowFilterId= "shadow1"
         
         ################
         #pre-processing#
@@ -1208,7 +1210,35 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         root.setHeight(str(h) + 'px')
         root.setXmlns('http://www.w3.org/2000/svg')
         root.setVersion('1.1')
+        root.setViewBox('0 0 ' + str(w) + ' ' + str(h))
         
+        #add shadow
+        if useShadow:
+            defNode= xmlDoc.createDefsNode()
+            filterNode= xmlDoc.createFilterNode()
+            filterNode.setId(shadowFilterId)
+            filterNode.setX(0)
+            filterNode.setY(0)
+            filterNode.setWidth('150%')
+            filterNode.setHeight('150%')
+            tempNode= xmlDoc.createFeOffsetNode()
+            tempNode.setDx(shadowXOffset)
+            tempNode.setDy(shadowYOffset)
+            tempNode.setResult('offOut')
+            tempNode.setIn('SourceGraphic')
+            filterNode.appendChild(tempNode)
+            tempNode= xmlDoc.createFeGaussianBlurNode()
+            tempNode.setResult('blurOut')
+            tempNode.setIn('offOut')
+            tempNode.setStdDeviation(shadowBlurSize)
+            filterNode.appendChild(tempNode)
+            tempNode= xmlDoc.createFeBlendNode()
+            tempNode.setIn('SourceGraphic')
+            tempNode.setIn2('blurOut')
+            tempNode.setMode('normal')
+            filterNode.appendChild(tempNode)
+            defNode.appendChild(filterNode)
+            root.appendChild(defNode)
         
 #        # define the global properties of the image
 #        propertiesNode= xmlDoc.createElement('properties')
@@ -1243,6 +1273,8 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         #define the main node for the table
         #tableGroupNode= xmlDoc.createElement('dendogramTable')
         tableGroupNode= xmlDoc.createGNode()
+        if useShadow:
+            tableGroupNode.setFilter('url(#' + shadowFilterId +')')
         tempNode= None
         #lets draw stuff now
         
@@ -1339,6 +1371,8 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         
         #dendogramConcernsGroup= xmlDoc.createElement('dendogramConcerns')
         dendogramConcernsGroup= xmlDoc.createGNode()
+        if useShadow:
+            dendogramConcernsGroup.setFilter('url(#' + shadowFilterId +')')
         
         #lets first draw all the individual items, the last sub-cluster should contain all of them
         allClusters= [] # format is ([item1, item2,...], positionX, positionY)
@@ -1461,6 +1495,8 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         
         #dendogramAlternativesGroup= xmlDoc.createElement('dendogramAlternative')
         dendogramAlternativesGroup= xmlDoc.createGNode()
+        if useShadow:
+            dendogramAlternativesGroup.setFilter('url(#' + shadowFilterId +')')
         
         allClusters= [] # format is ([item1, item2,...], positionX, positionY)
         i= 0;
