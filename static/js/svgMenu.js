@@ -73,7 +73,7 @@ function createSvgMenu(wrapDiv, options)
 		 */
 		if('saveItemAs' in options && 'saveItemAsUrl' in options)
 		{
-			if(options['saveItemAs'] != null and options['saveItemAs'] == true && options['saveItemAsUrl'] != null)
+			if(options['saveItemAs'] != null && options['saveItemAs'] == true && options['saveItemAsUrl'] != null)
 			{
 				saveItemAsUrl= options['saveItemAsUrl'];
 				if ('saveItemAsArguments' in options)
@@ -130,7 +130,10 @@ function createSvgMenu(wrapDiv, options)
 		{
 			button.click(function(){downloadItemAs($(this), saveItemAsUrl, saveItemAsArg)});
 		}
-		button.click(function(){saveButtonFunction($(this))});
+		else
+		{
+			button.click(function(){saveButtonFunction($(this))});
+		}
 		button.hover(
 				function(){
 					$(this).css({'background-image': 'url(/static/icons/save_hover.png)'});
@@ -203,6 +206,7 @@ function saveSvgAs(imgObj)
 			}
 		}
 	}
+	//get the download form
 	$.post('/grids/download/', '', callBack(imgObj));
 }
 
@@ -215,7 +219,7 @@ function saveSvgAs(imgObj)
 function downloadItemAs(imgObj, url, parameters)
 {
 	//the double function is used here so the tagData obj will be able to be used inside the function that will handle the post response
-	var callBack= function(imgObj2, parameters2)
+	var callBack= function(imgObj2, url2, parameters2)
 	{
 		return function(data)
 		{
@@ -235,7 +239,7 @@ function downloadItemAs(imgObj, url, parameters)
 						form.append($(temp));
 					}
 				}
-				
+				form.attr('action', url2);
 				modalDiv.dialog({
 			    	title: 'Download',
 					resizable: false,
@@ -253,5 +257,6 @@ function downloadItemAs(imgObj, url, parameters)
 			}
 		}
 	}
-	$.post(url, '', callBack(imgObj, parameters));
+	//get the download form
+	$.post('/grids/download/', '', callBack(imgObj, url, parameters));
 }

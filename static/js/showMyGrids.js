@@ -274,7 +274,7 @@ function getDendogram()
 							var importedSVGRootElement = document.importNode(data.documentElement,true);
 							//append the imported SVG root element to the appropriate HTML element
 							$("#dendogramDiv").append(importedSVGRootElement);
-							createSvgMenu($('#dendogramDiv'), {saveItemAs: true, saveItemAsUrl: '/grids/download/dendogram/', saveItemAsArguments:{usid: gridUSID, convertTo:'svg'}});
+							createSvgMenu($('#dendogramDiv'), {saveItemAs: true, saveItemAsUrl: '/grids/download/dendrogram/', saveItemAsArguments:{gridUSID: gridUSID, convertTo:'svg'}});
 							$('#dendrogramTitle').text('Dendrogram of grid: '+ $('#gridName').val());
 							hideLoadingSpinner($('#dendogramDiv'));
 						}

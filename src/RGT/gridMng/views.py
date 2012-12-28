@@ -22,7 +22,7 @@ from RGT.gridMng.template.createMyGridData import CreateMyGridData
 from django.db import IntegrityError
 from RGT.gridMng.error.unablaToCreateUSID import UnablaToCreateUSID
 
-from RGT.gridMng.utility import generateGridTable, createDendogram
+from RGT.gridMng.utility import generateGridTable, createDendogram, createFileResponse
 from RGT.settings import GRID_USID_KEY_LENGTH
 
 import sys, os
@@ -30,7 +30,7 @@ import traceback
 
 from io import BytesIO
 from types import StringType
-from RGT.gridMng.imageData import ImageData
+from RGT.gridMng.fileData import fileData
 
 def getCreateMyGridPage(request):
     if not request.user.is_authenticated():
@@ -389,7 +389,7 @@ def ajaxGenerateDendogram(request):
 
 #This function will return the html code that is needed to generate the dialog box 
 #that is used to ask to user to which format should a svg image be saved
-def ajaxSaveSvgPage(request):
+def ajaxGetSaveSvgPage(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
     
@@ -402,118 +402,75 @@ def ajaxSaveSvgPage(request):
 def ajaxConvertSvgTo(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
-    fpInMemory = None
     try:
         if request.POST.has_key('data') and request.POST.has_key('fileName') and request.POST.has_key('convertTo'):
-            if request.POST['convertTo'] == 'svg':
-                fileName= request.POST['fileName']
-                #if the file name is empty generate a file name
-                if  fileName == '':
-                    fileName= randomStringGenerator()
-                response = HttpResponse(request.POST['data'], content_type='image/svg+xml')
-                response['Content-Disposition'] = 'attachment; filename=' + fileName + '.svg'
-                return response
-
-            else:
-                try:
-                    (imageFileName, mimeType, fileExtention)= convertSvgTo(request.POST['data'], request.POST['convertTo'])
-                    if imageFileName != None:
-                        fpInMemory= BytesIO()
-                        fp= open(imageFileName, "rb")
-                        
-                        #read the file and place it in memory
-                        try:
-                            byte= fp.read(1)
-                            while byte != '':
-                                fpInMemory.write(byte)
-                                byte= fp.read(1)
-                        finally:
-                            fp.close()
-                            os.remove(imageFileName)
-                        
-                        # send the file
-                        response = HttpResponse(fpInMemory.getvalue(), content_type= mimeType)
-                        response['Content-Length'] = fpInMemory.tell()
-                        fileName= request.POST['fileName']
-                        if fileName != None and fileName != '':
-                            response['Content-Disposition'] = 'attachment; filename=' + fileName + fileExtention
-                        else:
-                            response['Content-Disposition'] = 'attachment; filename=' + randomStringGenerator() + fileExtention
-                        return response
-                    else:
-                        errorImageData= getImageError()
-                        # send the file
-                        response = HttpResponse(errorImageData, content_type= 'image/jpg')
-                        response['Content-Length'] = fpInMemory.tell()
-                        response['Content-Disposition'] = 'attachment; filename=error.jpg' 
-                        return response
-                except:
-                    print "Exception in user code:"
-                    print '-'*60
-                    traceback.print_exc(file=sys.stdout)
-                    print '-'*60
-                    errorImageData= getImageError()
-                    # send the file
-                    response = HttpResponse(errorImageData, content_type= 'image/jpg')
-                    response['Content-Disposition'] = 'attachment; filename=error.jpg'
-                    return response 
+            if request.POST['data'] and request.POST['convertTo']:
+                imgData= __convertSvgStringTo__(request.POST['data'], request.POST['convertTo'])
+                if not request.POST['fileName']:
+                    imgData.fileName= randomStringGenerator()
+                else:
+                    imgData.fileName= request.POST['fileName']
+                return createFileResponse(imgData)             
         else:
-            errorImageData= getImageError()
-            # send the file
-            response = HttpResponse(errorImageData, content_type= 'image/jpg')
-            response['Content-Length'] = fpInMemory.tell() if fpInMemory else None
-            response['Content-Disposition'] = 'attachment; filename=error.jpg'
-            return response 
+            if not request.POST.has_key('data'):
+                raise Exception('data key was not received')
+            if not request.POST.has_key('convertTo'):
+                raise Exception('convertTo key was not received')
     except:
         print "Exception in user code:"
         print '-'*60
         traceback.print_exc(file=sys.stdout)
         print '-'*60
-        errorImageData= getImageError()
-        # send the file
-        response = HttpResponse(errorImageData, content_type= 'image/jpg')
-        response['Content-Length'] = fpInMemory.tell() if fpInMemory else None
-        response['Content-Disposition'] = 'attachment; filename=error.jpg'
-        return response         
+    #in case of an error or checks failing return an image error
+    errorImageData= getImageError()
+    # send the file
+    response = HttpResponse(errorImageData, content_type= 'image/jpg')
+    response['Content-Disposition'] = 'attachment; filename=error.jpg'
+    return response
 
 #this function will convert the dendrogram to a image file
 def dendrogramTo(request):
     
-    #############
-    ## Options ##
-    #############
-    
-    #convertTo: svg
-    #gridUSID: usid of the grid in question
+    #########################################
+    ############## Options ##################
+    #########################################
+    #                                       #
+    #convertTo: svg                         #
+    #gridUSID: usid of the grid in question #
+    #########################################
     
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
-    
-    if request.POST.has_key('gridUSID') and request.POST.has_key('convertTo'):
-        #check to see if the inputs are not None
-        if request.POST['gridUSID'] and request.POST['convertTo']:
-            grid= Grid.objects.filter(usid= request.POST['gridUSID'])
-            if len(grid) >= 1:
-                grid= grid[0]
-                try: 
+    try:
+        if request.POST.has_key('gridUSID') and request.POST.has_key('convertTo'):
+            #check to see if the inputs are not None
+            if request.POST['gridUSID'] and request.POST['convertTo']:
+                grid= Grid.objects.filter(usid= request.POST['gridUSID'])
+                if len(grid) >= 1:
+                    grid= grid[0] 
                     data= __convertSvgStringTo__(grid.dendogram, request.POST['convertTo'])
-                    fileName= None
                     if request.POST.has_key('fileName'):
-                        fileName= request.POST.has_key('fileName')
+                        data.fileName= request.POST['fileName']
                     else:
-                        fileName= randomStringGenerator()
+                        data.fileName= randomStringGenerator()
                     
                     #return the file
-                    response = HttpResponse(data.data, content_type= data.ContentType)
-                    if data.length != None:
-                        response['Content-Length']= data.length
-                    response['Content-Disposition'] = 'attachment; filename=' + fileName + '.' + data.fileExtention
-                except:
-                    print "Exception in user code:"
-                    print '-'*60
-                    traceback.print_exc(file=sys.stdout)
-                    print '-'*60
-                    
+                    return createFileResponse(data)
+            else:
+                if not request.POST['gridUSID']:
+                    raise ValueError('gridUSID had an invalid value: ' + request.POST['gridUSID'])
+                if not request.POST['convertTo']:
+                    raise ValueError('convertTo had an invalid value: ' + request.POST['convertTo'])
+        else:
+            if not request.POST.has_key('gridUSID'):
+                raise Exception('gridUSID key was not received')
+            if not request.POST.has_key('convertTo'):
+                raise Exception('convertTo key was not received')
+    except:
+        print "Exception in user code:"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60                 
     #in case of an error or failing of one the checks return an image error
     errorImageData= getImageError()
     # send the file
@@ -523,7 +480,7 @@ def dendrogramTo(request):
     
 def __convertSvgStringTo__(svgString= None, convertTo= None):
     fpInMemory = None
-    imgData= ImageData()
+    imgData= fileData()
     if svgString and convertTo:
         if convertTo == 'svg':
             imgData.data= svgString

@@ -150,6 +150,14 @@ def getImageError():
         imageErrorData= fpInMemory.getvalue()
     return imageErrorData
 
+def createFileResponse(fileData):
+    response = HttpResponse(fileData.data, content_type= fileData.ContentType)
+    if fileData.length != None:
+        response['Content-Length']= fileData.length
+    response['Content-Disposition'] = 'attachment; filename=' + fileData.fileName + '.' + fileData.fileExtention
+    return response
+    
+
 # Create a dateTime tag that is returned to participant (along with the XmlSuccessResponse),
 # in order to show the time that he sent the response.
 def createDateTimeTag(data):
