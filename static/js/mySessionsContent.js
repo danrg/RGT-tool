@@ -339,9 +339,11 @@ function showSessionDendrogram(iteration, divId)
 						$('#mySessionResultsDendrogramTitleIteration').text(iteration);
 					}
 					clearSvgImg(dendrogramDiv);
-					createDendogram(dendrogramDiv, data);
+					var svg= $.parseXML($(data).find('svgData').text());
+					var gridId= $(data).find('extraInfo').find('usid').text();
+					createDendogram(dendrogramDiv, svg);
 					//create the menu for the svg
-					createSvgMenu($('#' + dendrogramDiv), null);
+					createSvgMenu($('#' + dendrogramDiv), {saveItemAs: true, saveItemAsUrl: '/grids/download/dendrogram/', saveItemAsArguments:{gridUSID: gridId}});
 					hideLoadingSpinner($('#' + dendrogramDiv));
 				}
 				else

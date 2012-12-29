@@ -20,6 +20,8 @@ from RGT.gridMng.error.wrongGridType import WrongGridType
 from RGT.gridMng.error.wrongSessionIteration import WrongSessionIteration
 from RGT.gridMng.utility import randomStringGenerator, validateName
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createXmlForComboBox, createXmlForNumberOfResponseSent, createDateTimeTag
+from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
+from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode
 from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid__
 from math import sqrt, ceil
 from RGT.gridMng.template.session.createSessionData import CreateSessionData
@@ -955,12 +957,14 @@ def ajaxGenerateSessionDendrogram(request):
                         sessionGridRelation= sessionGridRelation[0]
                         try:
                             imgData= createDendogram(sessionGridRelation.grid)
-                            return HttpResponse(imgData, content_type='application/xml')
-                        except Exception as error:
-                            if len(error.args) >= 1:
-                                return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
-                            else:
-                                return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'), content_type='application/xml')
+                            responseData= createSvgResponse(imgData, createXmlGridIdNode(sessionGridRelation.grid.usid))
+                            return HttpResponse(responseData, content_type='application/xml')
+                        except Exception:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60
+                            return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'), content_type='application/xml')
                     else:
                         return HttpResponse(createXmlErrorResponse('No grid found for the selected iteration'), content_type='application/xml')
                 else:

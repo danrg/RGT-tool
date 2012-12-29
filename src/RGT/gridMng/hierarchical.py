@@ -1210,7 +1210,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         root.setHeight(str(h) + 'px')
         root.setXmlns('http://www.w3.org/2000/svg')
         root.setVersion('1.1')
-        root.setViewBox('0 0 ' + str(w) + ' ' + str(h))
+        #root.setViewBox('0 0 ' + str(w) + ' ' + str(h))
         
         #add shadow
         if useShadow:

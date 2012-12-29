@@ -359,12 +359,6 @@ def ajaxGenerateDendogram(request):
             try:
                 grid1= grid1[0]
                 if grid1.dendogram != None and grid1.dendogram != '':
-                    #test
-                    xml= createDendogram(grid1)
-                    f = open('D:/Temp/newSvgText.svg','w')
-                    f.write(xml)
-                    f.close()
-                    #end test
                     imgData= createDendogram(grid1)
                     responseData= createSvgResponse(imgData, None)
                     return HttpResponse(responseData, content_type='application/xml')

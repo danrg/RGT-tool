@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from HelpMessages import HELP_MESSAGES
 #import logging
-from RGT.gridMng.utility import createXmlSuccessResponse, createXmlErrorResponse
+from RGT.gridMng.response.xml.htmlResponseUtil import createXmlSuccessResponse, createXmlErrorResponse
 
 @login_required
 def home(request):

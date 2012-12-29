@@ -2,7 +2,7 @@ from xml.dom.minidom import DOMImplementation
 
 #This function is used to create a successful
 #svgDoc: String with the svg document
-def createSvgResponse(svgDoc, extraDataXmlDoc= None):
+def createSvgResponse(svgDoc, extraData= None):
     imp= DOMImplementation()
     xmlDoc= imp.createDocument(None, 'svgResponse', '')
     root= xmlDoc.documentElement
@@ -11,9 +11,13 @@ def createSvgResponse(svgDoc, extraDataXmlDoc= None):
     tempNode.appendChild(xmlDoc.createCDATASection(svgDoc))
     root.appendChild(tempNode)
     #add extra data
-    if extraDataXmlDoc != None:
+    if extraData != None:
         extraInfoNode= xmlDoc.createElement('extraInfo')
-        extraInfoNode.appendChild(extraDataXmlDoc.document)
+        if hasattr(extraData, 'documentElement'):
+            extraInfoNode.appendChild(extraData.documentElement)
+        else:
+            extraInfoNode.appendChild(extraData)
         root.appendChild(extraInfoNode)
     return xmlDoc.toxml()
+
     
