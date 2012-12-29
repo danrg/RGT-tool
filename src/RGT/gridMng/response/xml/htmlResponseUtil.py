@@ -45,20 +45,6 @@ def createXmlForComboBox(data):
         topElement.appendChild(elementNode)
     return topElement
 
-def createXmlForIterationNumber(iteration):
-    impl= getDOMImplementation()
-    doc= impl.createDocument(None, "iteration", None)
-    topElement= doc.documentElement
-    topElement.appendChild(doc.createTextNode(str(iteration)))
-    return topElement
-
-def createXmlForNumberOfResponseSent(nResponsesSent):
-    impl= getDOMImplementation()
-    doc= impl.createDocument(None, "nResponses", None)
-    topElement= doc.documentElement
-    topElement.appendChild(doc.createTextNode(str(nResponsesSent)))
-    return topElement
-
 # Create a dateTime tag that is returned to participant (along with the XmlSuccessResponse),
 # in order to show the time that he sent the response.
 def createDateTimeTag(data):

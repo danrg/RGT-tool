@@ -19,9 +19,9 @@ from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
 from RGT.gridMng.error.wrongGridType import WrongGridType
 from RGT.gridMng.error.wrongSessionIteration import WrongSessionIteration
 from RGT.gridMng.utility import randomStringGenerator, validateName
-from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createXmlForComboBox, createXmlForNumberOfResponseSent, createDateTimeTag
+from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createXmlForComboBox, createDateTimeTag
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
-from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode
+from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode, createXmlNumberOfResponseNode
 from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid__
 from math import sqrt, ceil
 from RGT.gridMng.template.session.createSessionData import CreateSessionData
@@ -660,7 +660,7 @@ def ajaxRespond(request):
                             gridResponseRelation= ResponseGrid(grid= gridObj, session= sessionObj, iteration= sessionIteration, user= userObj)
                             gridResponseRelation.save()
 
-                            extraXmlData= createXmlForNumberOfResponseSent(len(sessionObj.getUsersThatRespondedRequest()) + 1)
+                            extraXmlData= createXmlNumberOfResponseNode(len(sessionObj.getUsersThatRespondedRequest()) + 1)
                             if extraXmlData == None:
                                 return HttpResponse(createXmlSuccessResponse('Grid created successfully.', createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
                             else:
@@ -679,7 +679,7 @@ def ajaxRespond(request):
                             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                 else:
                     return HttpResponse(createXmlErrorResponse('Can\'t create response grid, session is in a state where that is not permitted'), content_type='application/xml')
-                    #return ajaxCreateGrid(request, createXmlForNumberOfResponseSent(len(sessionObj.getUsersThatRespondedRequest()) + 1))
+                    #return ajaxCreateGrid(request, createXmlNumberOfResponseNode(len(sessionObj.getUsersThatRespondedRequest()) + 1))
             else:
                 return HttpResponse(createXmlErrorResponse('You are not participating in the session, can\'t send response grid'), content_type='application/xml')
         else:
