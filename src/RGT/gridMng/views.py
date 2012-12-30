@@ -11,7 +11,7 @@ from RGT.gridMng.models import Alternatives
 from RGT.gridMng.models import Concerns
 from RGT.gridMng.models import Ratings
 from RGT.gridMng.models import Facilitator
-from RGT.gridMng.utility import randomStringGenerator, validateName, convertSvgTo, getImageError
+from RGT.gridMng.utility import randomStringGenerator, validateName, convertSvgTo, getImageError, convertGridTableToSvg
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.session.state import State
@@ -358,6 +358,12 @@ def ajaxGenerateDendogram(request):
         if len(grid1) >= 1:
             try:
                 grid1= grid1[0]
+                ###test code###
+                testData= convertGridTableToSvg(grid1)
+                fp= open('d:/temp/gridSvg.svg', 'w')
+                fp.write(testData)
+                fp.close()
+                ###end test code###
                 if grid1.dendogram != None and grid1.dendogram != '':
                     imgData= createDendogram(grid1)
                     responseData= createSvgResponse(imgData, None)

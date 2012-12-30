@@ -1,8 +1,10 @@
 from django.http import HttpResponse
 from RGT import settings
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse
-
 from RGT.gridMng.hierarchical import hcluster, transpose, drawDendogram3
+from RGT.XML.SVG.svgDOMImplementation import SvgDOMImplementation
+from RGT.settings import DENDROGRAM_FONT_LOCATION
+from PIL import ImageFont #@UnresolvedImport
 
 import base64
 import random
@@ -249,3 +251,150 @@ def createDendogram(gridObj):
         traceback.print_exc(file=sys.stdout)
         print '-'*60
         raise Exception('Unknown error, couldn\'t create the dendogram')
+
+def convertGridTableToSvg(gridObj= None):
+    from RGT.gridMng.models import Ratings
+    
+    ###########settings###########
+    fontSize= 30
+    f = ImageFont.truetype(DENDROGRAM_FONT_LOCATION, fontSize)
+    xWordCellSpace= 5 #space between a word and the right and left line of the cell (in pixels)
+    yWordCellSpace= 5 #space between the biggest word and the top and bottom line of the cell (in pixels)
+    
+    xTableOffSet= 5 #the x offset of the start point of the table. Start point is x= 0 (in pixels)
+    yTableOffset= 5 #the y offset of the start point of the table. Start point is y= 0 (in pixels)
+    
+    tableLineThickness= 1 #in pixels
+    
+    if gridObj != None:
+        concerns= gridObj.concerns_set.all()
+        alternatives= gridObj.alternatives_set.all()
+        nConcerns= len(concerns)
+        nAlternatives= len(alternatives)
+        tData= __TableData___()
+        alternativeNames= []
+        concernNames= [] #list of tulips, position 0 contains the left pole, position 1 contains the right pole: [('a', 'b'), ('c', 'd'), ......]
+        ratioValues= [] #matrix
+        maxWordHeight= 0
+        colWidths= [None for x in xrange(nAlternatives)]
+        isFirstRunDone= False
+        
+        ##########Pre-processing##########
+        colN= 0
+        for concernObj in concerns:
+            concernNames.append((concernObj.leftPole, concernObj.rightPole))
+            row= []
+            for alternativeObj in alternatives:
+                # we only need to run this code ones for all the alternatives
+                if not isFirstRunDone:
+                    alternativeNames.append(alternativeObj.name)
+                    size= f.getsize(alternativeObj.name)
+                    if size[1] > maxWordHeight:
+                        maxWordHeight= size[1]
+                    if size[0] > colWidths[colN]:
+                        colWidths[colN]= size[0]
+                #process the rating info
+                ratingObj= Ratings.objects.filter(concern= concernObj, alternative= alternativeObj)
+                if len(ratingObj) >= 1:
+                    ratingObj= ratingObj[0]
+                    row.append(ratingObj.rating)
+                    #check to see if the rating text size 
+                    if ratingObj.rating != None:
+                        size= f.getsize(str(ratingObj.rating))
+                        if size[0] > colWidths[colN]:
+                            colWidths[colN]= size[0]
+                        if size[1] > maxWordHeight:
+                            maxWordHeight= size[1]            
+                colN+= 1
+            colN= 0          
+            isFirstRunDone= True
+            ratioValues.append(row)
+            row= []
+        
+        #add xWordCellSpace * 2 to each position of the array
+        colWidths[:] = [x + (xWordCellSpace * 2) for x in colWidths]
+        
+        ##########End pre-processing##########
+        tData.cellHeight= maxWordHeight + (yWordCellSpace *2)
+        tData.cellWidths= colWidths
+        tData.lineThickness= tableLineThickness
+        tData.nCols= nAlternatives
+        tData.nRows= nConcerns
+        tData.xTableOffSet= xTableOffSet
+        tData.yTableOffSet= yTableOffset
+        
+        imp= SvgDOMImplementation()
+        xmlDoc= imp.createSvgDocument()
+        root= xmlDoc.documentElement
+        root.setXmlns('http://www.w3.org/2000/svg')
+        root.setVersion('1.1')
+        gNode= __createSvgTable__(tData)
+        root.appendChild(gNode)
+        return xmlDoc.toxml()
+                
+                
+
+#lineColor: tulip (r,b,g)
+#return is a g node containing the code for the table
+def __createSvgTable__(data):
+    
+    imp= SvgDOMImplementation()
+    xmlDoc= imp.createSvgDocument()
+    nvl= data.nCols - 1 #number vertical lines
+    nhl= data.nRows - 1 #number horizontal lines
+    previousX= 0
+    previousY= 0
+    mainGnode= xmlDoc.createGNode()
+    mainGnode.setId('svgGridTableGroup')
+    #create the main body of the table
+    tableWidth= (data.nCols * data.lineThickness) + sum(data.cellWidths)
+    tableHeight= (data.nRows * data.lineThickness) + (data.nRows * data.cellHeight)
+    tempNode= xmlDoc.createRectNode(data.xTableOffSet, data.yTableOffSet, tableHeight, tableWidth)
+    tempNode.setFill('none')
+    tempNode.setStroke('black')
+    mainGnode.appendChild(tempNode)
+    #create the dividing lines in the table
+    previousX+= data.xTableOffSet
+    previousY+= data.yTableOffSet
+    #create the vertical lines
+    i= 0
+    while i < nvl:
+        cw= data.cellWidths[i]
+        x= previousX + cw + data.lineThickness
+        tempNode= xmlDoc.createLineNode(x, data.yTableOffSet, x, data.yTableOffSet + tableHeight)
+        tempNode.setStroke('black')
+        mainGnode.appendChild(tempNode)
+        previousX= x
+        i+= 1
+    
+    #create the horizontal lines
+    i= 0
+    while i < nhl:
+        y= previousY + data.cellHeight + data.lineThickness
+        tempNode= xmlDoc.createLineNode(data.xTableOffSet, y, data.xTableOffSet + tableWidth, y) 
+        tempNode.setStroke('black')
+        i+= 1
+        previousY= y
+        mainGnode.appendChild(tempNode)
+    
+    return mainGnode
+    
+    
+    
+
+#place holder for the variables used in __createSvgTable__
+class __TableData___(object):
+    
+    cellWidths= None #array with the cells width
+    cellHeight= None
+    nCols= None
+    nRows= None
+    lineThickness= 1
+    lineColor= None
+    xTableOffSet= 0
+    yTableOffSet= 0
+    
+    
+    
+    
+    
