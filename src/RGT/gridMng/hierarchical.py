@@ -904,6 +904,9 @@ def drawDendogram2(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
 
 #prototype function that will be used to create an image using xml      
 def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], maxMatrixCellValue= 1):
+    
+        from RGT.gridMng.utility import createColorRGBString
+        
         #cluster format is: [([element1, elemet2], distance), ([element1, elemet2, element3], distance), ......]
         
         #########################
@@ -1643,9 +1646,9 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         #lets return the image
         return xmlDoc
 
-# returns a string with: 'rgb(number,number,number)'
-def createColorRGBString(color):
-    return 'rgb(' + str(color[0]) + ',' + str(color[1]) + ',' + str(color[2]) + ')'
+## returns a string with: 'rgb(number,number,number)'
+#def createColorRGBString(color):
+#    return 'rgb(' + str(color[0]) + ',' + str(color[1]) + ',' + str(color[2]) + ')'
     
 #""" 
 #color is a tulp with 4 positions, (red, blue, green, alpha)

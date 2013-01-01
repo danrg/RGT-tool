@@ -358,8 +358,8 @@ class SvgDocument(Document):
     
     #gradient
     
-    def createLinearGradientNode(self):
-        return LinearGradientNode(self)
+    def createLinearGradientNode(self, x1= None, y1= None, x2= None, y2= None):
+        return LinearGradientNode(self, x1, y1, x2, y2)
     
     def createRadialGradientNode(self):
         return RadialGradientNode(self)
@@ -372,8 +372,8 @@ class SvgDocument(Document):
     def createPatternNode(self):
         return PatternNode(self)
     
-    def createStopNode(self):
-        return StopNode(self)
+    def createStopNode(self, offset= None, stopColor= None, stopOpacity= None, style= None):
+        return StopNode(self, offset, stopColor, stopOpacity, style)
         
     #copy from minidom, removed the part that writes the <?xml version="1.0" ?> and the encoding
     def writexml(self, writer, indent="", addindent="", newl="",
