@@ -864,3 +864,43 @@ function initiateGridTableToolTip(containerDiv)
 	
 	containerDiv.find('.tableStatus').tipsy({fade:true, gravity: 's'});
 }
+
+/**
+	this function will download a html and place it in a dialog that will as the
+	user to select the file type he wants to download the grid as.
+ */
+function downloadGridAs(usid)
+{
+	if(usid != 'None' && usid != null && usid != '')
+	{
+		var callBack= function(gridId){
+			return function(data)
+			{
+				if($(data).find('error').length <= 0)
+				{
+					var modalDiv= getDialogDiv();
+					modalDiv.html($(data).find('htmlData').text());
+					var input = $('<input>').attr("type", "hidden").attr("name", "usid").val(gridId); 
+					var form= modalDiv.find('form')
+					form.append($(input))
+					form.attr('action', '/grids/download/grid/')
+					modalDiv.dialog({
+				    	title: 'Download',
+						resizable: false,
+						width:400,
+						modal: true,
+						buttons: {'Download':function(){
+							sendDownloadSvgForm();
+							}
+				    	}
+				    });
+				}
+				else
+				{
+					showMessageInDialogBox($(data).html('error').text());
+				}
+			}
+		}
+		$.post('/grids/download/', '', callBack(usid));
+	}
+}

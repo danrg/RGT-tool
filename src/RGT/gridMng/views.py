@@ -11,7 +11,7 @@ from RGT.gridMng.models import Alternatives
 from RGT.gridMng.models import Concerns
 from RGT.gridMng.models import Ratings
 from RGT.gridMng.models import Facilitator
-from RGT.gridMng.utility import randomStringGenerator, validateName, convertSvgTo, getImageError, convertGridTableToSvg
+from RGT.gridMng.utility import randomStringGenerator, validateName, convertSvgTo, getImageError, convertGridTableToSvg, convertGridTableToSvg
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.session.state import State
@@ -30,7 +30,7 @@ import traceback
 
 from io import BytesIO
 from types import StringType
-from RGT.gridMng.fileData import fileData
+from RGT.gridMng.fileData import FileData
 
 def getCreateMyGridPage(request):
     if not request.user.is_authenticated():
@@ -220,6 +220,7 @@ def ajaxGetGrid(request):
             try:
                 templateData= GridTableData(generateGridTable(gridObj))
                 templateData.tableId= randomStringGenerator()
+                templateData.usid= gridObj.usid
                 templateData.changeRatingsWeights= changeRatingsWeights
                 templateData.changeCornAlt= changeCornAlt
                 templateData.showRatingWhileFalseChangeRatingsWeights= showRatingWhileFalseChangeRatingsWeights
@@ -431,6 +432,60 @@ def ajaxConvertSvgTo(request):
     response['Content-Disposition'] = 'attachment; filename=error.jpg'
     return response
 
+def ajaxConvertGridTo(request):
+    
+    if not request.user.is_authenticated():
+        return redirect_to(request, '/auth/login/')
+    try:
+        if request.POST.has_key('usid') and request.POST.has_key('convertTo'):
+            usidData= request.POST['usid']
+            convertToData= request.POST['convertTo']
+            
+            if usidData != None and convertToData != None:
+                gridObj= Grid.objects.filter(usid= usidData)
+                if len(gridObj) >= 1:
+                    gridObj= gridObj[0]
+                    #check if the requesting user is the owner of the grid
+                    if gridObj.user == request.user:
+                        imgData= FileData()
+                        if convertToData == 'svg':
+                            imgData.data=  convertGridTableToSvg(gridObj)
+                            imgData.fileExtention= 'svg'
+                            imgData.ContentType= 'image/svg+xml'
+                        
+                        if request.POST.has_key('fileName'):
+                            imgData.fileName= request.POST['fileName']
+                            
+                            if not imgData.fileName:
+                                imgData.fileName= randomStringGenerator()
+                            
+                            return createFileResponse(imgData)
+                    else:
+                        raise Exception('User is not authorized to access this grid as he is not the creator')
+                else:
+                    raise Exception('Grid was not found with the usid: ' + usidData)
+            else:
+                if not usidData:
+                    ValueError('usid had invalid value: ' + usidData)
+                if not convertToData:
+                    ValueError('convertTo had invalid value: ' + convertToData)
+        else:
+            if not request.POST.has_key('usid'):
+                raise Exception('usid key was not received')
+            if not request.POST.has_key('convertTo'):
+                raise Exception('convertTo key was not received')
+    except:
+        print "Exception in user code:"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60  
+    #anything else return the img error
+    errorImageData= getImageError()
+    # send the file
+    response = HttpResponse(errorImageData, content_type= 'image/jpg')
+    response['Content-Disposition'] = 'attachment; filename=error.jpg'
+    return response
+
 #this function will convert the dendrogram to a image file
 def dendrogramTo(request):
     
@@ -483,7 +538,7 @@ def dendrogramTo(request):
     
 def __convertSvgStringTo__(svgString= None, convertTo= None):
     fpInMemory = None
-    imgData= fileData()
+    imgData= FileData()
     if svgString and convertTo:
         if convertTo == 'svg':
             imgData.data= svgString

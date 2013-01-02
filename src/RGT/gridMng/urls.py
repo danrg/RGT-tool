@@ -14,5 +14,6 @@ urlpatterns = patterns('',
     url(r'^download/$', 'RGT.gridMng.views.ajaxGetSaveSvgPage'),
     url(r'^download/dendrogram/$', 'RGT.gridMng.views.dendrogramTo'),
     url(r'^download/image/$', 'RGT.gridMng.views.ajaxConvertSvgTo'),
+    url(r'^download/grid/$', 'RGT.gridMng.views.ajaxConvertGridTo'),
     url(r'^create/wizard/$', GridWizard.as_view(grid_wizard_forms)),
 )

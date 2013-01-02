@@ -101,11 +101,14 @@ def ajaxGetMySessionContentPage(request):
                     sessionObj= Session.objects.get(usid= request.POST['sessionUSID'], facilitator= facilitator1)
                     #get the users
                     #participants= sessionObj.getParticipators()
+                    
                     templateData= MySessionsContentData()
                     templateData.participantTableData= ParticipantsData(__createPaticipantPanelData__(sessionObj))
                     iteration= sessionObj.iteration
-                    gridTemplateData= GridTableData(generateGridTable(sessionObj.sessiongrid_set.all()[iteration].grid))
+                    sessionGrid= sessionObj.sessiongrid_set.all()[iteration].grid
+                    gridTemplateData= GridTableData(generateGridTable(sessionGrid))
                     gridTemplateData.tableId= randomStringGenerator()
+                    gridTemplateData.usid= sessionGrid.usid
                     templateData.tableData= gridTemplateData
                     iterationValueType = {}
                     iterationTypes = SessionIterationState.objects.filter(session=sessionObj)
@@ -999,6 +1002,7 @@ def ajaxGetSessionGrid(request):
                     gridObj= gridObj[0].grid
                     templateData= GridTableData(generateGridTable(gridObj))
                     templateData.tableId= randomStringGenerator()
+                    templateData.usid= gridObj.usid
                     #if the state is not check then return a table where nothing can be changed, else return a table that can be changed
                     if sessionObj.state.name == State.objects.getCheckState().name:
                         templateData.changeRatingsWeights= True

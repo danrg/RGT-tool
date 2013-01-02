@@ -10,6 +10,7 @@ class GridTableData(object):
     checkForTableIsSave= False
     showRatingWhileFalseChangeRatingsWeights= False
     changeRatingsWeights= False
+    usid= None #id of the grid
 
     def __init__(self, tableData= None):
         if tableData != None:
