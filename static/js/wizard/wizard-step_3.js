@@ -63,6 +63,21 @@ $(document).ready(function() {
 			showMessageInDialogBox('Please first type the left and right pole of the concern and then press the "Add" button.');
 		}
 	});
+    $('#del-conc-but').click(function() {
+        // get the number of cloned inputs
+        var numOfCloned = $('.cloned').length;
+        // this is the new number
+        var newNum = numOfCloned - 1;
+        if (numOfCloned > 1) {
+            $('#input' + numOfCloned).remove();
+            $('#id_2-concern'+numOfCloned+'-left').remove();
+            $('#id_2-concern'+numOfCloned+'-right').remove();
+            $('.cloned').length = newNum;
+            $('#num-concerns').attr('value',newNum);
+        } else {
+            showMessageInDialogBox('Atleast 2 concern pairs should exist to perform delete.');
+        }
+    });
 	$('#form').submit(function(event) {
 		// get references of the left and right part of the concerns the user inserted
 		var lcField = $('#left-conc');
