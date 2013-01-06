@@ -48,7 +48,8 @@ def ajaxGetCreateSessionPage(request):
         return redirect_to(request, '/auth/login/')
 
     user1= request.user
-    grids= user1.grid_set.all()
+    gridtype= Grid.GridType.USER_GRID
+    grids= Grid.objects.filter(user=user1, grid_type=gridtype)
 
     if len(grids) <= 0:
         grids= None
