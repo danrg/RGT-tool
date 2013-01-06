@@ -138,8 +138,9 @@ def getShowGridPage(request):
         return redirect_to(request, '/auth/login/')
 
     user1= request.user
+    gridtype= Grid.GridType.USER_GRID
     templateData= ShowGridsData()
-    templateData.grids= user1.grid_set.all();
+    templateData.grids= Grid.objects.filter(user=user1, grid_type=gridtype)
 
     if len(templateData.grids) <= 0:
         templateData.grids= None
@@ -560,7 +561,7 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
                         raise ValueError("Invalid input " + keyValue)
                         #return HttpResponse(createXmlErrorResponse("Invalid input " + keyValue), content_type='application/xml')
                 else:
-                    concernValues.append((leftPole, rightPole, None)) 
+                    raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
         else:
             concernValues.append((leftPole, rightPole, None))
         i+= 1
@@ -599,7 +600,7 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
                                 raise ValueError("Invalid value: " + keyValue)
                                 #return HttpResponse(createXmlErrorResponse("Invalid value: " + keyValue), content_type='application/xml')
                     else:
-                        ratios.append(None)
+                        raise KeyError('Invalid request, request is missing argument(s)', 'Error rating not found: ' + keyName)
                 j+= 1
             ratioValues.append(ratios)
             j= 0
