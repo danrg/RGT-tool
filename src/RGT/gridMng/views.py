@@ -446,7 +446,7 @@ def ajaxConvertGridTo(request):
                 if len(gridObj) >= 1:
                     gridObj= gridObj[0]
                     #check if the requesting user is the owner of the grid
-                    if gridObj.user == request.user:
+                    if gridObj.user == request.user or gridObj.user == None:
                         imgData= FileData()
                         if convertToData == 'svg':
                             imgData.data=  convertGridTableToSvg(gridObj)
