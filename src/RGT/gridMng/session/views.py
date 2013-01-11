@@ -603,6 +603,20 @@ def ajaxRespond(request):
                         nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj
 
                         if gridObj != None:
+                            for i in range(int(nAlternatives)):
+                                try:
+                                    str(alternativeValues[i])
+                                except:
+                                    return HttpResponse(createXmlErrorResponse("Invalid alternative name : "+ alternativeValues[i]), content_type='application/xml')
+                            for i in range(int(nConcerns)):
+                                try:
+                                    str(concernValues[i][0])
+                                except:
+                                    return HttpResponse(createXmlErrorResponse("Invalid left concern name : "+ concernValues[i][0]), content_type='application/xml')
+                                try:
+                                    str(concernValues[i][1])
+                                except:
+                                    return HttpResponse(createXmlErrorResponse("Invalid right concern name : "+ concernValues[i][1]), content_type='application/xml')
                             try:
                                 isGridCreated= updateGrid(gridObj , nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, isConcernAlternativeResponseGrid)
                                 if isGridCreated:
