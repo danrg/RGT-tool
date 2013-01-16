@@ -1,3 +1,15 @@
+var urlStaticFiles= '/static/';
+
+if( typeof downloadImageOf != 'function')
+{
+	$.ajax({
+		url: urlStaticFiles + 'js/generalUtil.js',
+		dataType: 'script',
+		async:   false 
+	});
+}
+
+
 /**
  * Function that will create an menu for the svg.
  * This function requires that the svg tag be inside a wrap div tag without any elements inside it (excluding the svg tag),
@@ -128,7 +140,7 @@ function createSvgMenu(wrapDiv, options)
 		//check if we are going to use the saveDendogram function or not
 		if(saveItemAsUrl != null)
 		{
-			button.click(function(){downloadItemAs($(this), saveItemAsUrl, saveItemAsArg)});
+			button.click(function(){downloadItemAs(saveItemAsUrl, saveItemAsArg)});
 		}
 		else
 		{
@@ -212,51 +224,11 @@ function saveSvgAs(imgObj)
 
 /**
  * Default function used to request a download of something from the server
- * @param imgObj object representing the <img> which was pressed to call this function
  * @param url url (string) that will be called by the post function
  * @param parameters obect with the arguments that should be passed to the server, format: { argumentName: value, argumentName: value, ......}
  */
-function downloadItemAs(imgObj, url, parameters)
+function downloadItemAs(url, parameters)
 {
-	//the double function is used here so the tagData obj will be able to be used inside the function that will handle the post response
-	var callBack= function(imgObj2, url2, parameters2)
-	{
-		return function(data)
-		{
-			var svg= getSvgFromDiv(imgObj2.parent('div').parent('div'));
-			if($(data).find('error').length <= 0)
-			{
-				
-				var modalDiv= getDialogDiv();
-				modalDiv.html($(data).find('htmlData').text());
-				var form= modalDiv.find('form');
-				var temp= null;
-				if (parameters2 != null)
-				{	
-					for(attrib in parameters2)
-					{
-						temp= $('<input>').attr("type", "hidden").attr("name", attrib).val(parameters2[attrib]);
-						form.append($(temp));
-					}
-				}
-				form.attr('action', url2);
-				modalDiv.dialog({
-			    	title: 'Download',
-					resizable: false,
-					width:400,
-					modal: true,
-					buttons: {'Download':function(){
-						sendDownloadSvgForm();
-						}
-			    	}
-			    });
-			}
-			else
-			{
-				showMessageInDialogBox($(data).html('error').text());
-			}
-		}
-	}
 	//get the download form
-	$.post('/grids/download/', '', callBack(imgObj, url, parameters));
+	downloadImageOf(url, parameters);
 }

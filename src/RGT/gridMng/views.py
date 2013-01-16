@@ -359,12 +359,6 @@ def ajaxGenerateDendogram(request):
         if len(grid1) >= 1:
             try:
                 grid1= grid1[0]
-                ###test code###
-                testData= convertGridTableToSvg(grid1)
-                fp= open('d:/temp/gridSvg.svg', 'w')
-                fp.write(testData)
-                fp.close()
-                ###end test code###
                 if grid1.dendogram != None and grid1.dendogram != '':
                     imgData= createDendogram(grid1)
                     responseData= createSvgResponse(imgData, None)

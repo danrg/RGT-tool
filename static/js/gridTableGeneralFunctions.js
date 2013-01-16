@@ -17,6 +17,15 @@ $.ajax({
 	async:   false 
 });
 
+if( typeof downloadImageOf != 'function')
+{
+	$.ajax({
+		url: urlStaticFiles + 'js/generalUtil.js',
+		dataType: 'script',
+		async:   false 
+	});
+}
+
 //var nChangeableCols= 0; // number of cols without the cols used for the row menus
 var colMenuTimers= new Hashtable();
 var nFixedCols= 5;//number of cols that are not user for alternatives
@@ -869,38 +878,10 @@ function initiateGridTableToolTip(containerDiv)
 	this function will download a html and place it in a dialog that will as the
 	user to select the file type he wants to download the grid as.
  */
-function downloadGridAs(usid)
+function downloadGridAs(usidN)
 {
-	if(usid != 'None' && usid != null && usid != '')
+	if(usidN != 'None' && usidN != null && usidN != '')
 	{
-		var callBack= function(gridId){
-			return function(data)
-			{
-				if($(data).find('error').length <= 0)
-				{
-					var modalDiv= getDialogDiv();
-					modalDiv.html($(data).find('htmlData').text());
-					var input = $('<input>').attr("type", "hidden").attr("name", "usid").val(gridId); 
-					var form= modalDiv.find('form')
-					form.append($(input))
-					form.attr('action', '/grids/download/grid/')
-					modalDiv.dialog({
-				    	title: 'Download',
-						resizable: false,
-						width:400,
-						modal: true,
-						buttons: {'Download':function(){
-							sendDownloadSvgForm();
-							}
-				    	}
-				    });
-				}
-				else
-				{
-					showMessageInDialogBox($(data).html('error').text());
-				}
-			}
-		}
-		$.post('/grids/download/', '', callBack(usid));
+		downloadImageOf('/grids/download/grid/', {usid: usidN});
 	}
 }

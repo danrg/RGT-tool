@@ -18,7 +18,7 @@ from RGT.gridMng.error.wrongState import WrongState
 from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
 from RGT.gridMng.error.wrongGridType import WrongGridType
 from RGT.gridMng.error.wrongSessionIteration import WrongSessionIteration
-from RGT.gridMng.utility import randomStringGenerator, validateName
+from RGT.gridMng.utility import randomStringGenerator, validateName, SessionResultImageConvertionData, convertRatingWeightSessionResultToSvg
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createXmlForComboBox, createDateTimeTag
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode, createXmlNumberOfResponseNode
@@ -37,7 +37,7 @@ from RGT.gridMng.template.session.participantsData import ParticipantsData
 from RGT.gridMng.template.gridTableData import GridTableData
 from RGT.gridMng.template.session.pedingResponsesData import PedingResponsesData
 
-from RGT.gridMng.utility import generateGridTable, createDendogram 
+from RGT.gridMng.utility import generateGridTable, createDendogram, getImageError
 from RGT.settings import SESSION_USID_KEY_LENGTH
 
 import uuid
@@ -902,6 +902,158 @@ def ajaxGetResponseResults(request):
         traceback.print_exc(file=sys.stdout)
         print '-'*60
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+
+def ajaxDonwloandSessionResults(request):
+    if not request.user.is_authenticated():
+        return redirect_to(request, '/auth/login/')
+    
+    try:
+        if not request.POST.has_key('sessionUSID') or not request.POST.has_key('iteration'):
+            if not request.POST.has_key('sessionUSID'):
+                raise Exception('sessionUSID key was not received')
+            else:
+                raise Exception('iteration key was not received')
+        else:
+            facilitatorObj= None
+            if len(request.user.facilitator_set.all()) < 1:
+                raise Exception('User is not a facilitator for a session')
+            else:
+                facilitatorObj= request.user.facilitator_set.all()[0]
+                sessionObj= Session.objects.filter(usid= request.POST['sessionUSID'])
+                if len(sessionObj) < 1:
+                    raise Exception('Couldn\'t find session: ' + request.POST['sessionUSID'])
+                else:
+                    session_= sessionObj[0]
+                    if session_.facilitator != facilitatorObj:
+                        raise Exception('User is  not a facilitator for session ' + request.POST['sessionUSID'])
+                    else:
+                        iteration_= int(request.POST['iteration'])
+                        templateData= __generateSessionIterationResult__(request, session_, iteration_)
+                        #check which type of response it is and convert the data so a svg can be created
+                        responseGridRelation= session_.responsegrid_set.filter(iteration= iteration_)
+                        if len(responseGridRelation) >= 1:
+                            gridType= responseGridRelation[0].grid.grid_type
+                            if gridType == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
+                                pass
+                            else:
+                                rangeData= SessionResultImageConvertionData()
+                                meanData= SessionResultImageConvertionData()
+                                stdData= SessionResultImageConvertionData()
+                                
+                                #the header object is shared among all the 3 tables
+                                templateData.rangeData.headers.append('weight')
+                                #templateData.rangeData.headers.insert(0, '')
+                                #templateData.rangeData.headers.append('')
+                                
+                                #range
+                                rangeData.tableHeader= templateData.rangeData.headers
+                                sizeWeights= len(templateData.rangeData.weights)
+                                i= 0
+                                temp= templateData.rangeData.table
+                                finalTable= []
+                                concerns= []
+                                
+                                i= 0
+                                j= 0
+                                
+                                while i < len(temp):
+                                    row= []
+                                    while j < len(temp[1]) - 2:
+                                        row.append((temp[i][j + 1][0], temp[i][j + 1][1]))
+                                        j+= 1
+                                    finalTable.append(row)
+                                    concerns.append((temp[i][0][0], temp[i][len(temp[i]) - 1][0]))
+                                    j= 0
+                                    i+= 1
+                                
+                                i= 0    
+                                while i < sizeWeights:
+                                    finalTable[i].append((templateData.rangeData.weights[i][0], templateData.rangeData.weightColorMap[i]))
+                                    i+= 1
+                                
+                                rangeData.tableData= finalTable
+                                rangeData.header= templateData.rangeData.tableHead
+                                rangeData.concerns= concerns
+                                
+                                #mean
+                                meanData.tableHeader= templateData.meanData.headers
+                                #meanData.tableHeader.append('weight')
+                                finalTable= []
+                                concerns= []
+                                sizeWeights= len(templateData.meanData.weights)
+                                i= 0
+                                temp= templateData.meanData.table
+
+                                i= 0
+                                j= 0
+                                
+                                while i < len(temp):
+                                    row= []
+                                    while j < len(temp[1]) - 2:
+                                        row.append((temp[i][j + 1][0], None))
+                                        j+= 1
+                                    finalTable.append(row)
+                                    concerns.append((temp[i][0][0], temp[i][len(temp[i]) - 1][0]))
+                                    j= 0
+                                    i+= 1
+                                
+                                i= 0    
+                                while i < sizeWeights:
+                                    finalTable[i].append((templateData.meanData.weights[i][0], None))
+                                    i+= 1
+                                
+                                meanData.tableData= finalTable
+                                meanData.header= templateData.meanData.tableHead
+                                meanData.concerns= concerns
+                                
+                                #std
+                                finalTable= []
+                                concerns= []
+                                stdData.tableHeader= templateData.stdData.headers
+                                sizeWeights= len(templateData.stdData.weights)
+                                i= 0
+                                temp= templateData.stdData.table
+                                
+                                i= 0
+                                j= 0
+                                
+                                while i < len(temp):
+                                    row= []
+                                    while j < len(temp[1]) - 2:
+                                        row.append((temp[i][j + 1][0], temp[i][j + 1][1]))
+                                        j+= 1
+                                    finalTable.append(row)
+                                    concerns.append((temp[i][0][0], temp[i][len(temp[i]) - 1][0]))
+                                    j= 0
+                                    i+= 1
+                                
+                                i= 0    
+                                while i < sizeWeights:
+                                    finalTable[i].append((templateData.stdData.weights[i][0], templateData.stdData.weightColorMap[i]))
+                                    i+= 1
+                                
+                                stdData.tableData= finalTable
+                                stdData.header= templateData.stdData.tableHead
+                                stdData.concerns= concerns
+                                
+                                testData= convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData)
+                                ###test code###
+                                fp= open('d:/temp/gridSvg.svg', 'w')
+                                fp.write(testData)
+                                fp.close()
+                                ###end test code###    
+                                #alslas
+    except:
+        print "Exception in user code:"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60
+    #in case of an error or checks failing return an image error
+    errorImageData= getImageError()
+    # send the file
+    response = HttpResponse(errorImageData, content_type= 'image/jpg')
+    response['Content-Disposition'] = 'attachment; filename=error.jpg'
+    return response
 
 #function that will get the page that display the participants of a session
 def ajaxGetParticipatingPage(request):
