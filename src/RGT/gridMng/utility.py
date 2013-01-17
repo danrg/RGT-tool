@@ -532,8 +532,237 @@ def convertGridTableToSvg(gridObj= None):
         root.appendChild(gNodeTable)
         return xmlDoc.toxml('utf-8')
 
+
+#data should be an object of the ResultAlternativeConcernTableData class
 def convertAlternativeConcernSessionResultToSvg(data):
-    pass
+    
+    ########### Settings ###########
+    fontSize= 30
+    f = ImageFont.truetype(DENDROGRAM_FONT_LOCATION, fontSize)
+    
+    fontName= 'arial'
+    
+    xWordCellSpace= 5 #space between a word and the right and left line of the cell (in pixels)
+    yWordCellSpace= 5 #space between the biggest word and the top and bottom line of the cell (in pixels)
+    
+    concernTableYOffset= 5 #offset from the top element. In pixels
+    alternativeTableYOffset= 5 #offset from the top element. In pixels
+    
+    concernTableXOffset= 5 #offset from the right element. In pixels
+    alternativeTableXOffset= 40 #offset from the right element. In pixels
+
+    
+    tableLineThickness= 1 #in pixels
+    tableLineColor= (202, 217, 237) #value in rbg
+    tableCellWordColor= (0, 0, 0) #value in rbg
+    tableHeaderCellWordColor= (185, 187, 189) #value in rbg
+    
+    concernTableHeaderBackground= (232, 234, 237)
+    alternativeTableHeaderBackground= (232, 234, 237)
+    
+    tableBackgroundColor1= (214, 233, 246)
+    tableBackgroundColor2= (189, 209, 247)
+    
+    ########### End settings ###########
+    
+    tempData= __TableData___()
+    alternativeTableData= []
+    concernTableData= []
+    alternativeTableHeader= ['name', 'times cited']
+    concernTableHeader= ['left', 'right', 'times cited']
+    concernsNRows= len(data.concerns) + 1 #+1 because of the header
+    alternativesNRows= len(data.alternatives) + 1 #+1 because of the header 
+    concernsNCols= len(concernTableHeader)
+    alternativesNCols= len(alternativeTableHeader)
+    concernCellWidths= [0 for x in xrange(concernsNCols)] #@UnusedVariable
+    alternativeCellWidths= [0 for x in xrange(alternativesNCols)] #@UnusedVariable
+    concernCellHeight= 0
+    alternativeCellHeight= 0
+    concernTableTotalXOffset= 0
+    alternativeTableTotalXOffset= 0
+    
+    #################### Pre-processing ####################
+    
+    #create the correct format for the table data
+    
+    #concern
+    i= 1
+    j= 0
+    concernTableData.append(concernTableHeader)
+    while i < concernsNRows:
+        row= []
+        row.append(data.concerns[i - 1][0])
+        row.append(data.concerns[i - 1][1])
+        row.append(data.concerns[i - 1][2])
+        concernTableData.append(row)
+        #calculate the cell height and width
+        while j < concernsNCols:
+            word= row[j]
+            if type(word) != StringType and type(word) != UnicodeType:
+                word= str(word)
+            size= f.getsize(word)
+            if size[0] > concernCellWidths[j]:
+                concernCellWidths[j]= size[0]
+            
+            if size[1] > concernCellHeight:
+                concernCellHeight= size[1]
+            j+= 1
+        j= 0
+        i+= 1
+    
+    #alternative
+    i= 1
+    j= 0
+    alternativeTableData.append(alternativeTableHeader)
+    while i < alternativesNRows:
+        row= []
+        row.append(data.alternatives[i - 1][0])
+        row.append(data.alternatives[i - 1][1])
+        alternativeTableData.append(row)
+        #calculate the cell height and width
+        while j < alternativesNCols:
+            word= row[j]
+            if type(word) != StringType and type(word) != UnicodeType:
+                word= str(word)
+            size= f.getsize(word)
+            if size[0] > alternativeCellWidths[j]:
+                alternativeCellWidths[j]= size[0]
+            
+            if size[1] > alternativeCellHeight:
+                alternativeCellHeight= size[1]
+            j+= 1
+        j= 0
+        i+= 1
+    
+    #check if the header word sizes
+    
+    #concern
+    i= 0
+    while i < concernsNCols:
+        size= f.getsize(concernTableData[0][i])
+        if size[0] > concernCellWidths[i]:
+            concernCellWidths[i]= size[0]
+        if size[1] > concernCellHeight:
+            concernCellHeight= size[1]
+        i+= 1
+    
+    #alternative
+    i= 0
+    while i < alternativesNCols:
+        size= f.getsize(alternativeTableData[0][i])
+        if size[0] > alternativeCellWidths[i]:
+            alternativeCellWidths[i]= size[0]
+        if size[1] > alternativeCellHeight:
+            alternativeCellHeight= size[1]
+        i+= 1
+    
+    #add xWordCellSpace * 2 to each position of the array (in place)
+    concernCellWidths[:] = [x + (xWordCellSpace * 2) for x in concernCellWidths]
+    alternativeCellWidths[:] = [x + (xWordCellSpace * 2) for x in alternativeCellWidths]
+    
+    concernTableTotalXOffset+= concernTableXOffset
+    alternativeTableTotalXOffset+= concernTableTotalXOffset + sum(concernCellWidths) + ((concernsNCols + 1) * tableLineThickness)  + alternativeTableXOffset
+    
+    #################### End pre-processing ####################
+    
+    imp= SvgDOMImplementation()
+    xmlDoc= imp.createSvgDocument()
+    root= xmlDoc.documentElement
+    root.setXmlns('http://www.w3.org/2000/svg')
+    root.setVersion('1.1')
+    
+    #################### Create the background of the header tables ####################
+    
+    #concern
+    concernTableHeaderBackgroundGround= xmlDoc.createGNode()
+    concernTableHeaderBackgroundGround.setId('concernTableHeaderBackgroundGround')
+    tempNode= xmlDoc.createRectNode(concernTableTotalXOffset, concernTableYOffset, concernCellHeight + tableLineThickness, sum(concernCellWidths) + (concernsNCols * tableLineThickness) )
+    tempNode.setFill(createColorRGBString(concernTableHeaderBackground))
+    concernTableHeaderBackgroundGround.appendChild(tempNode)
+    
+    #alternative
+    alternativeTableHeaderBackgroundGround= xmlDoc.createGNode()
+    alternativeTableHeaderBackgroundGround.setId('alternativeTableHeaderBackgroundGround')
+    tempNode= xmlDoc.createRectNode(alternativeTableTotalXOffset, alternativeTableYOffset, alternativeCellHeight + tableLineThickness, sum(alternativeCellWidths) + (alternativesNCols * tableLineThickness))
+    tempNode.setFill(createColorRGBString(alternativeTableHeaderBackground))
+    alternativeTableHeaderBackgroundGround.appendChild(tempNode)
+    
+    #################### End create the background of the header tables ####################
+    
+    #################### Create the background of the data part of the tables ####################
+    
+    #concern
+    i= 1
+    concernTableDataBackgrounGroup= xmlDoc.createGNode()
+    concernTableDataBackgrounGroup.setId('concernTableDataBackgrounGroup')
+    while i < concernsNRows:
+        x= concernTableTotalXOffset
+        y= concernTableYOffset + (i * concernCellHeight) + (i * tableLineThickness) + tableLineThickness/2
+        tempNode= xmlDoc.createRectNode(x, y, concernCellHeight + tableLineThickness, sum(concernCellWidths) + tableLineThickness * concernsNCols)
+        if i % 2 == 0:
+            tempNode.setFill(createColorRGBString(tableBackgroundColor2))
+        else:
+            tempNode.setFill(createColorRGBString(tableBackgroundColor1))
+        concernTableDataBackgrounGroup.appendChild(tempNode)
+        i+= 1
+        
+    #alternative
+    i= 1
+    alternativeTableDataBackgrounGroup= xmlDoc.createGNode()
+    alternativeTableDataBackgrounGroup.setId('alternativeTableDataBackgrounGroup')
+    while i < alternativesNRows:
+        x= alternativeTableTotalXOffset
+        y= alternativeTableYOffset + (i * alternativeCellHeight) + (i * tableLineThickness) + tableLineThickness/2
+        tempNode= xmlDoc.createRectNode(x, y, alternativeCellHeight + tableLineThickness, sum(alternativeCellWidths) + tableLineThickness * alternativesNCols)
+        if i % 2 == 0:
+            tempNode.setFill(createColorRGBString(tableBackgroundColor2))
+        else:
+            tempNode.setFill(createColorRGBString(tableBackgroundColor1))
+        alternativeTableDataBackgrounGroup.appendChild(tempNode)
+        i+= 1
+    
+    #################### End create the background of the data part of the tables ####################
+    
+    tempData.fontSize= fontSize
+    tempData.fontObject= f
+    tempData.fontName= fontName
+    tempData.lineThickness= tableLineThickness
+    tempData.tableLineColor= tableLineColor
+    tempData.tableCellWordColor= tableCellWordColor
+    tempData.tableHeaderCellWordColor= tableHeaderCellWordColor
+    tempData.yWordCellSpace= yWordCellSpace
+    tempData.xWordCellSpace= xWordCellSpace
+    
+    
+    tempData.cellHeight= concernCellHeight
+    tempData.cellWidths= concernCellWidths
+    tempData.nCols= concernsNCols
+    tempData.nRows= concernsNRows
+    tempData.tableData= concernTableData
+    tempData.yTableOffSet= concernTableYOffset
+    tempData.xTableOffSet= concernTableTotalXOffset
+    
+    xmlConcernTable= __createSvgTable__(tempData)
+    
+    root.appendChild(concernTableHeaderBackgroundGround)
+    root.appendChild(concernTableDataBackgrounGroup)
+    root.appendChild(xmlConcernTable)
+    
+    tempData.cellHeight= alternativeCellHeight
+    tempData.cellWidths= alternativeCellWidths
+    tempData.nCols= alternativesNCols
+    tempData.nRows= alternativesNRows
+    tempData.tableData= alternativeTableData
+    tempData.yTableOffSet= alternativeTableYOffset
+    tempData.xTableOffSet= alternativeTableTotalXOffset
+    
+    xmlAlternativeTable= __createSvgTable__(tempData)
+    
+    root.appendChild(alternativeTableHeaderBackgroundGround)
+    root.appendChild(alternativeTableDataBackgrounGroup)
+    root.appendChild(xmlAlternativeTable)
+    
+    return xmlDoc.toxml('utf-8')
 
 #meanData, rangeData and stdData should be objects of the resultRatingWeightTableData class
 def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData): 

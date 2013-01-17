@@ -18,7 +18,7 @@ from RGT.gridMng.error.wrongState import WrongState
 from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
 from RGT.gridMng.error.wrongGridType import WrongGridType
 from RGT.gridMng.error.wrongSessionIteration import WrongSessionIteration
-from RGT.gridMng.utility import randomStringGenerator, validateName, SessionResultImageConvertionData, convertRatingWeightSessionResultToSvg, createFileResponse
+from RGT.gridMng.utility import randomStringGenerator, validateName, SessionResultImageConvertionData, convertRatingWeightSessionResultToSvg, createFileResponse, convertAlternativeConcernSessionResultToSvg
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createXmlForComboBox, createDateTimeTag
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode, createXmlNumberOfResponseNode
@@ -935,8 +935,20 @@ def ajaxDonwloandSessionResults(request):
                         if len(responseGridRelation) >= 1:
                             gridType= responseGridRelation[0].grid.grid_type
                             if gridType == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
-                                #convertAlternativeConcernSessionResultToSvg()
-                                pass
+                                imgData= FileData()
+                                convertToData= request.POST['convertTo']
+                                if convertToData == 'svg':
+                                    imgData.data=  convertAlternativeConcernSessionResultToSvg(templateData)
+                                    imgData.fileExtention= 'svg'
+                                    imgData.ContentType= 'image/svg+xml'
+                                
+                                if request.POST.has_key('fileName'):
+                                    imgData.fileName= request.POST['fileName']
+                                    
+                                    if not imgData.fileName:
+                                        imgData.fileName= randomStringGenerator()
+                                    
+                                return createFileResponse(imgData)
                             else:
                                 rangeData= SessionResultImageConvertionData()
                                 meanData= SessionResultImageConvertionData()
