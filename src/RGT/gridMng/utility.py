@@ -532,6 +532,9 @@ def convertGridTableToSvg(gridObj= None):
         root.appendChild(gNodeTable)
         return xmlDoc.toxml('utf-8')
 
+def convertAlternativeConcernSessionResultToSvg(data):
+    pass
+
 #meanData, rangeData and stdData should be objects of the resultRatingWeightTableData class
 def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData): 
     
@@ -561,6 +564,13 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
     rangeHeaderYOffset= 10 #offset from the top of the header to the bottom of the element above it. In pixels
     stdHeaderYOffset= 10 #offset from the top of the header to the bottom of the element above it. In pixels
     
+    meanLeftConcernWordOffset= 5
+    rangeLeftConcernWordOffset= 5
+    stdLeftConcernWordOffset= 5
+    meanRightConcernWordOffset= 5
+    rangeRightConcernWordOffset= 5
+    stdRightConcernWordOffset= 5
+    
     tableLineThickness= 1 #in pixels
     tableLineColor= (60, 179, 113) #value in rbg
     tableCellWordColor= (60, 179, 113) #value in rbg
@@ -576,21 +586,27 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
     tempData.nRows= len(meanData.tableData) + 1 #it is + 1 for the table header
     tempData.nCols= len(meanData.tableHeader)
     
-    rangeColWidths= [0 for x in xrange(tempData.nCols)]
-    meanColWidths= [0 for x in xrange(tempData.nCols)]
-    stdColWidths= [0 for x in xrange(tempData.nCols)]
+    rangeColWidths= [0 for x in xrange(tempData.nCols)] #@UnusedVariable
+    meanColWidths= [0 for x in xrange(tempData.nCols)] #@UnusedVariable
+    stdColWidths= [0 for x in xrange(tempData.nCols)] #@UnusedVariable
     rangeCellHeight= 0
     meanCellHeight= 0
     stdCellHeight= 0
-    meanTableYTotalOffset= 0
-    rangeTableYTotalOffset= 0
-    stdTableYTotalOffset= 0
-    meanHeaderSize= None
-    rangeHeaderSize= None
-    stdHeaderSize= None
-    meanTablesize= None #tulip (width, height)
-    rangeTablesize= None #tulip (width, height)
-    stdTablesize= None #tulip (width, height)
+    meanTableYTotalOffset= 0 #@UnusedVariable
+    rangeTableYTotalOffset= 0 #@UnusedVariable
+    stdTableYTotalOffset= 0 #@UnusedVariable
+    meanTableXTotalOffset= 0 #@UnusedVariable
+    rangeTableXTotalOffset= 0 #@UnusedVariable
+    stdTableXTotalOffset= 0 #@UnusedVariable
+    meanHeaderSize= None #@UnusedVariable
+    rangeHeaderSize= None #@UnusedVariable
+    stdHeaderSize= None #@UnusedVariable
+    meanTablesize= None #tulip (width, height) #@UnusedVariable
+    rangeTablesize= None #tulip (width, height) #@UnusedVariable
+    stdTablesize= None #tulip (width, height) #@UnusedVariable
+    meanLeftConcernWordMaxWidth= 0
+    rangeLeftConcernWordMaxWidth= 0
+    stdLeftConcernWordMaxWidth= 0
     
     tempData.tableLineColor= tableLineColor
     tempData.lineThickness= tableLineThickness
@@ -714,6 +730,23 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
     width= (tempData.nCols + 1) * tableLineThickness + sum(stdColWidths)
     stdTablesize= (width, height)
     
+    #calculate max width of the left concern
+    i= 0
+    while i < len(meanData.concerns):
+        size= f.getsize(meanData.concerns[i][0])
+        if size[0] > meanLeftConcernWordMaxWidth:
+            meanLeftConcernWordMaxWidth= size[0]
+        
+        size= f.getsize(rangeData.concerns[i][0])
+        if size[0] > rangeLeftConcernWordMaxWidth:
+            rangeLeftConcernWordMaxWidth= size[0]
+        
+        size= f.getsize(stdData.concerns[i][0])
+        if size[0] > stdLeftConcernWordMaxWidth:
+            stdLeftConcernWordMaxWidth= size[0]
+        
+        i+= 1
+    
     #calculate the offset of each table
     
     #y offset
@@ -721,7 +754,10 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
     rangeTableYTotalOffset= rangeHeaderSize[1] + rangeHeaderYOffset + rangeTableYOffset + meanTableYTotalOffset + meanTablesize[1]
     stdTableYTotalOffset= stdHeaderSize[1] + stdHeaderYOffset + stdTableYOffset + rangeTableYTotalOffset + rangeTablesize[1]
     
-    
+    #x offset
+    meanTableXTotalOffset= meanLeftConcernWordMaxWidth + meanTableXOffset + meanLeftConcernWordOffset
+    rangeTableXTotalOffset= rangeLeftConcernWordMaxWidth + rangeTableXOffset + rangeLeftConcernWordOffset
+    stdTableXTotalOffset= stdLeftConcernWordMaxWidth + stdTableXOffset + stdLeftConcernWordOffset
     
     ####################End pre-processing####################
     
@@ -736,28 +772,89 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
     root= xmlDoc.documentElement
     root.setXmlns('http://www.w3.org/2000/svg')
     root.setVersion('1.1')
-    tempNode= None
+    tempNode= None #@UnusedVariable
+    globalDefNode= xmlDoc.createDefsNode()
+    root.appendChild(globalDefNode)
+    meanTableDataGroup= xmlDoc.createGNode()
+    meanTableDataGroup.setId('meanTableDataGroup')
+    rangeTableDataGroup= xmlDoc.createGNode()
+    rangeTableDataGroup.setId('rangeTableDataGroup')
+    stdTableDataGroup= xmlDoc.createGNode()
+    stdTableDataGroup.setId('stdTableDataGroup')
     
-    #create the svg tables
+    ########## create first row (header) linear gradient ##########
+    tempNode= xmlDoc.createLinearGradientNode('0%', '0%', '0%', '100%')
+    tempNode.appendChild(xmlDoc.createStopNode('0%', createColorRGBString(tableHeaderLinearColor1), 1))
+    tempNode.appendChild(xmlDoc.createStopNode('100%', createColorRGBString(tableHeaderLinearColor2), 1))
+    tempNode.setId('tableHeaderGradient')
+    globalDefNode.appendChild(tempNode)
+    ########## end create first row (header) linear gradient ##########
+    
+    ########## create the svg tables##########
     tempData.tableData= meanTableData
     tempData.cellHeight= meanCellHeight
     tempData.cellWidths= meanColWidths
     tempData.yTableOffSet= meanTableYTotalOffset
+    tempData.xTableOffSet= meanTableXTotalOffset
     xmlTableMean= __createSvgTable__(tempData)
     
     tempData.tableData= rangeTableData
     tempData.cellHeight= rangeCellHeight
     tempData.cellWidths= rangeColWidths
     tempData.yTableOffSet= rangeTableYTotalOffset
+    tempData.xTableOffSet= rangeTableXTotalOffset
     xmlTableRange= __createSvgTable__(tempData)
     
     tempData.tableData= stdTableData
     tempData.cellHeight= stdCellHeight
     tempData.cellWidths= stdColWidths
     tempData.yTableOffSet= stdTableYTotalOffset
+    tempData.xTableOffSet= stdTableXTotalOffset
     xmlTableStd= __createSvgTable__(tempData)
+    ########## end create the svg tables ##########
     
-    #create the background of the rating cells
+    ########## create the background of the table headers ##########
+    meanTableHeaderBackgroundGroup= xmlDoc.createGNode()
+    meanTableHeaderBackgroundGroup.setId('meanTableHeaderBackgroundGroup')
+    rangeTableHeaderBackgroundGroup= xmlDoc.createGNode()
+    rangeTableHeaderBackgroundGroup.setId('rangeTableHeaderBackgroundGroup')
+    stdTableHeaderBackgroundGroup= xmlDoc.createGNode()
+    stdTableHeaderBackgroundGroup.setId('stdTableHeaderBackgroundGroup')
+    i= 0
+    while i < len(meanData.tableHeader):
+        #calculate the total length of cols from 0 to i for all 3 tables
+        n1= 0
+        n2= 0
+        n3= 0
+        j= 0
+        while j < i:
+            n1+= meanColWidths[j] 
+            n2+= rangeColWidths[j] 
+            n3+= stdColWidths[j]
+            j+= 1
+        #mean
+        x= meanTableXTotalOffset + (tableLineThickness/2) + n1 + i * tableLineThickness
+        y= meanTableYTotalOffset + (tableLineThickness/2)
+        tempNode= xmlDoc.createRectNode(x, y, meanCellHeight + tableLineThickness, meanColWidths[i] + tableLineThickness)
+        tempNode.setFill('url(#tableHeaderGradient)')
+        meanTableHeaderBackgroundGroup.appendChild(tempNode)
+        #range
+        x= rangeTableXTotalOffset + (tableLineThickness/2) + n2 + i * tableLineThickness
+        y= rangeTableYTotalOffset + (tableLineThickness/2)
+        tempNode= xmlDoc.createRectNode(x, y, rangeCellHeight + tableLineThickness, rangeColWidths[i] + tableLineThickness)
+        tempNode.setFill('url(#tableHeaderGradient)')
+        rangeTableHeaderBackgroundGroup.appendChild(tempNode)
+        #std
+        x= stdTableXTotalOffset + (tableLineThickness/2) + n2 + i * tableLineThickness
+        y= stdTableYTotalOffset + (tableLineThickness/2)
+        tempNode= xmlDoc.createRectNode(x, y, stdCellHeight + tableLineThickness, stdColWidths[i] + tableLineThickness)
+        tempNode.setFill('url(#tableHeaderGradient)')
+        stdTableHeaderBackgroundGroup.appendChild(tempNode)
+        
+        i+= 1
+    ########## end create the background of the table headers ##########
+    
+    ########## create the background of the rating cells ##########
     i= 0
     j= 0
     
@@ -767,50 +864,120 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
     stdTableBackground.setId('stdTableRateBackgroundGroup')
     while i < tempData.nRows - 1:
         while j < tempData.nCols:
+            n1= 0
+            n2= 0
+            k= 0
+            while k < j:
+                n1+= rangeColWidths[k]
+                n2+= stdColWidths[k]
+                k+= 1
             #range table
             color= rangeData.tableData[i][j][1]
-            tempNode= xmlDoc.createRectNode(tableLineThickness * (j) + (j * rangeColWidths[j]), rangeTableYTotalOffset + ( (i + 1) * tableLineThickness) + ( (i + 1) * rangeCellHeight), rangeCellHeight + tableLineThickness, rangeColWidths[j] + tableLineThickness)
+            tempNode= xmlDoc.createRectNode(tableLineThickness * j + n1 + rangeTableXTotalOffset, rangeTableYTotalOffset + ( (i + 1) * tableLineThickness) + ( (i + 1) * rangeCellHeight), rangeCellHeight + tableLineThickness, rangeColWidths[j] + tableLineThickness)
             if color != None:
                 tempNode.setFill(createColorRGBString(rangeData.tableData[i][j][1]))
+            else:
+                tempNode.setFill(createColorRGBString((255, 255, 255)))
             rangeTableBackground.appendChild(tempNode)
             #std table
             color= stdData.tableData[i][j][1]
-            tempNode= xmlDoc.createRectNode(tableLineThickness * (j) + (j * stdColWidths[j]), stdTableYTotalOffset + ( (i + 1) * tableLineThickness) + ( (i + 1) * stdCellHeight), stdCellHeight + tableLineThickness, stdColWidths[j] + tableLineThickness)
+            tempNode= xmlDoc.createRectNode(tableLineThickness * j + n2 + stdTableXTotalOffset, stdTableYTotalOffset + ( (i + 1) * tableLineThickness) + ( (i + 1) * stdCellHeight), stdCellHeight + tableLineThickness, stdColWidths[j] + tableLineThickness)
             if color != None:
                 tempNode.setFill(createColorRGBString(stdData.tableData[i][j][1]))
+            else:
+                tempNode.setFill(createColorRGBString((255, 255, 255)))
             stdTableBackground.appendChild(tempNode)
             j+= 1
         j= 0
         i+= 1
+    ########## end create the background of the rating cells ##########
     
-    root.appendChild(rangeTableBackground)
-    root.appendChild(stdTableBackground)
+    ########## create the left and right concerns ##########
+    i= 0
+    meanConcernGroup= xmlDoc.createGNode()
+    meanConcernGroup.setId('meanTableConcernGroup')
+    rangeConcernGroup= xmlDoc.createGNode()
+    rangeConcernGroup.setId('rangeTableConcernGroup')
+    stdConcernGroup= xmlDoc.createGNode()
+    stdConcernGroup.setId('stdTableConcernGroup')
+    while i < len(meanData.concerns):
+        #mean
+        size= f.getsize(meanData.concerns[i][0])
+        y= meanTableYTotalOffset + (i + 1) * meanCellHeight + ((i + 1) * tableLineThickness )  +  (meanCellHeight / 2) + (size[1]/2) - 5
+        tempNode= xmlDoc.createSvgTextNode(meanLeftConcernWordOffset, y, meanData.concerns[i][0])
+        tempNode.setFontFamily(fontName)
+        tempNode.setFontSize( str(fontSize) + 'px')
+        meanConcernGroup.appendChild(tempNode)
+        tempNode= xmlDoc.createSvgTextNode(meanTableXTotalOffset + meanTablesize[0] + meanRightConcernWordOffset, y, meanData.concerns[i][1])
+        tempNode.setFontFamily(fontName)
+        tempNode.setFontSize( str(fontSize) + 'px')
+        meanConcernGroup.appendChild(tempNode)
+        #range
+        size= f.getsize(rangeData.concerns[i][0])
+        y= rangeTableYTotalOffset + (i + 1) * rangeCellHeight + ((i + 1) * tableLineThickness )  +  (rangeCellHeight / 2) + (size[1]/2) - 5
+        tempNode= xmlDoc.createSvgTextNode(rangeLeftConcernWordOffset, y, rangeData.concerns[i][0])
+        tempNode.setFontFamily(fontName)
+        tempNode.setFontSize( str(fontSize) + 'px')
+        rangeConcernGroup.appendChild(tempNode)
+        tempNode= xmlDoc.createSvgTextNode(rangeTableXTotalOffset + rangeTablesize[0] + rangeRightConcernWordOffset, y, rangeData.concerns[i][1])
+        tempNode.setFontFamily(fontName)
+        tempNode.setFontSize( str(fontSize) + 'px')
+        rangeConcernGroup.appendChild(tempNode)
+        #std
+        size= f.getsize(stdData.concerns[i][0])
+        y= stdTableYTotalOffset + (i + 1) * stdCellHeight + ((i + 1) * tableLineThickness )  +  (stdCellHeight / 2) + (size[1]/2) - 5
+        tempNode= xmlDoc.createSvgTextNode(stdLeftConcernWordOffset, y, stdData.concerns[i][0])
+        tempNode.setFontFamily(fontName)
+        tempNode.setFontSize( str(fontSize) + 'px')
+        stdConcernGroup.appendChild(tempNode)
+        tempNode= xmlDoc.createSvgTextNode(stdTableXTotalOffset + stdTablesize[0] + stdRightConcernWordOffset, y, stdData.concerns[i][1])
+        tempNode.setFontFamily(fontName)
+        tempNode.setFontSize( str(fontSize) + 'px')
+        stdConcernGroup.appendChild(tempNode)
+        
+        i+= 1
+    ######### end #create the left and right concerns ##########
     
+    ######### create the final document #########
     #add the header
-    tempNode= xmlDoc.createSvgTextNode(0, meanHeaderYOffset + meanHeaderSize[1] - 7, meanData.header)
+    tempNode= xmlDoc.createSvgTextNode(meanTableXTotalOffset, meanHeaderYOffset + meanHeaderSize[1] - 7, meanData.header)
     tempNode.setFontFamily(fontName)
     tempNode.setFontSize(str(headerFontSize) + 'px')
-    root.appendChild(tempNode)
+    meanTableDataGroup.appendChild(tempNode)
+    #add the different elements of the mean table
+    meanTableDataGroup.appendChild(meanTableHeaderBackgroundGroup)
+    meanTableDataGroup.appendChild(meanConcernGroup)
     #add the mean table
-    root.appendChild(xmlTableMean)
+    meanTableDataGroup.appendChild(xmlTableMean)
     
     #add the header
-    tempNode= xmlDoc.createSvgTextNode(0, meanTableYTotalOffset + meanTablesize[1] + rangeHeaderYOffset + rangeHeaderSize[1] - 7, rangeData.header)
+    tempNode= xmlDoc.createSvgTextNode(rangeTableXTotalOffset, meanTableYTotalOffset + meanTablesize[1] + rangeHeaderYOffset + rangeHeaderSize[1] - 7, rangeData.header)
     tempNode.setFontFamily(fontName)
     tempNode.setFontSize(str(headerFontSize) + 'px')
-    root.appendChild(tempNode)
-    #add the range tab;e
-    root.appendChild(xmlTableRange)
+    rangeTableDataGroup.appendChild(tempNode)
+    #add the different elements of the range table
+    rangeTableDataGroup.appendChild(rangeTableHeaderBackgroundGroup)
+    rangeTableDataGroup.appendChild(rangeConcernGroup)
+    rangeTableDataGroup.appendChild(rangeTableBackground)
+    #add the std table
+    rangeTableDataGroup.appendChild(xmlTableRange)
     
     #add the headers
-    tempNode= xmlDoc.createSvgTextNode(0, rangeTableYTotalOffset + rangeTablesize[1] + stdHeaderYOffset + stdHeaderSize[1] - 7, stdData.header)
+    tempNode= xmlDoc.createSvgTextNode(stdTableXTotalOffset, rangeTableYTotalOffset + rangeTablesize[1] + stdHeaderYOffset + stdHeaderSize[1] - 7, stdData.header)
     tempNode.setFontFamily(fontName)
     tempNode.setFontSize(str(headerFontSize) + 'px')
-    root.appendChild(tempNode)
+    stdTableDataGroup.appendChild(tempNode)
+    #add the different elements of the std table
+    stdTableDataGroup.appendChild(stdTableHeaderBackgroundGroup)
+    stdTableDataGroup.appendChild(stdConcernGroup)
+    stdTableDataGroup.appendChild(stdTableBackground)
     #add the std table
-    root.appendChild(xmlTableStd)
-    #root.appendChild(xmlTableRange)
-    #root.appendChild(xmlTableStd)
+    stdTableDataGroup.appendChild(xmlTableStd)
+    
+    #add the data to the document
+    root.appendChild(meanTableDataGroup)
+    root.appendChild(rangeTableDataGroup)
+    root.appendChild(stdTableDataGroup)
     
     return xmlDoc.toxml('utf-8')
 
@@ -887,6 +1054,8 @@ def __createSvgTable__(data):
             # use the floor of data.lineThickness/2, this will cause an error of around 0.5 pixels in the placement
             xTotalTableTextOffSet+= data.lineThickness/2
             word= data.tableData[i][j]
+            if word == None:
+                word= ''
             size= data.fontObject.getsize(str(word))
             #word is center aligned
             x= data.xTableOffSet + xTotalTableTextOffSet + data.xWordCellSpace + (data.cellWidths[j] / 2) - (size[0]/2) - 5 

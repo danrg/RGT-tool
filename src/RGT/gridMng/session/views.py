@@ -18,7 +18,7 @@ from RGT.gridMng.error.wrongState import WrongState
 from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
 from RGT.gridMng.error.wrongGridType import WrongGridType
 from RGT.gridMng.error.wrongSessionIteration import WrongSessionIteration
-from RGT.gridMng.utility import randomStringGenerator, validateName, SessionResultImageConvertionData, convertRatingWeightSessionResultToSvg
+from RGT.gridMng.utility import randomStringGenerator, validateName, SessionResultImageConvertionData, convertRatingWeightSessionResultToSvg, createFileResponse
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createXmlForComboBox, createDateTimeTag
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode, createXmlNumberOfResponseNode
@@ -36,7 +36,7 @@ from RGT.gridMng.template.session.resultRatingWeightTablesData import ResultRati
 from RGT.gridMng.template.session.participantsData import ParticipantsData
 from RGT.gridMng.template.gridTableData import GridTableData
 from RGT.gridMng.template.session.pedingResponsesData import PedingResponsesData
-
+from RGT.gridMng.fileData import FileData
 from RGT.gridMng.utility import generateGridTable, createDendogram, getImageError
 from RGT.settings import SESSION_USID_KEY_LENGTH
 
@@ -903,6 +903,7 @@ def ajaxGetResponseResults(request):
         print '-'*60
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
 
+#download the results from a session in the form of an image
 def ajaxDonwloandSessionResults(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
@@ -934,6 +935,7 @@ def ajaxDonwloandSessionResults(request):
                         if len(responseGridRelation) >= 1:
                             gridType= responseGridRelation[0].grid.grid_type
                             if gridType == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
+                                #convertAlternativeConcernSessionResultToSvg()
                                 pass
                             else:
                                 rangeData= SessionResultImageConvertionData()
@@ -1036,13 +1038,20 @@ def ajaxDonwloandSessionResults(request):
                                 stdData.header= templateData.stdData.tableHead
                                 stdData.concerns= concerns
                                 
-                                testData= convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData)
-                                ###test code###
-                                fp= open('d:/temp/gridSvg.svg', 'w')
-                                fp.write(testData)
-                                fp.close()
-                                ###end test code###    
-                                #alslas
+                                imgData= FileData()
+                                convertToData= request.POST['convertTo']
+                                if convertToData == 'svg':
+                                    imgData.data=  convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData)
+                                    imgData.fileExtention= 'svg'
+                                    imgData.ContentType= 'image/svg+xml'
+                                
+                                if request.POST.has_key('fileName'):
+                                    imgData.fileName= request.POST['fileName']
+                                    
+                                    if not imgData.fileName:
+                                        imgData.fileName= randomStringGenerator()
+                                    
+                                return createFileResponse(imgData)
     except:
         print "Exception in user code:"
         print '-'*60
