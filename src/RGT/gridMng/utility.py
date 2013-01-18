@@ -540,6 +540,11 @@ def convertAlternativeConcernSessionResultToSvg(data):
     fontSize= 30
     f = ImageFont.truetype(DENDROGRAM_FONT_LOCATION, fontSize)
     
+    newWordFontSize= 20
+    newWordF= ImageFont.truetype(DENDROGRAM_FONT_LOCATION, newWordFontSize)
+    newWord= 'new'
+    newWordColor= (243, 178, 126)
+    
     fontName= 'arial'
     
     xWordCellSpace= 5 #space between a word and the right and left line of the cell (in pixels)
@@ -551,6 +556,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
     concernTableXOffset= 5 #offset from the right element. In pixels
     alternativeTableXOffset= 40 #offset from the right element. In pixels
 
+    xNewWordOffset= 5 #offset of the new word from the most left element. In pixels
     
     tableLineThickness= 1 #in pixels
     tableLineColor= (202, 217, 237) #value in rbg
@@ -562,6 +568,10 @@ def convertAlternativeConcernSessionResultToSvg(data):
     
     tableBackgroundColor1= (214, 233, 246)
     tableBackgroundColor2= (189, 209, 247)
+    
+    shadowXOffset= 3 #value in pixels
+    shadowYOffset= 3 #value in pixels
+    shadowBlurSize= 4 #how big the bluer should be
     
     ########### End settings ###########
     
@@ -580,6 +590,8 @@ def convertAlternativeConcernSessionResultToSvg(data):
     alternativeCellHeight= 0
     concernTableTotalXOffset= 0
     alternativeTableTotalXOffset= 0
+    hasNewConcerns= False
+    newWordSize= newWordF.getsize(newWord)
     
     #################### Pre-processing ####################
     
@@ -594,6 +606,8 @@ def convertAlternativeConcernSessionResultToSvg(data):
         row.append(data.concerns[i - 1][0])
         row.append(data.concerns[i - 1][1])
         row.append(data.concerns[i - 1][2])
+        if data.concerns[i - 1][5] == True:
+            hasNewConcerns= True 
         concernTableData.append(row)
         #calculate the cell height and width
         while j < concernsNCols:
@@ -662,6 +676,8 @@ def convertAlternativeConcernSessionResultToSvg(data):
     
     concernTableTotalXOffset+= concernTableXOffset
     alternativeTableTotalXOffset+= concernTableTotalXOffset + sum(concernCellWidths) + ((concernsNCols + 1) * tableLineThickness)  + alternativeTableXOffset
+    if hasNewConcerns:
+        alternativeTableTotalXOffset+= xNewWordOffset + newWordSize[0]
     
     #################### End pre-processing ####################
     
@@ -670,6 +686,50 @@ def convertAlternativeConcernSessionResultToSvg(data):
     root= xmlDoc.documentElement
     root.setXmlns('http://www.w3.org/2000/svg')
     root.setVersion('1.1')
+    
+    globalDefNode= xmlDoc.createDefsNode()
+    root.appendChild(globalDefNode)
+    
+    ##########create the shadow filter ##########
+    filterNode= xmlDoc.createFilterNode()
+    filterNode.setId('shadow1')
+    filterNode.setX(0)
+    filterNode.setY(0)
+    filterNode.setWidth('150%')
+    filterNode.setHeight('150%')
+    tempNode= xmlDoc.createFeOffsetNode()
+    tempNode.setDx(shadowXOffset)
+    tempNode.setDy(shadowYOffset)
+    tempNode.setResult('offOut')
+    tempNode.setIn('SourceGraphic')
+    filterNode.appendChild(tempNode)
+    tempNode= xmlDoc.createFeGaussianBlurNode()
+    tempNode.setResult('blurOut')
+    tempNode.setIn('offOut')
+    tempNode.setStdDeviation(shadowBlurSize)
+    filterNode.appendChild(tempNode)
+    tempNode= xmlDoc.createFeBlendNode()
+    tempNode.setIn('SourceGraphic')
+    tempNode.setIn2('blurOut')
+    tempNode.setMode('normal')
+    filterNode.appendChild(tempNode)
+    globalDefNode.appendChild(filterNode)
+    ########## end create the shadow filter ##########
+    
+    ########## Create the glow filter ##########
+    filterNode= xmlDoc.createFilterNode()
+    filterNode.setId('glow1')
+    filterNode.setFilterUnits('userSpaceOnUse')
+    filterNode.setX(0)
+    filterNode.setY(0)
+    filterNode.setWidth(400)
+    filterNode.setHeight(400)
+    tempNode= xmlDoc.createFeGaussianBlurNode()
+    tempNode.setIn('SourceGraphic')
+    tempNode.setStdDeviation(25)
+    filterNode.appendChild(tempNode)
+    globalDefNode.appendChild(filterNode)
+    ########## End create the glow filter ##########
     
     #################### Create the background of the header tables ####################
     
@@ -723,6 +783,47 @@ def convertAlternativeConcernSessionResultToSvg(data):
     
     #################### End create the background of the data part of the tables ####################
     
+    #################### Add the 'new' word next to the tables ####################
+    
+    #concern
+    concernNewWordGroup= xmlDoc.createGNode()
+    concernNewWordGroup.setId('concernNewWordGroup')
+    i= 1
+    x= concernTableTotalXOffset + sum(concernCellWidths) + (concernsNCols + 1) * tableLineThickness + xNewWordOffset
+    while i < concernsNRows:
+        if data.concerns[i - 1][5] == True:
+            y= concernTableTotalXOffset + (i * concernCellHeight) + concernCellHeight / 2 + newWordSize[1] /2 - 5
+            tempNode= xmlDoc.createSvgTextNode(x, y, newWord)
+            tempNode.setFontFamily(fontName)
+            tempNode.setFontSize( str(newWordFontSize) + 'px')
+            tempNode.setFill('none')
+            tempNode.setStroke(createColorRGBString(newWordColor))
+            tempNode.setStrokeWidth(1)
+            tempNode.setFilter('url(#shadow1)')
+            concernNewWordGroup.appendChild(tempNode)
+        i+= 1
+        
+    #alternative
+    alternativeNewWordGroup= xmlDoc.createGNode()
+    alternativeNewWordGroup.setId('alternativeNewWordGroup')
+    i= 1
+    x= alternativeTableTotalXOffset + sum(alternativeCellWidths) + (alternativesNCols + 1) * tableLineThickness + xNewWordOffset
+    while i < alternativesNRows:
+        if data.alternatives[i - 1][2] == True:
+            y= alternativeTableYOffset + (i * alternativeCellHeight) + alternativeCellHeight / 2 + newWordSize[1] /2 - 5
+            tempNode= xmlDoc.createSvgTextNode(x, y, newWord)
+            tempNode.setFontFamily(fontName)
+            tempNode.setFontSize( str(newWordFontSize) + 'px')
+            tempNode.setFill('none')
+            tempNode.setStroke(createColorRGBString(newWordColor))
+            tempNode.setStrokeWidth(1)
+            tempNode.setFilter('url(#shadow1)')
+            alternativeNewWordGroup.appendChild(tempNode)
+        i+= 1
+    
+    
+    #################### End add the 'new' word next to the tables ####################
+    
     tempData.fontSize= fontSize
     tempData.fontObject= f
     tempData.fontName= fontName
@@ -746,6 +847,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
     
     root.appendChild(concernTableHeaderBackgroundGround)
     root.appendChild(concernTableDataBackgrounGroup)
+    root.appendChild(concernNewWordGroup)
     root.appendChild(xmlConcernTable)
     
     tempData.cellHeight= alternativeCellHeight
@@ -760,6 +862,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
     
     root.appendChild(alternativeTableHeaderBackgroundGround)
     root.appendChild(alternativeTableDataBackgrounGroup)
+    root.appendChild(alternativeNewWordGroup)
     root.appendChild(xmlAlternativeTable)
     
     return xmlDoc.toxml('utf-8')
