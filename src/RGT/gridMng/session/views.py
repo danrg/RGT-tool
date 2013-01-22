@@ -18,7 +18,10 @@ from RGT.gridMng.error.wrongState import WrongState
 from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
 from RGT.gridMng.error.wrongGridType import WrongGridType
 from RGT.gridMng.error.wrongSessionIteration import WrongSessionIteration
-from RGT.gridMng.utility import createXmlErrorResponse, createXmlSuccessResponse, randomStringGenerator, createXmlForComboBox, validateName, createXmlForNumberOfResponseSent, createDateTimeTag
+from RGT.gridMng.utility import randomStringGenerator, validateName, SessionResultImageConvertionData, convertRatingWeightSessionResultToSvg, createFileResponse, convertAlternativeConcernSessionResultToSvg
+from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createXmlForComboBox, createDateTimeTag
+from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
+from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode, createXmlNumberOfResponseNode
 from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid__
 from math import sqrt, ceil
 from RGT.gridMng.template.session.createSessionData import CreateSessionData
@@ -33,8 +36,8 @@ from RGT.gridMng.template.session.resultRatingWeightTablesData import ResultRati
 from RGT.gridMng.template.session.participantsData import ParticipantsData
 from RGT.gridMng.template.gridTableData import GridTableData
 from RGT.gridMng.template.session.pedingResponsesData import PedingResponsesData
-
-from RGT.gridMng.utility import generateGridTable, createDendogram 
+from RGT.gridMng.fileData import FileData
+from RGT.gridMng.utility import generateGridTable, createDendogram, getImageError
 from RGT.settings import SESSION_USID_KEY_LENGTH
 
 import uuid
@@ -99,11 +102,14 @@ def ajaxGetMySessionContentPage(request):
                     sessionObj= Session.objects.get(usid= request.POST['sessionUSID'], facilitator= facilitator1)
                     #get the users
                     #participants= sessionObj.getParticipators()
+                    
                     templateData= MySessionsContentData()
                     templateData.participantTableData= ParticipantsData(__createPaticipantPanelData__(sessionObj))
                     iteration= sessionObj.iteration
-                    gridTemplateData= GridTableData(generateGridTable(sessionObj.sessiongrid_set.all()[iteration].grid))
+                    sessionGrid= sessionObj.sessiongrid_set.all()[iteration].grid
+                    gridTemplateData= GridTableData(generateGridTable(sessionGrid))
                     gridTemplateData.tableId= randomStringGenerator()
+                    gridTemplateData.usid= sessionGrid.usid
                     templateData.tableData= gridTemplateData
                     iterationValueType = {}
                     iterationTypes = SessionIterationState.objects.filter(session=sessionObj)
@@ -672,7 +678,7 @@ def ajaxRespond(request):
                             gridResponseRelation= ResponseGrid(grid= gridObj, session= sessionObj, iteration= sessionIteration, user= userObj)
                             gridResponseRelation.save()
 
-                            extraXmlData= createXmlForNumberOfResponseSent(len(sessionObj.getUsersThatRespondedRequest()) + 1)
+                            extraXmlData= createXmlNumberOfResponseNode(len(sessionObj.getUsersThatRespondedRequest()) + 1)
                             if extraXmlData == None:
                                 return HttpResponse(createXmlSuccessResponse('Grid created successfully.', createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
                             else:
@@ -691,7 +697,7 @@ def ajaxRespond(request):
                             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                 else:
                     return HttpResponse(createXmlErrorResponse('Can\'t create response grid, session is in a state where that is not permitted'), content_type='application/xml')
-                    #return ajaxCreateGrid(request, createXmlForNumberOfResponseSent(len(sessionObj.getUsersThatRespondedRequest()) + 1))
+                    #return ajaxCreateGrid(request, createXmlNumberOfResponseNode(len(sessionObj.getUsersThatRespondedRequest()) + 1))
             else:
                 return HttpResponse(createXmlErrorResponse('You are not participating in the session, can\'t send response grid'), content_type='application/xml')
         else:
@@ -912,6 +918,179 @@ def ajaxGetResponseResults(request):
         print '-'*60
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
 
+#download the results from a session in the form of an image
+def ajaxDonwloandSessionResults(request):
+    if not request.user.is_authenticated():
+        return redirect_to(request, '/auth/login/')
+    
+    try:
+        if not request.POST.has_key('sessionUSID') or not request.POST.has_key('iteration'):
+            if not request.POST.has_key('sessionUSID'):
+                raise Exception('sessionUSID key was not received')
+            else:
+                raise Exception('iteration key was not received')
+        else:
+            facilitatorObj= None
+            if len(request.user.facilitator_set.all()) < 1:
+                raise Exception('User is not a facilitator for a session')
+            else:
+                facilitatorObj= request.user.facilitator_set.all()[0]
+                sessionObj= Session.objects.filter(usid= request.POST['sessionUSID'])
+                if len(sessionObj) < 1:
+                    raise Exception('Couldn\'t find session: ' + request.POST['sessionUSID'])
+                else:
+                    session_= sessionObj[0]
+                    if session_.facilitator != facilitatorObj:
+                        raise Exception('User is  not a facilitator for session ' + request.POST['sessionUSID'])
+                    else:
+                        iteration_= int(request.POST['iteration'])
+                        templateData= __generateSessionIterationResult__(request, session_, iteration_)
+                        #check which type of response it is and convert the data so a svg can be created
+                        responseGridRelation= session_.responsegrid_set.filter(iteration= iteration_)
+                        if len(responseGridRelation) >= 1:
+                            gridType= responseGridRelation[0].grid.grid_type
+                            if gridType == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
+                                imgData= FileData()
+                                convertToData= request.POST['convertTo']
+                                if convertToData == 'svg':
+                                    imgData.data=  convertAlternativeConcernSessionResultToSvg(templateData)
+                                    imgData.fileExtention= 'svg'
+                                    imgData.ContentType= 'image/svg+xml'
+                                
+                                if request.POST.has_key('fileName'):
+                                    imgData.fileName= request.POST['fileName']
+                                    
+                                    if not imgData.fileName:
+                                        imgData.fileName= randomStringGenerator()
+                                    
+                                return createFileResponse(imgData)
+                            else:
+                                rangeData= SessionResultImageConvertionData()
+                                meanData= SessionResultImageConvertionData()
+                                stdData= SessionResultImageConvertionData()
+                                
+                                #the header object is shared among all the 3 tables
+                                templateData.rangeData.headers.append('weight')
+                                #templateData.rangeData.headers.insert(0, '')
+                                #templateData.rangeData.headers.append('')
+                                
+                                #range
+                                rangeData.tableHeader= templateData.rangeData.headers
+                                sizeWeights= len(templateData.rangeData.weights)
+                                i= 0
+                                temp= templateData.rangeData.table
+                                finalTable= []
+                                concerns= []
+                                
+                                i= 0
+                                j= 0
+                                
+                                while i < len(temp):
+                                    row= []
+                                    while j < len(temp[1]) - 2:
+                                        row.append((temp[i][j + 1][0], temp[i][j + 1][1]))
+                                        j+= 1
+                                    finalTable.append(row)
+                                    concerns.append((temp[i][0][0], temp[i][len(temp[i]) - 1][0]))
+                                    j= 0
+                                    i+= 1
+                                
+                                i= 0    
+                                while i < sizeWeights:
+                                    finalTable[i].append((templateData.rangeData.weights[i][0], templateData.rangeData.weightColorMap[i]))
+                                    i+= 1
+                                
+                                rangeData.tableData= finalTable
+                                rangeData.header= templateData.rangeData.tableHead
+                                rangeData.concerns= concerns
+                                
+                                #mean
+                                meanData.tableHeader= templateData.meanData.headers
+                                #meanData.tableHeader.append('weight')
+                                finalTable= []
+                                concerns= []
+                                sizeWeights= len(templateData.meanData.weights)
+                                i= 0
+                                temp= templateData.meanData.table
+
+                                i= 0
+                                j= 0
+                                
+                                while i < len(temp):
+                                    row= []
+                                    while j < len(temp[1]) - 2:
+                                        row.append((temp[i][j + 1][0], None))
+                                        j+= 1
+                                    finalTable.append(row)
+                                    concerns.append((temp[i][0][0], temp[i][len(temp[i]) - 1][0]))
+                                    j= 0
+                                    i+= 1
+                                
+                                i= 0    
+                                while i < sizeWeights:
+                                    finalTable[i].append((templateData.meanData.weights[i][0], None))
+                                    i+= 1
+                                
+                                meanData.tableData= finalTable
+                                meanData.header= templateData.meanData.tableHead
+                                meanData.concerns= concerns
+                                
+                                #std
+                                finalTable= []
+                                concerns= []
+                                stdData.tableHeader= templateData.stdData.headers
+                                sizeWeights= len(templateData.stdData.weights)
+                                i= 0
+                                temp= templateData.stdData.table
+                                
+                                i= 0
+                                j= 0
+                                
+                                while i < len(temp):
+                                    row= []
+                                    while j < len(temp[1]) - 2:
+                                        row.append((temp[i][j + 1][0], temp[i][j + 1][1]))
+                                        j+= 1
+                                    finalTable.append(row)
+                                    concerns.append((temp[i][0][0], temp[i][len(temp[i]) - 1][0]))
+                                    j= 0
+                                    i+= 1
+                                
+                                i= 0    
+                                while i < sizeWeights:
+                                    finalTable[i].append((templateData.stdData.weights[i][0], templateData.stdData.weightColorMap[i]))
+                                    i+= 1
+                                
+                                stdData.tableData= finalTable
+                                stdData.header= templateData.stdData.tableHead
+                                stdData.concerns= concerns
+                                
+                                imgData= FileData()
+                                convertToData= request.POST['convertTo']
+                                if convertToData == 'svg':
+                                    imgData.data=  convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData)
+                                    imgData.fileExtention= 'svg'
+                                    imgData.ContentType= 'image/svg+xml'
+                                
+                                if request.POST.has_key('fileName'):
+                                    imgData.fileName= request.POST['fileName']
+                                    
+                                    if not imgData.fileName:
+                                        imgData.fileName= randomStringGenerator()
+                                    
+                                return createFileResponse(imgData)
+    except:
+        print "Exception in user code:"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60
+    #in case of an error or checks failing return an image error
+    errorImageData= getImageError()
+    # send the file
+    response = HttpResponse(errorImageData, content_type= 'image/jpg')
+    response['Content-Disposition'] = 'attachment; filename=error.jpg'
+    return response
+
 #function that will get the page that display the participants of a session
 def ajaxGetParticipatingPage(request):
     if not request.user.is_authenticated():
@@ -969,12 +1148,14 @@ def ajaxGenerateSessionDendrogram(request):
                         sessionGridRelation= sessionGridRelation[0]
                         try:
                             imgData= createDendogram(sessionGridRelation.grid)
-                            return HttpResponse(imgData, content_type='application/xml')
-                        except Exception as error:
-                            if len(error.args) >= 1:
-                                return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
-                            else:
-                                return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'), content_type='application/xml')
+                            responseData= createSvgResponse(imgData, createXmlGridIdNode(sessionGridRelation.grid.usid))
+                            return HttpResponse(responseData, content_type='application/xml')
+                        except Exception:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60
+                            return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'), content_type='application/xml')
                     else:
                         return HttpResponse(createXmlErrorResponse('No grid found for the selected iteration'), content_type='application/xml')
                 else:
@@ -1009,6 +1190,7 @@ def ajaxGetSessionGrid(request):
                     gridObj= gridObj[0].grid
                     templateData= GridTableData(generateGridTable(gridObj))
                     templateData.tableId= randomStringGenerator()
+                    templateData.usid= gridObj.usid
                     #if the state is not check then return a table where nothing can be changed, else return a table that can be changed
                     if sessionObj.state.name == State.objects.getCheckState().name:
                         templateData.changeRatingsWeights= True

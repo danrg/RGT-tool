@@ -20,6 +20,14 @@ if( typeof createSvgMenu != 'function')
 	});
 }
 
+if( typeof downloadImageOf != 'function')
+{
+	$.ajax({
+		url: urlStaticFiles + 'js/generalUtil.js',
+		dataType: 'script',
+		async:   false 
+	});
+}
 
 
 //function definitions
@@ -289,6 +297,7 @@ function mySessionsShowResults()
 				}
 				$('#mySessionsContentResultDiv').html($(data).find('htmlData').text());
 				$('#clearResultsButton').show();
+				$('#downloadResultsButton').show();
 			}
 			else
 			{
@@ -339,9 +348,11 @@ function showSessionDendrogram(iteration, divId)
 						$('#mySessionResultsDendrogramTitleIteration').text(iteration);
 					}
 					clearSvgImg(dendrogramDiv);
-					createDendogram(dendrogramDiv, data);
+					var svg= $.parseXML($(data).find('svgData').text());
+					var gridId= $(data).find('extraInfo').find('usid').text();
+					createDendogram(dendrogramDiv, svg);
 					//create the menu for the svg
-					createSvgMenu($('#' + dendrogramDiv), null);
+					createSvgMenu($('#' + dendrogramDiv), {saveItemAs: true, saveItemAsUrl: '/grids/download/dendrogram/', saveItemAsArguments:{gridUSID: gridId}});
 					hideLoadingSpinner($('#' + dendrogramDiv));
 				}
 				else
@@ -440,10 +451,28 @@ function getSessionGrid()
 	}
 }
 
+/**
+ * This function will retrieve the download option page
+ */
+function getResultsDownloadPage()
+{
+	var selectedOption = $('#mySessionsContentSessionIterationSelect option:selected');
+	var iterationN= selectedOption.val();
+	if (iterationN > 0) {
+		var sessionUsid= mySessionsGetSessionUSID();
+		downloadImageOf('download/results/', {sessionUSID:sessionUsid, iteration:iterationN})
+	}
+	else
+	{
+		showMessageInDialogBox('Error, interation value was less than zero')
+	}
+}
+
 function clearResults() {
 	$('#mySessionsResultDendrogramDiv').empty();
 	$('#mySessionsContentResultDiv').empty();
 	$('#mySessionResultsDendrogram').hide();
 	$('#clearResultsButton').hide();
+	$('#downloadResultsButton').hide();
 	clearRatioResultCharts(); //function from resultRatingWeightTables.js
 }

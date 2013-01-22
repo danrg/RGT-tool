@@ -10,12 +10,16 @@ class StopNode(BasicSvgNode, PresentationAttributes, ClassAttribute, StyleAttrib
     
     ATTRIBUTE_OFFSET= 'offset'
 
-    def __init__(self, ownerDoc):
+    def __init__(self, ownerDoc, offset= None, stopColor= None, stopOpacity= None, style= None):
         BasicSvgNode.__init__(self, ownerDoc, 'stop')
         PresentationAttributes.__init__(self)
         ClassAttribute.__init__(self)
         StyleAttribute.__init__(self)
         self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_ANIMATE_COLOR_NODE, self.SVG_SET_NODE})
+        self.setOffset(offset)
+        self.setStopColor(stopColor)
+        self.setStopOpacity(stopOpacity)
+        self.setStyle(style)
     
     def setOffset(self, data):
         if data != None:

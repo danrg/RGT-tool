@@ -14,4 +14,5 @@ urlpatterns = patterns('',
     url(r'^participants/$', 'RGT.gridMng.session.views.ajaxGetParticipatingPage'),
     url(r'^dendrogram/$', 'RGT.gridMng.session.views.ajaxGenerateSessionDendrogram'),
     url(r'^sessionGrid/$', 'RGT.gridMng.session.views.ajaxGetSessionGrid'),
+    url(r'^download/results/$', 'RGT.gridMng.session.views.ajaxDonwloandSessionResults'),
 )

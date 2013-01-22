@@ -17,6 +17,15 @@ $.ajax({
 	async:   false 
 });
 
+if( typeof downloadImageOf != 'function')
+{
+	$.ajax({
+		url: urlStaticFiles + 'js/generalUtil.js',
+		dataType: 'script',
+		async:   false 
+	});
+}
+
 //var nChangeableCols= 0; // number of cols without the cols used for the row menus
 var colMenuTimers= new Hashtable();
 var nFixedCols= 5;//number of cols that are not user for alternatives
@@ -863,4 +872,16 @@ function initiateGridTableToolTip(containerDiv)
 	}
 	
 	containerDiv.find('.tableStatus').tipsy({fade:true, gravity: 's'});
+}
+
+/**
+	this function will download a html and place it in a dialog that will as the
+	user to select the file type he wants to download the grid as.
+ */
+function downloadGridAs(usidN)
+{
+	if(usidN != 'None' && usidN != null && usidN != '')
+	{
+		downloadImageOf('/grids/download/grid/', {usid: usidN});
+	}
 }

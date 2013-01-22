@@ -1,9 +1,25 @@
+var urlStaticFiles= '/static/';
+
+if( typeof downloadImageOf != 'function')
+{
+	$.ajax({
+		url: urlStaticFiles + 'js/generalUtil.js',
+		dataType: 'script',
+		async:   false 
+	});
+}
+
+
 /**
  * Function that will create an menu for the svg.
  * This function requires that the svg tag be inside a wrap div tag without any elements inside it (excluding the svg tag),
  * the wrap div should positioned as relative so the menu can work properly.
  * @param wrapDiv the jquery obj representing the div
- * @param options Options is not mandatory. Available options are: showSaveButton: boolean, showClearButton: boolean, saveButtonFunction: function
+ * @param options Options is not mandatory. Available options are: showSaveButton: boolean, showClearButton: boolean, saveButtonFunction: function, 
+ * saveItemAs: boolean, saveItemAsArguments: object with this format: {attribute: value, attribute: value, ...}, saveItemAsUrl: string
+ * 
+ * saveItemAsUrl: url that should be called to request something from the server and is mandatory when using saveItemAs: true
+ * Observation: when using saveItemAsArguments the data will in that object will be sent to the server
  */
 function createSvgMenu(wrapDiv, options)
 {
@@ -12,6 +28,9 @@ function createSvgMenu(wrapDiv, options)
 	var saveButtonFunction= null;
 	var showSaveButton= true;
 	var showClearButton= true;
+	var checkSaveButtonFunction= true;
+	var saveItemAsArg= null;
+	var saveItemAsUrl= null;
 
 	//path of the images
 	var saveButtonImg= '/static/icons/save.png';
@@ -57,10 +76,26 @@ function createSvgMenu(wrapDiv, options)
 		}
 		else
 		{
-			//default is to shoe the button
+			//default is to show the button
 			menuContent+= '<img src="' + clearButtonImg + '" id="clearButtonImg" />'
 		}
-		if('saveButtonFunction' in options)
+		/* if saveItemAsArguments is true we will use the default saveItemAsArguments function, 
+		 * else check if the saveButtonFunction is defined and if that fails, use
+		 * the default function
+		 */
+		if('saveItemAs' in options && 'saveItemAsUrl' in options)
+		{
+			if(options['saveItemAs'] != null && options['saveItemAs'] == true && options['saveItemAsUrl'] != null)
+			{
+				saveItemAsUrl= options['saveItemAsUrl'];
+				if ('saveItemAsArguments' in options)
+				{
+					saveItemAsArg= options['saveItemAsArguments'];
+					checkSaveButtonFunction= false;
+				}
+			}
+		}
+		if('saveButtonFunction' in options && checkSaveButtonFunction)
 		{
 			if(options['saveButtonFunction'] != null)
 			{
@@ -102,7 +137,15 @@ function createSvgMenu(wrapDiv, options)
 	if(showSaveButton)
 	{
 		button= menuDiv.find('#saveButtonImg');
-		button.click(function(){saveButtonFunction($(this))});
+		//check if we are going to use the saveDendogram function or not
+		if(saveItemAsUrl != null)
+		{
+			button.click(function(){downloadItemAs(saveItemAsUrl, saveItemAsArg)});
+		}
+		else
+		{
+			button.click(function(){saveButtonFunction($(this))});
+		}
 		button.hover(
 				function(){
 					$(this).css({'background-image': 'url(/static/icons/save_hover.png)'});
@@ -140,6 +183,7 @@ function createSvgMenu(wrapDiv, options)
 
 /**
  * Default function used to save the svg
+ * @param imgObj: object representing the <img> which was pressed to call this function
  */
 function saveSvgAs(imgObj)
 {
@@ -152,11 +196,12 @@ function saveSvgAs(imgObj)
 			var svg= getSvgFromDiv(tagData.parent('div').parent('div'));
 			if($(data).find('error').length <= 0)
 			{
+				
 				var modalDiv= getDialogDiv();
 				modalDiv.html($(data).find('htmlData').text());
-				var input = $('<input>').attr("type", "hidden").attr("name", "data").val(svg.toSVG()); 
+				var input = $('<input>').attr("type", "hidden").attr("name", "data").val(getSvgString(svg)); 
 				modalDiv.find('form').append($(input))
-				$('#modalDialogBox').dialog({
+				modalDiv.dialog({
 			    	title: 'Download',
 					resizable: false,
 					width:400,
@@ -173,5 +218,17 @@ function saveSvgAs(imgObj)
 			}
 		}
 	}
+	//get the download form
 	$.post('/grids/download/', '', callBack(imgObj));
+}
+
+/**
+ * Default function used to request a download of something from the server
+ * @param url url (string) that will be called by the post function
+ * @param parameters obect with the arguments that should be passed to the server, format: { argumentName: value, argumentName: value, ......}
+ */
+function downloadItemAs(url, parameters)
+{
+	//get the download form
+	downloadImageOf(url, parameters);
 }
