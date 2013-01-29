@@ -1942,9 +1942,9 @@ def __generateSessionIterationResult__(request, sessionObj, iterationObj):
                 rowRange= []
                 rowStd= []
                 rowMean= []
-                tableWeightMean.append((meanWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[i]))#meanWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
-                tableWeightStd.append((stdWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[i]))#stdWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
-                tableWeightRange.append((rangeWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[i]))#rangeWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                tableWeightMean.append((meanWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[(nConcerns - 1) - i]))#meanWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                tableWeightStd.append((stdWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[(nConcerns - 1) - i]))#stdWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                tableWeightRange.append((rangeWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[(nConcerns - 1) - i]))#rangeWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
                 #create a tulip with the value that should be displayed in the td and the color of the background for each cell in the row
                 while k < nAlternatives:
                     rowRange.append((rangeRatioMatrix[i][k], rangeRatioColorMap[i][k], ratioJsChartData[i][k]))
