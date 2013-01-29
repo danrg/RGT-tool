@@ -26,6 +26,15 @@ if( typeof downloadImageOf != 'function')
 	});
 }
 
+if( typeof createRatingConfidenseLevelInput != 'function')
+{
+	$.ajax({
+		url: urlStaticFiles + 'js/confidenceLevelInput.js',
+		dataType: 'script',
+		async:   false 
+	});
+}
+
 //var nChangeableCols= 0; // number of cols without the cols used for the row menus
 var colMenuTimers= new Hashtable();
 var nFixedCols= 5;//number of cols that are not user for alternatives
@@ -655,6 +664,18 @@ function findTable(obj)
 		{
 			return obj;
 		}
+		default:
+		{
+			var temp= obj.parents('table');
+			if(temp.length <= 0)
+			{
+				return null;
+			}
+			else
+			{
+				return temp;
+			}
+		}
 	}
 }
 
@@ -883,5 +904,92 @@ function downloadGridAs(usidN)
 	if(usidN != 'None' && usidN != null && usidN != '')
 	{
 		downloadImageOf('/grids/download/grid/', {usid: usidN});
+	}
+}
+
+/**
+ * This function will show the dialog box containing the input for the confidence level and rating
+ * @param obj, any jquery object representing some part of the table that contained the cell/input
+ * that was clicked
+ */
+function showConfidenceLevelAndRatingValueInput(obj)
+{
+	var tableId= getTableId(obj);
+	var dialogDiv= $.find('[data-tableassociationid=\'' + tableId + '\' ]'); //obj.parents('.gridTrableContainerDiv').find('.confidenceLevelDialogDiv');
+	if(dialogDiv != null)
+	{
+		dialogDiv= $(dialogDiv);
+		var svgContainerDiv= dialogDiv.find('.confidenceLevelInputDiv');
+		if( svgContainerDiv.children('svg').length <= 0)
+		{
+			//create and show the dialog box
+			dialogDiv.dialog({
+				title: 'Please select the ratio and confidence level',
+				resizable: false,
+				modal: true,
+			});
+		}
+		//check to see if the svg input has been created already;
+		if(svgContainerDiv.children('svg').length <= 0)
+		{
+			//create the svg input
+			var handler= new confidenceLevelHandler();
+			handler.caller= obj;
+			createRatingConfidenseLevelInput(svgContainerDiv, handler);
+			dialogDiv.dialog({width: parseInt(svgContainerDiv.find('svg').attr('width')) + 30});
+			console.log(obj);
+		}
+		else
+		{
+			//change the caller variable of the handler
+			//svgContainerDiv.find('svg').data('getHandler');
+			var handler= getConfidenceLevelInputHandler(svgContainerDiv);
+			handler.callter= obj;
+			saveConfidenceLelelInputHandler(svgContainerDiv, handler);
+			console.log(obj);
+		}
+		
+		dialogDiv.dialog("open");
+	}
+}
+
+//class
+function confidenceLevelHandler()
+{
+	this.caller= null; // this is an jquery object representing the object that was clicked 
+	this.exec= exec;
+	
+	function exec(rowNumber, colNumber, ratingName, confidenceLevelName)
+	{
+		var divColorIndicator= this.caller.parent('.ratingCellDiv').find('.confidenceLevelColorDiv');
+		var classString= divColorIndicator.attr('class');
+		var index= classString.indexOf(' ');
+		console.log(this.caller);
+		if(confidenceLevelName == 'very low')
+		{
+			classString= classString.substring(0, index);
+			classString+= ' ' + 'confidenceLevelColor1';
+		}
+		else if(confidenceLevelName == 'low')
+		{
+			classString= classString.substring(0, index);
+			classString+= ' ' + 'confidenceLevelColor2';
+		}
+		else if(confidenceLevelName == 'mid')
+		{
+			classString= classString.substring(0, index);
+			classString+= ' ' + 'confidenceLevelColor3';
+		}
+		else if(confidenceLevelName == 'high')
+		{
+			classString= classString.substring(0, index);
+			classString+= ' ' + 'confidenceLevelColor4';
+		}
+		else if (confidenceLevelName == 'very high')
+		{
+			classString= classString.substring(0, index);
+			classString+= ' ' + 'confidenceLevelColor5';
+		}
+		divColorIndicator.attr('class', classString);
 	}
 }

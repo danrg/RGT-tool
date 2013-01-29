@@ -39,7 +39,8 @@
 }
 
 .gridTable input[type=text]{
-	width: 100px
+	width: 100px;
+	padding-top: 7px;
 }
 
 .deleteImage
@@ -111,4 +112,37 @@
 
 .legendDescription{
 	padding-left: 5px;
+}
+
+.ratingCellDiv{
+	position: relative;
+}
+
+.confidenceLevelColorDiv{
+	width: 103px; 
+	height: 7px; 
+	position: absolute; 
+	top: 1px; 
+	left: 1px;
+	background-color: yellow;
+}
+
+.confidenceLevelColor1{
+	background-color: rgb(200, 248, 190);
+}
+
+.confidenceLevelColor2{
+	background-color: rgb(169, 248, 153);
+}
+
+.confidenceLevelColor3{
+	background-color: rgb(123, 234, 100);
+}
+
+.confidenceLevelColor4{
+	background-color: rgb(115, 182, 101);
+}
+
+.confidenceLevelColor5{
+	background-color: rgb(60, 161, 39);
 }

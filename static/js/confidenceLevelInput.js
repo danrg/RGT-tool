@@ -39,12 +39,13 @@ function testR(rowN, colN, rangeName, confidenceName)
  * This function will create the interactive svg chart that will be used as the input for 
  * the rating and confidence level
  * @param div the div that should host the svg element (should be a jquery object)
- * @param returnFunction function that will be called when the user press one of the cells of the input chart. This function must be able to get 4 arguments: rowNumber (int), colNumber (int), range name (string), confidence level name (string)
+ * @param handler: class that has a function called exec, that function will be called when the user press one of the cells of the input chart. This function must be able to get 4 arguments: rowNumber (int), colNumber (int), range name (string), confidence level name (string)
  */
-function createRatingConfidenseLevelInput(div, returnFunction)
+function createRatingConfidenseLevelInput(div, handler)
 {
 	div.svg();
 	var svg= div.svg('get');
+	$(svg).data('clickHandler', handler);
 	
 	/* Settings */
 	var chartYOffset= 5; //offset from the top element
@@ -459,9 +460,9 @@ function createRatingConfidenseLevelInput(div, returnFunction)
 				$(temp).mouseout(cellColor, removeHighlightFromBackground);
 				$(temp).mousedown(highlightMouseDown);
 				$(temp).mouseup(removeHighlightMouseDown)
-				if(returnFunction != null)
+				if(handler != null)
 				{
-					$(temp).click({returnFunction: returnFunction, ratings: ratings, confidenceLevels: confidenceLevels}, onClickHandler);
+					$(temp).click({svg: $(svg).parent('div'), ratings: ratings, confidenceLevels: confidenceLevels}, onClickHandler);
 				}
 			}
 		}
@@ -610,10 +611,25 @@ function removeHighlightMouseDown(event)
  */
 function onClickHandler(event)
 {
-	var returnFunction= event.data.returnFunction;
+	console.log(event.data.svg);
+	var svg= $(event.data.svg.svg('get'));
 	var rowN= parseInt($(event.target).attr('data-rowvalue'));
 	var colN= parseInt($(event.target).attr('data-colvalue'));
 	var ratingName= event.data.ratings[colN];
 	var confidenceName= event.data.confidenceLevels[rowN];
-	returnFunction(rowN, colN, ratingName, confidenceName);
+	console.log(1);
+	svg.data('clickHandler').exec(rowN, colN, ratingName, confidenceName);
+}
+
+function getConfidenceLevelInputHandler(containerDiv)
+{
+	var svg= containerDiv.svg('get');
+	var handler= $(svg).data('clickHandler');
+	return handler;
+}
+
+function saveConfidenceLelelInputHandler(containerDiv, handler)
+{
+	var svg= containerDiv.svg('get');
+	$(svg).data('clickHandler', handler);
 }

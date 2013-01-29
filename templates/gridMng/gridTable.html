@@ -90,18 +90,20 @@
 									{% endif %}
 									{% else %}{% if not forloop.last %}
 										<td class= "ratioCell" onmouseover="displayRowMenu($(this));showColMenu($(this))" >
-											<div>
+											<div class= "ratingCellDiv">
+												{%comment%} div is used to show the confidence level color {%endcomment%}
+												<div class= "confidenceLevelColorDiv confidenceLevelColor1"></div>
 											{% if data.changeRatingsWeights %}
 												{% if data.checkForTableIsSave %}
-													<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="{{ ratio }}" onchange="isTextEmpty($(this));isTableSaved();rationRangeValidation($(this))"/>
+													<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="{{ ratio }}" onchange="isTextEmpty($(this));isTableSaved();rationRangeValidation($(this))" onclick= "showConfidenceLevelAndRatingValueInput($(this))"/>
 												{% else %}
-													<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="{{ ratio }}" onchange="rationRangeValidation($(this))"/>
+													<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="{{ ratio }}" onchange="rationRangeValidation($(this))" onclick= "showConfidenceLevelAndRatingValueInput($(this))"/>
 												{% endif %}
 											{% else %}
 												{% if data.showRatingWhileFalseChangeRatingsWeights %}
-													<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="{{ ratio }}" disabled="disabled" readonly/>
+													<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="{{ ratio }}" disabled="disabled" readonly onclick= "showConfidenceLevelAndRatingValueInput($(this))"/>
 												{% else %}
-												 	<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="" disabled="disabled" readonly/>
+												 	<input type="text" id="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" name="ratio_concer{{forloop.parentloop.counter}}_alternative{{forloop.counter0}}" value="" disabled="disabled" readonly onclick= "showConfidenceLevelAndRatingValueInput($(this))"/>
 												{% endif %}
 											{% endif %}
 											</div>
@@ -204,4 +206,8 @@
 			<input type="hidden" value="{{value}}" id="{{id}}" name="{{id}}"/>
 		{% endfor %}
 	{%endif%}
+	<div class= "confidenceLevelDialogDiv" data-tableassociationid= "{{data.tableId}}">
+		<div class= "confidenceLevelInputDiv">
+		</div>
+	</div>
 </div>
