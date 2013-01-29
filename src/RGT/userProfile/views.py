@@ -3,9 +3,12 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from RGT.userProfile.userProfileForm import UserProfileForm
-from RGT.gridMng.response.xml.htmlResponseUtil import createXmlSuccessResponse
+from RGT.gridMng.response.xml.htmlResponseUtil import createXmlSuccessResponse, createXmlErrorResponse
 
 def ajaxGetDisplayHelpState(request):
+    if not request.user.is_authenticated():
+        return HttpResponse(createXmlErrorResponse('You are not logged in, please log in.'), content_type='application/xml')
+    
     profile= request.user.get_profile()
     return HttpResponse(createXmlSuccessResponse(`profile.displayHelp`), content_type='application/xml')
 
