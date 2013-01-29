@@ -18,7 +18,7 @@ def createXmlSuccessResponse(htmlData, extraData= None):
                 extraNode.appendChild(data)
         topElement.appendChild(extraNode)
                 
-    return doc.toxml()
+    return doc.toxml('utf-8')
 
 def createXmlErrorResponse(errorData):
     impl= getDOMImplementation()
@@ -27,7 +27,7 @@ def createXmlErrorResponse(errorData):
     errorNode= doc.createElement('error')
     errorNode.appendChild(doc.createTextNode(errorData))
     topElement.appendChild(errorNode)
-    return doc.toxml()
+    return doc.toxml('utf-8')
 
 #data is a dictionary, key would be the the 'value' used in the comboBox and the value would be the displaying element in the comboBox
 def createXmlForComboBox(data):

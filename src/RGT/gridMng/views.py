@@ -23,7 +23,7 @@ from django.db import IntegrityError
 from RGT.gridMng.error.unablaToCreateUSID import UnablaToCreateUSID
 
 from RGT.gridMng.utility import generateGridTable, createDendogram, createFileResponse
-from RGT.settings import GRID_USID_KEY_LENGTH
+from RGT.settings import GRID_USID_KEY_LENGTH, DEBUG
 
 import sys, os
 import traceback
@@ -128,15 +128,24 @@ def ajaxCreateGrid(request):
         for i in range(int(nAlternatives)):
             try:
                 str(alternativeValues[i])
+            except UnicodeEncodeError as error:
+                errorString= 'Invalid character found in the alternatives. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely'
+                return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
             except:
                 return HttpResponse(createXmlErrorResponse("Invalid alternative name : "+ alternativeValues[i]), content_type='application/xml')
         for i in range(int(nConcerns)):
             try:
                 str(concernValues[i][0])
+            except UnicodeEncodeError as error:
+                errorString= 'Invalid character found in left concern. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely'
+                return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
             except:
                 return HttpResponse(createXmlErrorResponse("Invalid left concern name : "+ concernValues[i][0]), content_type='application/xml')
             try:
                 str(concernValues[i][1])
+            except UnicodeEncodeError as error:
+                errorString= 'Invalid character found in right concern. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely'
+                return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
             except:
                 return HttpResponse(createXmlErrorResponse("Invalid right concern name : "+ concernValues[i][1]), content_type='application/xml')
         try:
@@ -262,15 +271,16 @@ def ajaxUpdateGrid(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
     
-    for key in request.REQUEST.keys():
-        print 'key: ' + key + ' values: ' + request.REQUEST[key]
-    print '------'
+    if DEBUG:
+        for key in request.REQUEST.keys():
+            print 'key: ' + key + ' values: ' + repr(request.REQUEST[key])
+        print '------'
     
     user1= request.user
     gridObj= None
     isConcernAlternativeResponseGrid= False
     
-    #lets determine what type of grid we are dealing with here
+    #lets determine what type of grid we are dealing with here and do some checks to see if all the parameters are present
     if request.POST.has_key('gridType'):
         gridType= request.POST['gridType']
         if gridType == 'session':
@@ -340,15 +350,24 @@ def ajaxUpdateGrid(request):
         for i in range(int(nAlternatives)):
             try:
                 str(alternativeValues[i])
+            except UnicodeEncodeError as error:
+                errorString= 'Invalid character found in the alternatives. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely'
+                return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
             except:
                 return HttpResponse(createXmlErrorResponse("Invalid alternative name : "+ alternativeValues[i]), content_type='application/xml')
         for i in range(int(nConcerns)):
             try:
                 str(concernValues[i][0])
+            except UnicodeEncodeError as error:
+                errorString= 'Invalid character found in left concern. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely'
+                return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
             except:
                 return HttpResponse(createXmlErrorResponse("Invalid left concern name : "+ concernValues[i][0]), content_type='application/xml')
             try:
                 str(concernValues[i][1])
+            except UnicodeEncodeError as error:
+                errorString= 'Invalid character found in right concern. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely'
+                return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
             except:
                 return HttpResponse(createXmlErrorResponse("Invalid right concern name : "+ concernValues[i][1]), content_type='application/xml')
         try:
