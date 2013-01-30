@@ -38,13 +38,16 @@ from RGT.gridMng.template.gridTableData import GridTableData
 from RGT.gridMng.template.session.pedingResponsesData import PedingResponsesData
 from RGT.gridMng.fileData import FileData
 from RGT.gridMng.utility import generateGridTable, createDendogram, getImageError
-from RGT.settings import SESSION_USID_KEY_LENGTH
+from RGT.settings import SESSION_USID_KEY_LENGTH, DEBUG
 
 import uuid
 import sys
 import traceback
+import logging
 from types import StringType
 from datetime import datetime
+
+logger = logging.getLogger('django.request')
 
 def ajaxGetCreateSessionPage(request):
     if not request.user.is_authenticated():
@@ -82,10 +85,11 @@ def getMySessionsPage(request):
 
                 return render(request, 'gridMng/mySessions.html', context_instance=context)
     except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
 
     context= RequestContext(request, {})
     return render(request, 'gridMng/mySessions.html', context_instance=context)
@@ -175,18 +179,21 @@ def ajaxGetMySessionContentPage(request):
                 else:
                     return HttpResponse(createXmlErrorResponse('You are not the facilitator for this session'), content_type='application/xml')
             except:
-                print "Exception in user code:"
-                print '-'*60
-                traceback.print_exc(file=sys.stdout)
-                print '-'*60
+                if DEBUG == True:
+                    print "Exception in user code:"
+                    print '-'*60
+                    traceback.print_exc(file=sys.stdout)
+                    print '-'*60
                 return HttpResponse(createXmlErrorResponse('No session found'), content_type='application/xml')
         else:
             return HttpResponse(createXmlErrorResponse('No session id found in the request'), content_type='application/xml')
     except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+        logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('unknown error'), content_type='application/xml')
 
 def ajaxCreateSession(request):
@@ -249,10 +256,11 @@ def ajaxCreateSession(request):
                                 newSession.delete()
                                 hasError= True
                                 errorMsg= 'unable to relate the grid with the session'
-                                print "Exception in user code:"
-                                print '-'*60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-'*60
+                                if DEBUG == True:
+                                    print "Exception in user code:"
+                                    print '-'*60
+                                    traceback.print_exc(file=sys.stdout)
+                                    print '-'*60
                     except:
                         try:
                             newSession.delete()
@@ -260,24 +268,27 @@ def ajaxCreateSession(request):
                             print 'Could\'t delete the session'
                         hasError= True
                         errorMsg= 'unable to copy the grid to the session'
+                        if DEBUG == True:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60
+                except:
+                    hasError= True
+                    errorMsg= 'unable to create the session'
+                    if DEBUG == True:
                         print "Exception in user code:"
                         print '-'*60
                         traceback.print_exc(file=sys.stdout)
                         print '-'*60
-                except:
-                    hasError= True
-                    errorMsg= 'unable to create the session'
+            except:
+                hasError= True
+                errorMsg= 'unable to create or set the facilitator for the session'
+                if DEBUG == True:
                     print "Exception in user code:"
                     print '-'*60
                     traceback.print_exc(file=sys.stdout)
                     print '-'*60
-            except:
-                hasError= True
-                errorMsg= 'unable to create or set the facilitator for the session'
-                print "Exception in user code:"
-                print '-'*60
-                traceback.print_exc(file=sys.stdout)
-                print '-'*60
         if hasError:
             try:
                 #revert changes
@@ -285,10 +296,11 @@ def ajaxCreateSession(request):
                 sessionGrid.delete()
             except:
                 #do nothing
-                print "Exception in user code:"
-                print '-'*60
-                traceback.print_exc(file=sys.stdout)
-                print '-'*60
+                if DEBUG == True:
+                    print "Exception in user code:"
+                    print '-'*60
+                    traceback.print_exc(file=sys.stdout)
+                    print '-'*60
             return HttpResponse(createXmlErrorResponse(errorMsg), content_type='application/xml')
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
     return ajaxGetCreateSessionPage(request)
@@ -338,10 +350,12 @@ def ajaxJoinSession(request):
         except UserIsFacilitator:
             return HttpResponse(createXmlErrorResponse('You are the facilitator of the session, facilitators can\'t be added as participants'), content_type='application/xml')
         except:
-            print "Exception in user code:"
-            print '-'*60
-            traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            if DEBUG == True:
+                print "Exception in user code:"
+                print '-'*60
+                traceback.print_exc(file=sys.stdout)
+                print '-'*60
+            logger.exception('Unknown error')
             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
     else:
         return HttpResponse(createXmlErrorResponse(error), content_type='application/xml')
@@ -366,26 +380,30 @@ def ajaxChangeSessionState(request):
                             try:
                                 __saveSessionGridAsUserGrid__(request) 
                             except:
-                                print "Exception in user code:"
-                                print '-'*60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-'*60
-                                print 'Could not save session grid as user grid'
+                                if DEBUG == True:
+                                    print "Exception in user code:"
+                                    print '-'*60
+                                    traceback.print_exc(file=sys.stdout)
+                                    print '-'*60
+                                    print 'Could not save session grid as user grid'
                         session.changeState(stateObj)
                         return ajaxGetMySessionContentPage(request)
                     else:
                         return HttpResponse(createXmlErrorResponse('Invalid state given in the request'), content_type='application/xml')
                 except WrongState:
-                    print "Exception in user code:"
-                    print '-'*60
-                    traceback.print_exc(file=sys.stdout)
-                    print '-'*60
+                    if DEBUG == True:
+                        print "Exception in user code:"
+                        print '-'*60
+                        traceback.print_exc(file=sys.stdout)
+                        print '-'*60
                     return HttpResponse(createXmlErrorResponse('Can\'t change states, session is in the wrong state'), content_type='application/xml')
                 except:
-                    print "Exception in user code:"
-                    print '-'*60
-                    traceback.print_exc(file=sys.stdout)
-                    print '-'*60
+                    if DEBUG == True:
+                        print "Exception in user code:"
+                        print '-'*60
+                        traceback.print_exc(file=sys.stdout)
+                        print '-'*60
+                    logger.exception('Unknown error')
                     return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
             else:
                 return HttpResponse(createXmlErrorResponse('Session not found'), content_type='application/xml')
@@ -475,10 +493,11 @@ def ajaxGetParticipatingSessionContentPage(request):
                         templateData.nReceivedResponses= len(sessionObj.getUsersThatRespondedRequest())
                         templateData.nParticipants= len(sessionObj.getParticipators())
                     except:
-                        print "Exception in user code:"
-                        print '-'*60
-                        traceback.print_exc(file=sys.stdout)
-                        print '-'*60
+                        if DEBUG == True:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60
                         #check if i have sent a response grid
                     responseGrid= request.user.responsegrid_set.filter(user= request.user, iteration= iteration, session=sessionObj)
                     if len(responseGrid) <= 0:
@@ -561,22 +580,26 @@ def ajaxRespond(request):
                         try:
                             __validateAltConResponse__(request)
                         except ValueError as error:
-                            print "Exception in user code:"
-                            print '-'*60
-                            traceback.print_exc(file=sys.stdout)
-                            print '-'*60
+                            if DEBUG == True:
+                                print "Exception in user code:"
+                                print '-'*60
+                                traceback.print_exc(file=sys.stdout)
+                                print '-'*60
                             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                         except KeyError as error:
-                            print "Exception in user code:"
-                            print '-'*60
-                            traceback.print_exc(file=sys.stdout)
-                            print '-'*60
+                            if DEBUG == True:
+                                print "Exception in user code:"
+                                print '-'*60
+                                traceback.print_exc(file=sys.stdout)
+                                print '-'*60
                             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                         except:
-                            print "Exception in user code:"
-                            print '-'*60
-                            traceback.print_exc(file=sys.stdout)
-                            print '-'*60
+                            if DEBUG == True:
+                                print "Exception in user code:"
+                                print '-'*60
+                                traceback.print_exc(file=sys.stdout)
+                                print '-'*60
+                            logger.exception('Unknown error')
                             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                             #determine if it is a new response grid or not
                     if len(userResponseGridRelation) >= 1:
@@ -589,22 +612,26 @@ def ajaxRespond(request):
                         try:
                             obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
                         except KeyError as error:
-                            print "Exception in user code:"
-                            print '-'*60
-                            traceback.print_exc(file=sys.stdout)
-                            print '-'*60
+                            if DEBUG == True:
+                                print "Exception in user code:"
+                                print '-'*60
+                                traceback.print_exc(file=sys.stdout)
+                                print '-'*60
                             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                         except ValueError as error:
-                            print "Exception in user code:"
-                            print '-'*60
-                            traceback.print_exc(file=sys.stdout)
-                            print '-'*60
+                            if DEBUG == True:
+                                print "Exception in user code:"
+                                print '-'*60
+                                traceback.print_exc(file=sys.stdout)
+                                print '-'*60
                             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                         except:
-                            print "Exception in user code:"
-                            print '-'*60
-                            traceback.print_exc(file=sys.stdout)
-                            print '-'*60
+                            if DEBUG == True:
+                                print "Exception in user code:"
+                                print '-'*60
+                                traceback.print_exc(file=sys.stdout)
+                                print '-'*60
+                            logger.exception('Unknown error')
                             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                         nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj
 
@@ -628,10 +655,12 @@ def ajaxRespond(request):
                                 if isGridCreated:
                                     return HttpResponse(createXmlSuccessResponse('Grid was saved', createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
                             except:
-                                print "Exception in user code:"
-                                print '-'*60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-'*60
+                                if DEBUG == True:
+                                    print "Exception in user code:"
+                                    print '-'*60
+                                    traceback.print_exc(file=sys.stdout)
+                                    print '-'*60
+                                logger.exception('Unknown error')
                                 return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                         else:
                             return HttpResponse(createXmlErrorResponse("No grid found"), content_type='application/xml')
@@ -653,22 +682,26 @@ def ajaxRespond(request):
                         try:
                             obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
                         except KeyError as error:
-                            print "Exception in user code:"
-                            print '-'*60
-                            traceback.print_exc(file=sys.stdout)
-                            print '-'*60
+                            if DEBUG == True:
+                                print "Exception in user code:"
+                                print '-'*60
+                                traceback.print_exc(file=sys.stdout)
+                                print '-'*60
                             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                         except ValueError as error:
-                            print "Exception in user code:"
-                            print '-'*60
-                            traceback.print_exc(file=sys.stdout)
-                            print '-'*60
+                            if DEBUG == True:
+                                print "Exception in user code:"
+                                print '-'*60
+                                traceback.print_exc(file=sys.stdout)
+                                print '-'*60
                             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                         except:
-                            print "Exception in user code:"
-                            print '-'*60
-                            traceback.print_exc(file=sys.stdout)
-                            print '-'*60
+                            if DEBUG == True:
+                                print "Exception in user code:"
+                                print '-'*60
+                                traceback.print_exc(file=sys.stdout)
+                                print '-'*60
+                            logger.exception('Unknown error')
                             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
 
                         nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj
@@ -690,10 +723,12 @@ def ajaxRespond(request):
                                     extraDataToUse= [extraXmlData, createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))]
                                 return HttpResponse(createXmlSuccessResponse('Grid created successfully.', extraDataToUse), content_type='application/xml')
                         except:
-                            print "Exception in user code:"
-                            print '-'*60
-                            traceback.print_exc(file=sys.stdout)
-                            print '-'*60
+                            if DEBUG == True:
+                                print "Exception in user code:"
+                                print '-'*60
+                                traceback.print_exc(file=sys.stdout)
+                                print '-'*60
+                            logger.exception('Unknown error')
                             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                 else:
                     return HttpResponse(createXmlErrorResponse('Can\'t create response grid, session is in a state where that is not permitted'), content_type='application/xml')
@@ -817,10 +852,13 @@ def ajaxGetParticipatingSessionsContentGrids(request):
         else:
             return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'), content_type='application/xml')
     except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+        logger.exception('Unknown error')
+        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
  
 # function is to get the session results for the facilitator for completed iterations
 def ajaxGetResults(request):
@@ -863,13 +901,16 @@ def ajaxGetResults(request):
                         except WrongSessionIteration:
                             return HttpResponse(createXmlErrorResponse('Session does not contain that iteration'), content_type='application/xml')
                         except:
+                            logger.exception('Unknown error')
                             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml') 
                         #return ajaxGenerateResultsData(request_, session_, iteration_)
     except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+        logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
 
 # function is to get the session results for the participants for completed iterations
@@ -909,13 +950,16 @@ def ajaxGetResponseResults(request):
                     except WrongSessionIteration:
                         return HttpResponse(createXmlErrorResponse('Session does not contain that iteration'), content_type='application/xml')
                     except:
+                        logger.exception('Unknown error')
                         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                     #return ajaxGenerateResultsData(request_, session_, iteration_)
     except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+        logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
 
 #download the results from a session in the form of an image
@@ -1080,10 +1124,11 @@ def ajaxDonwloandSessionResults(request):
                                     
                                 return createFileResponse(imgData)
     except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
     #in case of an error or checks failing return an image error
     errorImageData= getImageError()
     # send the file
@@ -1119,10 +1164,13 @@ def ajaxGetParticipatingPage(request):
         else:
             return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'), content_type='application/xml')
     except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+        logger.exception('Unknown error')
+        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
 
 def ajaxGenerateSessionDendrogram(request):
     if not request.user.is_authenticated():
@@ -1151,10 +1199,12 @@ def ajaxGenerateSessionDendrogram(request):
                             responseData= createSvgResponse(imgData, createXmlGridIdNode(sessionGridRelation.grid.usid))
                             return HttpResponse(responseData, content_type='application/xml')
                         except Exception:
-                            print "Exception in user code:"
-                            print '-'*60
-                            traceback.print_exc(file=sys.stdout)
-                            print '-'*60
+                            if DEBUG == True:
+                                print "Exception in user code:"
+                                print '-'*60
+                                traceback.print_exc(file=sys.stdout)
+                                print '-'*60
+                            logger.exception('Unknown error')
                             return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'), content_type='application/xml')
                     else:
                         return HttpResponse(createXmlErrorResponse('No grid found for the selected iteration'), content_type='application/xml')
@@ -1163,10 +1213,11 @@ def ajaxGenerateSessionDendrogram(request):
             else:
                 return HttpResponse(createXmlErrorResponse('You are not a facilitator'), content_type='application/xml')
         except:
-            print "Exception in user code:"
-            print '-'*60
-            traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            if DEBUG == True:
+                print "Exception in user code:"
+                print '-'*60
+                traceback.print_exc(file=sys.stdout)
+                print '-'*60
     else:
         return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'), content_type='application/xml')
 
@@ -1756,10 +1807,11 @@ def __saveSessionGridAsUserGrid__(request):
     try:
         obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
     except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
         return False
     nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj
 
@@ -1805,10 +1857,11 @@ def __generateSessionIterationResult__(request, sessionObj, iterationObj):
                     return None
                     #return HttpResponse(createXmlErrorResponse('No results found. This means that the participants did not provide any responses for this particular iteration.'), content_type='application/xml')
             except Exception as e:
-                print "Exception in user code:"
-                print '-'*60
-                traceback.print_exc(file=sys.stdout)
-                print '-'*60
+                if DEBUG == True:
+                    print "Exception in user code:"
+                    print '-'*60
+                    traceback.print_exc(file=sys.stdout)
+                    print '-'*60
                 raise e
                 #return HttpResponse(createXmlErrorResponse('Unknown Error'), content_type='application/xml')
         elif gridType == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:

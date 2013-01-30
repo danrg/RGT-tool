@@ -27,10 +27,14 @@ from RGT.settings import GRID_USID_KEY_LENGTH, DEBUG
 
 import sys, os
 import traceback
+import logging
 
 from io import BytesIO
 from types import StringType
 from RGT.gridMng.fileData import FileData
+
+logger = logging.getLogger('django.request')
+
 
 def getCreateMyGridPage(request):
     if not request.user.is_authenticated():
@@ -61,10 +65,12 @@ def getCreateMyGridPage(request):
 
     except:
         #do nothing
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+        logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('unknown error'), content_type='application/xml')
 
 #extraXmlData is only added if the response is a success
@@ -100,22 +106,26 @@ def ajaxCreateGrid(request):
         try:                
             obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
         except KeyError as error:
-            print "Exception in user code:"
-            print '-'*60
-            traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            if DEBUG == True:
+                print "Exception in user code:"
+                print '-'*60
+                traceback.print_exc(file=sys.stdout)
+                print '-'*60
             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
         except ValueError as error:
-            print "Exception in user code:"
-            print '-'*60
-            traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            if DEBUG == True:
+                print "Exception in user code:"
+                print '-'*60
+                traceback.print_exc(file=sys.stdout)
+                print '-'*60
             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
         except:
-            print "Exception in user code:"
-            print '-'*60
-            traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            if DEBUG == True:
+                print "Exception in user code:"
+                print '-'*60
+                traceback.print_exc(file=sys.stdout)
+                print '-'*60
+            logger.exception('Unknown error')
             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
         nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj
         gridName= None
@@ -229,10 +239,11 @@ def ajaxGetGrid(request):
             if request.REQUEST['checkTable'] == 'true':
                 checkForTableIsSave= True
     except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
         error= 'one or more variables were not found'
     
     if not error:
@@ -256,10 +267,12 @@ def ajaxGetGrid(request):
                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                 #return render_to_response('gridMng/gridTable.html', {'table' : table, 'tableHeader': header, 'hiddenFields': hidden, 'weights':concernWeights, 'showRatings':showRatings, 'readOnly':readOnly, 'checkForTableIsSave':checkForTableIsSave }, context_instance=RequestContext(request))
             except:
-                print "Exception in user code:"
-                print '-'*60
-                traceback.print_exc(file=sys.stdout)
-                print '-'*60
+                if DEBUG == True:
+                    print "Exception in user code:"
+                    print '-'*60
+                    traceback.print_exc(file=sys.stdout)
+                    print '-'*60
+                logger.exception('Unknown error')
                 return HttpResponse(createXmlErrorResponse('unknown error'), content_type='application/xml')                
         else:
             return HttpResponse(createXmlErrorResponse('Grid was not found'), content_type='application/xml')
@@ -326,22 +339,26 @@ def ajaxUpdateGrid(request):
     try:
         obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
     except KeyError as error:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except ValueError as error:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+        logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
     nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj     
     
@@ -375,10 +392,12 @@ def ajaxUpdateGrid(request):
             if isGridCreated:
                 return HttpResponse(createXmlSuccessResponse('Grid was saved', createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
         except:
-            print "Exception in user code:"
-            print '-'*60
-            traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            if DEBUG == True:
+                print "Exception in user code:"
+                print '-'*60
+                traceback.print_exc(file=sys.stdout)
+                print '-'*60
+            logger.exception('Unknown error')
             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
     else:
         return HttpResponse(createXmlErrorResponse("No grid found"), content_type='application/xml')
@@ -417,16 +436,20 @@ def ajaxGenerateDendogram(request):
                         responseData= createSvgResponse(imgData, None)
                         return HttpResponse(responseData, content_type='application/xml')
                     except:
-                        print "Exception in user code:"
-                        print '-'*60
-                        traceback.print_exc(file=sys.stdout)
-                        print '-'*60
+                        if DEBUG == True:
+                            print "Exception in user code:"
+                            print '-'*60
+                            traceback.print_exc(file=sys.stdout)
+                            print '-'*60
+                        logger.exception('Unknown error')
                         return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'), content_type='application/xml')
             except:
-                print "Exception in user code:"
-                print '-'*60
-                traceback.print_exc(file=sys.stdout)
-                print '-'*60
+                if DEBUG == True:
+                    print "Exception in user code:"
+                    print '-'*60
+                    traceback.print_exc(file=sys.stdout)
+                    print '-'*60
+                logger.exception('Unknown error')
                 return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
         else:
             return HttpResponse(createXmlErrorResponse('Could not find the grid to generate the dendrogram'), content_type='application/xml')
@@ -463,10 +486,11 @@ def ajaxConvertSvgTo(request):
             if not request.POST.has_key('convertTo'):
                 raise Exception('convertTo key was not received')
     except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
     #in case of an error or checks failing return an image error
     errorImageData= getImageError()
     # send the file
@@ -517,10 +541,11 @@ def ajaxConvertGridTo(request):
             if not request.POST.has_key('convertTo'):
                 raise Exception('convertTo key was not received')
     except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60  
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60  
     #anything else return the img error
     errorImageData= getImageError()
     # send the file
@@ -567,10 +592,11 @@ def dendrogramTo(request):
             if not request.POST.has_key('convertTo'):
                 raise Exception('convertTo key was not received')
     except:
-        print "Exception in user code:"
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60                 
+        if DEBUG == True:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60                 
     #in case of an error or failing of one the checks return an image error
     errorImageData= getImageError()
     # send the file
@@ -980,11 +1006,12 @@ def createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernVa
             try:
                 gridObj.delete()
             except:
-                print 'Could not delete the grid'
-                print "Exception in user code:"
-                print '-'*60
-                traceback.print_exc(file=sys.stdout)
-                print '-'*60
+                if DEBUG == True:
+                    print 'Could not delete the grid'
+                    print "Exception in user code:"
+                    print '-'*60
+                    traceback.print_exc(file=sys.stdout)
+                    print '-'*60
             raise
     else:
         raise ValueError('One or more variables were None')
