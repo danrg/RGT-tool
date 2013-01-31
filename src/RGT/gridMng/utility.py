@@ -545,6 +545,17 @@ def convertAlternativeConcernSessionResultToSvg(data):
     newWord= 'new'
     newWordColor= (243, 178, 126)
     
+    headerColor= (255, 255, 255)
+    headerFontSize= 30
+    headerFontName= 'ariel'
+    headerConcern= 'Concern'
+    headerAlternative= 'Alternative'
+    fHeader= ImageFont.truetype(DENDROGRAM_FONT_LOCATION, headerFontSize)
+    
+    yHeaderOffset= 10;
+    
+    fontSize
+    
     fontName= 'arial'
     
     xWordCellSpace= 5 #space between a word and the right and left line of the cell (in pixels)
@@ -592,6 +603,9 @@ def convertAlternativeConcernSessionResultToSvg(data):
     alternativeTableTotalXOffset= 0
     hasNewConcerns= False
     newWordSize= newWordF.getsize(newWord)
+    headerMaxHeight= 0
+    concernTableTotalYOffset= 0
+    alternativeTableTotalYOffset= 0
     
     #################### Pre-processing ####################
     
@@ -670,6 +684,13 @@ def convertAlternativeConcernSessionResultToSvg(data):
             alternativeCellHeight= size[1]
         i+= 1
     
+    #calculate the max height of the headers
+    size= fHeader.getsize(headerConcern)
+    if size[1] > headerMaxHeight:
+        headerMaxHeight= size[1]
+    size= fHeader.getsize(headerAlternative)
+    if size[1] > headerMaxHeight:
+        headerMaxHeight= size[1]
     #add xWordCellSpace * 2 to each position of the array (in place)
     concernCellWidths[:] = [x + (xWordCellSpace * 2) for x in concernCellWidths]
     alternativeCellWidths[:] = [x + (xWordCellSpace * 2) for x in alternativeCellWidths]
@@ -678,6 +699,10 @@ def convertAlternativeConcernSessionResultToSvg(data):
     alternativeTableTotalXOffset+= concernTableTotalXOffset + sum(concernCellWidths) + ((concernsNCols + 1) * tableLineThickness)  + alternativeTableXOffset
     if hasNewConcerns:
         alternativeTableTotalXOffset+= xNewWordOffset + newWordSize[0]
+        
+    #calculate the total y offset for the alternative and concern table
+    concernTableTotalYOffset= yHeaderOffset + headerMaxHeight + concernTableYOffset
+    alternativeTableTotalYOffset= yHeaderOffset + headerMaxHeight + alternativeTableYOffset
     
     #################### End pre-processing ####################
     
@@ -731,19 +756,39 @@ def convertAlternativeConcernSessionResultToSvg(data):
     globalDefNode.appendChild(filterNode)
     ########## End create the glow filter ##########
     
+    ########## Create the headers of the concerns and alternative tables ##########
+    
+    headerGroup= xmlDoc.createGNode()
+    headerGroup.setId('headerGroup')
+    #concern
+    tempNode= xmlDoc.createSvgTextNode(concernTableXOffset, yHeaderOffset + headerMaxHeight - 5, headerConcern)
+    tempNode.setFontFamily(headerFontName)
+    tempNode.setFontSize(str(headerFontSize) + 'px')
+    tempNode.setColor(createColorRGBString(headerColor))
+    headerGroup.appendChild(tempNode)
+    
+    #alternative
+    tempNode= xmlDoc.createSvgTextNode(alternativeTableTotalXOffset, yHeaderOffset + headerMaxHeight - 5, headerAlternative)
+    tempNode.setFontFamily(headerFontName)
+    tempNode.setFontSize(str(headerFontSize) + 'px')
+    tempNode.setColor(createColorRGBString(headerColor))
+    headerGroup.appendChild(tempNode)
+    
+    ########## End Create the headers of the concerns and alternative tables ##########
+    
     #################### Create the background of the header tables ####################
     
     #concern
     concernTableHeaderBackgroundGround= xmlDoc.createGNode()
     concernTableHeaderBackgroundGround.setId('concernTableHeaderBackgroundGround')
-    tempNode= xmlDoc.createRectNode(concernTableTotalXOffset, concernTableYOffset, concernCellHeight + tableLineThickness, sum(concernCellWidths) + (concernsNCols * tableLineThickness) )
+    tempNode= xmlDoc.createRectNode(concernTableTotalXOffset, concernTableTotalYOffset, concernCellHeight + tableLineThickness, sum(concernCellWidths) + (concernsNCols * tableLineThickness) )
     tempNode.setFill(createColorRGBString(concernTableHeaderBackground))
     concernTableHeaderBackgroundGround.appendChild(tempNode)
     
     #alternative
     alternativeTableHeaderBackgroundGround= xmlDoc.createGNode()
     alternativeTableHeaderBackgroundGround.setId('alternativeTableHeaderBackgroundGround')
-    tempNode= xmlDoc.createRectNode(alternativeTableTotalXOffset, alternativeTableYOffset, alternativeCellHeight + tableLineThickness, sum(alternativeCellWidths) + (alternativesNCols * tableLineThickness))
+    tempNode= xmlDoc.createRectNode(alternativeTableTotalXOffset, alternativeTableTotalYOffset, alternativeCellHeight + tableLineThickness, sum(alternativeCellWidths) + (alternativesNCols * tableLineThickness))
     tempNode.setFill(createColorRGBString(alternativeTableHeaderBackground))
     alternativeTableHeaderBackgroundGround.appendChild(tempNode)
     
@@ -757,7 +802,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
     concernTableDataBackgrounGroup.setId('concernTableDataBackgrounGroup')
     while i < concernsNRows:
         x= concernTableTotalXOffset
-        y= concernTableYOffset + (i * concernCellHeight) + (i * tableLineThickness) + tableLineThickness/2
+        y= concernTableTotalYOffset + (i * concernCellHeight) + (i * tableLineThickness) + tableLineThickness/2
         tempNode= xmlDoc.createRectNode(x, y, concernCellHeight + tableLineThickness, sum(concernCellWidths) + tableLineThickness * concernsNCols)
         if i % 2 == 0:
             tempNode.setFill(createColorRGBString(tableBackgroundColor2))
@@ -772,7 +817,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
     alternativeTableDataBackgrounGroup.setId('alternativeTableDataBackgrounGroup')
     while i < alternativesNRows:
         x= alternativeTableTotalXOffset
-        y= alternativeTableYOffset + (i * alternativeCellHeight) + (i * tableLineThickness) + tableLineThickness/2
+        y= alternativeTableTotalYOffset + (i * alternativeCellHeight) + (i * tableLineThickness) + tableLineThickness/2
         tempNode= xmlDoc.createRectNode(x, y, alternativeCellHeight + tableLineThickness, sum(alternativeCellWidths) + tableLineThickness * alternativesNCols)
         if i % 2 == 0:
             tempNode.setFill(createColorRGBString(tableBackgroundColor2))
@@ -792,7 +837,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
     x= concernTableTotalXOffset + sum(concernCellWidths) + (concernsNCols + 1) * tableLineThickness + xNewWordOffset
     while i < concernsNRows:
         if data.concerns[i - 1][5] == True:
-            y= concernTableTotalXOffset + (i * concernCellHeight) + concernCellHeight / 2 + newWordSize[1] /2 - 5
+            y= concernTableTotalYOffset + (i * concernCellHeight) + concernCellHeight / 2 + newWordSize[1] /2 - 5
             tempNode= xmlDoc.createSvgTextNode(x, y, newWord)
             tempNode.setFontFamily(fontName)
             tempNode.setFontSize( str(newWordFontSize) + 'px')
@@ -810,7 +855,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
     x= alternativeTableTotalXOffset + sum(alternativeCellWidths) + (alternativesNCols + 1) * tableLineThickness + xNewWordOffset
     while i < alternativesNRows:
         if data.alternatives[i - 1][2] == True:
-            y= alternativeTableYOffset + (i * alternativeCellHeight) + alternativeCellHeight / 2 + newWordSize[1] /2 - 5
+            y= alternativeTableTotalYOffset + (i * alternativeCellHeight) + alternativeCellHeight / 2 + newWordSize[1] /2 - 5
             tempNode= xmlDoc.createSvgTextNode(x, y, newWord)
             tempNode.setFontFamily(fontName)
             tempNode.setFontSize( str(newWordFontSize) + 'px')
@@ -840,7 +885,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
     tempData.nCols= concernsNCols
     tempData.nRows= concernsNRows
     tempData.tableData= concernTableData
-    tempData.yTableOffSet= concernTableYOffset
+    tempData.yTableOffSet= concernTableTotalYOffset
     tempData.xTableOffSet= concernTableTotalXOffset
     
     xmlConcernTable= __createSvgTable__(tempData)
@@ -855,11 +900,12 @@ def convertAlternativeConcernSessionResultToSvg(data):
     tempData.nCols= alternativesNCols
     tempData.nRows= alternativesNRows
     tempData.tableData= alternativeTableData
-    tempData.yTableOffSet= alternativeTableYOffset
+    tempData.yTableOffSet= alternativeTableTotalYOffset
     tempData.xTableOffSet= alternativeTableTotalXOffset
     
     xmlAlternativeTable= __createSvgTable__(tempData)
     
+    root.appendChild(headerGroup)
     root.appendChild(alternativeTableHeaderBackgroundGround)
     root.appendChild(alternativeTableDataBackgrounGroup)
     root.appendChild(alternativeNewWordGroup)
