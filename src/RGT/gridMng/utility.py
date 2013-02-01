@@ -351,13 +351,16 @@ def convertGridTableToSvg(gridObj= None):
                 colN+= 1
             colN= 0
             #weight
-            totalWeight+= concernObj.weight
-            size= f.getsize(str(concernObj.weight))
-            if size[0] > colWidths[nAlternatives]:
-                colWidths[nAlternatives]= size[0]
-            if size[1] > maxWordHeight:
-                maxWordHeight= size[1] 
-            row.append(str(concernObj.weight)) 
+            if concernObj.weight != None:
+                totalWeight+= concernObj.weight
+                size= f.getsize(str(concernObj.weight))
+                if size[0] > colWidths[nAlternatives]:
+                    colWidths[nAlternatives]= size[0]
+                if size[1] > maxWordHeight:
+                    maxWordHeight= size[1] 
+                row.append(str(concernObj.weight))
+            else:
+                row.append('---')
                   
             isFirstRunDone= True
             tableData.append(row)
