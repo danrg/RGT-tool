@@ -1,5 +1,5 @@
 from RGT.XML.SVG.baseTextNode import BaseTextNode
-from types import StringType
+from types import StringType, UnicodeType
 from xml.dom import Node
 
 class BaseEditableTextNode(BaseTextNode):
@@ -11,7 +11,7 @@ class BaseEditableTextNode(BaseTextNode):
     def setText(self, text):
         if text != None:
             textNode= None
-            if type(text) != StringType:
+            if type(text) != StringType and type(text) != UnicodeType:
                 text= str(text)
             
             if self.hasChildNodes() == True:

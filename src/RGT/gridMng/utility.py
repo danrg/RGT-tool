@@ -1434,7 +1434,9 @@ def __createSvgTable__(data):
             word= data.tableData[i][j]
             if word == None:
                 word= ''
-            size= data.fontObject.getsize(str(word))
+            if type(word) != StringType and type(word) != UnicodeType:
+                word= str(word)
+            size= data.fontObject.getsize(word)
             #word is center aligned
             x= data.xTableOffSet + xTotalTableTextOffSet + data.xWordCellSpace + (data.cellWidths[j] / 2) - (size[0]/2) - 5 
             # -5 is used to correct the placement of the text
