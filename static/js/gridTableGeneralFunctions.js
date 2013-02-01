@@ -1,5 +1,4 @@
 var urlStaticFiles= '/static/';
-
 //check if plugin has been loaded
 if(!jQuery.getRowAndCellIndex)
 {
@@ -937,23 +936,21 @@ function showConfidenceLevelAndRatingValueInput(obj)
 			handler.caller= obj;
 			createRatingConfidenseLevelInput(svgContainerDiv, handler);
 			dialogDiv.dialog({width: parseInt(svgContainerDiv.find('svg').attr('width')) + 30});
-			console.log(obj);
 		}
 		else
 		{
 			//change the caller variable of the handler
-			//svgContainerDiv.find('svg').data('getHandler');
-			var handler= getConfidenceLevelInputHandler(svgContainerDiv);
-			handler.callter= obj;
-			saveConfidenceLelelInputHandler(svgContainerDiv, handler);
-			console.log(obj);
+			var handler= getClickConfidenceLevelInputHandler(svgContainerDiv);
+			handler.caller= obj;
 		}
 		
 		dialogDiv.dialog("open");
 	}
 }
 
-//class
+/**
+ * Confidence Level Click handler class
+ */
 function confidenceLevelHandler()
 {
 	this.caller= null; // this is an jquery object representing the object that was clicked 
@@ -964,7 +961,6 @@ function confidenceLevelHandler()
 		var divColorIndicator= this.caller.parent('.ratingCellDiv').find('.confidenceLevelColorDiv');
 		var classString= divColorIndicator.attr('class');
 		var index= classString.indexOf(' ');
-		console.log(this.caller);
 		if(confidenceLevelName == 'very low')
 		{
 			classString= classString.substring(0, index);
@@ -991,5 +987,6 @@ function confidenceLevelHandler()
 			classString+= ' ' + 'confidenceLevelColor5';
 		}
 		divColorIndicator.attr('class', classString);
+		this.caller.val(ratingName);
 	}
 }

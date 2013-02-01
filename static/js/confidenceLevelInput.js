@@ -1,4 +1,5 @@
 var urlStaticFiles= '/static/';
+var clickHandler= null;
 //load other javascript needed for the showMyGrids.html
 if(!jQuery.svg)
 {
@@ -22,8 +23,6 @@ function dostuff()
 	var text= svg.text(null, 30, 30, 'TEXT', {fill:'black', id:'svgText', fontSize: '16px'});
 	svg.line(29, 29, 68, 29, {strokeWidth: 5, stroke:'black'})
 	node = document.getElementById("svgText")
-	//console.log(text.getComputedTextLength());
-	//console.log(text);
 	createRatingConfidenseLevelInput($('#testSvg2'), testR);
 }
 
@@ -45,7 +44,7 @@ function createRatingConfidenseLevelInput(div, handler)
 {
 	div.svg();
 	var svg= div.svg('get');
-	$(svg).data('clickHandler', handler);
+	//$(svg).data('clickHandler', handler);
 	
 	/* Settings */
 	var chartYOffset= 5; //offset from the top element
@@ -151,6 +150,9 @@ function createRatingConfidenseLevelInput(div, handler)
 	var confidenceLevelLegendBodyGroup= svg.group(confidenceLevelLegendGroup, 'confidenceLevelLegendBodyGroup', null);
 	var confidenceLevelLegendColorIndicatorGroup= svg.group(confidenceLevelLegendGroup, 'confidenceLevelLegendColorIndicatorGroup', null);
 	var confidenceLevelLegendLabelsGroup= svg.group(confidenceLevelLegendGroup, 'confidenceLevelLegendLabelsGroup', null);
+	
+	//store the handler
+	$(svg).data('clickHandler', handler)
 	
 	//because we need to know the width of the text to place the some of the items, create all the labels before anything else
 	
@@ -462,7 +464,7 @@ function createRatingConfidenseLevelInput(div, handler)
 				$(temp).mouseup(removeHighlightMouseDown)
 				if(handler != null)
 				{
-					$(temp).click({svg: $(svg).parent('div'), ratings: ratings, confidenceLevels: confidenceLevels}, onClickHandler);
+					$(temp).click({svg: svg, ratings: ratings, confidenceLevels: confidenceLevels}, onClickHandler);
 				}
 			}
 		}
@@ -611,24 +613,32 @@ function removeHighlightMouseDown(event)
  */
 function onClickHandler(event)
 {
-	console.log(event.data.svg);
-	var svg= $(event.data.svg.svg('get'));
+	var clickHandler= $(event.data.svg).data('clickHandler');
 	var rowN= parseInt($(event.target).attr('data-rowvalue'));
 	var colN= parseInt($(event.target).attr('data-colvalue'));
 	var ratingName= event.data.ratings[colN];
 	var confidenceName= event.data.confidenceLevels[rowN];
-	console.log(1);
-	svg.data('clickHandler').exec(rowN, colN, ratingName, confidenceName);
+	clickHandler.exec(rowN, colN, ratingName, confidenceName);
 }
 
-function getConfidenceLevelInputHandler(containerDiv)
+/**
+ * This function will get the current click handler that is associated with the svg element
+ * @param containerDiv jquery element with the div or other element that contains the svg element
+ * @returns the handler
+ */
+function getClickConfidenceLevelInputHandler(containerDiv)
 {
 	var svg= containerDiv.svg('get');
 	var handler= $(svg).data('clickHandler');
 	return handler;
 }
 
-function saveConfidenceLelelInputHandler(containerDiv, handler)
+/**
+ * This function will set a new handler that is associated with a svg element.
+ * @param containerDiv The div or other element that contains svg element
+ * @param handler The click handler that will be associated with the svg element
+ */
+function saveClickConfidenceLelelInputHandler(containerDiv, handler)
 {
 	var svg= containerDiv.svg('get');
 	$(svg).data('clickHandler', handler);
