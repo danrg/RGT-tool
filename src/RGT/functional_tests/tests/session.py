@@ -492,6 +492,42 @@ class SessionTests(BaseSessionLiveTest):
         logout_link = self.browser.find_element_by_link_text("Log out")
         logout_link.click()
 
+        # Facilitator admin logs in, selects the session with name session1
+        self.facilitator_can_select_session("admin@admin.com", "123", "session1")
+
+        # Facilitator clicks the show dendrogram button and gets the dendrogram
+        show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show Dendrogram']")
+        show_dendrogram_button.click()
+
+        # Wait until the dendrogram appears successfully
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_tag_name("svg"))
+
+        time.sleep(1)
+
+        # Facilitator mouse over dendrogram
+        dendrogram_image = self.browser.find_element_by_tag_name("svg")
+        ActionChains(self.browser).move_to_element(dendrogram_image).perform()
+
+        save_image_button = self.browser.find_element_by_css_selector("img[id='saveButtonImg']")
+        save_image_button.click()
+
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
+
+        # Facilitator types value for filename
+        session_file_name = self.browser.find_element_by_name("fileName")
+        session_file_name.send_keys('dendrogram')
+
+        #for future use
+        #download_button = self.browser.find_element_by_css_selector("button[class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only']")
+        #download_button.click()
+
+        close_button = self.browser.find_element_by_css_selector("a[class='ui-dialog-titlebar-close ui-corner-all']")
+        close_button.click()
+
+        # Facilitator admin logs out
+        logout_link = self.browser.find_element_by_link_text("Log out")
+        logout_link.click()
+
         # Participant with the name user1 logs in, goes to participating session
         # page and selects the session session1 of user admin
         self.participant_can_select_session("test1@test1.com", "123", "admin:session1", False)
@@ -509,6 +545,36 @@ class SessionTests(BaseSessionLiveTest):
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("clearResultsButton"))
 
         time.sleep(2)
+
+        # user logs out
+        logout_link = self.browser.find_element_by_link_text("Log out")
+        logout_link.click()
+
+        # Facilitator admin logs in, selects the session with name session1
+        self.facilitator_can_select_session("admin@admin.com", "123", "session1")
+
+        # Facilitator clicks the button to save the grid
+        concern_1_left = self.browser.find_element_by_name("concern_1_left")
+        ActionChains(self.browser).move_to_element(concern_1_left).perform()
+        save_grid_button = self.browser.find_element_by_css_selector("img[title='download grid as']")
+        save_grid_button.click()
+
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
+
+        # User types value for filename
+        grid_file_name = self.browser.find_element_by_name("fileName")
+        grid_file_name.send_keys('sessionGrid')
+
+        #for future use
+        #download_button = self.browser.find_element_by_css_selector("button[class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only']")
+        #download_button.click()
+
+        close_button = self.browser.find_element_by_css_selector("a[class='ui-dialog-titlebar-close ui-corner-all']")
+        close_button.click()
+
+        # Facilitator admin logs out
+        logout_link = self.browser.find_element_by_link_text("Log out")
+        logout_link.click()
 
 class FacilitatorSessionTests(BaseSessionLiveTest):
     """
