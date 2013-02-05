@@ -121,6 +121,23 @@ class GridTests(BaseGridLiveTest):
         # A dialog box appears with the message 'Grid was created.' and user closes it
         self.wait_for_dialog_box_with_message("Grid was created.")
 
+    def test_can_download_grid(self):
+        # User logs in successfully, goes to grid page and selects a saved grid
+        self.can_select_grid('admin@admin.com', '123')
+
+        # User clicks the button to save
+        concern_1_left = self.browser.find_element_by_name("concern_1_left")
+        ActionChains(self.browser).move_to_element(concern_1_left).perform()
+        save_grid_button = self.browser.find_element_by_css_selector("img[title='download grid as']")
+        save_grid_button.click()
+
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
+
+        # User types value for filename
+        grid_file_name = self.browser.find_element_by_name("fileName")
+        grid_file_name.send_keys('grid1')
+
+
     def test_can_update_grid(self):
         # User logs in successfully, goes to grid page and selects a saved grid
         self.can_select_grid('admin@admin.com', '123')
@@ -222,3 +239,16 @@ class GridTests(BaseGridLiveTest):
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_tag_name("svg"))
 
         time.sleep(1)
+
+        # User mouse over dendrogram
+        dendrogram_image = self.browser.find_element_by_tag_name("svg")
+        ActionChains(self.browser).move_to_element(dendrogram_image).perform()
+
+        save_image_button = self.browser.find_element_by_css_selector("img[id='saveButtonImg']")
+        save_image_button.click()
+
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
+
+        # User types value for filename
+        grid_file_name = self.browser.find_element_by_name("fileName")
+        grid_file_name.send_keys('image')
