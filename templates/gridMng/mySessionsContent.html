@@ -103,7 +103,7 @@
 			</div>
 			{% if data.savaGridSession %}
 				<div id="sessionGridOptions">
-					<input type="button" id="saveButton" onclick="saveSessionGrid()" value="Save Changes" />
+					<input type="button" id="saveButton" onclick="rescaleWeights();saveSessionGrid()" value="Save Changes" />
 					<input type= "button" id= "mySessionsContentUndoAllButton" value="undo all" onclick= "getSessionGrid()" />
 				</div>
 			{% endif %}
