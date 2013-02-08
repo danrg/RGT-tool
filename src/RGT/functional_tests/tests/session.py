@@ -317,6 +317,23 @@ class SessionTests(BaseSessionLiveTest):
         # Wait until the results from the selected iteration appear
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("resultAlternativeConcernTablesDiv"))
 
+        # Facilitator admin clicks the button to download results
+        download_result1_button = self.browser.find_element_by_id("downloadResultsButton")
+        download_result1_button.click()
+
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
+
+        # User types value for filename
+        grid_file_name = self.browser.find_element_by_name("fileName")
+        grid_file_name.send_keys('resultsIteration1')
+
+        #for future use
+        #download_button = self.browser.find_element_by_css_selector("button[class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only']")
+        #download_button.click()
+
+        close_button = self.browser.find_element_by_css_selector("a[class='ui-dialog-titlebar-close ui-corner-all']")
+        close_button.click()
+
         # Facilitator admin mouse over to alternative_2
         alternative_2_name = self.browser.find_element_by_name("alternative_2_name")
         ActionChains(self.browser).move_to_element(alternative_2_name).perform()
@@ -458,10 +475,31 @@ class SessionTests(BaseSessionLiveTest):
         show_respond_from_iterations_options[2].click()
 
         # Wait until the results from the selected iteration appear
-        #self.wait_for_dialog_box_with_message("The dendrogram of iteration 2 cannot be generated. Ratings must be complete in order to generate a dendrogram.")
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("clearResultsButton"))
 
-        # Facilitator admin type some values for the ratings
-        #self.fill_empty_ratings()
+        # User mouse over dendrogram
+        results_image = self.browser.find_element_by_id("downloadResultsButton")
+        ActionChains(self.browser).move_to_element(results_image).perform()
+
+        time.sleep(2)
+
+        # Facilitator admin clicks the button to download results
+        download_result2_button = self.browser.find_element_by_css_selector("input[id='downloadResultsButton']")
+        download_result2_button.click()
+
+        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
+
+        # User types value for filename
+        grid_file_name = self.browser.find_element_by_name("fileName")
+        grid_file_name.send_keys('resultsIteration2')
+
+        #for future use
+        #download_button = self.browser.find_element_by_css_selector("button[class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only']")
+        #download_button.click()
+
+        close_button = self.browser.find_element_by_css_selector("a[class='ui-dialog-titlebar-close ui-corner-all']")
+        close_button.click()
+
 
         # Facilitator admin saves the changes
         save_changes_button = self.browser.find_element_by_css_selector("input[value='Save Changes']")
