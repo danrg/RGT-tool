@@ -549,46 +549,6 @@ function removeCol(cell)
 	}
 }
 
-function rescaleWeights()
-{
-    var nConcerns= getNumberOfConcerns($('.gridTrableContainerDiv').find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
-    var weightTotal= 0.0;
-    var id= null;
-    var tbody= $('.gridTrableContainerDiv').find('.mainGridDiv table>tbody');//$('#Grid>tbody');
-
-
-    for(var i= 0; i < nConcerns; i++)
-    {
-        id= "weight_concern" + (i + 1);
-        weightTotal+= parseFloat(tbody.find('#' + id).val());
-    }
-
-    if(weightTotal >= 0 || weightTotal < 0)
-    {
-        if(weightTotal != 100)
-        {
-            var rescaleValue = 100/weightTotal;
-            for (var i= 0; i < nConcerns; i++)
-            {
-                var weightVal = $('#weight_concern' + (i + 1)).val();
-                var newWeightVal = (weightVal * rescaleValue).toFixed(2);
-                $('#weight_concern' + (i + 1)).attr('value', newWeightVal);
-            }
-            weightTotal= 100;
-            alert('Weights are automatically rescaled by factor : ' + rescaleValue + ' to make total = 100' );
-        }
-    }
-
-    if(weightTotal >= 0 || weightTotal < 0)
-    {
-        $('.gridTrableContainerDiv').find('.weightMeter').attr('value', weightTotal);
-    }
-    else
-    {
-        $('.gridTrableContainerDiv').find('.weightMeter').attr('value', '-----');
-    }
-}
-
 /**
  * Function used to calculate the total weight value used in the grid table
  * @param containerDiv jquery object containing all the components of a grid table
