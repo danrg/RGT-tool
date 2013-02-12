@@ -29,6 +29,14 @@ if( typeof downloadImageOf != 'function')
 	});
 }
 
+if( typeof showColMenu != 'function')
+{
+	$.ajax({
+		url: urlStaticFiles + 'js/gridTableGeneralFunctions.js',
+		dataType: 'script',
+		async:   false 
+	});
+}
 
 //function definitions
 

@@ -1,3 +1,14 @@
+var urlStaticFiles= '/static/';
+
+if( typeof showColMenu != 'function')
+{
+	$.ajax({
+		url: urlStaticFiles + 'js/gridTableGeneralFunctions.js',
+		dataType: 'script',
+		async:   false 
+	});
+}
+
 function sendResponse()
 {
 	showLoadingSpinner($('#wrap'), 'Please wait...')

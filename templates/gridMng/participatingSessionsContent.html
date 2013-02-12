@@ -1,13 +1,5 @@
 {% load tz %} 
 <script type="text/javascript">
-if( typeof showColMenu != 'function')
-{
-	$.ajax({
-		url: '{{ STATIC_URL }}js/gridTableGeneralFunctions.js',
-		dataType: 'script',
-		async:   false 
-	});
-}
 if( typeof sendResponse != 'function')
 {
 	$.ajax({

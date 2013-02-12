@@ -9,12 +9,7 @@
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/createSession.css" />
 {% endblock stylesheet %}
 
-{% block content%}
-{% if not user.is_active %}
-	<div id="verify-message">
-		<p>Please verify your email in order to use this part of the application! Thank you!</p>
-	</div>
-{% else %}
+{% block javascript %}
 <script>
     if (typeof showGridSessionSelection != 'function') {
         $.ajax({
@@ -24,6 +19,15 @@
                });
     }
 </script>
+{% endblock javascript %}
+
+{% block content%}
+{% if not user.is_active %}
+	<div id="verify-message">
+		<p>Please verify your email in order to use this part of the application! Thank you!</p>
+	</div>
+{% else %}
+
 <h2>Create Session</h2>
 <p>Follow these four easy steps to create a new session.</p>
 <div id="createSessionBody">

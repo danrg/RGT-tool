@@ -23,6 +23,15 @@ if( typeof createSvgMenu != 'function')
 	});
 }
 
+if( typeof createDendogram != 'function')
+{
+	$.ajax({
+		url: urlStaticFiles + 'js/svgDendogram.js',
+		dataType: 'script',
+		async:   false 
+	});
+}
+
 //function used to get a grid from the db and display it to the user
 function showMyGrid(reload)
 {
