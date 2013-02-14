@@ -435,6 +435,9 @@ def ajaxGenerateDendogram(request):
                         imgData= createDendogram(grid1)
                         responseData= createSvgResponse(imgData, None)
                         return HttpResponse(responseData, content_type='application/xml')
+                    except UnicodeEncodeError as error:
+                        errorString= 'Invalid character found in the grid. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely.\nDendogram can not be created.'
+                        return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
                     except:
                         if DEBUG == True:
                             print "Exception in user code:"
