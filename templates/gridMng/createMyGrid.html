@@ -17,45 +17,45 @@ RGT | Grids - Create
 
 {% block content %}
 {% if not user.is_active %}
-<div id="verify-message">
-    <p>Please verify your email in order to use this part of the application! Thank you!</p>
-</div>
+	<div id="verify-message">
+		<p>Please verify your email in order to use this part of the application! Thank you!</p>
+	</div>
 {% else %}
-<div id="myGridDiv">
-    <h2>Create Grid</h2>
-    <p>Follow these three easy steps to create a new grid.</p>
-    <div id="createGridBody">
-        <form id="form">
-            <div class="formelms">
-                <h3>Step 1: Enter grid name</h3>
-                <label class="gridNameLabel" for="gridName">Grid name:</label>
-                <input type="text" id="gridName" name="gridName"/>
-                <h3>Step 2: Enter grid data</h3>
-                <div id= "gridData" style="display: inline;">
-                    {% include "gridMng/createMyGridBase.html" with data=data.templateCreateMyGridBase STATIC_URL=STATIC_URL %}
-                </div>
-                <h3>Step 3: Save the grid</h3>
-                <input onclick="rescale();createGrid()" type="button" value="Save" />
-                or <a href="/grids/">return to index.</a>
-            </div>
-        </form>
-    </div>
-    <script type="text/javascript">
-        if(typeof prepareGrid != 'function')
-        {
-            //$.getScript( '{{ STATIC_URL }}js/createMyGrid.js');
-            $.ajax({
-                url: '{{ STATIC_URL }}js/createMyGrid.js',
-                dataType: 'script',
-                success: function(){prepareGrid()},
-                async:   false
-            });
-        }
-        else
-        {
-            prepareGrid();
-        }
-    </script>
+<div id="myGridDiv">    
+	<h2>Create Grid</h2>
+	<p>Follow these three easy steps to create a new grid.</p>
+	<div id="createGridBody">
+		<form id="form">
+			<div class="formelms">
+			    <h3>Step 1: Enter grid name</h3>
+			    <label class="gridNameLabel" for="gridName">Grid name:</label>
+			    <input type="text" id="gridName" name="gridName"/>
+			    <h3>Step 2: Enter grid data</h3>
+				<div id= "gridData" style="display: inline;">
+					{% include "gridMng/createMyGridBase.html" with data=data.templateCreateMyGridBase STATIC_URL=STATIC_URL %}
+				</div>
+			    <h3>Step 3: Save the grid</h3>
+			    <input onclick="createGrid()" type="button" value="Save" />
+			    or <a href="/grids/">return to index.</a>
+			</div>
+		</form>
+	</div>
+	<script type="text/javascript">
+		if(typeof prepareGrid != 'function')
+		{
+			//$.getScript( '{{ STATIC_URL }}js/createMyGrid.js');
+			$.ajax({
+				url: '{{ STATIC_URL }}js/createMyGrid.js',
+				dataType: 'script',
+				success: function(){prepareGrid()},
+				async:   false 
+			});
+		}
+		else
+		{
+			prepareGrid();
+		}
+	</script>
 </div>
 {% endif %}
 {% endblock content %}
