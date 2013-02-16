@@ -1,126 +1,126 @@
 <script type="text/javascript">
-    if(typeof startSession != 'function')
-    {
-        $.ajax({
-            url: '{{ STATIC_URL }}js/mySessionsContent.js',
-            dataType: 'script',
-            async: false,
-        });
-    }
+	if(typeof startSession != 'function')
+	{
+		$.ajax({
+			url: '{{ STATIC_URL }}js/mySessionsContent.js',
+			dataType: 'script',
+			async: false,
+		});
+	}
 </script>
 <div id="sessionInfoDiv">
-    <div id ="sessionDetails">
-        <table class="grid" id="sessionDetails">
-            <thead>
-            <tr>
-                <th colspan="2">Session Details</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>Session Name:</td>
-                <td>{{data.sessionName}}</td>
-            </tr>
-            <tr>
-                <td>Invitation key</td>
-                <td>{{data.invitationKey}}</td>
-            </tr>
-            <tr>
-                <td>Current iteration</td>
-                <td id="iteration">{{data.iteration}}</td>
-            </tr>
-            <tr>
-                <td>Current iteration status</td>
-                <td id="currentIterationStatus">{{data.state}}</td>
-            </tr>
-            <tr>
-                <td>Show results from iteration</td>
-                <td>		<select id="mySessionsContentSessionIterationSelect" onchange="mySessionsShowResults()" style="width:230px">
-                    {%for key,value in data.iterationValueType.items %}
-                        {% if key == 0 %}
-                            <option value="{{key}}"></option>
-                        {% else %}
-                            <option class="{{value.stateNameKey}}" value="{{key}}">#{{key}} - type: {{value.stateName}}</option>
-                        {% endif %}
-                    {% endfor %}
-                </select></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    <div id="sessionParticipants">
-        {% include "gridMng/participants.html" with data=data.participantTableData STATIC_URL=STATIC_URL%}
-    </div>
+	<div id ="sessionDetails">
+		<table class="grid" id="sessionDetails">
+			<thead>
+				<tr>
+					<th colspan="2">Session Details</th>
+		        </tr>
+		    </thead>
+		    <tbody>
+		    	<tr>
+		            <td>Session Name:</td>
+		            <td>{{data.sessionName}}</td>
+		        </tr>
+		        <tr>
+		            <td>Invitation key</td>
+		            <td>{{data.invitationKey}}</td>
+		        </tr>
+		        <tr>
+		            <td>Current iteration</td>
+		            <td id="iteration">{{data.iteration}}</td>
+		        </tr>
+		        <tr>
+		            <td>Current iteration status</td>
+		            <td id="currentIterationStatus">{{data.state}}</td>
+		        </tr>
+		        <tr>
+		            <td>Show results from iteration</td>
+		            <td>		<select id="mySessionsContentSessionIterationSelect" onchange="mySessionsShowResults()" style="width:230px">
+		                {%for key,value in data.iterationValueType.items %}
+		                	{% if key == 0 %}
+		                		<option value="{{key}}"></option>
+		                	{% else %}
+		                		<option class="{{value.stateNameKey}}" value="{{key}}">#{{key}} - type: {{value.stateName}}</option>
+		                	{% endif %}
+		                {% endfor %}
+		            </select></td>
+		        </tr>
+			</tbody>
+		</table>
+	</div>
+	<div id="sessionParticipants">
+		{% include "gridMng/participants.html" with data=data.participantTableData STATIC_URL=STATIC_URL%}
+	</div>
 </div>
 <!-- navigation menus -->
 <div id="mainNavigationDiv">
-    {% if not data.isSessionClose %}
+	{% if not data.isSessionClose %}
         <table>
             <tr>
-                {% if not data.hasSessionStarted %}
+				{% if not data.hasSessionStarted %}
                     <td><input type="button" onclick="startSession()" value="Start Session"/></td>
-                {% endif %}
-                {% if data.showRequestButtons %}
+				{% endif %}
+				{% if data.showRequestButtons %}
                     <td><input type="button" onclick="requestAlternativeConcerns()" value="Request Alt/Con" /></td>
                     <td><input type="button" onclick="requestRatings()" value="Request Ratings"/></td>
-                {% endif %}
-                {% if data.showFinishButton %}
+				{% endif %}
+				{% if data.showFinishButton %}
                     <td><input type="button" onclick="finishCurrentRequest()" value="Finish Request" /></td>
-                {% endif %}
-                {% if data.hasSessionStarted and data.showCloseSessionButton %}
+				{% endif %}
+				{% if data.hasSessionStarted and data.showCloseSessionButton %}
                     <td><input type="button" onclick="finishSession()" value="End Session"/></td>
-                {% endif %}
-                {% if data.hasSessionStarted %}
-                    <td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show Dendrogram"/></td>
-                {% endif %}
+				{% endif %}
+				{% if data.hasSessionStarted %}
+					<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show Dendrogram"/></td>
+				{% endif %}
             </tr>
-        </table>
-    {% else %}
-        <table>
-            <tr>
-                <td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show Dendrogram" /></td>
-            </tr>
-        </table>
-    {% endif %}
+		</table>
+	{% else %}
+		<table>
+			<tr>
+				<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show Dendrogram" /></td>
+			</tr>
+		</table>
+	{% endif %}
 </div>
 <!-- main content div -->
 <div id="mySessionsDiv">
-    <div id="mySessionMainContentDiv">
-        <div id="contentDiv">
-            <div id="sessionGridDiv">
-                <form id="form">
+	<div id="mySessionMainContentDiv">
+		<div id="contentDiv">
+			<div id="sessionGridDiv">
+				<form id="form">
                     {% csrf_token %}
-                    {% include "gridMng/gridTable.html" with data=data.tableData STATIC_URL=STATIC_URL %}
-                </form>
-            </div>
-            {% if data.savaGridSession %}
-                <div id="sessionGridOptions">
-                    <input type="button" id="saveButton" onclick="rescale();saveSessionGrid()" value="Save Changes" />
-                    <input type= "button" id= "mySessionsContentUndoAllButton" value="undo all" onclick= "getSessionGrid()" />
-                </div>
-            {% endif %}
-            <div id="mySessionDendrogram" style="display: none;">
-                <div id="mySessionDendrogramHead" class="dendrogramHead">
-                    <span id="mySessionDendrogramTitle" class="dendrogramTitle">Dendrogram of current iteration</span>
-                </div>
-                <div id="mySessionDendrogramDiv" class="dendrogramDiv">
-                </div>
-            </div>
-            <div id="mySessionsResultsDiv">
-                <div id="mySessionResultsDendrogram" style="display: none;">
-                    <div id="mySessionResultsDendrogramHead" class="dendrogramHead">
-                        <span id="mySessionResultsDendrogramTitle" class="dendrogramTitle">Dendrogram of iteration <span id="mySessionResultsDendrogramTitleIteration"></span></span>
-                    </div>
-                    <div id="mySessionsResultDendrogramDiv" class="dendrogramDiv">
-                    </div>
-                </div>
-                <div id="mySessionsContentResultDiv">
-                </div>
-                <div id="sessionContentResultsOptions">
-                    <input type="button" id="clearResultsButton" onclick="clearResults()" value="Clear Results" style="display: none;" />
-                    <input type="button" id="downloadResultsButton" onclick="getResultsDownloadPage()" value="Download Results" style="display: none;" />
-                </div>
-            </div>
-        </div>
-    </div>
+					{% include "gridMng/gridTable.html" with data=data.tableData STATIC_URL=STATIC_URL %}
+				</form>
+			</div>
+			{% if data.savaGridSession %}
+				<div id="sessionGridOptions">
+					<input type="button" id="saveButton" onclick="saveSessionGrid()" value="Save Changes" />
+					<input type= "button" id= "mySessionsContentUndoAllButton" value="undo all" onclick= "getSessionGrid()" />
+				</div>
+			{% endif %}
+			<div id="mySessionDendrogram" style="display: none;">
+				<div id="mySessionDendrogramHead" class="dendrogramHead">
+					<span id="mySessionDendrogramTitle" class="dendrogramTitle">Dendrogram of current iteration</span>
+				</div>
+				<div id="mySessionDendrogramDiv" class="dendrogramDiv">
+				</div>
+			</div>
+			<div id="mySessionsResultsDiv">
+				<div id="mySessionResultsDendrogram" style="display: none;">
+					<div id="mySessionResultsDendrogramHead" class="dendrogramHead">
+						<span id="mySessionResultsDendrogramTitle" class="dendrogramTitle">Dendrogram of iteration <span id="mySessionResultsDendrogramTitleIteration"></span></span>
+					</div>
+					<div id="mySessionsResultDendrogramDiv" class="dendrogramDiv">
+					</div>
+				</div>
+				<div id="mySessionsContentResultDiv">
+				</div>
+				<div id="sessionContentResultsOptions">
+					<input type="button" id="clearResultsButton" onclick="clearResults()" value="Clear Results" style="display: none;" />
+					<input type="button" id="downloadResultsButton" onclick="getResultsDownloadPage()" value="Download Results" style="display: none;" />
+				</div>
+			</div>
+		</div>
+	</div>
 </div>

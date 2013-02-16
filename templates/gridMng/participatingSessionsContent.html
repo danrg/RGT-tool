@@ -1,19 +1,19 @@
-{% load tz %}
+{% load tz %} 
 <script type="text/javascript">
-    if( typeof sendResponse != 'function')
-    {
-        $.ajax({
-            url: '{{ STATIC_URL }}js/participatingSessionsContent.js',
-            dataType: 'script',
-            async: false
-        });
-    }
+if( typeof sendResponse != 'function')
+{
+	$.ajax({
+		url: '{{ STATIC_URL }}js/participatingSessionsContent.js',
+		dataType: 'script',
+		async: false
+	});
+}
 </script>
 <table class="grid" id="sessionDetails">
     <thead>
-    <tr>
-        <th colspan="2">Session details</th>
-    </tr>
+        <tr>
+            <th colspan="2">Session details</th>
+        </tr>
     </thead>
     <tbody>
     <tr>
@@ -25,14 +25,14 @@
         <td>{{data.sessionStatus}}</td>
     </tr>
     <tr>
-        <td>Number of participants that responded</td>
-        <td>
-            {% if data.showNParticipantsAndResponces %}
-                <span id= "nReceivedResponses">{{data.nReceivedResponses}}</span>/{{data.nParticipants}}
-            {% else %}
-                -----
-            {% endif %}
-        </td>
+    	<td>Number of participants that responded</td>
+    	<td>
+    		{% if data.showNParticipantsAndResponces %}
+    			<span id= "nReceivedResponses">{{data.nReceivedResponses}}</span>/{{data.nParticipants}}
+    		{% else %}
+    			-----
+    		{% endif %}
+    	</td>
     </tr>
     <tr>
         <td class= "participatingSessionsResponseHighlight">Response status</td>
@@ -43,15 +43,15 @@
         <td>
             <select id= "responseSelection" onchange= "getResponseFromIteration()"> <!-- Add a question mark icon here with tooltip explaining what this does-->
                 {% if not data.iterations %}
-                    <option value="null">N/A</option>
+                <option value="null">N/A</option>
                 {% else %}
-                    <option value="null">    </option>
-                    {% for i in data.iterations %}
-                        {% if i != data.iteration %}
-                            <option value="{{i}}">{{i}}</option>
-                        {% endif %}
-                    {% endfor %}
-                    <option value="current">Cur</option>
+                <option value="null">    </option>
+                {% for i in data.iterations %}
+	                {% if i != data.iteration %}
+	                	<option value="{{i}}">{{i}}</option>
+	                {% endif %}
+                {% endfor %}
+                <option value="current">Cur</option>
                 {% endif %}
             </select>
         </td>
@@ -60,13 +60,13 @@
 </table>
 <!-- div with all the content -->
 <div id="participationSessionsContentDiv">
-    {% include "gridMng/participatingSessionsContentGrids.html" with data=data.participatingSessionsContentGridsData STATIC_URL=STATIC_URL only %}
+	{% include "gridMng/participatingSessionsContentGrids.html" with data=data.participatingSessionsContentGridsData STATIC_URL=STATIC_URL only %}
 </div>
 <div id="responseOptionsDiv">
-    {% if not data.hideSaveResponseButton %}
-        <input type="button" id="sendResponseButton" onclick="rescale();sendResponse()" value="Send Response" />
-        <input type="button" id="participatingSessionsContentUndoAllButton" onclick="getResponseFromIteration('current')" value="Undo All" />
-    {% endif %}
+	{% if not data.hideSaveResponseButton %}
+		<input type="button" id="sendResponseButton" onclick="sendResponse()" value="Send Response" />
+		<input type="button" id="participatingSessionsContentUndoAllButton" onclick="getResponseFromIteration('current')" value="Undo All" />
+	{% endif %}
 </div>
 <table class="grid" id="resultDetails">
     <tbody>
