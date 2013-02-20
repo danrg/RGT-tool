@@ -29,6 +29,15 @@ if( typeof downloadImageOf != 'function')
 	});
 }
 
+if(typeof clearRatioResultCharts != 'function')
+{
+	$.ajax({
+		url: urlStaticFiles + 'js/resultRatingWeightTables.js',
+		dataType: 'script',
+		async:   false 
+	});
+}
+
 if( typeof showColMenu != 'function')
 {
 	$.ajax({
