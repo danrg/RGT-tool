@@ -9,6 +9,15 @@ if( typeof showColMenu != 'function')
 	});
 }
 
+if(typeof clearRatioResultCharts != 'function')
+{
+	$.ajax({
+		url: urlStaticFiles + 'js/resultRatingWeightTables.js',
+		dataType: 'script',
+		async:   false 
+	});
+}
+
 function sendResponse()
 {
 	showLoadingSpinner($('#wrap'), 'Please wait...')
