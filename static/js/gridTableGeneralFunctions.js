@@ -550,6 +550,67 @@ function removeCol(cell)
 }
 
 /**
+ * Function used to rescale weight value used in the grid table so that the total remains 100
+ * @param containerDiv jquery object containing all the components of a grid table
+ */
+function rescale()
+{
+    var responseGrid = $('form').attr('id');
+    if(responseGrid == 'participatingSessionResponseGridForm')
+    {
+        var nConcerns= getNumberOfConcerns($('#participatingSessionResponseGridForm').find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
+    }
+    else
+    {
+        var nConcerns= getNumberOfConcerns($('.gridTrableContainerDiv').find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
+    }
+    var weightTotal= 0.0;
+    var id= null;
+    var tbody= $('.gridTrableContainerDiv').find('.mainGridDiv table>tbody');//$('#Grid>tbody');
+
+    for(var i= 0; i < nConcerns; i++)
+    {
+        id= "weight_concern" + (i + 1);
+        weightTotal+= parseFloat(tbody.find('#' + id + '[onchange]').val());
+    }
+
+    if(weightTotal >= 0 || weightTotal < 0)
+    {
+        if(weightTotal != 100)
+        {
+            var rescaleValue = 100/weightTotal;
+            for (var i= 0; i < nConcerns; i++)
+            {
+                var id = "weight_concern" + (i+1);
+                var weightVal = $('#' + id + '[onchange]').val();
+                var newWeightVal = (weightVal * rescaleValue).toFixed(2);
+                $('#' + id + '[onchange]').attr('value', newWeightVal);
+            }
+            weightTotal= 0.0;
+            for(var i= 0; i < nConcerns; i++)
+            {
+                id= "weight_concern" + (i + 1);
+                weightTotal+= parseFloat(tbody.find('#' + id).val());
+            }
+        }
+    }
+
+    if(weightTotal > 99.0 && weightTotal < 100)
+    {
+        weightTotal = 100
+    }
+
+    if(weightTotal >= 0 || weightTotal < 0)
+    {
+        $('.gridTrableContainerDiv').find('.weightMeter').attr('value', weightTotal);
+    }
+    else
+    {
+        $('.gridTrableContainerDiv').find('.weightMeter').attr('value', '-----');
+    }
+}
+
+/**
  * Function used to calculate the total weight value used in the grid table
  * @param containerDiv jquery object containing all the components of a grid table
  */

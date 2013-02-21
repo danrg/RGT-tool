@@ -64,7 +64,7 @@ if( typeof sendResponse != 'function')
 </div>
 <div id="responseOptionsDiv">
 	{% if not data.hideSaveResponseButton %}
-		<input type="button" id="sendResponseButton" onclick="sendResponse()" value="Send Response" />
+		<input type="button" id="sendResponseButton" onclick="rescale();sendResponse()" value="Send Response" />
 		<input type="button" id="participatingSessionsContentUndoAllButton" onclick="getResponseFromIteration('current')" value="Undo All" />
 	{% endif %}
 </div>
