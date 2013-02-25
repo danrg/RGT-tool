@@ -296,6 +296,7 @@ function finishCurrentRequest()
 
 function mySessionsShowResults()
 {
+    showLoadingSpinner($('#wrap'), 'Please wait...');
 	var selectedOption = $('#mySessionsContentSessionIterationSelect option:selected');
 	var iteration= selectedOption.val();
 	if (iteration > 0) {
@@ -315,6 +316,7 @@ function mySessionsShowResults()
 				$('#mySessionsContentResultDiv').html($(data).find('htmlData').text());
 				$('#clearResultsButton').show();
 				$('#downloadResultsButton').show();
+                hideLoadingSpinner($('#wrap'));
 			}
 			else
 			{
