@@ -553,20 +553,12 @@ function removeCol(cell)
  * Function used to rescale weight value used in the grid table so that the total remains 100
  * @param containerDiv jquery object containing all the components of a grid table
  */
-function rescale()
+function rescale(containerDiv)
 {
-    var responseGrid = $('form').attr('id');
-    if(responseGrid == 'participatingSessionResponseGridForm')
-    {
-        var nConcerns= getNumberOfConcerns($('#participatingSessionResponseGridForm').find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
-    }
-    else
-    {
-        var nConcerns= getNumberOfConcerns($('.gridTrableContainerDiv').find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
-    }
+    var nConcerns= getNumberOfConcerns(containerDiv.find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
     var weightTotal= 0.0;
     var id= null;
-    var tbody= $('.gridTrableContainerDiv').find('.mainGridDiv table>tbody');//$('#Grid>tbody');
+    var tbody= $(containerDiv).find('.mainGridDiv table>tbody');//$('#Grid>tbody');
 
     for(var i= 0; i < nConcerns; i++)
     {
@@ -602,11 +594,11 @@ function rescale()
 
     if(weightTotal >= 0 || weightTotal < 0)
     {
-        $('.gridTrableContainerDiv').find('.weightMeter').attr('value', weightTotal);
+        $(containerDiv).find('.weightMeter').attr('value', weightTotal);
     }
     else
     {
-        $('.gridTrableContainerDiv').find('.weightMeter').attr('value', '-----');
+        $(containerDiv).find('.weightMeter').attr('value', '-----');
     }
 }
 

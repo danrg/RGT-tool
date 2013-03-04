@@ -35,7 +35,7 @@ RGT | Grids - Create
 					{% include "gridMng/createMyGridBase.html" with data=data.templateCreateMyGridBase STATIC_URL=STATIC_URL %}
 				</div>
 			    <h3>Step 3: Save the grid</h3>
-			    <input onclick="rescale();createGrid()" type="button" value="Save" />
+			    <input onclick="rescale($('#gridData'));createGrid()" type="button" value="Save" />
 			    or <a href="/grids/">return to index.</a>
 			</div>
 		</form>

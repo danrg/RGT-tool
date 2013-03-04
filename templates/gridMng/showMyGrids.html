@@ -66,7 +66,7 @@ RGT | Grids
 	<div id="results">
 	</div>
 	<div class="tableOptions" id="showMyGridsTableOptions">
-        <input type="button" id="saveButton" onclick="rescale();saveGrid()" value="Save" />
+        <input type="button" id="saveButton" onclick="rescale($('#form'));saveGrid()" value="Save" />
         <input type="button" onclick="deleteMyGrid()" value="Delete" />
         <input type="button" id="showDendogramButton" onclick="getDendogram()" value="Show Dendrogram" />
         <input type="button" id="reloadSavedGridButton" onclick="showMyGrid(true)" value="Undo all" />
