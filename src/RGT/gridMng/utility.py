@@ -194,6 +194,7 @@ def createDendogram(gridObj):
                         ratio= (Ratings.objects.get(concern= concernObj, alternative= alternativeObj)).rating
                         if ratio != None:
                             ratio*= weight
+                            ratio= round(ratio, 2)
                             row.append(ratio)
                             if ratio > maxValueOfAlternative:
                                 maxValueOfAlternative= ratio
