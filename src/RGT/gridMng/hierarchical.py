@@ -521,7 +521,7 @@ def drawDendogram2(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
             j= 1
         tempMatrix.insert(0, firstRow)
         tempMatrix.pop(1)
-        print tempMatrix 
+        #print tempMatrix 
         matrix= tempMatrix
         
         #######end pre-processing #########
@@ -1037,11 +1037,18 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         
         #find the max word width of the left and right side of the table and the size of the cells
         for row in matrix:
-            maxValue= max(row[1: len(row)-1])
+            #maxValue= max(row[1: len(row)-1])
             #the first row is special as it only contains the names of the alternatives, thus skip it
-            if type(maxValue) != str: 
-                if tableCellWidth < maxValue:
-                    tableCellWidth= maxValue
+            if type(row[1]) != str:
+                i= 1
+                while i < len(row) - 2:
+                    col= row[i]
+                    (tempCellWidth, tempCellHeight)= f.getsize(str(col))
+                    if tableCellWidth < tempCellWidth:
+                        tableCellWidth= tempCellWidth
+                    if tableCellHeight < tempCellHeight:
+                        tableCellHeight= tempCellHeight
+                    i+= 1
                 size= f.getsize(row[0])
                 if size[0] > leftConcernMaxWordWidth:
                     leftConcernMaxWordWidth= size[0]
@@ -1053,7 +1060,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
                 if size[1] > rightConcernMaxWordHeight:
                     rightConcernMaxWordHeight= size[1]
                 
-        (tableCellWidth, tableCellHeight)= f.getsize(str(tableCellWidth))
+        #(tableCellWidth, tableCellHeight)= f.getsize(str(tableCellWidth))
         #the height of the cell should be a little bigger then the max word height
         if rightConcernMaxWordHeight > leftConcernMaxWordHeight:
             if rightConcernMaxWordHeight > tableCellHeight:
