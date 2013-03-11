@@ -71,6 +71,21 @@ RGT | Grids
         <input type="button" id="showDendogramButton" onclick="getDendogram()" value="Show Dendrogram" />
         <input type="button" id="reloadSavedGridButton" onclick="showMyGrid(true)" value="Undo all" />
 	</div>
+    <div id="tabs" hidden="hidden">
+        <ul>
+            <li><a href="#similarityMatrix" onclick="hideImage()">Similarity Matrix</a></li>
+            <li><a href="#showDendrogram" onclick="getDendogram()" >Show Dendrogram</a></li>
+            <li><a href="#pca" onclick="hideImage()">PCA</a></li>
+        </ul>
+        <div id="similarityMatrix">
+            <p>          </p>
+        </div>
+        <div id="showDendrogram">
+        </div>
+        <div id="pca">
+            <p>           </p>
+        </div>
+    </div>
 </form>
 <div id="dendrogram" style="display: none;">
 	<div id="dendrogramHead" class="dendrogramHead">

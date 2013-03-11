@@ -32,10 +32,19 @@ if( typeof createDendogram != 'function')
 	});
 }
 
+function hideImage()
+{
+    $('#dendrogram').hide();
+}
+
 //function used to get a grid from the db and display it to the user
 function showMyGrid(reload)
 {
 	var gridUSID;
+    if($('#tabs').is(':hidden'))
+    {
+        $('#tabs').show();
+    }
 	if (!reload){
 		gridUSID = $("#showGridSelection option:selected").val();
 	} else {
@@ -306,3 +315,7 @@ function getDendogram()
 		console.log(err)
 	}
 }
+
+$(function() {
+    $( "#tabs" ).tabs();
+});
