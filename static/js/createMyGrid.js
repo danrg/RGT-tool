@@ -22,7 +22,7 @@ function createGrid()
 	try
 	{
 		var table= getGridTable($('#gridData').find('#gridDiv'));
-		var str= 'nAlternatives=' + getNumberOfAlternatives(table) + '&nConcerns=' + getNumberOfConcerns(table) + '&tableOnly=true&'+ $('#form').serialize();
+		var str= 'nAlternatives=' + getNumberOfAlternatives(table) + '&nConcerns=' + getNumberOfConcerns(table) + '&'+ $('#form').serialize();
 		var error= '';
 		$.post('/grids/create/', str, function(data){
 			try
