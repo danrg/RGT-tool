@@ -70,7 +70,8 @@ def getCreateMyGridPage(request):
     External arguments:
         nAlternatives: int
         nConcerns: int
-        gridType: string values: response or user
+        gridType: string 
+            values: user
         gridName: string
 """
 def ajaxCreateGrid(request):
@@ -173,7 +174,10 @@ def ajaxCreateGrid(request):
     htmlData= template.render(context)
     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
 
-
+"""
+    This function is used to display the initial page the user sees when he
+    clicks the button 'grids'.
+"""
 def getShowGridPage(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
@@ -190,6 +194,26 @@ def getShowGridPage(request):
 
     return render(request, 'gridMng/showMyGrids.html', context_instance = context)
 
+"""
+    This function is used to generate the html code of a grid that 
+    was previously saved in the database.
+    
+    External arguments:
+        gridUSID: string
+        viewMode: string
+            values:
+                all: show the concerns/alternatives and ratings/weights
+                ac: show only alternatives and concerns (only works with write mode read)
+        writeMode: string
+            values:
+                read: can only see the values 
+                write: can see and change the values
+        checkTable: string
+            values:
+                true: will call the javascript function isTableSaved()
+                false: will not call the javascript function isTableSaved()
+            default: false
+"""
 def ajaxGetGrid(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
@@ -286,7 +310,25 @@ def ajaxGetGrid(request):
     else:
         return HttpResponse(createXmlErrorResponse(error), content_type='application/xml')
     
-
+"""
+    This function is used to update a grid that has been previously
+    saved in the database by the user.
+    
+    External arguments:
+        gridType: string
+            values: 
+                session
+                user
+            default: user
+        sessionUSID: string
+            information: The sessionUSID is only needed if the gridType is session
+        iteration: int
+            information: The iteration is only needed if the gridType is session
+        gridUSID: string
+            information: The gridUSID is only needed if the gridType is user
+        gridName: string
+        
+"""
 def ajaxUpdateGrid(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
@@ -409,6 +451,12 @@ def ajaxUpdateGrid(request):
     else:
         return HttpResponse(createXmlErrorResponse("No grid found"), content_type='application/xml')
     
+"""
+    This function is used to delete a grid created by a user.
+    
+    External arguments:
+        gridUSID: string
+"""
 def ajaxDeleteGrid(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
@@ -425,6 +473,13 @@ def ajaxDeleteGrid(request):
     else:
         return HttpResponse(createXmlErrorResponse('Invalid request, request is missing arguments'), content_type='application/xml')
 
+"""
+    This function is used to send a dendrogram back to the client machine 
+    that was generated based on a grid saved in the database
+    
+    External arguments:
+        gridUSID: string
+"""
 def ajaxGenerateDendogram(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
@@ -466,8 +521,10 @@ def ajaxGenerateDendogram(request):
     else:
         return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'), content_type='application/xml')
 
-#This function will return the html code that is needed to generate the dialog box 
-#that is used to ask to user to which format should a svg image be saved
+"""
+    This function will return the html code that is needed to generate the dialog box 
+    that is used to ask to user to which format should a svg image be saved
+"""
 def ajaxGetSaveSvgPage(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
@@ -477,7 +534,16 @@ def ajaxGetSaveSvgPage(request):
     htmlData= template.render(context)
     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
     
-#this function will receive a svg string and will convert it to another file type
+"""
+    this function will receive a svg string and will convert it to another file type.
+    
+    External arguments:
+        data: svg string
+        convertTo: string
+            values:
+                svg
+        fileName: string
+"""
 def ajaxConvertSvgTo(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
@@ -508,6 +574,16 @@ def ajaxConvertSvgTo(request):
     response['Content-Disposition'] = 'attachment; filename=error.jpg'
     return response
 
+"""
+    This function is used to send the user a file containing the svg image of a grid he created.
+    
+    External arguments:
+        convertTo: string
+            values:
+                svg
+        usid: string
+        fileName: string 
+"""
 def ajaxConvertGridTo(request):
     
     if not request.user.is_authenticated():
@@ -563,7 +639,17 @@ def ajaxConvertGridTo(request):
     response['Content-Disposition'] = 'attachment; filename=error.jpg'
     return response
 
-#this function will convert the dendrogram to a image file
+"""
+    This functions is used to send back an image file to the user
+    containg a dendrogram.
+    
+    External arguments:
+        convertTo: string
+            values:
+                svg
+        gridUSID: string
+        fileName: string 
+"""
 def dendrogramTo(request):
     
     #########################################
@@ -614,6 +700,21 @@ def dendrogramTo(request):
     response['Content-Disposition'] = 'attachment; filename=error.jpg' 
     return response
     
+"""
+    This function is used to convert a string that contains svg data into
+    image data that can be sent over the internet and be downloaded as a file.
+    
+    Parameters:
+        svgString: string
+            information: string that contains the svg data.
+        convertTo: string
+            values:
+                svg
+    
+    Return
+        rgt/gridMng/fileData.FileData
+        
+"""
 def __convertSvgStringTo__(svgString= None, convertTo= None):
     fpInMemory = None
     imgData= FileData()
@@ -673,6 +774,28 @@ def __convertSvgStringTo__(svgString= None, convertTo= None):
     else:
         raise ValueError('svgString or convertTo was None')
 
+"""
+    This function is used to validate the input that will be used to create
+    a grid for the user.
+    
+    Arguments:
+        isConcernAlternativeResponseGrid: boolean
+        request: HttpRequest
+            information: this argument is needed as the concerns, alternatives, ratings and weights will be 
+                         contained in the HttpRequest object.
+    Return:
+        Type:
+            Tulip
+        Information: The tulip contains 5 positions. Position zero is where the number of concerns is located,
+                     position one contains the number of alternatives, position two contains the array of tulips
+                     containg the concern data, position three contains the array of altenative names and position
+                     four contains the array of values.
+                     
+                     The array of tulips used to store concern  data had 3 positions. Position zero contains the
+                     left pole name of the concern, position one contains the name of the right pole and position
+                     two contains the weight of the concern.  
+        
+"""
 def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
 
     concernValues= [] #this will contain a tuple with 3 values, (leftPole, rightPole, weight)
@@ -812,9 +935,26 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
     return (nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues)
     
     
-
-
-#intern function used to update a grid
+"""
+    This function is used to update a grid that was previouly saved in the database.
+    
+    Arguments:
+        gridObj: rgt/gridMng/models.Grid
+        nConcerns: int
+        nAlternatives: int
+        concernValues: array of tulips
+            information: the tulips must have 3 positions. The 1st position should have the concern
+                        left pole name, the 2nd position should have the right pole name and the 
+                        3rd position should have the weight (double) of the concern.
+        alternativeValues: array of strings
+            information: each position of the array should have a string representing the name of the
+                         alternative.
+        ratioValues: array of doubles
+        isConcernAlternativeResponseGrid: boolean
+    
+    Return:
+        boolean
+"""
 def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, isConcernAlternativeResponseGrid):
     if gridObj != None:
         valuesChanged= None #use to check if we need to clear the dendogram field in the Grid model
@@ -956,7 +1096,34 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
     else:
         raise ValueError('GridObj was None')
     
-#this function will create and save a basic grid. After successful creation the grid is returned 
+"""
+    this function will create and save a grid. After successful creation the grid is returned
+    
+    Arguments:
+        userObj:
+        gridType: string
+            values:
+                u
+                s
+                ac
+                rw
+            information: more information about the meaning of the values can be found in rgt/gridMng/models.Grid
+        gridName: string
+        nConcerns: int
+        nAlternatives: int
+        concernValues: array of tulips
+            information: the tulips must have 3 positions. The 1st position should have the concern
+                        left pole name, the 2nd position should have the right pole name and the 
+                        3rd position should have the weight (double) of the concern.
+        alternativeValues: array of strings
+            information: each position of the array should have a string representing the name of the
+                         alternative.
+        ratioValues: array of doubles
+        createRatios: boolean
+    
+    Return:
+        rgt/gridMng/models.Grid
+"""
 def createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, createRatios):
     
     if userObj != None and gridType != None and nConcerns != None and nAlternatives != None and concernValues != None and alternativeValues != None and ratioValues != None and createRatios != None:
