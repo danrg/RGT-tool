@@ -12,7 +12,7 @@ if(!jQuery.getRowAndCellIndex)
 
 
 $.ajax({
-	url: urlStaticFiles + 'js/jshashtable-2.1_src.js',
+	url: urlStaticFiles + 'js/external/jshashtable-2.1_src.js',
 	dataType: 'script',
 	async:   false 
 });
@@ -923,7 +923,7 @@ function initiateGridTableToolTip(containerDiv)
 	if(!jQuery.tipsy)
 	{
 		$.ajax({
-			url: urlStaticFiles + 'js/tipsy.js',
+			url: urlStaticFiles + 'js/external/tipsy.js',
 			dataType: 'script',
 			async:   false 
 		});

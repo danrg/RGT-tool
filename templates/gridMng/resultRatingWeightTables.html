@@ -1,5 +1,5 @@
-<script src= "{{ STATIC_URL }}js/highcharts/highcharts.js" type="text/javascript"></script>
-<script src= "{{ STATIC_URL }}js/resultRatingWeightTables.js" type="text/javascript"></script>
+<script src= "{{ STATIC_URL }}js/external/highcharts/highcharts.js" type="text/javascript"></script>
+<script src= "{{ STATIC_URL }}js/external/resultRatingWeightTables.js" type="text/javascript"></script>
 <div id="resultsRatingsWeightsTables">
 	<div style= "overflow: auto">
 		{% include "gridMng/resultRatingWeightTable.html" with data=data.rangeData STATIC_URL=STATIC_URL %}
