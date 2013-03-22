@@ -1,4 +1,4 @@
-var resultIndividualRatioChart= null;
+var resultIndividualRatioChart = null;
 
 /**
  * 
@@ -6,10 +6,10 @@ var resultIndividualRatioChart= null;
  */
 function displayChartOfRatings(data)
 {
-	var chartData= [];
-	var chartOptions= null;
+	var chartData = [];
+	var chartOptions = null;
 	// create the data for the chart
-	for (var i= 0; i < data.length; i++)
+	for (var i = 0; i < data.length; i++)
 	{
 		chartData.push({name: data[i][0], data: [data[i][1]]});
 	}
@@ -39,7 +39,7 @@ function displayChartOfRatings(data)
 	else
 	{
 		resultIndividualRatioChart.destroy();
-		resultIndividualRatioChart= new Highcharts.Chart(chartOptions);
+		resultIndividualRatioChart = new Highcharts.Chart(chartOptions);
 	}
 }
 
@@ -48,7 +48,7 @@ function displayChartOfRatings(data)
  */
 function clearRatioResultCharts()
 {
-	if(resultIndividualRatioChart != null)
+	if (resultIndividualRatioChart != null)
 	{
 		resultIndividualRatioChart.destroy();
 		resultIndividualRatioChart= null;

@@ -4,39 +4,38 @@
  */
 function downloadImageOf(formUrl, hiddenData)
 {
-	if(formUrl != null)
+	if (formUrl != null)
 	{
 		//the double function is used here so the tagData obj will be able to be used inside the function that will handle the post response
-		var callBack= function(formUrl, hiddenData)
+		var callBack = function (formUrl, hiddenData)
 		{
-			return function(data)
+			return function (data)
 			{
-				if($(data).find('error').length <= 0)
+				if ($(data).find('error').length <= 0)
 				{
-					
-					var modalDiv= getDialogDiv();
+					var modalDiv = getDialogDiv();
 					modalDiv.html($(data).find('htmlData').text());
-					var form= modalDiv.find('form');
-					var temp= null;
+					var form = modalDiv.find('form');
+					var temp = null;
 					if (hiddenData != null)
-					{	
-						for(attrib in hiddenData)
+					{
+						for (attrib in hiddenData)
 						{
-							temp= $('<input>').attr("type", "hidden").attr("name", attrib).val(hiddenData[attrib]);
+							temp = $('<input>').attr("type", "hidden").attr("name", attrib).val(hiddenData[attrib]);
 							form.append($(temp));
 						}
 					}
 					form.attr('action', formUrl);
 					modalDiv.dialog({
-				    	title: 'Download',
+                        title: 'Download',
 						resizable: false,
 						width:400,
 						modal: true,
 						buttons: {'Download':function(){
 							sendDownloadSvgForm();
 							}
-				    	}
-				    });
+                        }
+                    });
 				}
 				else
 				{

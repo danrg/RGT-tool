@@ -1,44 +1,44 @@
-var urlStaticFiles= '/static/';
-var intervalId= null;
-var participantTableRefreshTime= 900000; //15 min refresh time
+var urlStaticFiles = '/static/';
+var intervalId = null;
+var participantTableRefreshTime = 900000; //15 min refresh time
 
-if( typeof createDendogram != 'function')
+if (typeof createDendogram != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/svgDendogram.js',
 		dataType: 'script',
-		async:   false 
+		async:   false
 	});
 }
 
-if( typeof createSvgMenu != 'function')
+if (typeof createSvgMenu != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/svgMenu.js',
 		dataType: 'script',
-		async:   false 
+		async:   false
 	});
 }
 
-if( typeof downloadImageOf != 'function')
+if (typeof downloadImageOf != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/generalUtil.js',
 		dataType: 'script',
-		async:   false 
+		async:   false
 	});
 }
 
-if(typeof clearRatioResultCharts != 'function')
+if (typeof clearRatioResultCharts != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/resultRatingWeightTables.js',
 		dataType: 'script',
-		async:   false 
+		async:   false
 	});
 }
 
-if( typeof showColMenu != 'function')
+if (typeof showColMenu != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/gridTableGeneralFunctions.js',
@@ -55,7 +55,7 @@ if( typeof showColMenu != 'function')
 function initializeMySessionsContent()
 {
 	//set the refresh time of the participant table
-	if(intervalId != null)
+	if (intervalId != null)
 	{
 		clearInterval(intervalId);
 	}
@@ -114,7 +114,7 @@ function requestAlternativeConcerns()
 	showLoadingSpinner($('#wrap'), 'Please wait...');
 	try
 	{
-		var str= 'sessionUSID=' + mySessionsGetSessionUSID() + '&newState=waitingForAltAndCon'; //mySessionsGetSessionId is from mySessions.js
+		var str = 'sessionUSID=' + mySessionsGetSessionUSID() + '&newState=waitingForAltAndCon'; //mySessionsGetSessionId is from mySessions.js
 		$.post('/sessions/state/', str, function(data){
 			try
 			{
@@ -150,7 +150,7 @@ function requestRatings()
 	showLoadingSpinner($('#wrap'), 'Please wait...');
 	try
 	{
-		var str= 'sessionUSID=' + mySessionsGetSessionUSID() + '&newState=waitingForWeightsAndRatings'; //mySessionsGetSessionId is from mySessions.js
+		var str = 'sessionUSID=' + mySessionsGetSessionUSID() + '&newState=waitingForWeightsAndRatings'; //mySessionsGetSessionId is from mySessions.js
 		$.post('/sessions/state/', str, function(data){
 			try
 			{
@@ -186,10 +186,10 @@ function finishSession() {
 	showLoadingSpinner($('#wrap'), 'Please wait...');
 	try
 	{
-        var form= $('#sessionGridDiv').find('form');
-        var table= getGridTable($('#sessionGridDiv'));
-        var iteration= $('#iteration').text();
-        var str= 'sessionUSID=' + mySessionsGetSessionUSID() + '&newState=finish' + '&nConcerns=' + getNumberOfConcerns(table) + '&nAlternatives='+ getNumberOfAlternatives(table) + '&gridType=session' + '&iteration=' + iteration + '&' + form.serialize();
+        var form = $('#sessionGridDiv').find('form');
+        var table = getGridTable($('#sessionGridDiv'));
+        var iteration = $('#iteration').text();
+        var str = 'sessionUSID=' + mySessionsGetSessionUSID() + '&newState=finish' + '&nConcerns=' + getNumberOfConcerns(table) + '&nAlternatives='+ getNumberOfAlternatives(table) + '&gridType=session' + '&iteration=' + iteration + '&' + form.serialize();
 		$.post('/sessions/state/', str, function(data){
 			try
 			{
@@ -224,14 +224,14 @@ function saveSessionGrid()
 	hideLoadingSpinner($('#mySessionsResultDendrogramDiv'));
 	try
 	{
-		var form= $('#sessionGridDiv').find('form');
-		var table= getGridTable($('#sessionGridDiv'));
-		var iteration= $('#iteration').text();
-		str= 'nConcerns=' + getNumberOfConcerns(table) + '&nAlternatives='+ getNumberOfAlternatives(table) + '&gridType=session' + '&iteration=' + iteration + '&sessionUSID='+ mySessionsGetSessionUSID() + '&' + form.serialize();
+		var form = $('#sessionGridDiv').find('form');
+		var table = getGridTable($('#sessionGridDiv'));
+		var iteration = $('#iteration').text();
+		str = 'nConcerns=' + getNumberOfConcerns(table) + '&nAlternatives='+ getNumberOfAlternatives(table) + '&gridType=session' + '&iteration=' + iteration + '&sessionUSID='+ mySessionsGetSessionUSID() + '&' + form.serialize();
 		$.post('/grids/update/', str, function(data){
 			try
 			{
-				if($(data).find('error').length <= 0)
+				if ($(data).find('error').length <= 0)
 				{
 					masterFormString = $('#form').serialize();
 					isTableSaved();
@@ -263,7 +263,7 @@ function finishCurrentRequest()
 	showLoadingSpinner($('#wrap'), 'Please wait...');
 	try
 	{
-		var str= 'sessionUSID=' + mySessionsGetSessionUSID() + '&newState=check'; //mySessionsGetSessionId is from mySessions.js
+		var str = 'sessionUSID=' + mySessionsGetSessionUSID() + '&newState=check'; //mySessionsGetSessionId is from mySessions.js
 		$.post('/sessions/state/', str, function(data){
 			try
 			{
@@ -300,8 +300,8 @@ function mySessionsShowResults()
 	var selectedOption = $('#mySessionsContentSessionIterationSelect option:selected');
 	var iteration= selectedOption.val();
 	if (iteration > 0) {
-		var sessionUSID= mySessionsGetSessionUSID();
-		var str= 'sessionUSID=' + sessionUSID + '&iteration=' + iteration;
+		var sessionUSID = mySessionsGetSessionUSID();
+		var str = 'sessionUSID=' + sessionUSID + '&iteration=' + iteration;
 		//get the result tables
 		$.post('/sessions/results/', str, function(data){
 			if($(data).find('error').length <= 0)
@@ -334,29 +334,29 @@ function mySessionsShowResults()
  */
 function showSessionDendrogram(iteration, divId)
 {
-	var dendrogramDiv= null;
-	if(divId != null && divId != '')
+	var dendrogramDiv = null;
+	if (divId != null && divId != '')
 	{
-		dendrogramDiv= divId;
+		dendrogramDiv = divId;
 	}
 	else
 	{
-		dendrogramDiv= 'mySessionDendrogramDiv';
+		dendrogramDiv = 'mySessionDendrogramDiv';
 	}
 	showLoadingSpinner($('#' + dendrogramDiv));
 	try
 	{
 		if(iteration == null || iteration == '')
 		{
-			iteration= $('#mySessionsContentSessionIterationSelect option:selected').val();
+			iteration = $('#mySessionsContentSessionIterationSelect option:selected').val();
 		}
 		//in case the iteration is not specified display the current session
 		if(iteration <=  0)
 		{
-			iteration= -1;
+			iteration = -1;
 		}
-		var sessionUSID= mySessionsGetSessionUSID();
-		var str= 'sessionUSID=' + sessionUSID + '&iteration=' + iteration;
+		var sessionUSID = mySessionsGetSessionUSID();
+		var str = 'sessionUSID=' + sessionUSID + '&iteration=' + iteration;
 		$.post('/sessions/dendrogram/', str, function(data){
 			try
 			{
@@ -367,8 +367,8 @@ function showSessionDendrogram(iteration, divId)
 						$('#mySessionResultsDendrogramTitleIteration').text(iteration);
 					}
 					clearSvgImg(dendrogramDiv);
-					var svg= $.parseXML($(data).find('svgData').text());
-					var gridId= $(data).find('extraInfo').find('usid').text();
+					var svg = $.parseXML($(data).find('svgData').text());
+					var gridId = $(data).find('extraInfo').find('usid').text();
 					createDendogram(dendrogramDiv, svg);
 					//create the menu for the svg
 					createSvgMenu($('#' + dendrogramDiv), {saveItemAs: true, saveItemAsUrl: '/grids/download/dendrogram/', saveItemAsArguments:{gridUSID: gridId}});
@@ -405,7 +405,7 @@ function getParticipantPage()
 	try
 	{
 		//request for the user panel
-		var str= 'sessionUSID=' + mySessionsGetSessionUSID(); //mySessionsGetSessionId is from mySessions.js
+		var str = 'sessionUSID=' + mySessionsGetSessionUSID(); //mySessionsGetSessionId is from mySessions.js
 		$.post('/sessions/participants/', str, function(data){
 			try
 			{
@@ -439,7 +439,7 @@ function getSessionGrid()
 	showLoadingSpinner($('#sessionGridDiv'), 'Please wait...');
 	try
 	{
-		var str= 'sessionUSID=' + mySessionsGetSessionUSID();
+		var str = 'sessionUSID=' + mySessionsGetSessionUSID();
 		$.post('/sessions/sessionGrid/', str, function(data){
 			
 			try
@@ -476,9 +476,9 @@ function getSessionGrid()
 function getResultsDownloadPage()
 {
 	var selectedOption = $('#mySessionsContentSessionIterationSelect option:selected');
-	var iterationN= selectedOption.val();
+	var iterationN = selectedOption.val();
 	if (iterationN > 0) {
-		var sessionUsid= mySessionsGetSessionUSID();
+		var sessionUsid = mySessionsGetSessionUSID();
 		downloadImageOf('download/results/', {sessionUSID:sessionUsid, iteration:iterationN})
 	}
 	else

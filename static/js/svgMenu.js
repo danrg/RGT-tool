@@ -1,6 +1,6 @@
-var urlStaticFiles= '/static/';
+var urlStaticFiles = '/static/';
 
-if( typeof downloadImageOf != 'function')
+if (typeof downloadImageOf != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/generalUtil.js',
@@ -23,39 +23,39 @@ if( typeof downloadImageOf != 'function')
  */
 function createSvgMenu(wrapDiv, options)
 {
-	var svgDiv= wrapDiv.find('svg');
-	var menuDiv= null;
-	var saveButtonFunction= null;
-	var showSaveButton= true;
-	var showClearButton= true;
-	var checkSaveButtonFunction= true;
-	var saveItemAsArg= null;
-	var saveItemAsUrl= null;
+	var svgDiv = wrapDiv.find('svg');
+	var menuDiv = null;
+	var saveButtonFunction = null;
+	var showSaveButton = true;
+	var showClearButton = true;
+	var checkSaveButtonFunction = true;
+	var saveItemAsArg = null;
+	var saveItemAsUrl = null;
 
 	//path of the images
-	var saveButtonImg= '/static/icons/save.png';
-	var clearButtonImg= '/static/icons/clear.png';
+	var saveButtonImg = '/static/icons/save.png';
+	var clearButtonImg = '/static/icons/clear.png';
 
-	var menuContent= '';
-	
+	var menuContent = '';
+
 	//set the wrapDiv to relative
-	wrapDiv.css({position:'relative'});
-	
+	wrapDiv.css({position: 'relative'});
+
 	//create the menu with the correct options
 	{
-		if(options == null)
+		if (options == null)
 		{
-			options= {};
+			options = {};
 		}
-		if('showSaveButton' in options)
+		if ('showSaveButton' in options)
 		{
-			if(options['showSaveButton'] == true)
+			if (options['showSaveButton'] == true)
 			{
-				menuContent+= '<img src="' + saveButtonImg + '" id="saveButtonImg" />';
+				menuContent += '<img src="' + saveButtonImg + '" id="saveButtonImg" />';
 			}
 			else
 			{
-				showSaveButton= false;
+				showSaveButton = false;
 			}
 		}
 		else
@@ -63,65 +63,65 @@ function createSvgMenu(wrapDiv, options)
 			//default options is to add the button
 			menuContent+= '<img src="' + saveButtonImg + '" id="saveButtonImg" />';
 		}
-		if('showClearButton' in options)
+		if ('showClearButton' in options)
 		{
-			if(options['showClearButton'] == true)
+			if (options['showClearButton'] == true)
 			{
-				menuContent+= '<img src="' + clearButtonImg + '" id="clearButtonImg" />'
+				menuContent += '<img src="' + clearButtonImg + '" id="clearButtonImg" />'
 			}
 			else
 			{
-				showClearButton= false;
+				showClearButton = false;
 			}
 		}
 		else
 		{
 			//default is to show the button
-			menuContent+= '<img src="' + clearButtonImg + '" id="clearButtonImg" />'
+			menuContent += '<img src="' + clearButtonImg + '" id="clearButtonImg" />'
 		}
 		/* if saveItemAsArguments is true we will use the default saveItemAsArguments function, 
 		 * else check if the saveButtonFunction is defined and if that fails, use
 		 * the default function
 		 */
-		if('saveItemAs' in options && 'saveItemAsUrl' in options)
+		if ('saveItemAs' in options && 'saveItemAsUrl' in options)
 		{
 			if(options['saveItemAs'] != null && options['saveItemAs'] == true && options['saveItemAsUrl'] != null)
 			{
-				saveItemAsUrl= options['saveItemAsUrl'];
+				saveItemAsUrl = options['saveItemAsUrl'];
 				if ('saveItemAsArguments' in options)
 				{
-					saveItemAsArg= options['saveItemAsArguments'];
-					checkSaveButtonFunction= false;
+					saveItemAsArg = options['saveItemAsArguments'];
+					checkSaveButtonFunction = false;
 				}
 			}
 		}
-		if('saveButtonFunction' in options && checkSaveButtonFunction)
+		if ('saveButtonFunction' in options && checkSaveButtonFunction)
 		{
 			if(options['saveButtonFunction'] != null)
 			{
-				saveButtonFunction= options['saveButtonFunction'];
+				saveButtonFunction = options['saveButtonFunction'];
 			}
 			else
 			{
-				saveButtonFunction= saveSvgAs;
+				saveButtonFunction = saveSvgAs;
 			}
 		}
 		else
 		{
-			saveButtonFunction= saveSvgAs;
+			saveButtonFunction = saveSvgAs;
 		}
 	}
 	
 	//add the menu div inside the wrap div
 	wrapDiv.append('<div style="position:absolute;">' + menuContent +  '</div>');
 	
-	menuDiv= wrapDiv.find('div');
+	menuDiv = wrapDiv.find('div');
 	
 	//add the functions to the images
 	
-	if(showClearButton)
+	if (showClearButton)
 	{
-		var button= menuDiv.find('#clearButtonImg');
+		var button = menuDiv.find('#clearButtonImg');
 		button.click(function(){
 			$(this).parent('div').parent('div').parent('div').hide();
 		});
@@ -136,7 +136,7 @@ function createSvgMenu(wrapDiv, options)
 	
 	if(showSaveButton)
 	{
-		button= menuDiv.find('#saveButtonImg');
+		button = menuDiv.find('#saveButtonImg');
 		//check if we are going to use the saveDendogram function or not
 		if(saveItemAsUrl != null)
 		{
@@ -193,11 +193,11 @@ function saveSvgAs(imgObj)
 		
 		return function(data)
 		{
-			var svg= getSvgFromDiv(tagData.parent('div').parent('div'));
+			var svg = getSvgFromDiv(tagData.parent('div').parent('div'));
 			if($(data).find('error').length <= 0)
 			{
 				
-				var modalDiv= getDialogDiv();
+				var modalDiv = getDialogDiv();
 				modalDiv.html($(data).find('htmlData').text());
 				var input = $('<input>').attr("type", "hidden").attr("name", "data").val(getSvgString(svg)); 
 				modalDiv.find('form').append($(input))

@@ -1,4 +1,4 @@
-var urlStaticFiles= '/static/';
+var urlStaticFiles = '/static/';
 
 /**
  * Remove the svg element
@@ -25,7 +25,7 @@ function getSvgFromDiv(divTag)
 function getSvgString(svgElement)
 {
 	var serializer = new XMLSerializer();
-	return  serializer.serializeToString(svgElement[0]);
+	return serializer.serializeToString(svgElement[0]);
 }
 
 /**

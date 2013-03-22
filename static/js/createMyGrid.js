@@ -1,15 +1,15 @@
-var urlStaticFiles= '/static/';
-var loadingDiv= $('#wrap');
-	
+var urlStaticFiles = '/static/';
+var loadingDiv = $('#wrap');
+
 //load needed scripts
-if( typeof showColMenu != 'function')
+if (typeof showColMenu != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/gridTableGeneralFunctions.js',
 		dataType: 'script',
-		async:   false 
+		async:   false
 	});
-};
+}
 
 function prepareGrid()
 {

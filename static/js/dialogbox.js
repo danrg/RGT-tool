@@ -5,19 +5,19 @@ function showMessageInDialogBox(text) {
 function showMessageInDialogBox(text, closeFunction) {
 	$('#modalDialogBox').html('<p>' + text + '</p>');
     $('#modalDialogBox').dialog({
-    	title: 'Information',
+        title: 'Information',
 		resizable: false,
 		height: 160,
 		width: 400,
 		modal: true,
-		buttons: {'Close':function(){
-				$( this ).dialog( "close" );
-				if(closeFunction != null)
+		buttons: {'Close':function () {
+				$(this).dialog("close");
+				if (closeFunction != null)
 				{
 					closeFunction();
 				}
 			}
-    	}
+        }
     });
 }
 

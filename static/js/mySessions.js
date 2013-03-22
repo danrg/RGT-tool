@@ -1,5 +1,5 @@
-var urlStaticFiles= '/static/'
-var loadingDiv= $('#wrap');
+var urlStaticFiles = '/static/';
+var loadingDiv = $('#wrap');
 var hasTableBeenSaved = true;
 var masterFormString = '';
 
@@ -8,22 +8,22 @@ function showMySession()
 	showLoadingSpinner(loadingDiv, null);
 	try
 	{
-		var sessionUSID= mySessionsGetSessionUSID();
+		var sessionUSID = mySessionsGetSessionUSID();
 		if(sessionUSID != 'noSessions' && sessionUSID != '' && sessionUSID != null)
 		{
-			var str= 'sessionUSID=' + sessionUSID;
+			var str = 'sessionUSID=' + sessionUSID;
 			$.post('/sessions/show/', str, function(data){
 				try
 				{
 					//if(data.search('<error>.*?</error>') <= -1)
-					if($(data).find('error').length <= 0)
+					if ($(data).find('error').length <= 0)
 					{
 						$('#concentDiv').html($(data).find('htmlData').text());
 						prepareForNewGrid($('#contentDiv'));
 						//set tipsy
 						initiateGridTableToolTip($('#concentDiv'));
 						hideLoadingSpinner(loadingDiv);
-						hasTableBeenSaved= true;
+						hasTableBeenSaved = true;
 						masterFormString = $('#form').serialize();
 						//initialize anything that should be initialize after the content page has loaded
 						initializeMySessionsContent(); // from mySessionsContent.js

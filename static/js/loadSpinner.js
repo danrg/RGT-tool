@@ -1,6 +1,6 @@
 function showLoadingSpinner(element, msg)
 {
-	if( msg == null)
+	if (msg == null)
 	{
 		element.mask("Loading...");
 	}

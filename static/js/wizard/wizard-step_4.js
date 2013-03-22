@@ -1,6 +1,6 @@
-$(document).ready(function() {
+$(document).ready(function () {
 	init();
-	$('.weight-input').change(function() {
+	$('.weight-input').change(function () {
 		calculateTotal();
 	});
 	function init() {

@@ -1,12 +1,12 @@
-var urlStaticFiles= '/static/';
+var urlStaticFiles = '/static/';
 
 //check if plugin has been loaded
-if(!jQuery.getRowAndCellIndex)
+if (!jQuery.getRowAndCellIndex)
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/RowAndCellIndex.js',
 		dataType: 'script',
-		async:   false 
+		async:   false
 	});
 }
 
@@ -14,22 +14,22 @@ if(!jQuery.getRowAndCellIndex)
 $.ajax({
 	url: urlStaticFiles + 'js/external/jshashtable-2.1_src.js',
 	dataType: 'script',
-	async:   false 
+	async:   false
 });
 
-if( typeof downloadImageOf != 'function')
+if (typeof downloadImageOf != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/generalUtil.js',
 		dataType: 'script',
-		async:   false 
+		async:   false
 	});
 }
 
 //var nChangeableCols= 0; // number of cols without the cols used for the row menus
-var colMenuTimers= new Hashtable();
-var nFixedCols= 5;//number of cols that are not user for alternatives
-var nFixedRows= 2;//number of rows that are not user for concerns
+var colMenuTimers = new Hashtable();
+var nFixedCols = 5;//number of cols that are not user for alternatives
+var nFixedRows = 2;//number of rows that are not user for concerns
 
 /**
  * this function should be called if a new grid is loaded in the page
@@ -37,61 +37,55 @@ var nFixedRows= 2;//number of rows that are not user for concerns
  */
 function prepareForNewGrid(containerDiv)
 {
-	var table= containerDiv.find('.mainGridDiv table')
+	var table = containerDiv.find('.mainGridDiv table');
 	//var tableContainer = $(table).parent();
-	 //add the animation to the buttons of the menu of the grid
-	$(table).find(".deleteImage").hover(function(){
-		 $(this).attr("src", urlStaticFiles + "icons/delete_hover.png");
+	//add the animation to the buttons of the menu of the grid
+	$(table).find(".deleteImage").hover(function () {
+        $(this).attr("src", urlStaticFiles + "icons/delete_hover.png");
 	},
-	function(){
-		 $(this).attr("src", urlStaticFiles + "icons/delete.png");
+	function () {
+        $(this).attr("src", urlStaticFiles + "icons/delete.png");
 	});//end hover
+
+    $(table).find(".addImage").hover(function () {
+        $(this).attr("src", urlStaticFiles + "icons/plus_hover.png");
+    },
+    function () {
+        $(this).attr("src", urlStaticFiles + "icons/plus.png");
+    });//end hover
+
+    //add show and hide the menu function
+    $(table).find('.gridRow').mouseleave(function () {
+
+        $(this).find('.gridRowMenu').each(function () {
+            $(this).hide();
+        });
+    });//end mouse leave
+
+    //add hide cell menu
+    $(table).find('.ratioCell').each(function () {
+        var cell = $(this);
+        cell.mouseleave(function () {
+            hidecolMenu(cell, null, true, null);
+        });
+    });
 				
-	 $(table).find(".addImage").hover(function(){
-		 $(this).attr("src", urlStaticFiles + "icons/plus_hover.png");
-	 },
-	 function(){
-		 $(this).attr("src", urlStaticFiles + "icons/plus.png");
-	 });//end hover
+    $(table).find('.colMenu').each(function(){
+        var cell = $(this);
+        cell.mouseleave(function(){
+            hidecolMenu(cell, null, true, null);
+        });
+    });
 				
-	 //add show and hide the menu function
-	 $(table).find('.gridRow').mouseleave(function(){
-					
-		 $(this).find('.gridRowMenu').each(function(){
-			 $(this).hide();
-		 });
-	 });//end mouse leave
-				
-	 //add hide cell menu
-	 $(table).find('.ratioCell').each(function(){
-					
-		 var cell= $(this);
-		 cell.mouseleave(function(){
-						
-			 hidecolMenu(cell, null, true, null);
-		 });
-	 });
-				
-	 $(table).find('.colMenu').each(function(){
-					
-		 var cell= $(this);
-		 cell.mouseleave(function(){
-						
-			 hidecolMenu(cell, null, true, null);
-		 });
-	 });
-				
-	 $(table).find('.alternativeCell').each(function(){
-					
-		 var cell= $(this);
-		 cell.mouseleave(function(){
-						
-			 hidecolMenu(cell, null, true, null);
-		 });
-	 });
+    $(table).find('.alternativeCell').each(function(){
+        var cell = $(this);
+        cell.mouseleave(function(){
+            hidecolMenu(cell, null, true, null);
+        });
+    });
 	
-	 //initiate an array for the col menu of the table
-	var tableId= getTableId(table);
+    //initiate an array for the col menu of the table
+	var tableId = getTableId(table);
 	if(!colMenuTimers.containsKey(tableId))
 	{
 		colMenuTimers.put(tableId, new Array(getNumberOfAlternatives(table)));
@@ -109,14 +103,13 @@ function prepareForNewGrid(containerDiv)
  */
 function displayRowMenu(cell)
 {
-	
-	temp= cell.getRowAndCellIndex();
-	rowIndex= temp[0];
-	colIndex= temp[1];
-	nCols= cell.parent('tr').children('td').length;
-	if( Math.floor(nCols/2) > colIndex )
+	temp = cell.getRowAndCellIndex();
+	rowIndex = temp[0];
+	colIndex = temp[1];
+	nCols = cell.parent('tr').children('td').length;
+	if (Math.floor(nCols/2) > colIndex)
 	{
-		var rightMenu= cell.parent('tr').find('.rightRowMenuDiv');
+		var rightMenu = cell.parent('tr').find('.rightRowMenuDiv');
 		if(!rightMenu.is(':hidden'))
 		{
 			rightMenu.hide();
@@ -125,7 +118,7 @@ function displayRowMenu(cell)
 	}
 	else
 	{
-		var leftMenu= cell.parent('tr').find('.leftRowMenuDiv');
+		var leftMenu = cell.parent('tr').find('.leftRowMenuDiv');
 		if(!leftMenu.is(':hidden'))
 		{
 			leftMenu.hide();
@@ -140,20 +133,20 @@ function displayRowMenu(cell)
  */
 function showColMenu(cell)
 {
-	var temp= cell.getRowAndCellIndex();
-	var rowIndex= temp[0];
-	var cellIndex= temp[1];
-	var table= findTable(cell);
-	var tableId= getTableId(table);
-	if(colMenuTimers.get(tableId)[cellIndex - 2] != null)
+	var temp = cell.getRowAndCellIndex();
+	var rowIndex = temp[0];
+	var cellIndex = temp[1];
+	var table = findTable(cell);
+	var tableId = getTableId(table);
+	if (colMenuTimers.get(tableId)[cellIndex - 2] != null)
 	{
 		//console.log('cancel: ' + tableId + ' ' + colMenuTimers.get(tableId)[cellIndex - 2]);
 		clearTimeout(colMenuTimers.get(tableId)[cellIndex - 2]);
-		colMenuTimers.get(tableId)[cellIndex - 2]= null;
+		colMenuTimers.get(tableId)[cellIndex - 2] = null;
 	}
 	
-	colMenuDiv= table.find('tbody>tr:eq(0)').children('td:eq(' + cellIndex + ')').children('div');
-	if(colMenuDiv.is(':hidden'))
+	colMenuDiv = table.find('tbody>tr:eq(0)').children('td:eq(' + cellIndex + ')').children('div');
+	if (colMenuDiv.is(':hidden'))
 	{
 		//console.log('show: ' + tableId + ' ' + colMenuTimers.get(tableId)[cellIndex - 2]);
 		colMenuDiv.show();
@@ -172,9 +165,9 @@ function hidecolMenu(cell, cellIndex, delayed, tableId)
 {
 	if(delayed == true)
 	{
-		cellIndex= cell.getRowAndCellIndex()[1];
-		var tableId= getTableId(cell);
-		colMenuTimers.get(tableId)[cellIndex - 2]= setTimeout("hidecolMenu(null, " + cellIndex + ", false, '" + tableId + "' );", 200);
+		cellIndex = cell.getRowAndCellIndex()[1];
+		var tableId = getTableId(cell);
+		colMenuTimers.get(tableId)[cellIndex - 2] = setTimeout("hidecolMenu(null, " + cellIndex + ", false, '" + tableId + "' );", 200);
 		//console.log('start timer: ' + tableId + ' ' + colMenuTimers.get(tableId)[cellIndex - 2]);
 	}
 	else
@@ -190,80 +183,80 @@ function hidecolMenu(cell, cellIndex, delayed, tableId)
  */
 function addRow(cell)
 {
-	var nConcerns= getNumberOfConcerns(cell);//parseInt($("#nConcerns").val());
+	var nConcerns = getNumberOfConcerns(cell);//parseInt($("#nConcerns").val());
 	nConcerns++;
-	var leftId= "concern_" + nConcerns + "_left";
-	var rightId= "concern_" + nConcerns +"_right";
-	var ratingReadOnly= isRatingReadOnly(cell);
-	var showRatingWhileFalseChangeRatingsWeights= isShowRatingIfReadOnly(cell);
+	var leftId = "concern_" + nConcerns + "_left";
+	var rightId = "concern_" + nConcerns +"_right";
+	var ratingReadOnly = isRatingReadOnly(cell);
+	var showRatingWhileFalseChangeRatingsWeights = isShowRatingIfReadOnly(cell);
 	var containerDiv = findTable(cell).parents('.gridTrableContainerDiv');
 	//$("#nConcerns").val(nConcerns);
 	
 	//add the new row to the table
-	var nAlternatives= getNumberOfAlternatives(cell); //parseInt($("#nAlternatives").val());
-	var cols= '';
-	var id= ''; //id is the name used id and name options in the input tag
+	var nAlternatives = getNumberOfAlternatives(cell); //parseInt($("#nAlternatives").val());
+	var cols = '';
+	var id = ''; //id is the name used id and name options in the input tag
 	
 	//row menu
-	cols+= '<td onmouseover="displayRowMenu($(this))">\n';
-	cols+= '<div class="gridRowMenu leftRowMenuDiv">\n';
-	cols+= '<a><img class= "deleteImage" src="' + urlStaticFiles + 'icons/delete.png" alt="" onclick= "removeRow($(this).parents(\'td\'))"/></a>\n';
-	cols+= '<a><img class= "addImage" src="' + urlStaticFiles + 'icons/plus.png" alt="" onclick= "addRow($(this).parents(\'td\'))"/></a>\n';
-	cols+= '</div>\n';
-	cols+= '</td>\n';
+	cols += '<td onmouseover="displayRowMenu($(this))">\n';
+	cols += '<div class="gridRowMenu leftRowMenuDiv">\n';
+	cols += '<a><img class= "deleteImage" src="' + urlStaticFiles + 'icons/delete.png" alt="" onclick= "removeRow($(this).parents(\'td\'))"/></a>\n';
+	cols += '<a><img class= "addImage" src="' + urlStaticFiles + 'icons/plus.png" alt="" onclick= "addRow($(this).parents(\'td\'))"/></a>\n';
+	cols += '</div>\n';
+	cols += '</td>\n';
 	//concern left
-	cols+= '<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class="tableHeader" type="text" id="' + leftId + '" name="' + leftId +'" onchange="isTextEmpty($(this));isTableSaved()" /></td>\n';
+	cols += '<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class="tableHeader" type="text" id="' + leftId + '" name="' + leftId +'" onchange="isTextEmpty($(this));isTableSaved()" /></td>\n';
 	for(var i=0; i < nAlternatives; i++)
 	{
-		id= "ratio_concer" + nConcerns + "_alternative" + (i + 1);
+		id = "ratio_concer" + nConcerns + "_alternative" + (i + 1);
 		if(!ratingReadOnly)
 		{
-			cols+= '<td class= "ratioCell" onmouseover="displayRowMenu($(this));showColMenu($(this))" ><div><input type="text" id="' + id +'" name="' + id + '" onchange="isTextEmpty($(this));isTableSaved()"/></div></td>\n';
+			cols += '<td class= "ratioCell" onmouseover="displayRowMenu($(this));showColMenu($(this))" ><div><input type="text" id="' + id +'" name="' + id + '" onchange="isTextEmpty($(this));isTableSaved()"/></div></td>\n';
 			//cols+= "<td><input type=\"text\" id=" + id +" name= " + id +"/></td>";
 		}
 		else
 		{
-			cols+= '<td class= "ratioCell" onmouseover="displayRowMenu($(this));showColMenu($(this))" ><div><input type="text" id="' + id +'" name="' + id + '" disabled="disabled" readonly/></div></td>\n';
+			cols += '<td class= "ratioCell" onmouseover="displayRowMenu($(this));showColMenu($(this))" ><div><input type="text" id="' + id +'" name="' + id + '" disabled="disabled" readonly/></div></td>\n';
 		}
 	}
 	//concern weight
 	if(!ratingReadOnly)
 	{
-		cols+= '<td onmouseover="displayRowMenu($(this))">\n'
-		cols+= '<input type="text" id= "weight_concern' + nConcerns + '" name= "weight_concern' + nConcerns + '" value= "1.0" onchange="calculateTotalWeight($(this).parents(\'.gridTrableContainerDiv\'));isTextEmpty($(this));isTableSaved()"/>\n';
-		cols+= '</td>\n'
+		cols += '<td onmouseover="displayRowMenu($(this))">\n'
+		cols += '<input type="text" id= "weight_concern' + nConcerns + '" name= "weight_concern' + nConcerns + '" value= "1.0" onchange="calculateTotalWeight($(this).parents(\'.gridTrableContainerDiv\'));isTextEmpty($(this));isTableSaved()"/>\n';
+		cols += '</td>\n'
 	}
 	else
 	{
 		if(showRatingWhileFalseChangeRatingsWeights)
 		{
-			cols+= '<td onmouseover="displayRowMenu($(this))">\n'
-			cols+= '<input type="text" id= "weight_concern' + nConcerns + '" name= "weight_concern' + nConcerns + '" value= "1.0" onchange="calculateTotalWeight($(this).parents(\'.gridTrableContainerDiv\'))" disabled="disabled" readonly/>\n';
-			cols+= '</td>\n'
+			cols += '<td onmouseover="displayRowMenu($(this))">\n'
+			cols += '<input type="text" id= "weight_concern' + nConcerns + '" name= "weight_concern' + nConcerns + '" value= "1.0" onchange="calculateTotalWeight($(this).parents(\'.gridTrableContainerDiv\'))" disabled="disabled" readonly/>\n';
+			cols += '</td>\n'
 		}
 		else
 		{
-			cols+= '<td onmouseover="displayRowMenu($(this))">\n'
-			cols+= '<input type="text" id= "weight_concern' + nConcerns + '" name= "weight_concern' + nConcerns + '" value= "" onchange="calculateTotalWeight($(this).parents(\'.gridTrableContainerDiv\'))" disabled="disabled" readonly/>\n';
-			cols+= '</td>\n'
+			cols += '<td onmouseover="displayRowMenu($(this))">\n'
+			cols += '<input type="text" id= "weight_concern' + nConcerns + '" name= "weight_concern' + nConcerns + '" value= "" onchange="calculateTotalWeight($(this).parents(\'.gridTrableContainerDiv\'))" disabled="disabled" readonly/>\n';
+			cols += '</td>\n'
 		}
 	}
 	//concern right
-	cols+= '<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class= "tableHeader" type="text" id="' + rightId + '" name="' + rightId + '" onchange="isTextEmpty($(this));isTableSaved()" /></td>\n';
+	cols += '<td onmouseover="displayRowMenu($(this))" class= "concernCell"><input class= "tableHeader" type="text" id="' + rightId + '" name="' + rightId + '" onchange="isTextEmpty($(this));isTableSaved()" /></td>\n';
 	//add the new row to the table
-	cols+= '<td onmouseover="displayRowMenu($(this))">\n';
-	cols+= '<div class="gridRowMenu rightRowMenuDiv">\n';
-	cols+= '<a><img class= "deleteImage" src="' + urlStaticFiles + 'icons/delete.png" alt="" onclick= "removeRow($(this).parents(\'td\'))"/></a>\n';
-	cols+= '<a><img class= "addImage" src="' + urlStaticFiles + 'icons/plus.png" alt="" onclick= "addRow($(this).parents(\'td\'))"/></a>\n';
-	cols+= '</div>\n';
-	cols+= '</td>\n';
-	var table= findTable(cell);
+	cols += '<td onmouseover="displayRowMenu($(this))">\n';
+	cols += '<div class="gridRowMenu rightRowMenuDiv">\n';
+	cols += '<a><img class= "deleteImage" src="' + urlStaticFiles + 'icons/delete.png" alt="" onclick= "removeRow($(this).parents(\'td\'))"/></a>\n';
+	cols += '<a><img class= "addImage" src="' + urlStaticFiles + 'icons/plus.png" alt="" onclick= "addRow($(this).parents(\'td\'))"/></a>\n';
+	cols += '</div>\n';
+	cols += '</td>\n';
+	var table = findTable(cell);
 	//$("#Grid").append('<tr class="gridRow">' + cols + '</tr>');
 	table.find('tbody').append('<tr class="gridRow">' + cols + '</tr>');
 	//now add the mouseleave and mouseenter actions
 	
 	//left part
-	var obj= table.find("tbody>tr:last");
+	var obj = table.find("tbody>tr:last");
 	//obj.find('#leftRowMenuDiv').hide();
 	
 	
@@ -279,18 +272,15 @@ function addRow(cell)
 	
 	obj.find('.colMenu').each(function(){
 		
-		var cell= $(this);
+		var cell = $(this);
 		cell.mouseleave(function(){
-			
 			hidecolMenu(cell, null, true, null);
 		});
 	});
 	
 	obj.find('.alternativeCell').each(function(){
-		
-		var cell= $(this);
+		var cell = $(this);
 		cell.mouseleave(function(){
-			
 			hidecolMenu(cell, null, true, null);
 		});
 	});
@@ -331,45 +321,43 @@ function addRow(cell)
  */
 function removeRow(cell)
 {
-	var concernNumber= cell.getRowAndCellIndex()[0] - 1;
-	var nConcerns= getNumberOfConcerns(cell);//parseInt($("#nConcerns").val());
-	var temp= null;
+	var concernNumber = cell.getRowAndCellIndex()[0] - 1;
+	var nConcerns = getNumberOfConcerns(cell);//parseInt($("#nConcerns").val());
+	var temp = null;
 	var containerDiv = findTable(cell).parents('.gridTrableContainerDiv');
 	if(nConcerns - 1 != 0)
 	{	
 		//update all the ids of the table 
-		var table= findTable(cell).find("tbody");
+		var table = findTable(cell).find("tbody");
 		table.find("tr:gt(" + (concernNumber + 1) + ")").each(function(i)
 		{	
-			var concernIndex= concernNumber + i;
+			var concernIndex = concernNumber + i;
 			
 			//create the old and new ids
-			var oldLeftId= "concern_" + (concernIndex + 1) + "_left";
-			var oldRightId= "concern_" + (concernIndex + 1) + "_right";
-			var leftId= "concern_" + concernIndex + "_left";
-			var rightId= "concern_" + concernIndex +"_right";
-			var oldWeightId= 'weight_concern' + (concernIndex + 1);
-			var weightId= 'weight_concern' + concernIndex;
+			var oldLeftId = "concern_" + (concernIndex + 1) + "_left";
+			var oldRightId = "concern_" + (concernIndex + 1) + "_right";
+			var leftId = "concern_" + concernIndex + "_left";
+			var rightId = "concern_" + concernIndex +"_right";
+			var oldWeightId = 'weight_concern' + (concernIndex + 1);
+			var weightId = 'weight_concern' + concernIndex;
 			//update the left concern
-			temp= $(this).find('#' + oldLeftId);
+			temp = $(this).find('#' + oldLeftId);
 			temp.attr('id', leftId);
 			temp.attr('name', leftId);
 			
 			//update the ratios id and name attributes
-			var nAlternatives= getNumberOfAlternatives(cell);//parseInt($("#nAlternatives").val());
+			var nAlternatives = getNumberOfAlternatives(cell);//parseInt($("#nAlternatives").val());
 			$(this).find("td:gt(1):lt(" + nAlternatives + ")").each(function(i){
-				
-				var id="ratio_concer" + concernIndex + "_alternative" + (i + 1); 
-				
+				var id="ratio_concer" + concernIndex + "_alternative" + (i + 1);
 				$(this).find("input").attr("id", id);
 				$(this).find("input").attr("name", id);
 			});
 			//update the weight
-			temp= $(this).find('#' + oldWeightId);
+			temp = $(this).find('#' + oldWeightId);
 			temp.attr('id', weightId);
 			temp.attr('name', weightId);
 			//update the right concern
-			temp= $(this).find('#' + oldRightId);
+			temp = $(this).find('#' + oldRightId);
 			temp.attr('id', rightId);
 			temp.attr('name', rightId);
 		});
@@ -395,17 +383,17 @@ function removeRow(cell)
  */
 function addCol(cell)
 {
-	var temp= null;
-	var nAlternatives= getNumberOfAlternatives(cell);//parseInt($("#nAlternatives").val());
-	var id= ''; //id is the name used id and name options in the input tag
+	var temp = null;
+	var nAlternatives = getNumberOfAlternatives(cell);//parseInt($("#nAlternatives").val());
+	var id = ''; //id is the name used id and name options in the input tag
 	nAlternatives++;
-	id= "alternative_" + nAlternatives + "_name";
-	var ratingReadOnly= isRatingReadOnly(cell);
+	id = "alternative_" + nAlternatives + "_name";
+	var ratingReadOnly = isRatingReadOnly(cell);
 	
 	//$("#nAlternatives").val(nAlternatives);
 		
 	//add the col menu
-	var tbody= findTable(cell).find('tbody');//$('#Grid>tbody');
+	var tbody = findTable(cell).find('tbody');//$('#Grid>tbody');
 	tbody.find('tr:eq(0)').find('td:eq(' + nAlternatives + ')').after('<td class= "colMenu" onmouseover="showColMenu($(this))">\n' +
 						'<div class= "colMenuDiv">\n' + 
 							'<a><img class= "deleteImage" src="' + urlStaticFiles + 'icons/delete.png" alt="" onclick= "removeCol($(this).parents(\'td\'))"/></a>\n' +
@@ -413,11 +401,10 @@ function addCol(cell)
 						'</div>\n' +
 					'</td>\n'
 			);
-	temp= tbody.find('tr:eq(0)').find('td:eq(' + (nAlternatives + 1) + ')');
+	temp = tbody.find('tr:eq(0)').find('td:eq(' + (nAlternatives + 1) + ')');
 	
 	//add the mouse leave function to the cell menu
 	temp.mouseleave(function(){
-			
 		hidecolMenu($(this), null, true, null);
 	});
 	
@@ -451,11 +438,11 @@ function addCol(cell)
 	});
 	
 	//add the new col to the table
-	var nConcerns= getNumberOfConcerns(cell);//parseInt($("#nConcerns").val());
+	var nConcerns = getNumberOfConcerns(cell);//parseInt($("#nConcerns").val());
 	//take care of the normal cells of the table
 	for(var i=0; i < nConcerns; i++)
 	{
-		id= "ratio_concer" + (i + 1) + "_alternative" + nAlternatives;
+		id = "ratio_concer" + (i + 1) + "_alternative" + nAlternatives;
 		temp = tbody.find("tr:eq(" +  (i + 2)  + ")");
 		//function changed because of the new added cell in the begin of the table ( there are now 2 cells now (name of the concern + the options)), also it is now i+2 because we added another tr to the begin of the table
 		if(!ratingReadOnly)
@@ -475,7 +462,7 @@ function addCol(cell)
 		});
 	}
 	//add +1 position to the colMenuTimers
-	var tableId= getTableId(cell);
+	var tableId = getTableId(cell);
 	colMenuTimers.get(tableId).push(null);
 	
 	if(typeof isTableSaved == 'function')
@@ -490,16 +477,16 @@ function addCol(cell)
  */
 function removeCol(cell)
 {
-	var alternativeNumber= cell.getRowAndCellIndex()[1] - 1;
-	var nAlternatives= getNumberOfAlternatives(cell);//parseInt($("#nAlternatives").val());
-	var nConcerns= getNumberOfConcerns(cell);//parseInt($("#nConcerns").val());
-	var table= findTable(cell);
+	var alternativeNumber = cell.getRowAndCellIndex()[1] - 1;
+	var nAlternatives = getNumberOfAlternatives(cell);//parseInt($("#nAlternatives").val());
+	var nConcerns = getNumberOfConcerns(cell);//parseInt($("#nConcerns").val());
+	var table = findTable(cell);
 	// find now the tableId of this cell because when you remove it, it generates error
 	// because it cannot find it
-	var tableId= getTableId(cell);
-	var temp= null;
-	var id= null;
-	if(nAlternatives - 2 != 0)
+	var tableId = getTableId(cell);
+	var temp = null;
+	var id = null;
+	if (nAlternatives - 2 != 0)
 	{
 		
 		//remove cell menu
@@ -509,7 +496,7 @@ function removeCol(cell)
 		//rename the next headers
 		//let's first find the correct row where the headers are, after that find the 
 		tbody.find('tr:eq(1)').find('td:gt(' + (alternativeNumber + 1) + '):lt(' + (nAlternatives - alternativeNumber) + ')').each(function(i){
-			id= "alternative_" + (alternativeNumber + i) + "_name";
+			id = "alternative_" + (alternativeNumber + i) + "_name";
 			$(this).find('input').attr("id", id);
 			$(this).find('input').attr('name', id);
 		})
@@ -518,14 +505,14 @@ function removeCol(cell)
 		tbody.find('tr:eq(1)').find('td:eq(' + (alternativeNumber + 1) + ')').remove();
 		
 		//now lets remove 1 col from every row, update the ids of the other cols and change the id of the hidden fields (also from the header)
-		for(var i=0; i < nConcerns; i++)
+		for (var i = 0; i < nConcerns; i++)
 		{	
-			var row= table.find("tbody>tr:eq(" +  (i + 2)  + ")");//$("#Grid>tbody").find("tr:eq(" +  (i + 2)  + ")");
+			var row = table.find("tbody>tr:eq(" +  (i + 2)  + ")");//$("#Grid>tbody").find("tr:eq(" +  (i + 2)  + ")");
 			//update the ids of the other cols
-			for(var j= alternativeNumber + 1; j <= nAlternatives; j++)
+			for(var j = alternativeNumber + 1; j <= nAlternatives; j++)
 			{
-				id= "ratio_concer" + (i + 1) + "_alternative" + (j - 1);
-				var input= row.find("td:eq("+ (j + 1) +")").find("input");
+				id = "ratio_concer" + (i + 1) + "_alternative" + (j - 1);
+				var input = row.find("td:eq("+ (j + 1) +")").find("input");
 				input.attr("id", id);
 				input.attr("name", id);
 
@@ -542,7 +529,7 @@ function removeCol(cell)
 		//remove -1 position to the colMenuTimers
 		colMenuTimers.get(tableId).pop();
 
-		if(typeof isTableSaved == 'function')
+		if (typeof isTableSaved == 'function')
 		{
 			isTableSaved();
 		}
@@ -555,23 +542,23 @@ function removeCol(cell)
  */
 function rescale(containerDiv)
 {
-    var nConcerns= getNumberOfConcerns(containerDiv.find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
-    var weightTotal= 0.0;
-    var id= null;
-    var tbody= $(containerDiv).find('.mainGridDiv table>tbody');//$('#Grid>tbody');
+    var nConcerns = getNumberOfConcerns(containerDiv.find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
+    var weightTotal = 0.0;
+    var id = null;
+    var tbody = $(containerDiv).find('.mainGridDiv table>tbody');//$('#Grid>tbody');
 
-    for(var i= 0; i < nConcerns; i++)
+    for (var i = 0; i < nConcerns; i++)
     {
-        id= "weight_concern" + (i + 1);
-        weightTotal+= parseFloat(tbody.find('#' + id + '[onchange]').val());
+        id = "weight_concern" + (i + 1);
+        weightTotal += parseFloat(tbody.find('#' + id + '[onchange]').val());
     }
 
-    if(weightTotal >= 0 || weightTotal < 0)
+    if (weightTotal >= 0 || weightTotal < 0)
     {
-        if(weightTotal != 100)
+        if (weightTotal != 100)
         {
             var rescaleValue = 100/weightTotal;
-            for (var i= 0; i < nConcerns; i++)
+            for (var i = 0; i < nConcerns; i++)
             {
                 var id = "weight_concern" + (i+1);
                 var weightVal = $('#' + id + '[onchange]').val();
@@ -579,7 +566,7 @@ function rescale(containerDiv)
                 $('#' + id + '[onchange]').attr('value', newWeightVal);
             }
             weightTotal= 0.0;
-            for(var i= 0; i < nConcerns; i++)
+            for (var i = 0; i < nConcerns; i++)
             {
                 id= "weight_concern" + (i + 1);
                 weightTotal+= parseFloat(tbody.find('#' + id).val());
@@ -589,7 +576,7 @@ function rescale(containerDiv)
 
     if(weightTotal > 99.0 && weightTotal < 100)
     {
-        weightTotal = 100
+        weightTotal = 100;
     }
 
     if(weightTotal >= 0 || weightTotal < 0)
@@ -608,12 +595,12 @@ function rescale(containerDiv)
  */
 function calculateTotalWeight(containerDiv)
 {
-	var nConcerns= getNumberOfConcerns(containerDiv.find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
-	var weightTotal= 0.0;
-	var id= null;
-	var tbody= containerDiv.find('.mainGridDiv table>tbody');//$('#Grid>tbody');
+	var nConcerns = getNumberOfConcerns(containerDiv.find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
+	var weightTotal = 0.0;
+	var id = null;
+	var tbody = containerDiv.find('.mainGridDiv table>tbody');//$('#Grid>tbody');
 	
-	for(var i= 0; i < nConcerns; i++)
+	for(var i = 0; i < nConcerns; i++)
 	{
 		id= "weight_concern" + (i + 1);
 		weightTotal+= parseFloat(tbody.find('#' + id).val());
@@ -621,7 +608,7 @@ function calculateTotalWeight(containerDiv)
 
     if (weightTotal > 99.0 && weightTotal <100.0)
     {
-        weightTotal = 100
+        weightTotal = 100;
     }
 
     if(weightTotal >= 0 || weightTotal < 0)
@@ -641,22 +628,22 @@ function calculateTotalWeight(containerDiv)
  */
 function getNumberOfAlternatives(obj)
 {
-	var nCols= 0;
+	var nCols = 0;
 	switch(obj.prop('tagName').toLowerCase())
 	{
 		case 'td':
 		{
-			nCols= obj.parent('tr').children('td').length;
+			nCols = obj.parent('tr').children('td').length;
 			break;
 		}
 		case 'tr':
 		{
-			nCols= obj.children('td').length;
+			nCols = obj.children('td').length;
 			break;
 		}
 		case 'table':
 		{
-			nCols= obj.children('tbody').children('tr:first').children('td').length;
+			nCols = obj.children('tbody').children('tr:first').children('td').length;
 			break;
 		}
 	}
@@ -670,22 +657,22 @@ function getNumberOfAlternatives(obj)
  */
 function getNumberOfConcerns(obj)
 {
-	var nRows= 0;
+	var nRows = 0;
 	switch(obj.prop('tagName').toLowerCase())
 	{
 		case 'td':
 		{
-			nRows= obj.parent('tr').parent('tbody').children('tr').length;
+			nRows = obj.parent('tr').parent('tbody').children('tr').length;
 			break;
 		}
 		case 'tr':
 		{
-			nRows= obj.length;
+			nRows = obj.length;
 			break;
 		}
 		case 'table':
 		{
-			nRows= obj.children('tbody').children('tr').length;
+			nRows = obj.children('tbody').children('tr').length;
 			break;
 		}
 	}
@@ -723,7 +710,7 @@ function findTable(obj)
  */
 function getTableId(obj)
 {
-	var table= findTable(obj);
+	var table = findTable(obj);
 	return table.attr('id');
 }
 
@@ -734,7 +721,7 @@ function getTableId(obj)
  */
 function isRatingReadOnly(obj)
 {
-	var ratingReadOnly= findTable(obj).parents('.gridTrableContainerDiv').find('#changeRatingsWeights').val();
+	var ratingReadOnly = findTable(obj).parents('.gridTrableContainerDiv').find('#changeRatingsWeights').val();
 	try
 	{
 		if (ratingReadOnly != null && (ratingReadOnly != '' || ratingReadOnly != ' '))
@@ -742,21 +729,21 @@ function isRatingReadOnly(obj)
 			//the meaning of isRatingReadOnly and changeRatingsWeights are different from each other, so that is why we invert a true to false
 			if(ratingReadOnly.toLowerCase() == 'false')
 			{
-				ratingReadOnly= true;
+				ratingReadOnly = true;
 			}
 			else
 			{
-				ratingReadOnly= false;
+				ratingReadOnly = false;
 			}
 		}
 		else
 		{
-			ratingReadOnly= false;
+			ratingReadOnly = false;
 		}
 	}
 	catch(err)
 	{
-		ratingReadOnly= false;
+		ratingReadOnly = false;
 	}
 	return ratingReadOnly;
 }
@@ -768,29 +755,29 @@ function isRatingReadOnly(obj)
  */
 function isShowRatingIfReadOnly(obj)
 {
-	var showRatingWhileFalseChangeRatingsWeights= findTable(obj).parents('.gridTrableContainerDiv').find('#showRatingWhileFalseChangeRatingsWeights').val();
+	var showRatingWhileFalseChangeRatingsWeights = findTable(obj).parents('.gridTrableContainerDiv').find('#showRatingWhileFalseChangeRatingsWeights').val();
 	try
 	{
 		if (showRatingWhileFalseChangeRatingsWeights != null && (showRatingWhileFalseChangeRatingsWeights != '' || showRatingWhileFalseChangeRatingsWeights != ' '))
 		{
 			if(showRatingWhileFalseChangeRatingsWeights.toLowerCase() == 'true')
 			{
-				showRatingWhileFalseChangeRatingsWeights= true;
+				showRatingWhileFalseChangeRatingsWeights = true;
 			}
 			else
 			{
-				showRatingWhileFalseChangeRatingsWeights= false;
+				showRatingWhileFalseChangeRatingsWeights = false;
 			}
 			
 		}
 		else
 		{
-			showRatingWhileFalseChangeRatingsWeights= false;
+			showRatingWhileFalseChangeRatingsWeights = false;
 		}
 	}
 	catch(err)
 	{
-		showRatingWhileFalseChangeRatingsWeights= false;
+		showRatingWhileFalseChangeRatingsWeights = false;
 	}
 	return showRatingWhileFalseChangeRatingsWeights;
 }
@@ -803,7 +790,7 @@ function isShowRatingIfReadOnly(obj)
  */
 function rationRangeValidation(inputRating)
 {
-	var rating= parseInt(inputRating.val());
+	var rating = parseInt(inputRating.val());
 	if( !(rating >= 1 && rating <= 5))
 	{
 		inputRating.val(1.0);

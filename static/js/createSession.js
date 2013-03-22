@@ -1,13 +1,13 @@
-var urlStaticFiles= '/static/';
-var loadingDiv= $('#wrap');
-	
+var urlStaticFiles = '/static/';
+var loadingDiv = $('#wrap');
+
 //load other needed scripts
-if( typeof showColMenu != 'function')
+if (typeof showColMenu != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/gridTableGeneralFunctions.js',
 		dataType: 'script',
-		async:   false 
+		async:   false
 	});
 }
 
@@ -15,11 +15,11 @@ function showGridSessionSelection(){
 	showLoadingSpinner($('#createSessionBasedOnGrid'), null);
 	try
 	{
-		var gridUSID= $("#gridSessionSelection option:selected").val();
-		if(gridUSID != "noGrids" && gridUSID != "" && gridUSID != null)
+		var gridUSID = $("#gridSessionSelection option:selected").val();
+		if (gridUSID != "noGrids" && gridUSID != "" && gridUSID != null)
 		{
-			var str= 'viewMode=all&writeMode=read&gridUSID=' + gridUSID;
-			$.post('/grids/show/', str, function(data){
+			var str = 'viewMode=all&writeMode=read&gridUSID=' + gridUSID;
+			$.post('/grids/show/', str, function (data) {
 				try
 				{
 					if($(data).find('error').length <= 0)
@@ -55,18 +55,18 @@ function showGridSessionSelection(){
 		hideLoadingSpinner($('#createSessionBasedOnGrid'));
 		console.log(err);
 	}
-};
+}
 
 function createSession()
 {
 	showLoadingSpinner(loadingDiv, 'Creating...');
 	try
 	{
-        var showResults= $('input:radio[name=showResults]:checked').val();
-        var gridUSID= $("#gridSessionSelection option:selected").val();
-		var sessionName= $("#sessionNameInputBox").val();
-        var str= 'gridUSID=' + gridUSID + '&sessionName=' + sessionName + '&showResults=' + showResults;
-		var jqxhr= $.post('/sessions/create/', str, function(data){
+        var showResults = $('input:radio[name=showResults]:checked').val();
+        var gridUSID = $("#gridSessionSelection option:selected").val();
+		var sessionName = $("#sessionNameInputBox").val();
+        var str = 'gridUSID=' + gridUSID + '&sessionName=' + sessionName + '&showResults=' + showResults;
+		var jqxhr = $.post('/sessions/create/', str, function(data){
 			try
 			{
 				if($(data).find('error').length <= 0)
@@ -109,6 +109,6 @@ function createSession()
 	catch(err)
 	{
 		hideLoadingSpinner(loadingDiv);
-		console.log(err)
+		console.log(err);
 	}
-};
+}

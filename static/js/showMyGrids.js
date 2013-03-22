@@ -1,34 +1,34 @@
-var urlStaticFiles= '/static/';
-var hasTableBeenSaved= true;
+var urlStaticFiles = '/static/';
+var hasTableBeenSaved = true;
 var masterFormString = '';
-var loadingDiv= $('#wrap');
+var loadingDiv = $('#wrap');
 var isGridCompleteFlag = false;
 
 //load other javascript needed for the showMyGrids.html
-if( typeof showColMenu != 'function')
+if (typeof showColMenu != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/gridTableGeneralFunctions.js',
 		dataType: 'script',
-		async:   false 
+		async:   false
 	});
 }
 
-if( typeof createSvgMenu != 'function')
+if (typeof createSvgMenu != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/svgMenu.js',
 		dataType: 'script',
-		async:   false 
+		async:   false
 	});
 }
 
-if( typeof createDendogram != 'function')
+if (typeof createDendogram != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/svgDendogram.js',
 		dataType: 'script',
-		async:   false 
+		async:   false
 	});
 }
 
@@ -41,11 +41,11 @@ function hideImage()
 function showMyGrid(reload)
 {
 	var gridUSID;
-    if($('#tabs').is(':hidden'))
+    if ($('#tabs').is(':hidden'))
     {
         $('#tabs').show();
     }
-	if (!reload){
+	if (!reload) {
 		gridUSID = $("#showGridSelection option:selected").val();
 	} else {
 		gridUSID = $("#gridUSID").val();
@@ -124,7 +124,7 @@ function showMyGrid(reload)
 			console.log(err);
 		}
 	}
-};
+}
 		
 function deleteMyGrid(){		
 	
@@ -200,7 +200,7 @@ function deleteMyGrid(){
 			}
 		}
 	});
-};
+}
 
 //check if the table is saved
 function isTableSaved()
@@ -211,7 +211,7 @@ function isTableSaved()
 		{
 			changeTableSaveStatusIcon($('#results'), false);
 			setGridTableSaveStatusToolTip($('#results'), 'Current showing table has been modified since retrieving it from the server.');
-			hasTableBeenSaved= false;
+			hasTableBeenSaved = false;
 			// this is needed here because in order to generate the dendogram, we use the values
 			// that are stored, and if the table is saved which means that the values shown are
 			// the same as in the database, then we can generate
@@ -234,16 +234,16 @@ function saveGrid()
 {
 	showLoadingSpinner(loadingDiv, 'Saving...');
 	try{
-		var formString= $("#form").serialize();
-		var table= getGridTable($('#results'));
+		var formString = $("#form").serialize();
+		var table = getGridTable($('#results'));
 		var gridUSID = $("#gridUSID").val();
-		var gridName= $("#gridName").val();
-		var str= 'gridUSID=' + gridUSID + '&gridName=' + gridName + '&nAlternatives=' + getNumberOfAlternatives(table) + '&nConcerns=' + getNumberOfConcerns(table) + '&' + formString;
+		var gridName = $("#gridName").val();
+		var str = 'gridUSID=' + gridUSID + '&gridName=' + gridName + '&nAlternatives=' + getNumberOfAlternatives(table) + '&nConcerns=' + getNumberOfConcerns(table) + '&' + formString;
 		$.post('/grids/update/', str, function(data)
 		{
 			try
 			{
-				if($(data).find('error').length <= 0)
+				if ($(data).find('error').length <= 0)
 				{
 					hideLoadingSpinner(loadingDiv);
 					showMessageInDialogBox($(data).find('htmlData').text()); //function is from layout.html
@@ -312,10 +312,10 @@ function getDendogram()
 	catch(err)
 	{
 		hideLoadingSpinner($('#dendogramDiv'));
-		console.log(err)
+		console.log(err);
 	}
 }
 
 $(function() {
-    $( "#tabs" ).tabs();
+    $("#tabs").tabs();
 });

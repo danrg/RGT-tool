@@ -1,42 +1,42 @@
-var urlStaticFiles= '/static/';
+var urlStaticFiles = '/static/';
 
-if( typeof showColMenu != 'function')
+if (typeof showColMenu != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/gridTableGeneralFunctions.js',
 		dataType: 'script',
-		async:   false 
+		async:   false
 	});
 }
 
-if(typeof clearRatioResultCharts != 'function')
+if (typeof clearRatioResultCharts != 'function')
 {
 	$.ajax({
 		url: urlStaticFiles + 'js/resultRatingWeightTables.js',
 		dataType: 'script',
-		async:   false 
+		async:   false
 	});
 }
 
 function sendResponse()
 {
-	showLoadingSpinner($('#wrap'), 'Please wait...')
+	showLoadingSpinner($('#wrap'), 'Please wait...');
 	try
 	{
-		var sessionUSID= participatingGetSessionUSID(); //function is from participatingSession.js
-		var iteration= $.trim($('#participantSessionIteration').text());
-		var table= getGridTable($('#participatingSessionResponseGridForm'));
-		var nAlternatives= getNumberOfAlternatives(table);
-		var nConcerns= getNumberOfConcerns(table);
-		var form= $('#participatingSessionResponseGridForm');
-		var strD= '';
+		var sessionUSID = participatingGetSessionUSID(); //function is from participatingSession.js
+		var iteration = $.trim($('#participantSessionIteration').text());
+		var table = getGridTable($('#participatingSessionResponseGridForm'));
+		var nAlternatives = getNumberOfAlternatives(table);
+		var nConcerns = getNumberOfConcerns(table);
+		var form = $('#participatingSessionResponseGridForm');
+		var strD = '';
 		//serialize the disabled inputs
 		form.find('input:disabled').each(function(){
 			strD = strD + '&' + $(this).attr('name') + '=' + $(this).val();
 		});
-		var str=  'nConcerns=' + nConcerns + '&nAlternatives=' + nAlternatives + '&iteration=' + iteration + '&gridType=response&sessionUSID=' + sessionUSID + '&' + form.serialize() + strD;
+		var str =  'nConcerns=' + nConcerns + '&nAlternatives=' + nAlternatives + '&iteration=' + iteration + '&gridType=response&sessionUSID=' + sessionUSID + '&' + form.serialize() + strD;
 		//double function is needed here because we want access to sessionUSID
-		var callBack= function(sessionID){
+		var callBack = function(sessionID){
 
 			return function(data){
 				try
@@ -84,20 +84,19 @@ function getResponseFromIteration(iteration)
 	var currentIteration = false;
 	try
 	{
-
-		var sessionUSID= participatingGetSessionUSID(); //function is from participatingSession.js
+		var sessionUSID = participatingGetSessionUSID(); //function is from participatingSession.js
 		if(iteration == null || iteration == '')
 		{
-			iteration= $('#responseSelection option:selected').val();
+			iteration = $('#responseSelection option:selected').val();
 		}
 		if(iteration != null && iteration != 'null')
 		{
 			if(iteration == 'current')
 			{
 				currentIteration = true;
-				iteration= $('#participantSessionIteration').text();
+				iteration = $('#participantSessionIteration').text();
 			}
-			str= 'sessionUSID=' + sessionUSID + '&iteration=' + iteration;
+			str = 'sessionUSID=' + sessionUSID + '&iteration=' + iteration;
 			$.post('/sessions/response/', str, function(data){
 				try
 				{
@@ -147,10 +146,10 @@ function sessionsGetSessionUSID()
 function sessionsShowResults()
 {
     var selectedOption = $('#resultSelection option:selected');
-    var iteration= selectedOption.val();
+    var iteration = selectedOption.val();
     if (iteration > 0) {
-        var sessionUSID= sessionsGetSessionUSID();
-        var str= 'sessionUSID=' + sessionUSID + '&iteration=' + iteration;
+        var sessionUSID = sessionsGetSessionUSID();
+        var str = 'sessionUSID=' + sessionUSID + '&iteration=' + iteration;
         //get the result tables
         $.post('/sessions/responseResults/', str, function(data){
             if($(data).find('error').length <= 0)
