@@ -27,11 +27,11 @@ function downloadImageOf(formUrl, hiddenData)
 					}
 					form.attr('action', formUrl);
 					modalDiv.dialog({
-                        title: 'Download',
+						title: 'Download',
 						resizable: false,
 						width:400,
 						modal: true,
-						buttons: {'Download':function(){
+						buttons: {'Download':function () {
 							sendDownloadSvgForm();
 							}
                         }

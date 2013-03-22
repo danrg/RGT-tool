@@ -186,10 +186,10 @@ function finishSession() {
 	showLoadingSpinner($('#wrap'), 'Please wait...');
 	try
 	{
-        var form = $('#sessionGridDiv').find('form');
-        var table = getGridTable($('#sessionGridDiv'));
-        var iteration = $('#iteration').text();
-        var str = 'sessionUSID=' + mySessionsGetSessionUSID() + '&newState=finish' + '&nConcerns=' + getNumberOfConcerns(table) + '&nAlternatives='+ getNumberOfAlternatives(table) + '&gridType=session' + '&iteration=' + iteration + '&' + form.serialize();
+		var form = $('#sessionGridDiv').find('form');
+		var table = getGridTable($('#sessionGridDiv'));
+		var iteration = $('#iteration').text();
+		var str = 'sessionUSID=' + mySessionsGetSessionUSID() + '&newState=finish' + '&nConcerns=' + getNumberOfConcerns(table) + '&nAlternatives='+ getNumberOfAlternatives(table) + '&gridType=session' + '&iteration=' + iteration + '&' + form.serialize();
 		$.post('/sessions/state/', str, function(data){
 			try
 			{
@@ -296,7 +296,7 @@ function finishCurrentRequest()
 
 function mySessionsShowResults()
 {
-    showLoadingSpinner($('#wrap'), 'Please wait...');
+	showLoadingSpinner($('#wrap'), 'Please wait...');
 	var selectedOption = $('#mySessionsContentSessionIterationSelect option:selected');
 	var iteration= selectedOption.val();
 	if (iteration > 0) {
@@ -316,7 +316,7 @@ function mySessionsShowResults()
 				$('#mySessionsContentResultDiv').html($(data).find('htmlData').text());
 				$('#clearResultsButton').show();
 				$('#downloadResultsButton').show();
-                hideLoadingSpinner($('#wrap'));
+				hideLoadingSpinner($('#wrap'));
 			}
 			else
 			{

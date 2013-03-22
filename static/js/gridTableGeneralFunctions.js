@@ -47,43 +47,42 @@ function prepareForNewGrid(containerDiv)
         $(this).attr("src", urlStaticFiles + "icons/delete.png");
 	});//end hover
 
-    $(table).find(".addImage").hover(function () {
-        $(this).attr("src", urlStaticFiles + "icons/plus_hover.png");
-    },
-    function () {
-        $(this).attr("src", urlStaticFiles + "icons/plus.png");
-    });//end hover
+	$(table).find(".addImage").hover(function () {
+		$(this).attr("src", urlStaticFiles + "icons/plus_hover.png");
+	},
+	function () {
+		$(this).attr("src", urlStaticFiles + "icons/plus.png");
+	});//end hover
 
-    //add show and hide the menu function
-    $(table).find('.gridRow').mouseleave(function () {
+	//add show and hide the menu function
+	$(table).find('.gridRow').mouseleave(function () {
+		$(this).find('.gridRowMenu').each(function () {
+			$(this).hide();
+		});
+	});//end mouse leave
 
-        $(this).find('.gridRowMenu').each(function () {
-            $(this).hide();
-        });
-    });//end mouse leave
+	//add hide cell menu
+	$(table).find('.ratioCell').each(function () {
+		var cell = $(this);
+		cell.mouseleave(function () {
+			hidecolMenu(cell, null, true, null);
+		});
+	});
 
-    //add hide cell menu
-    $(table).find('.ratioCell').each(function () {
-        var cell = $(this);
-        cell.mouseleave(function () {
-            hidecolMenu(cell, null, true, null);
-        });
-    });
-				
-    $(table).find('.colMenu').each(function(){
-        var cell = $(this);
-        cell.mouseleave(function(){
-            hidecolMenu(cell, null, true, null);
-        });
-    });
-				
-    $(table).find('.alternativeCell').each(function(){
-        var cell = $(this);
-        cell.mouseleave(function(){
-            hidecolMenu(cell, null, true, null);
-        });
-    });
-	
+	$(table).find('.colMenu').each(function(){
+		var cell = $(this);
+		cell.mouseleave(function(){
+			hidecolMenu(cell, null, true, null);
+		});
+	});
+
+	$(table).find('.alternativeCell').each(function(){
+		var cell = $(this);
+		cell.mouseleave(function(){
+			hidecolMenu(cell, null, true, null);
+		});
+	});
+
     //initiate an array for the col menu of the table
 	var tableId = getTableId(table);
 	if(!colMenuTimers.containsKey(tableId))
@@ -542,51 +541,51 @@ function removeCol(cell)
  */
 function rescale(containerDiv)
 {
-    var nConcerns = getNumberOfConcerns(containerDiv.find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
-    var weightTotal = 0.0;
-    var id = null;
-    var tbody = $(containerDiv).find('.mainGridDiv table>tbody');//$('#Grid>tbody');
+	var nConcerns = getNumberOfConcerns(containerDiv.find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
+	var weightTotal = 0.0;
+	var id = null;
+	var tbody = $(containerDiv).find('.mainGridDiv table>tbody');//$('#Grid>tbody');
 
-    for (var i = 0; i < nConcerns; i++)
-    {
-        id = "weight_concern" + (i + 1);
-        weightTotal += parseFloat(tbody.find('#' + id + '[onchange]').val());
-    }
+	for (var i = 0; i < nConcerns; i++)
+	{
+		id = "weight_concern" + (i + 1);
+		weightTotal += parseFloat(tbody.find('#' + id + '[onchange]').val());
+	}
 
-    if (weightTotal >= 0 || weightTotal < 0)
-    {
-        if (weightTotal != 100)
-        {
-            var rescaleValue = 100/weightTotal;
-            for (var i = 0; i < nConcerns; i++)
-            {
-                var id = "weight_concern" + (i+1);
-                var weightVal = $('#' + id + '[onchange]').val();
-                var newWeightVal = (weightVal * rescaleValue).toFixed(2);
-                $('#' + id + '[onchange]').attr('value', newWeightVal);
-            }
-            weightTotal= 0.0;
-            for (var i = 0; i < nConcerns; i++)
-            {
-                id= "weight_concern" + (i + 1);
-                weightTotal+= parseFloat(tbody.find('#' + id).val());
-            }
-        }
-    }
+	if (weightTotal >= 0 || weightTotal < 0)
+	{
+		if (weightTotal != 100)
+		{
+			var rescaleValue = 100/weightTotal;
+			for (var i = 0; i < nConcerns; i++)
+			{
+				var id = "weight_concern" + (i+1);
+				var weightVal = $('#' + id + '[onchange]').val();
+				var newWeightVal = (weightVal * rescaleValue).toFixed(2);
+				$('#' + id + '[onchange]').attr('value', newWeightVal);
+			}
+			weightTotal= 0.0;
+			for (var i = 0; i < nConcerns; i++)
+			{
+				id= "weight_concern" + (i + 1);
+				weightTotal+= parseFloat(tbody.find('#' + id).val());
+			}
+		}
+	}
 
-    if(weightTotal > 99.0 && weightTotal < 100)
-    {
-        weightTotal = 100;
-    }
+	if(weightTotal > 99.0 && weightTotal < 100)
+	{
+		weightTotal = 100;
+	}
 
-    if(weightTotal >= 0 || weightTotal < 0)
-    {
-        $(containerDiv).find('.weightMeter').attr('value', weightTotal);
-    }
-    else
-    {
-        $(containerDiv).find('.weightMeter').attr('value', '-----');
-    }
+	if(weightTotal >= 0 || weightTotal < 0)
+	{
+		$(containerDiv).find('.weightMeter').attr('value', weightTotal);
+	}
+	else
+	{
+		$(containerDiv).find('.weightMeter').attr('value', '-----');
+	}
 }
 
 /**

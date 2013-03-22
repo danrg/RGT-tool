@@ -22,13 +22,13 @@ function displayChartOfRatings(data)
 				text: 'Grid Ratios'
 			},
 			xAxis: {
-	            categories: ['Proposed ratio']
-	         },
-	         yAxis: {
-	             title: {
-	                text: 'Ratio'
-	             }
-	         },
+				categories: ['Proposed ratio']
+			},
+			yAxis: {
+				title: {
+					text: 'Ratio'
+				}
+			},
 			series: chartData
 		};
 	if(resultIndividualRatioChart == null)

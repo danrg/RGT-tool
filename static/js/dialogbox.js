@@ -4,8 +4,8 @@ function showMessageInDialogBox(text) {
 
 function showMessageInDialogBox(text, closeFunction) {
 	$('#modalDialogBox').html('<p>' + text + '</p>');
-    $('#modalDialogBox').dialog({
-        title: 'Information',
+	$('#modalDialogBox').dialog({
+		title: 'Information',
 		resizable: false,
 		height: 160,
 		width: 400,
@@ -17,11 +17,11 @@ function showMessageInDialogBox(text, closeFunction) {
 					closeFunction();
 				}
 			}
-        }
-    });
+		}
+	});
 }
 
 function getDialogDiv()
 {
-	return  $('#modalDialogBox');
+	return $('#modalDialogBox');
 }
