@@ -470,6 +470,36 @@ function addCol(cell)
 	}
 }
 
+/* This function is to add the alternative columns when clicking new image on the results page
+***********
+ */
+function addCol2(altObj)
+{
+    var firstColumn = $("img[onclick^='addCol']:first");
+    firstColumn.click();
+    var alternatives = $(altObj).find('td:first-child'); // Alternative name is obtained from the resultAlternativeTable.html
+    var altHtml = $(alternatives).html();
+    var inputAlt = $("input[id^='alternative']:last");
+    inputAlt.val(altHtml);
+}
+
+/* This function is to add Row and passing the concern values by clicking the New image in the results page
+*********
+ */
+function addRow2(conObj)
+{
+    var firstRow = $("img[onclick^='addRow']:first");
+    firstRow.click();
+    var concernsLeft = $(conObj).find('td:first-child'); // Concern names are obtained from resultAlternativeTable.html
+    var conLeftHtml = $(concernsLeft).html();
+    var concernsRight = $(concernsLeft).next();
+    var conRightHtml = $(concernsRight).html();
+    var inputConLeft = $("input[id*='left']:last");
+    var inputConRight = $("input[id*='right']:last");
+    inputConLeft.val(conLeftHtml);
+    inputConRight.val(conRightHtml);
+}
+
 /**
  * This function will remove a col in place of grid table
  * @param cell jquery object representing a cell in the table that a col will be removed

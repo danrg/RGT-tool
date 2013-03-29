@@ -37,3 +37,8 @@
 	margin-left: 85px; 
 	margin-top: -15px
 }
+
+.resultAlternativeConcernNewDiv:hover{
+    cursor:pointer;
+    background-color: #ffff00;
+}

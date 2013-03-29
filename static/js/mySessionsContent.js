@@ -487,6 +487,16 @@ function getResultsDownloadPage()
 	}
 }
 
+function addCon(conObj)
+{
+    addRow2(conObj); // function is in gridTableGeneralFunctions.js
+}
+
+function addAlternative(altObj)
+{
+    addCol2(altObj); //function is in gridTableGeneralFunctions.js
+}
+
 function clearResults() {
 	$('#mySessionsResultDendrogramDiv').empty();
 	$('#mySessionsContentResultDiv').empty();

@@ -1498,7 +1498,9 @@ def __generateAlternativeConcernResultTable__(data=[], sessionGridObj= None):
     oldAlternatives= []
     concerns= {}
     concernPairs= {} #key is a tulp value is the number the pair is present together
+    concernUsers= {} # this tuple is for the list of participants who suggested the concerns in the responseGrid
     alternatives= {}
+    alternativeUsers= {} #this tuple is for the list of participants who suggested the alternative in the responseGrid
     temp= None
 
     #first find all the existing pairs of concerns
@@ -1520,6 +1522,7 @@ def __generateAlternativeConcernResultTable__(data=[], sessionGridObj= None):
 
     for relation in data:
         grid= relation.grid
+        userID= relation.user.first_name + ' '
         for concern in grid.concerns_set.all():
             if concern.leftPole:
                 temp= concern.leftPole.lower()
@@ -1537,6 +1540,10 @@ def __generateAlternativeConcernResultTable__(data=[], sessionGridObj= None):
                 concernPairs[(concern.leftPole.lower(), concern.rightPole.lower())]+= 1
             else:
                 concernPairs[(concern.leftPole.lower(), concern.rightPole.lower())]= 1
+            if concernUsers.has_key((concern.leftPole.lower(), concern.rightPole.lower())):
+                concernUsers[(concern.leftPole.lower(), concern.rightPole.lower())]+= userID
+            else:
+                concernUsers[(concern.leftPole.lower(), concern.rightPole.lower())]= userID
 
         for alternative in grid.alternatives_set.all():
             if alternative:
@@ -1545,20 +1552,24 @@ def __generateAlternativeConcernResultTable__(data=[], sessionGridObj= None):
                     alternatives[temp]= 1
                 else:
                     alternatives[temp]= alternatives[temp] + 1
+                if not alternativeUsers.has_key(temp):
+                    alternativeUsers[temp]= userID
+                else:
+                    alternativeUsers[temp]= alternativeUsers[temp] + userID
                     #create an array that contains the tulip (leftconcern, right concern, nPair, nLeftConcern, nRightConcern, isNew), where nPair is the number of times the pair is found, isNew determines if the pair was present in the session grid or not
     for key, value in concernPairs.items():
         leftC, rightC= key
         #check if this pair already exist in the main session grid
         if (leftC, rightC) in oldConcernsPair:
-            concernsResult.append((leftC, rightC, value, concerns[leftC], concerns[rightC], False))
+            concernsResult.append((leftC, rightC, value, concerns[leftC], concerns[rightC], False, concernUsers[key]))
         else:
-            concernsResult.append((leftC, rightC, value, concerns[leftC], concerns[rightC], True))
+            concernsResult.append((leftC, rightC, value, concerns[leftC], concerns[rightC], True, concernUsers[key]))
             #create an tulip: (anternative, nTimes, isNew) where nTimes is the amount of times each alternative is cited; isNew tells if the alternative was present in the session grid
     for key, value in alternatives.items():
         if key in oldAlternatives:
-            alternativeResult.append((key, value, False))
+            alternativeResult.append((key, value, False, alternativeUsers[key]))
         else:
-            alternativeResult.append((key, value, True))
+            alternativeResult.append((key, value, True, alternativeUsers[key]))
 
     return (concernsResult, alternativeResult)
 

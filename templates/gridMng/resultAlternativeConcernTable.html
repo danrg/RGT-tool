@@ -7,31 +7,28 @@
 	           <tr>
 	               <th>Left</th>
 	               <th>Right</th>
-	               <th>Who cited</th>
-                   <th>Click "New" to add
-                       concern
-                   </th>
+	               <th>Times cited</th>
 	           </tr>
 	           </thead>
 			<tbody>
-				{% for leftC, rightC, nPair, nLeftC, nRightC, isNew in data.concerns %}
+				{% for leftC, rightC, nPair, nLeftC, nRightC, isNew, users in data.concerns %}
 					{%	comment %} header for the tr {% endcomment %}
 					{% if forloop.first %}
-					<tr class= "resultAlternativeConcernRow">
+					<tr class= "resultAlternativeConcernRow" title="{{users}}">
 						<td class= "{% cycle 'resultAlternativeConcernAmountCellBg1' 'resultAlternativeConcernAmountCellBg2' as bgColor%}" title="Times cited individually {{nLeftC}}">{{leftC}}</td>
 						<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="Times cited individually {{nRightC}}">{{rightC}}</td>
 						{% if isNew %}
-							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nPair}}</td><td><div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png" onclick="addConcern($(this).parents('tr'), $('img'))"/></div></td>
+							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nPair}}<div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png" onclick="addConcern($(this).parents('tr'))"/></div></td>
 						{% else %}
 							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nPair}}</td>
 						{% endif %}
 					</tr>
 					{% else %}
-					<tr class= "resultAlternativeConcernRow">
+					<tr class= "resultAlternativeConcernRow" title="{{users}}">
 						<td class= "{% cycle bgColor%}" title="Times cited individually {{nLeftC}}">{{leftC}}</td>
 						<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="Times cited individually {{nRightC}}">{{rightC}}</td>
 						{% if isNew %}
-							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nPair}}</td><td><div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png" onclick="addConcern($(this).parents('tr'), $('img'))"/></div></td>
+							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nPair}}<div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png" onclick="addConcern($(this).parents('tr'))"/></div></td>
 						{% else %}
 							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nPair}}</td>
 						{% endif %}
@@ -47,29 +44,26 @@
 	           <thead>
 	               <tr>
 	                   <th>Name</th>
-	                   <th>Who cited</th>
-                       <th>Click "New" to add
-                           alternative
-                       </th>
+	                   <th>Times cited</th>
 	               </tr>
 	           </thead>
 			<tbody>
-				{% for alternaive, nTime, isNew in data.alternatives %}
+				{% for alternaive, nTime, isNew, users in data.alternatives %}
 					{%	comment %} header for the tr {% endcomment %}
 					{% if forloop.first %}
-					<tr class= "resultAlternativeConcernRow">
+					<tr class= "resultAlternativeConcernRow" title="{{users}}">
 						<td class= "{% cycle 'resultAlternativeConcernAmountCellBg1' 'resultAlternativeConcernAmountCellBg2' as bgColor%}">{{alternaive}}</td>
 						{% if isNew %}
-							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nTime}}</td><td><div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png" onclick="addAlt($(this).parents('tr'), $('img'))"/></div></td>
+							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nTime}}<div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png" onclick="addAlt($(this).parents('tr'))"/></div></td>
 						{% else %}
 							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nTime}}</td>
 						{% endif %}
 					</tr>
 					{% else %}
-					<tr class= "resultAlternativeConcernRow">
+					<tr class= "resultAlternativeConcernRow" title="{{users}}">
 						<td class="{% cycle bgColor%}">{{alternaive}}</td>
 						{% if isNew %}
-							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nTime}}</td><td><div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png" onclick="addAlt($(this).parents('tr'), $('img'))"/></div></td>
+							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nTime}}<div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png" onclick="addAlt($(this).parents('tr'))"/></div></td>
 						{% else %}
 							<td class="resultAlternativeConcernAmountCell {{bgColor}}">{{nTime}}</td>
 						{% endif %}
