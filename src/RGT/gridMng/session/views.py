@@ -49,6 +49,10 @@ from datetime import datetime
 
 logger = logging.getLogger('django.request')
 
+"""
+    This function is used to send back the page that the user sees when he
+    press the button to create a new session.
+"""
 def ajaxGetCreateSessionPage(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
@@ -913,7 +917,14 @@ def ajaxGetResults(request):
         logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
 
-# function is to get the session results for the participants for completed iterations
+"""
+    This function is used to return html code that is used to display the results of a sesssion to a 
+    participant if the facilitator has allowed participants to see session results.
+    
+    External arguments:
+        sessionUSID: string
+        iteration: int    
+"""
 def ajaxGetResponseResults(request):
     if not request.user.is_authenticated():
         return redirect_to(request, '/auth/login/')
@@ -1490,7 +1501,35 @@ def __createJSforRatioWeightSessionResultsChart__(ratioMatrices= None, weightMat
 
 
 
-# data is a list of ResponseGrid objs
+"""
+    This function is used to generate the input used for the resultAlternativeConcernTable.html template
+    
+    Arguemnts:
+        data: obejct of QuerySet
+            information: The QuerySet must contain all the grids that were submitted as response for a session with a iteration
+        sessionGridObj: rgt.gridMng.models.Grid object
+            nformation: The grid object must be of a session.
+    
+    Return:
+        Tulip
+            information: The tulip has two positions, the first position contains the data for the concern table and the
+                         second position contains the data for the alternative table.
+                         
+                         The concern data is an array containing a tulip in each position. The tulip represents a row of a table.
+                         The first position of the tulip contains a string representing the left concern name. The second
+                         position contains a string representing the right concern name. The third posisition contains an int
+                         representing how many times the pair (left and right concern) was mentioned in all of the response grids.
+                         The fourth position contains an int indicating how many times the left concern was mentioned individually.
+                         The fifth position contains an int indication how many times the right concern was mentioned individially.
+                         The sixth poisition contains a boolean that indicates if the pair was previously was present in the session
+                         grid or not. The seventh position contains a string with the names of the users who suggested something.
+                         
+                         The alternative data is an array containing a tulip. The tulip represents a row of a table. The tulip has four
+                         positions. The first position contains a string representing the name of the alternative. The second position
+                         contains an int that represents how many times that alternative was mentioned in the response grids. The third
+                         position has a boolean indicating if the alternative was previously found in the session grid or not. The fourth
+                         position has a string with the names of the users who suggested something.
+"""
 def __generateAlternativeConcernResultTable__(data=[], sessionGridObj= None):
     concernsResult= [] #obj that will be returned with the concerns as following: (leftconcern, right concern, nPair, nLeftConcern, nRightConcern, isNew)
     alternativeResult= [] #obj that will be returned with the alternative as following: (alternative, nTime, isNew)
@@ -1659,6 +1698,20 @@ def __createPaticipantPanelData__(sessionObj):
                 participantData.append((user, 'didNotRespondedRequest'))
     return participantData
 
+"""
+    This function is used to create the data required to be used in the pendingResponses.html 
+    template.
+    
+    ARguments:
+        userObj: django.contrib.auth.models.User
+    
+    Return
+        Array
+        information: The returned array contains a tulip in each position. Each tulip represents a row.
+                     The tulips have two positions. The first position contains a string , this string is a 
+                     composite of the session name and the facilitator name. The second position contains a
+                     string representing the session USID.
+"""
 def __createPendingResponseData__(userObj= None):
     table= None
 
