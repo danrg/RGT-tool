@@ -1541,6 +1541,7 @@ def __generateAlternativeConcernResultTable__(data=[], sessionGridObj= None):
     alternatives= {}
     alternativeUsers= {} #this tuple is for the list of participants who suggested the alternative in the responseGrid
     temp= None
+    i= 0
 
     #first find all the existing pairs of concerns
     if sessionGridObj != None:
@@ -1561,7 +1562,12 @@ def __generateAlternativeConcernResultTable__(data=[], sessionGridObj= None):
 
     for relation in data:
         grid= relation.grid
-        userID= relation.user.first_name + ' '
+        i= i+1
+        if i==2:
+            userID= relation.user.first_name + '\n'
+            i= 0
+        else:
+            userID= relation.user.first_name + ' '
         for concern in grid.concerns_set.all():
             if concern.leftPole:
                 temp= concern.leftPole.lower()

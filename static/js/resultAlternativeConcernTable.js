@@ -12,3 +12,4 @@ function addAlt(altObj)
 $(function() {
     $(".resultAlternativeConcernRow").tooltip();
 });
+

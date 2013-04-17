@@ -321,6 +321,7 @@ function mySessionsShowResults()
 			else
 			{
 				clearResults();
+                hideLoadingSpinner($('#wrap'));
 				showMessageInDialogBox($(data).find('error').text());
 			}
 		});

@@ -475,12 +475,16 @@ function addCol(cell)
  */
 function addCol2(altObj)
 {
-    var firstColumn = $("img[onclick^='addCol']:first");
-    firstColumn.click();
-    var alternatives = $(altObj).find('td:first-child'); // Alternative name is obtained from the resultAlternativeTable.html
-    var altHtml = $(alternatives).html();
-    var inputAlt = $("input[id^='alternative']:last");
-    inputAlt.val(altHtml);
+    var editable = $('#ratio_concer1_alternative1').attr('disabled');
+    if(editable!="disabled")
+    {
+        var cell = $("td[class='colMenu']:first");
+        addCol(cell);
+        var alternatives = $(altObj).find('td:first-child'); // Alternative name is obtained from the resultAlternativeTable.html
+        var altHtml = $(alternatives).html();
+        var inputAlt = $("input[id^='alternative']:last");
+        inputAlt.val(altHtml);
+    }
 }
 
 /* This function is to add Row and passing the concern values by clicking the New image in the results page
@@ -488,16 +492,20 @@ function addCol2(altObj)
  */
 function addRow2(conObj)
 {
-    var firstRow = $("img[onclick^='addRow']:first");
-    firstRow.click();
-    var concernsLeft = $(conObj).find('td:first-child'); // Concern names are obtained from resultAlternativeTable.html
-    var conLeftHtml = $(concernsLeft).html();
-    var concernsRight = $(concernsLeft).next();
-    var conRightHtml = $(concernsRight).html();
-    var inputConLeft = $("input[id*='left']:last");
-    var inputConRight = $("input[id*='right']:last");
-    inputConLeft.val(conLeftHtml);
-    inputConRight.val(conRightHtml);
+    var editable = $('#ratio_concer1_alternative1').attr('disabled');
+    if(editable!="disabled")
+    {
+        var cell = $("td[onmouseover^='displayRow']:first");
+        addRow(cell);
+        var concernsLeft = $(conObj).find('td:first-child'); // Concern names are obtained from resultAlternativeTable.html
+        var conLeftHtml = $(concernsLeft).html();
+        var concernsRight = $(concernsLeft).next();
+        var conRightHtml = $(concernsRight).html();
+        var inputConLeft = $("input[id*='left']:last");
+        var inputConRight = $("input[id*='right']:last");
+        inputConLeft.val(conLeftHtml);
+        inputConRight.val(conRightHtml);
+    }
 }
 
 /**
