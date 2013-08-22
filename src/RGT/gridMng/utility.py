@@ -1,10 +1,10 @@
 from django.http import HttpResponse
 from RGT import settings
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse
-from RGT.gridMng.hierarchical import hcluster, transpose, drawDendogram3
+from RGT.gridMng.hierarchical import hcluster, transpose, drawDendogram3, pcaCluster, getSimilarities
 from RGT.XML.SVG.svgDOMImplementation import SvgDOMImplementation
 from RGT.settings import DENDROGRAM_FONT_LOCATION
-from PIL import ImageFont #@UnresolvedImport
+import ImageFont #@UnresolvedImport
 from types import StringType, UnicodeType
 
 import base64
@@ -215,6 +215,8 @@ def createDendogram(gridObj):
     else:
         raise ValueError('More than one concerns must be present in order to generate a dendrogram.')
     #lets transpose the matrix so we calculate the dendrogram for the alternatives
+    # print "Alternatives: "
+    # print matrixAlternatives
     matrixAlternatives= transpose(matrixAlternatives)
     i= 0;
     temp= [[]]
@@ -253,6 +255,78 @@ def createDendogram(gridObj):
         traceback.print_exc(file=sys.stdout)
         print '-'*60
         raise Exception('Unknown error, couldn\'t create the dendogram')
+
+"""
+This function returns eigther concerns matrix or alternatives matrix
+"""
+def returnMatrix(gridObj, which):
+
+    from RGT.gridMng.models import Ratings #can't be declared globally because it will generate an import error
+
+    #lets create a matrix that the hierarchical module understands
+    matrixFull= [] # this is the compleet matrix, it will be used to create the table in the picture
+    matrixConcern= []
+    matrixAlternatives= [] #matrix that will be transposed
+    concerns= gridObj.concerns_set.all()
+    alternatives= gridObj.alternatives_set.all()
+    maxValueOfAlternative = -1 # this is to save time later on as i need to loop trough all the alternatives right now so i can check for max value
+
+    if len(concerns) > 1:
+        for concernObj in concerns:
+            row= []
+            ratio= None
+            weight= concernObj.weight
+            if concernObj.leftPole != None:
+                row.append(str(concernObj.leftPole))
+                if len(alternatives) >= 1:
+                    for alternativeObj in alternatives:
+                        ratio= (Ratings.objects.get(concern= concernObj, alternative= alternativeObj)).rating
+                        if ratio != None:
+                            ratio*= weight
+                            ratio= round(ratio, 2)
+                            row.append(ratio)
+                            if ratio > maxValueOfAlternative:
+                                maxValueOfAlternative= ratio
+                        else:
+                            raise ValueError('Ratings must be complete in order to generate a dendrogram.')
+                else:
+                    raise ValueError('No alternatives were found.')
+            else:
+                raise ValueError('Concerns must be complete in order to generate a dendrogram.')
+            matrixConcern.append(row)
+            matrixAlternatives.append(row[1:])
+            row= row[0:] #create new obj of row
+            if concernObj.rightPole != None:
+                row.append(str(concernObj.rightPole))
+            else:
+                raise ValueError('Concerns must be complete in order to generate a dendrogram.')
+            matrixFull.append(row)
+    else:
+        raise ValueError('More than one concerns must be present in order to generate a dendrogram.')
+    #lets transpose the matrix so we calculate the dendrogram for the alternatives
+    matrixAlternatives= transpose(matrixAlternatives)
+    i= 0;
+    temp= [[]]
+    while i < len(alternatives):
+        if alternatives[i].name != None:
+            matrixAlternatives[i].insert(0, str(alternatives[i].name))
+            temp.append(str(alternatives[i].name))
+            #print alternatives[i].name
+            i+= 1;
+        else:
+            raise ValueError('Invalid alternative name: ' + alternatives[i].name)
+    temp.append([])
+    matrixFull.insert(0, temp)
+
+    concenrDistance= pcaCluster(matrixConcern)
+    alternativeDistance= pcaCluster(matrixAlternatives)
+
+    if(which == "concern"):
+        return getSimilarities(concenrDistance, alternativeDistance, matrixFull, maxValueOfAlternative, which)
+    else:
+        return getSimilarities(concenrDistance, alternativeDistance, matrixFull, maxValueOfAlternative, which)
+
+
 
 def convertGridTableToSvg(gridObj= None):
     from RGT.gridMng.models import Ratings

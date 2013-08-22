@@ -87,7 +87,6 @@ def hcluster(matrix, distanceAlgorithm= EuclideanDistanceAlgorithm(), linkageAlg
     
     # create the distance matrix based on the euclidean distance (n dimensions)
     distanceMatrix= distanceAlgorithm.calculateDistance(matrix)
-    
     #now lets make the cluster
     result= []; #each position in result represent the found cluster in step n
     
@@ -164,8 +163,13 @@ def hcluster(matrix, distanceAlgorithm= EuclideanDistanceAlgorithm(), linkageAlg
         if len(distanceMatrix) == 2: # this is 2 because we have 1 extra row that identify the clusters 
             break;
         i+= 1;
-        
+
     return result;
+
+def pcaCluster(matrix, distanceAlgorithm= EuclideanDistanceAlgorithm(), linkageAlgorithm= MaxLinkageAlgorithm()):
+    # create the distance matrix based on the euclidean distance (n dimensions)
+    distanceMatrix= distanceAlgorithm.calculateDistance(matrix)
+    return distanceMatrix
 
 
 def drawDendogram(clusters= []):
@@ -921,10 +925,14 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         #########################
         ###changeable settings###
         #########################
-        
+
         #f= ImageFont.truetype("arial.ttf", 15)
+
         fontSize= 15;
-        f = ImageFont.truetype(DENDROGRAM_FONT_LOCATION, fontSize)
+        try:
+            f = ImageFont.truetype(DENDROGRAM_FONT_LOCATION, fontSize) #
+        except:
+            print("wtf")
 
         fontName= 'arial'  #this variable is used by the client to know which font it should use when creating the picture 
         useShadow= True
@@ -1016,21 +1024,29 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         ################
         #pre-processing#
         ################
-        
+
+        #print alternativeClusterSimilarity
         
         #find the min similarity of the concern
         for cluster in clustersConcern:
+
+            print cluster
             if cluster[1] != 0:
                 concernClusterSimilarity.append(100 * (1 - (cluster[1] / ((len(matrix) - 1) * (maxMatrixCellValue - 1)))))
             else:
                 concernClusterSimilarity.append(100)
+
+        print concernClusterSimilarity
         #find the min similarity of the alternatives
         for cluster in clustersAlternative:
             if cluster[1] != 0:
                 alternativeClusterSimilarity.append(100 * (1 - (cluster[1] / ((len(matrix[0]) - 2) * (maxMatrixCellValue - 1)))))
             else:
                 alternativeClusterSimilarity.append(100)
-        
+
+
+
+
         #calculate the ruler step size 
         concernRulerStep= (len(clustersConcern) * rulerStepIncrease) + baseRulerStep
         alternativeRulerStep= (len(clustersAlternative) * rulerStepIncrease) + baseRulerStep
@@ -1207,7 +1223,7 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
             j= 1
         tempMatrix.insert(0, firstRow)
         tempMatrix.pop(1)
-        print tempMatrix 
+        #print tempMatrix
         matrix= tempMatrix
         
         #######end pre-processing #########
@@ -1652,6 +1668,47 @@ def drawDendogram3(clustersConcern= [], clustersAlternative= [], matrix= [[]], m
         
         #lets return the image
         return xmlDoc
+
+#prototype function that will be used to create an image using xml
+def getSimilarities(clustersConcern= [], clustersAlternative= [], matrix= [[]], maxMatrixCellValue= 1, which="concern"):
+
+
+
+        #cluster format is: [([element1, elemet2], distance), ([element1, elemet2, element3], distance), ......]
+
+
+        concernClusterSimilarity= []
+        alternativeClusterSimilarity= []
+
+        #print alternativeClusterSimilarity
+
+        #find the min similarity of the concern
+        if(which=="concern"):
+            for i in range(1, len(clustersConcern)):
+                for j in range(1, len(clustersConcern[i])):
+                    clustersConcern[i][j] = int(round((100 * (1 - (clustersConcern[i][j] / ((len(matrix) - 1) * (maxMatrixCellValue - 1))))), 0))
+
+            return clustersConcern
+
+            # if cluster[1] != 0:
+            #     concernClusterSimilarity.append(100 * (1 - (cluster[1] / ((len(matrix) - 1) * (maxMatrixCellValue - 1)))))
+            # else:
+            #     concernClusterSimilarity.append(100)
+        else:
+            for i in range(1, len(clustersAlternative)):
+                for j in range(1, len(clustersAlternative[i])):
+                    clustersAlternative[i][j] = int(round((100 * (1 - (clustersAlternative[i][j] / ((len(matrix[0]) - 2) * (maxMatrixCellValue - 1))))), 0))
+
+            return clustersAlternative
+
+        #find the min similarity of the alternatives
+        # for cluster in clustersAlternative:
+        #     # if cluster[1] != 0:
+        #     #     alternativeClusterSimilarity.append(100 * (1 - (cluster[1] / ((len(matrix[0]) - 2) * (maxMatrixCellValue - 1)))))
+        #     # else:
+        #     #     alternativeClusterSimilarity.append(100)
+
+
 
 ## returns a string with: 'rgb(number,number,number)'
 #def createColorRGBString(color):

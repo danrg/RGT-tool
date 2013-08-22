@@ -151,6 +151,15 @@
 				{% endfor %}
 			</tbody>
 		</table>
+    {% block javascript %}
+        <script>
+            var tableName = "{{data.tableId}}";
+            var query = '#'+tableName+" tr";
+            var rowCount = $(query).length;
+            rowCount -= 2;
+        //alert(rowCount);
+        </script>
+    {% endblock javascript %}
 		<div class= "weightDiv weightTableDiv" style="display: inline-table">
 				<label class= "weightLabel">Total weight: </label><input class= "weightMeter" value= "0" disabled="disabled" readonly />
 		</div>

@@ -1,5 +1,5 @@
-from django.shortcuts import render_to_response, render
-from django.views.generic.simple import redirect_to
+from django.shortcuts import render_to_response, render, redirect
+#from django.views.generic.simple import redirect_to
 from django.template import RequestContext
 from django.template import loader
 from django.http import HttpResponse
@@ -11,7 +11,7 @@ from RGT.gridMng.models import Alternatives
 from RGT.gridMng.models import Concerns
 from RGT.gridMng.models import Ratings
 from RGT.gridMng.models import Facilitator
-from RGT.gridMng.utility import randomStringGenerator, validateName, convertSvgTo, getImageError, convertGridTableToSvg, convertGridTableToSvg
+from RGT.gridMng.utility import randomStringGenerator, validateName, convertSvgTo, getImageError, convertGridTableToSvg, convertGridTableToSvg, returnMatrix
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.session.state import State
@@ -23,6 +23,7 @@ from django.db import IntegrityError
 from RGT.gridMng.error.unablaToCreateUSID import UnablaToCreateUSID
 
 from RGT.gridMng.utility import generateGridTable, createDendogram, createFileResponse
+from RGT.gridMng.hierarchical import transpose
 from RGT.settings import GRID_USID_KEY_LENGTH, DEBUG
 
 import sys, os
@@ -41,7 +42,7 @@ logger = logging.getLogger('django.request')
 """
 def getCreateMyGridPage(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     try: 
         gridTableTemplate= GridTableData(generateGridTable(None))
         gridTableTemplate.changeRatingsWeights= True
@@ -76,7 +77,7 @@ def getCreateMyGridPage(request):
 """
 def ajaxCreateGrid(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
 
         
     #for key in request.REQUEST.keys():
@@ -180,7 +181,7 @@ def ajaxCreateGrid(request):
 """
 def getShowGridPage(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
 
     user1= request.user
     gridtype= Grid.GridType.USER_GRID
@@ -216,7 +217,7 @@ def getShowGridPage(request):
 """
 def ajaxGetGrid(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     user1= request.user
     
     #####view mode values########################################################################
@@ -331,7 +332,7 @@ def ajaxGetGrid(request):
 """
 def ajaxUpdateGrid(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     
     if DEBUG:
         for key in request.REQUEST.keys():
@@ -459,7 +460,8 @@ def ajaxUpdateGrid(request):
 """
 def ajaxDeleteGrid(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
+
     if request.POST.has_key('gridUSID'):
         gridUSID= request.POST['gridUSID']
         grid= None
@@ -481,8 +483,13 @@ def ajaxDeleteGrid(request):
         gridUSID: string
 """
 def ajaxGenerateDendogram(request):
+    """
+
+    :param request:
+    :return:
+    """
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     if request.POST.has_key('gridUSID'):
         grid1= Grid.objects.filter(user= request.user, usid= request.POST['gridUSID'])
         if len(grid1) >= 1:
@@ -522,12 +529,84 @@ def ajaxGenerateDendogram(request):
         return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'), content_type='application/xml')
 
 """
+This function will generate the similarity matrix for concers and alternatives ---- MURAT
+"""
+
+def ajaxGenerateSimilarity(request):
+
+    """
+    :param request:
+    :return:
+    """
+
+    if not request.user.is_authenticated():
+        return redirect('/auth/login/')
+
+    if request.POST.has_key('gridUSID'):
+        grid1= Grid.objects.filter(user= request.user, usid= request.POST['gridUSID'])
+        if len(grid1) >= 1:
+            try:
+                grid1= grid1[0]
+
+                matrixConcern= returnMatrix(grid1, "concern")
+                matrixAlternatives= returnMatrix(grid1, "alt") #matrix that will be transposed
+
+                consRangeXi = len(matrixConcern[0])
+                consRangeYi = len(matrixConcern)-1
+
+                consRangeX =  [i+1 for i in range(consRangeXi)]
+                consRangeY =  [j+1 for j in range(consRangeYi)]
+
+                altsRangeX = len(matrixAlternatives[0])
+                altsRangeY = len(matrixAlternatives) - 1
+
+
+                template= loader.get_template('gridMng/murat.html')
+                context= RequestContext(request, {'cons': matrixConcern, 'alts': matrixAlternatives, 'consRangeX': consRangeX, 'consRangeY': consRangeY, 'altsRangeX': altsRangeX, 'altsRangeY': altsRangeY})
+                htmlData= template.render(context)
+                return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
+
+                # if grid1.dendogram != None and grid1.dendogram != '':
+                #     imgData= createDendogram(grid1)
+                #     responseData= createSvgResponse(imgData, None)
+                #     return HttpResponse(responseData, content_type='application/xml')
+                # else:
+                #     try:
+                #         imgData= createDendogram(grid1)
+                #         responseData= createSvgResponse(imgData, None)
+                #         return HttpResponse(responseData, content_type='application/xml')
+                #     except UnicodeEncodeError as error:
+                #         errorString= 'Invalid character found in the grid. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely.\nDendogram can not be created.'
+                #         return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
+                #     except:
+                #         if DEBUG == True:
+                #             print "Exception in user code:"
+                #             print '-'*60
+                #             traceback.print_exc(file=sys.stdout)
+                #             print '-'*60
+                #         logger.exception('Unknown error')
+                #         return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'), content_type='application/xml')
+            except:
+                if DEBUG == True:
+                    print "Exception in user code:"
+                    print '-'*60
+                    traceback.print_exc(file=sys.stdout)
+                    print '-'*60
+                logger.exception('Unknown error')
+                return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+        else:
+            return HttpResponse(createXmlErrorResponse('Could not find the grid to generate similarity matrices'), content_type='application/xml')
+    else:
+        return HttpResponse("Hello World!")
+
+
+"""
     This function will return the html code that is needed to generate the dialog box 
     that is used to ask to user to which format should a svg image be saved
 """
 def ajaxGetSaveSvgPage(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     
     template= loader.get_template('gridMng/saveSvg.html')
     context= RequestContext(request, {})
@@ -546,7 +625,7 @@ def ajaxGetSaveSvgPage(request):
 """
 def ajaxConvertSvgTo(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     try:
         if request.POST.has_key('data') and request.POST.has_key('fileName') and request.POST.has_key('convertTo'):
             if request.POST['data'] and request.POST['convertTo']:
@@ -587,7 +666,7 @@ def ajaxConvertSvgTo(request):
 def ajaxConvertGridTo(request):
     
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     try:
         if request.POST.has_key('usid') and request.POST.has_key('convertTo'):
             usidData= request.POST['usid']
@@ -661,7 +740,7 @@ def dendrogramTo(request):
     #########################################
     
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     try:
         if request.POST.has_key('gridUSID') and request.POST.has_key('convertTo'):
             #check to see if the inputs are not None
@@ -1192,3 +1271,164 @@ def createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernVa
             raise
     else:
         raise ValueError('One or more variables were None')
+
+def pca(request):
+
+    # imagePath = "C:\Android Dev\RGT-INstall Steps.png"
+    # from PIL import Image
+    # Image.init()
+    # i = Image.open(imagePath)
+    #
+    # response = HttpResponse(mimetype='image/png')
+    # i.save(response,'PNG')
+    # return response
+
+    import matplotlib
+    matplotlib.use('Agg')
+    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    from matplotlib.figure import Figure
+    from matplotlib.dates import DateFormatter
+
+    #fig = Figure()
+
+    #make sure these libraries are installed:
+    import mdp
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import gc
+
+
+    if not request.user.is_authenticated():
+        return redirect('/auth/login/')
+    if request.GET.has_key('gridUSID'):
+        grid1= Grid.objects.filter(user= request.user, usid= request.GET['gridUSID'])
+        if len(grid1) >= 1:
+            try:
+                grid1= grid1[0]
+                #here is sample data
+                #concerns are represented on columns, alternatives on lines
+
+
+        ### DENEMEEEEEE ###
+
+                from RGT.gridMng.models import Ratings #can't be declared globally because it will generate an import error
+
+                #lets create a matrix that the hierarchical module understands
+                matrixFull= [] # this is the compleet matrix, it will be used to create the table in the picture
+                matrixConcern= []
+                matrixAlternatives= [] #matrix that will be transposed
+                concerns= grid1.concerns_set.all()
+                alternatives= grid1.alternatives_set.all()
+                maxValueOfAlternative = -1 # this is to save time later on as i need to loop trough all the alternatives right now so i can check for max value
+
+                if len(concerns) > 1:
+                    for concernObj in concerns:
+                        row= []
+                        ratio= None
+                        weight= 1 #concernObj.weight
+                        if concernObj.leftPole != None:
+                            row.append(str(concernObj.leftPole))
+                            if len(alternatives) >= 1:
+                                for alternativeObj in alternatives:
+                                    ratio= (Ratings.objects.get(concern= concernObj, alternative= alternativeObj)).rating
+                                    if ratio != None:
+                                        ratio*= weight
+                                        ratio= round(ratio, 2)
+                                        row.append(ratio)
+                                        if ratio > maxValueOfAlternative:
+                                            maxValueOfAlternative= ratio
+                                    else:
+                                        raise ValueError('Ratings must be complete in order to generate a dendrogram.')
+                            else:
+                                raise ValueError('No alternatives were found.')
+                        else:
+                            raise ValueError('Concerns must be complete in order to generate a dendrogram.')
+                        matrixConcern.append(row)
+                        matrixAlternatives.append(row[1:])
+                        row= row[0:] #create new obj of row
+                        if concernObj.rightPole != None:
+                            row.append(str(concernObj.rightPole))
+                        else:
+                            raise ValueError('Concerns must be complete in order to generate a dendrogram.')
+                        matrixFull.append(row)
+                else:
+                    raise ValueError('More than one concerns must be present in order to generate a dendrogram.')
+
+                ### ANNE BTTT ###
+                matrixAlternatives= transpose(matrixAlternatives)
+                var_grid = np.array(matrixAlternatives)
+                #improve output readability
+                np.set_printoptions(precision=2)
+                np.set_printoptions(suppress=True)
+
+                print "var_grid:"
+                print var_grid
+
+                #Create the PCA node and train it
+                pcan = mdp.nodes.PCANode(output_dim=2, svd=True)
+                pcar = pcan.execute(var_grid)
+
+                print "\npcar"
+                print pcar
+
+                print "\neigenvalues:"
+                print pcan.d
+
+                print "\nexplained variance:"
+                print pcan.explained_variance
+
+                print "\neigenvectors:"
+                print pcan.v
+
+                #Graph results
+                #pcar[3,0],pcar[3,1] has the projections of alternative3 on the
+                #first two principal components (0 and 1)
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+                ax.plot(pcar[:, 0], pcar[:, 1], 'bo')
+                ax.plot(pcan.v[:,0], pcan.v[:,1], 'ro')
+
+                #draw axes
+                ax.axhline(0, color='black')
+                ax.axvline(0, color='black')
+
+                #annotations each concern
+                id=0
+                for xpoint, ypoint in pcan.v:
+                    ax.annotate('C{:.0f}'.format(id), (xpoint, ypoint+0.1), ha='center',
+                    va='center', bbox=dict(fc='white',ec='none'))
+                    id+=1
+                id=0
+                for xpoint, ypoint in pcar:
+                    ax.annotate(alternatives[id].name.format(id), (xpoint, ypoint+0.1), ha='center',
+                    va='center', bbox=dict(fc='0.99',ec='none'))
+                    id+=1
+
+
+                #calculate accounted for variance
+                var_accounted_PC1 = pcan.d[0] * pcan.explained_variance * 100 /(pcan.d[0] + pcan.d[1])
+                var_accounted_PC2 = pcan.d[1] * pcan.explained_variance * 100 /(pcan.d[0] + pcan.d[1])
+
+                #Show variance accounted for
+                ax.set_xlabel('Accounted variance on PC1 (%.1f%%)' % (var_accounted_PC1))
+                ax.set_ylabel('Accounted variance on PC2 (%.1f%%)' % (var_accounted_PC2))
+
+                canvas = FigureCanvas(fig)
+                response = HttpResponse(content_type='image/png')
+                canvas.print_png(response)
+                fig.clf()
+                plt.close()
+                plt.clf()
+                del var_grid
+                gc.collect()
+                return response
+            except:
+                if DEBUG == True:
+                    print "Exception in user code:"
+                    print '-'*60
+                    traceback.print_exc(file=sys.stdout)
+                    print '-'*60
+                logger.exception('Unknown error')
+                return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+
+

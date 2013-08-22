@@ -37,6 +37,152 @@ function hideImage()
     $('#dendrogram').hide();
 }
 
+function adjustWeights()
+{
+    $('#results').hide();
+    $('#wContainer').show();
+    $('#totalW').show();
+    $('#wContainer').html("");
+    var table = getGridTable($('#results'));
+    var numConcerns = getNumberOfConcerns(table);
+    var dummyConStr = "#concern_";
+    var dummyWeightStr = "#weight_concern";
+    var dummySpanStr = "span_concern";
+    var dummySpan = "<span id='";
+    var dummyP = "<p id='"
+    var dummyPStr = "pConcern"
+
+    for(var i=1; i<=numConcerns; i++)
+    {
+        dummySpan = "<span id='";
+        dummyP = "<p id='"
+        var dummyConStr2 = dummyWeightStr + i.toString();
+        var dummySpan2 = dummySpan + dummySpanStr + i.toString() + "'> " + Math.round($(dummyConStr2).val()) + "</span>";
+        var dummyP2 = dummyP + dummyPStr + i.toString() + "'>&nbsp;&nbsp;" + Math.round($(dummyConStr2).val()) + "</p>";
+        var cName = dummyConStr + i.toString() + "_left";
+        var cName2 = "<p>" + $(cName).val() + "</p>";
+        $('#wContainer').append(cName2);
+        $('#wContainer').append(dummySpan2);
+        $('#wContainer').append(dummyP2);
+    }
+
+     $( "#wContainer > span" ).each(function() {
+      // read initial values from markup and remove that
+      var value = parseInt( $( this ).text(), 10 );
+      $(this).empty().slider({
+        value: value,
+        range: "min",
+        min: 1,
+        max: 100-(numConcerns-1),
+        animate: true,
+        step: 1,
+        //orientation: "vertical",
+        slide: function(event, ui) {
+
+            var clicked = "#" + $(this).attr('id');
+            pClicked = clicked;
+            pClicked = pClicked.replace("span", "pConcern");
+            pClicked = pClicked.replace("_concern", "");
+
+//            $('#pipi').text(pClicked);
+            $(pClicked).text("\xa0\xa0"+ui.value.toString());
+
+        },
+        stop: function( event, ui ) {
+            for(var k=1; k<=numConcerns; k++)
+                {
+                    var pDummy = "#pConcern" + k.toString();
+                    var spanDummy = "#span_concern" + k.toString();
+                    var wDummy = "#weight_concern" + k.toString();
+                    var clicked = "#" + $(this).attr('id');
+                    clicked = clicked.replace("span", "weight");
+//                    $("#pipi").text(clicked);
+                    if($(this).attr('id') != $(spanDummy).attr('id'))
+                    {
+                        var val = $(spanDummy).slider("value");
+                        $(spanDummy).slider("value", val-((ui.value-$(clicked).val())*($(spanDummy).slider("value")/(100-$(clicked).val()))));
+
+                    }
+                    $(pDummy).text($(spanDummy).slider("value").toString());
+                }
+
+                var total = 0;
+                for(var i=1; i<=numConcerns; i++)
+                {
+                        var clicked = "#" + $(this).attr('id');
+                        var spanDummy = "#span_concern" + i.toString();
+                        if($(this).attr('id') != $(spanDummy).attr('id'))
+                            total += $(spanDummy).slider("value");
+                        else
+                            total += ui.value;
+                }
+
+                if(total != 100)
+                {
+                    if(total>100)
+                    {
+                        var dif = total - 100;
+                        for(var a=1; a<=numConcerns && dif>0; a++)
+                        {
+                            var spanDummy = "#span_concern" + a.toString();
+                            if($(this).attr('id') != $(spanDummy).attr('id'))
+                            {
+                                if($(spanDummy).slider("value")>dif)
+                                {
+                                    $(spanDummy).slider("value", $(spanDummy).slider("value")-dif);
+                                    dif = 0;
+                                }
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        var dif = 100 - total;
+                        for(var b=1; b<=numConcerns && dif>0; b++)
+                        {
+
+                            var spanDummy = "#span_concern" + b.toString();
+                            if($(this).attr('id') != $(spanDummy).attr('id'))
+                            {
+                                if($(spanDummy).slider("value")+dif<100)
+                                {   $(spanDummy).slider("value", $(spanDummy).slider("value")+dif);
+                                    dif = 0;
+                                }
+                            }
+
+                        }
+                    }
+                }
+               //$('#pipi').text(total.toString());
+                    for(var j=1; j<=numConcerns; j++)
+                    {
+                            var pDummy = "#pConcern" + j.toString();
+                            var spanDummy = "#span_concern" + j.toString();
+                            var wDummy = "#weight_concern" + j.toString();
+
+                        $(pDummy).text("\xa0\xa0"+$(spanDummy).slider("value").toString());
+                        $(wDummy).val($(spanDummy).slider("value"));
+
+                    }
+
+
+
+        }
+      });
+    });
+
+
+
+//    var bisey = "#weight_concern";
+//
+//    for (var num = 1; num<=2; num++)
+//    {
+//        var dummy = bisey + num.toString();
+//        $(dummy).val(50.0);
+//    }
+}
+
 //function used to get a grid from the db and display it to the user
 function showMyGrid(reload)
 {
@@ -58,11 +204,10 @@ function showMyGrid(reload)
 		{
 			var str= 'checkTable=true&viewMode=all&writeMode=write&gridUSID=' + gridUSID;
 			$.post('/grids/show/', str, function(data){
-				
 				try
 				{
 					//clear the information div
-					$("#informationDiv").html('');
+					$("#information").html('Select another grid:');
 					
 					if($(data).find('error').length <= 0)
 					{
@@ -102,6 +247,7 @@ function showMyGrid(reload)
 						$('#gridUSID').val(gridUSID);
 						
 						hideLoadingSpinner(loadingDiv);
+
 					}
 					else
 					{
@@ -125,7 +271,40 @@ function showMyGrid(reload)
 		}
 	}
 }
-		
+
+function getPCA()
+{
+    if(isGridValid())
+    {
+        showLoadingSpinner($('#pca'));
+        try
+        {
+            var gridUSID = $("#gridUSID").val();
+            var str = 'result.png?gridUSID=' + gridUSID;
+
+            var img = $("<img class = 'resim'/>").attr('src', str).load(function() {
+                if (!this.complete || typeof this.naturalWidth == "undefined" || this.naturalWidth == 0) {
+                alert('broken image!');
+                } else {
+                 $("#pca").show();
+                 $("#pcaResult").show();
+                 $("#pcaResult").append(img);
+                 hideLoadingSpinner($('#pca'));
+                }
+            });
+        }
+        catch(err)
+        {
+            hideLoadingSpinner($('#pca'));
+            console.log(err);
+        }
+    }else
+    {
+        showMessageInDialogBox("Please add at least one more concern");
+    }
+
+}
+
 function deleteMyGrid(){		
 	
 	//var str= 'grid='+$("#showGridSelection option:selected").val();
@@ -274,48 +453,109 @@ function saveGrid()
 
 function getDendogram()
 {
-	showLoadingSpinner($('#dendogramDiv'));
-	try
-	{
-		var gridUSID = $("#gridUSID").val();
-		var str = 'gridUSID=' + gridUSID;
-		$.post('/grids/dendrogram/', str, function(data)
-				{
-					try
-					{
-						if($(data).find('error').length <= 0)
-						{
-							$('#dendrogram').show();
-							clearSvgImg('dendogramDiv');
-							// extra the svg data from the xml file
-							var svg= $.parseXML($(data).find('svgData').text());
-							createDendogram('dendogramDiv', svg);
-							createSvgMenu($('#dendogramDiv'), {saveItemAs: true, saveItemAsUrl: '/grids/download/dendrogram/', saveItemAsArguments:{gridUSID: gridUSID}});
-							//createSvgMenu($('#dendogramDiv'), null);
-							$('#dendrogramTitle').text('Dendrogram of grid: '+ $('#gridName').val());
-							hideLoadingSpinner($('#dendogramDiv'));
-						}
-						else
-						{
-							hideLoadingSpinner($('#dendogramDiv'));
-							console.log($(data).find('error').text());
-							showMessageInDialogBox($(data).find('error').text());// function is from layout.html	
-						}
-					}
-					catch(err)
-					{
-						hideLoadingSpinner(loadingDiv);
-						console.log(err);
-					}
-				});
-	}
-	catch(err)
-	{
-		hideLoadingSpinner($('#dendogramDiv'));
-		console.log(err);
-	}
+    if(isGridValid())
+    {
+        showLoadingSpinner($('#dendogramDiv'));
+        try
+        {
+            var gridUSID = $("#gridUSID").val();
+            var str = 'gridUSID=' + gridUSID;
+            $.post('/grids/dendrogram/', str, function(data)
+                    {
+                        try
+                        {
+                            if($(data).find('error').length <= 0)
+                            {
+                                $('#dendrogram').show();
+                                clearSvgImg('dendogramDiv');
+                                // extra the svg data from the xml file
+                                var svg= $.parseXML($(data).find('svgData').text());
+                                createDendogram('dendogramDiv', svg);
+                                createSvgMenu($('#dendogramDiv'), {saveItemAs: true, saveItemAsUrl: '/grids/download/dendrogram/', saveItemAsArguments:{gridUSID: gridUSID}});
+                                //createSvgMenu($('#dendogramDiv'), null);
+                                $('#dendrogramTitle').text('Dendrogram of grid: '+ $('#gridName').val());
+                                hideLoadingSpinner($('#dendogramDiv'));
+                            }
+                            else
+                            {
+                                hideLoadingSpinner($('#dendogramDiv'));
+                                console.log($(data).find('error').text());
+                                showMessageInDialogBox($(data).find('error').text());// function is from layout.html
+                            }
+                        }
+                        catch(err)
+                        {
+                            hideLoadingSpinner(loadingDiv);
+                            console.log(err);
+                        }
+                    });
+        }
+        catch(err)
+        {
+            hideLoadingSpinner($('#dendogramDiv'));
+            console.log(err);
+        }
+    }else
+    {
+        showMessageInDialogBox("Please add at least one more concern");
+    }
+}
+
+function getMatrices()
+{
+    if(isGridValid())
+    {
+        showLoadingSpinner($('#similarityMatrix'));
+        try
+        {
+            var gridUSID = $("#gridUSID").val();
+            var str = 'gridUSID=' + gridUSID;
+            $.post('/grids/similarity/', str, function(data)
+                    {
+                        try
+                        {
+                            if($(data).find('error').length <= 0)
+                            {
+                                $('#similarity').show();
+                                $("#similarity").html($(data).find('htmlData').text());
+                                hideLoadingSpinner($('#similarityMatrix'));
+                            }
+                            else
+                            {
+                                hideLoadingSpinner($('#dendogramDiv'));
+                                console.log($(data).find('error').text());
+                                showMessageInDialogBox($(data).find('error').text());// function is from layout.html
+                            }
+                        }
+                        catch(err)
+                        {
+                            hideLoadingSpinner(loadingDiv);
+                            console.log(err);
+                        }
+                    });
+        }
+        catch(err)
+        {
+            hideLoadingSpinner($('#similarityMatrix'));
+            console.log(err);
+        }
+    }else
+    {
+        showMessageInDialogBox("Please add at least one more concern");
+    }
+}
+
+function isGridValid()
+{
+   var rowCount = $('.gridRow').length;
+
+   if(rowCount > 1)
+        return true;
+   else
+        return false;
 }
 
 $(function() {
     $("#tabs").tabs();
 });
+

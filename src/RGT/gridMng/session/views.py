@@ -1,5 +1,5 @@
-from django.shortcuts import render_to_response, render
-from django.views.generic.simple import redirect_to
+from django.shortcuts import render_to_response, render, redirect
+#from django.views.generic.simple import redirect_to
 from django.template import RequestContext
 from django.template import loader
 from django.http import HttpResponse #,HttpResponseRedirect
@@ -55,7 +55,7 @@ logger = logging.getLogger('django.request')
 """
 def ajaxGetCreateSessionPage(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
 
     user1= request.user
     gridtype= Grid.GridType.USER_GRID
@@ -72,7 +72,7 @@ def ajaxGetCreateSessionPage(request):
 
 def getMySessionsPage(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
 
     try:
         facilitator1= Facilitator.objects.isFacilitator(request.user)
@@ -100,7 +100,7 @@ def getMySessionsPage(request):
 
 def ajaxGetMySessionContentPage(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     sessionObj= None
     try:
         if request.POST.has_key('sessionUSID'):
@@ -202,7 +202,7 @@ def ajaxGetMySessionContentPage(request):
 
 def ajaxCreateSession(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
 
     if request.method == 'POST':
         user1= request.user
@@ -311,7 +311,7 @@ def ajaxCreateSession(request):
 
 def getParticipatingSessionsPage(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     sessions= []
     templateDate= ParticipatingSessionsData()
     for userParticipateSession in request.user.userparticipatesession_set.all():
@@ -329,7 +329,7 @@ def getParticipatingSessionsPage(request):
 
 def ajaxJoinSession(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     user1= request.user
     invitationKey1= None
     error= None
@@ -366,7 +366,7 @@ def ajaxJoinSession(request):
 
 def ajaxChangeSessionState(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     if request.POST.has_key('sessionUSID') and request.POST.has_key('newState'):
         facilitatorObj= request.user.facilitator_set.all()
         if len(facilitatorObj) >= 1:
@@ -418,7 +418,7 @@ def ajaxChangeSessionState(request):
 
 def ajaxGetParticipatingSessionContentPage(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
 
     if request.method == 'POST':
         if request.POST.has_key('sessionUSID'):
@@ -559,7 +559,7 @@ def ajaxGetParticipatingSessionContentPage(request):
 #this function will determine if we are creating a new response grid or updating an old one
 def ajaxRespond(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
         #check inputs
     userObj= request.user
     nConcerns= None
@@ -747,7 +747,7 @@ def ajaxRespond(request):
 #this function only return the content grids!!
 def ajaxGetParticipatingSessionsContentGrids(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
 
     try:
         #check for the mandatory keys
@@ -867,7 +867,7 @@ def ajaxGetParticipatingSessionsContentGrids(request):
 # function is to get the session results for the facilitator for completed iterations
 def ajaxGetResults(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     try:
         request_= request
         if not (request.POST.has_key('sessionUSID') and request.POST.has_key('iteration')):
@@ -927,7 +927,7 @@ def ajaxGetResults(request):
 """
 def ajaxGetResponseResults(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     try:
         request_= request
         if not (request.POST.has_key('sessionUSID') and request.POST.has_key('iteration')):
@@ -976,7 +976,7 @@ def ajaxGetResponseResults(request):
 #download the results from a session in the form of an image
 def ajaxDonwloandSessionResults(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     
     try:
         if not request.POST.has_key('sessionUSID') or not request.POST.has_key('iteration'):
@@ -1150,7 +1150,7 @@ def ajaxDonwloandSessionResults(request):
 #function that will get the page that display the participants of a session
 def ajaxGetParticipatingPage(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     try:
         #check if the mandatory variables are present
         if request.POST.has_key('sessionUSID'):
@@ -1185,7 +1185,7 @@ def ajaxGetParticipatingPage(request):
 
 def ajaxGenerateSessionDendrogram(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
 
     #check if all the mandatory keys are present
     if request.POST.has_key('sessionUSID') and request.POST.has_key('iteration'):
@@ -1237,7 +1237,7 @@ def ajaxGenerateSessionDendrogram(request):
 
 def ajaxGetSessionGrid(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
 
     #check if all the mandatory keys are present
     if request.POST.has_key('sessionUSID'):

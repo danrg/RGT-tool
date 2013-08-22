@@ -17,6 +17,21 @@
 	display: none;
 }
 
+
+#wContainer{
+    width: 1000px;
+	overflow: auto;
+	-moz-box-shadow: 0 0 5px #888;
+	-webkit-box-shadow: 0 0 5px #888;
+	box-shadow: 0 0 5px #888;
+	padding: 20px;
+	margin-top: 7px;
+}
+
+#wContainer span {
+    width:250px; float: left; margin-left:auto; margin-right:auto;
+}
+
 #informationTd{
 	text-align:left;
 	height: 20px;

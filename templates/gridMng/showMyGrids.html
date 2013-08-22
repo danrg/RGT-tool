@@ -9,6 +9,7 @@ RGT | Grids
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/showMyGrids.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tipsy.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smallButton.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/sliders.css" />
 {% endblock stylesheet %}
 
 {% block javascript %}
@@ -43,7 +44,7 @@ RGT | Grids
 	<table border= "0">
 		<tr>
 			<td>
-				<label for="showGridSelection">Select grid:</label><select id="showGridSelection" onchange="showMyGrid(false)">
+				<label for="showGridSelection">Select grid:</label><select id="showGridSelection" onchange="$('.resim').remove();showMyGrid(false);$('#weightSliders').show();$('#wContainer').hide();$('#weightSliders2').hide()">
 					{% if data.grids %}
 						<option value= "noGrids">&nbsp;</option>
 						{% for grid in data.grids %}
@@ -65,34 +66,45 @@ RGT | Grids
 <form id="form">{% csrf_token %} 
 	<div id="results">
 	</div>
+    <div id="wContainer" style="display: none;">
+	</div>
+
+    <p id="totalW"></p>
+    <input type="button" id="weightSliders" onclick="adjustWeights();$('#weightSliders').hide();$('#weightSliders2').show();" value="Prioritize Concerns" hidden="hidden"/><p id="weightSliders2" hidden="hidden">&nbsp;Please click save in order to go back.</p>
 	<div class="tableOptions" id="showMyGridsTableOptions">
-        <input type="button" id="saveButton" onclick="rescale($('#form'));saveGrid()" value="Save" />
-        <input type="button" onclick="deleteMyGrid()" value="Delete" />
-        <input type="button" id="showDendogramButton" onclick="getDendogram()" value="Show Dendrogram" />
+        <input type="button" id="saveButton" onclick="$('#results').show();$('#weightSliders').show();$('#totalW').hide();$('#wContainer').hide();$('#weightSliders2').hide();rescale($('#form'));$('#similarityMatrix').hide();$('.resim').remove();clearSvgImg('dendogramDiv');saveGrid();" value="Save" />
+        <input type="button" onclick="$('.resim').remove();deleteMyGrid()" value="Delete" />
         <input type="button" id="reloadSavedGridButton" onclick="showMyGrid(true)" value="Undo all" />
 	</div>
     <div id="tabs" hidden="hidden">
         <ul>
-            <li><a href="#similarityMatrix" onclick="hideImage()">Similarity Matrix</a></li>
-            <li><a href="#showDendrogram" onclick="getDendogram()" >Show Dendrogram</a></li>
-            <li><a href="#pca" onclick="hideImage()">PCA</a></li>
+            <li><a href="#similarityMatrix" onclick="$('.resim').remove();$('#similarityMatrix').show();getMatrices()">Similarity Matrix</a></li>
+            <li><a href="#showDendrogram" onclick="$('.resim').remove();$('#showDendogram').show();getDendogram()" >Show Dendrogram</a></li>
+            <li><a href="#pca" onclick="getPCA()">PCA</a></li>
         </ul>
         <div id="similarityMatrix">
-            <p>          </p>
+            <div id="similarity" style="display: none;">
+	            <div id="similarityDiv" class="similarityDiv">
+	            </div>
+            </div>
         </div>
         <div id="showDendrogram">
+             <div id="dendrogram" style="display: none;">
+	                <div id="dendrogramHead" class="dendrogramHead">
+                    <span id="dendrogramTitle" class="dendrogramTitle"></span>
+	                </div>
+	                <div id="dendogramDiv" class="dendrogramDiv">
+	                </div>
+            </div>
         </div>
         <div id="pca">
-            <p>           </p>
+            <div id="pcaResult" align="center">
+            </div>
         </div>
     </div>
 </form>
-<div id="dendrogram" style="display: none;">
-	<div id="dendrogramHead" class="dendrogramHead">
-		<span id="dendrogramTitle" class="dendrogramTitle"></span>
-	</div>
-	<div id="dendogramDiv" class="dendrogramDiv">
-	</div>
-</div>
+
+
 {% endif %}
 {% endblock %}
+

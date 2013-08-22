@@ -1,6 +1,6 @@
-from django.views.generic.simple import redirect_to
+#from django.views.generic.simple import redirect_to
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from RGT.userProfile.userProfileForm import UserProfileForm
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlSuccessResponse, createXmlErrorResponse
@@ -14,7 +14,7 @@ def ajaxGetDisplayHelpState(request):
 
 def displayUserProfile(request):
     if not request.user.is_authenticated():
-        return redirect_to(request, '/auth/login/')
+        return redirect('/auth/login/')
     
     #post = save stuff else just display
     user= request.user

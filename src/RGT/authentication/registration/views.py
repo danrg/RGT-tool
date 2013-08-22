@@ -1,4 +1,5 @@
-from django.views.generic.simple import redirect_to
+from django.shortcuts import redirect
+# from django.views.generic.simple import redirect_to
 from RGT.userProfile.models import UserProfile
 from django.contrib.auth.models import User
 
@@ -17,5 +18,5 @@ def verify(request, verifyEmailCode=''):
         # profile already verified
             pass
 
-    return redirect_to(request, '/auth/login/')
+    return redirect('/auth/login/')
 
