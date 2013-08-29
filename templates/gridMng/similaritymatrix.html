@@ -1,0 +1,148 @@
+<style>
+    .datagrid {
+        font: normal 12px/150% Arial, Helvetica, sans-serif;
+        background: #fff;
+        width: 960px;
+        overflow: hidden;
+    }
+
+    .datagrid table {
+        border-collapse: collapse;
+        text-align: center;
+        width: 60%;
+        margin-left: auto;
+        margin-right: auto;
+        border: 1px solid #006699;
+        -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+        border-radius: 3px;
+    }
+
+    .datagrid table td, .datagrid table th {
+        padding: 3px 5px;
+    }
+
+    .datagrid table thead th {
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #006699), color-stop(1, #00557F));
+        background: -moz-linear-gradient(center top, #006699 5%, #00557F 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#006699', endColorstr='#00557F');
+        background-color: #006699;
+        color: #FFFFFF;
+        font-size: 12px;
+        font-weight: bold;
+        border-left: 1px solid #0070A8;
+    }
+
+    .datagrid table thead th:first-child {
+        border: none;
+    }
+
+    .datagrid table tbody td {
+        color: #00557F;
+        border-left: 1px solid #E1EEF4;
+        font-size: 12px;
+        font-weight: normal;
+    }
+
+    .datagrid table tbody td:first-child {
+        border-left: none;
+    }
+
+    .datagrid table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    table.fixed {
+        table-layout: fixed;
+    }
+
+    table.fixed th {
+        overflow: hidden;
+    }
+</style>
+
+<!--
+<h3> Concern Matrix </h3>
+<div class="datagrid">
+<table>
+<thead><tr><th>Concern Matrix</th><th>header</th><th>header</th><th>header</th></tr></thead>
+<tbody><tr><td class="murat">data1</td><td>data1</td><td>data1</td><td>data1</td></tr>
+<tr><td class="murat">data</td><td>data</td><td>data</td><td>data</td></tr>
+<tr><td class="murat">data</td><td>data</td><td>data</td><td>data</td></tr>
+<tr><td class="murat">data</td><td>data</td><td>data</td><td>data</td></tr>
+<tr><td class="murat">data</td><td>data</td><td>data</td><td>data</td></tr>
+</tbody>
+</table>
+</div>
+-->
+
+
+<!-- REAL TABLE -->
+<h3> Concern Matrix </h3>
+<div class="datagrid">
+    <table class="fixed">
+
+        <thead>
+        <tr>
+            <th>Concern Matrix</th>
+
+            {% for i in cons.0 %}
+                {% if i.0 %}
+                    <th>{{ i.0 }}</th>
+                {% endif %}
+            {% endfor %}
+
+            <tbody>
+            {% for j in cons %}
+                {% if not forloop.first %}
+                    <tr>
+                        {% for k in j %}
+                            {% if forloop.first %}
+                                <td class="murat">{{ k.0 }}</td>
+                            {% else %}
+                                <td>{{ k }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+
+        </tr></thead>
+    </table>
+</div>
+
+<!-- REAL TABLE -->
+<h3> Alternate Matrix </h3>
+<div class="datagrid">
+    <table>
+
+        <thead>
+        <tr>
+            <th>Alternate Matrix</th>
+
+            {% for i in alts.0 %}
+                {% if i.0 %}
+                    <th>{{ i.0 }}</th>
+                {% endif %}
+            {% endfor %}
+
+            <tbody>
+            {% for j in alts %}
+                {% if not forloop.first %}
+                    <tr>
+                        {% for k in j %}
+                            {% if forloop.first %}
+                                <td class="murat">{{ k.0 }}</td>
+                            {% else %}
+                                <td>{{ k }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+
+        </tr></thead>
+    </table>
+</div>
