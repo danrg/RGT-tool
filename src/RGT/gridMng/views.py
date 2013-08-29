@@ -40,30 +40,33 @@ logger = logging.getLogger('django.request')
     This function is used to display the initial page the is seem when the user wants to create
     an in place grid (private grid).   
 """
+
+
 def getCreateMyGridPage(request):
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
-    try: 
-        gridTableTemplate= GridTableData(generateGridTable(None))
-        gridTableTemplate.changeRatingsWeights= True
-        gridTableTemplate.changeCornAlt= True
-        gridTableTemplate.tableId= randomStringGenerator()
-             
-        context= None 
+    try:
+        gridTableTemplate = GridTableData(generateGridTable(None))
+        gridTableTemplate.changeRatingsWeights = True
+        gridTableTemplate.changeCornAlt = True
+        gridTableTemplate.tableId = randomStringGenerator()
+
+        context = None
         #RequestContext(request, {'data': gridTableTemplate })
-        templateData= CreateMyGridData(CreateMyGridBaseData(gridTableTemplate))
-        context= RequestContext(request, {'data': templateData })
+        templateData = CreateMyGridData(CreateMyGridBaseData(gridTableTemplate))
+        context = RequestContext(request, {'data': templateData})
         return render(request, 'gridMng/createMyGrid.html', context_instance=context)
 
     except:
         #do nothing
         if DEBUG == True:
             print "Exception in user code:"
-            print '-'*60
+            print '-' * 60
             traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            print '-' * 60
         logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('unknown error'), content_type='application/xml')
+
 
 """
     This function is used to create a private grid.
@@ -75,125 +78,141 @@ def getCreateMyGridPage(request):
             values: user
         gridName: string
 """
+
+
 def ajaxCreateGrid(request):
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
 
-        
+
     #for key in request.REQUEST.keys():
     #    print 'key: ' + key + ' values: ' + request.REQUEST[key]
     #print '------'
-    
-    gridType= None
-    userObj= request.user
-    isConcernAlternativeResponseGrid= False
+
+    gridType = None
+    userObj = request.user
+    isConcernAlternativeResponseGrid = False
     #check the if the inputs are correct
-    if request.POST.has_key('nAlternatives') and request.POST.has_key('nConcerns'): #and request.POST.has_key('gridName')
+    if request.POST.has_key('nAlternatives') and request.POST.has_key(
+            'nConcerns'): #and request.POST.has_key('gridName')
         if request.POST.has_key('gridType'):
             if request.POST['gridType'] == 'response':
-                return HttpResponse(createXmlErrorResponse("Invalid request, unsupported operation"), content_type='application/xml') 
+                return HttpResponse(createXmlErrorResponse("Invalid request, unsupported operation"),
+                                    content_type='application/xml')
             elif request.POST['gridType'] == 'user':
-                gridType= Grid.GridType.USER_GRID
+                gridType = Grid.GridType.USER_GRID
             else:
                 return HttpResponse(createXmlErrorResponse("Unsupported grid type"), content_type='application/xml')
         else:
             #if the gridType key is not found assume it is a user grid
-            gridType= Grid.GridType.USER_GRID
+            gridType = Grid.GridType.USER_GRID
     else:
-        return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
+        return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"),
+                            content_type='application/xml')
 
     #lets validate the data
-    try:                
-        obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
+    try:
+        obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
     except KeyError as error:
         if DEBUG == True:
             print "Exception in user code:"
-            print '-'*60
+            print '-' * 60
             traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            print '-' * 60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except ValueError as error:
         if DEBUG == True:
             print "Exception in user code:"
-            print '-'*60
+            print '-' * 60
             traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            print '-' * 60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except:
         if DEBUG == True:
             print "Exception in user code:"
-            print '-'*60
+            print '-' * 60
             traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            print '-' * 60
         logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
-    nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj
-    gridName= None
+    nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues = obj
+    gridName = None
     if request.POST.has_key('gridName'):
-        result= validateName(request.POST['gridName'])
-        if  type(result) == StringType:
-            gridName= result
+        result = validateName(request.POST['gridName'])
+        if type(result) == StringType:
+            gridName = result
         else:
             return result
     for i in range(int(nAlternatives)):
         try:
             str(alternativeValues[i])
         except UnicodeEncodeError as error:
-            errorString= 'Invalid character found in the alternatives. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely'
+            errorString = 'Invalid character found in the alternatives. The "' + error.object[
+                                                                                 error.start:error.end] + '" character can not be convert or used safely'
             return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
         except:
-            return HttpResponse(createXmlErrorResponse("Invalid alternative name : "+ alternativeValues[i]), content_type='application/xml')
+            return HttpResponse(createXmlErrorResponse("Invalid alternative name : " + alternativeValues[i]),
+                                content_type='application/xml')
     for i in range(int(nConcerns)):
         try:
             str(concernValues[i][0])
         except UnicodeEncodeError as error:
-            errorString= 'Invalid character found in left concern. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely'
+            errorString = 'Invalid character found in left concern. The "' + error.object[
+                                                                             error.start:error.end] + '" character can not be convert or used safely'
             return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
         except:
-            return HttpResponse(createXmlErrorResponse("Invalid left concern name : "+ concernValues[i][0]), content_type='application/xml')
+            return HttpResponse(createXmlErrorResponse("Invalid left concern name : " + concernValues[i][0]),
+                                content_type='application/xml')
         try:
             str(concernValues[i][1])
         except UnicodeEncodeError as error:
-            errorString= 'Invalid character found in right concern. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely'
+            errorString = 'Invalid character found in right concern. The "' + error.object[
+                                                                              error.start:error.end] + '" character can not be convert or used safely'
             return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
         except:
-            return HttpResponse(createXmlErrorResponse("Invalid right concern name : "+ concernValues[i][1]), content_type='application/xml')
+            return HttpResponse(createXmlErrorResponse("Invalid right concern name : " + concernValues[i][1]),
+                                content_type='application/xml')
     try:
-        createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, True)
+        createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues,
+                   True)
     except:
         #return render_to_response('gridMng/createGrid.html', {'existingProjectName': request.REQUEST['grid']}, context_instance=RequestContext(request))
         return HttpResponse(createXmlErrorResponse("Could not create grid."), content_type='application/xml')
-    
+
     #return an empty grid div
-    gridTableTemplate= GridTableData(generateGridTable(None))
-    gridTableTemplate.changeRatingsWeights= True
-    gridTableTemplate.changeCornAlt= True
-    gridTableTemplate.tableId= randomStringGenerator()
-    template= loader.get_template('gridMng/createMyGridBase.html')
-    templateData= CreateMyGridBaseData(gridTableTemplate)
-    context= RequestContext(request, {'data': templateData })
-    htmlData= template.render(context)
+    gridTableTemplate = GridTableData(generateGridTable(None))
+    gridTableTemplate.changeRatingsWeights = True
+    gridTableTemplate.changeCornAlt = True
+    gridTableTemplate.tableId = randomStringGenerator()
+    template = loader.get_template('gridMng/createMyGridBase.html')
+    templateData = CreateMyGridBaseData(gridTableTemplate)
+    context = RequestContext(request, {'data': templateData})
+    htmlData = template.render(context)
     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
+
 
 """
     This function is used to display the initial page the user sees when he
     clicks the button 'grids'.
 """
+
+
 def getShowGridPage(request):
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
 
-    user1= request.user
-    gridtype= Grid.GridType.USER_GRID
-    templateData= ShowGridsData()
-    templateData.grids= Grid.objects.filter(user=user1, grid_type=gridtype)
+    user1 = request.user
+    gridtype = Grid.GridType.USER_GRID
+    templateData = ShowGridsData()
+    templateData.grids = Grid.objects.filter(user=user1, grid_type=gridtype)
 
     if len(templateData.grids) <= 0:
-        templateData.grids= None
+        templateData.grids = None
 
-    context= RequestContext(request, {'data' : templateData})
+    context = RequestContext(request, {'data': templateData})
 
-    return render(request, 'gridMng/showMyGrids.html', context_instance = context)
+    return render(request, 'gridMng/showMyGrids.html', context_instance=context)
+
 
 """
     This function is used to generate the html code of a grid that 
@@ -215,102 +234,105 @@ def getShowGridPage(request):
                 false: will not call the javascript function isTableSaved()
             default: false
 """
+
+
 def ajaxGetGrid(request):
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
-    user1= request.user
-    
+    user1 = request.user
+
     #####view mode values########################################################################
     # all: show the concerns/alternatives and ratings/weights                                   #
     # ac: show only alternatives and concerns (only works with write mode read)                 #
     #############################################################################################
-    
+
     #####write mode values#######################################
     # read: can only see the values                             #
     # write: can see and change the values                      #
     #############################################################
-    
+
     #####check table values#######################################
     # true: will call the javascript function isTableSaved()     #
     # false: will not call the javascript function isTableSaved()#
     ##############################################################
-    
-    checkForTableIsSave= False
-    changeRatingsWeights= False
-    changeCornAlt= False
-    showRatingWhileFalseChangeRatingsWeights= True
-    error= None;
-    
+
+    checkForTableIsSave = False
+    changeRatingsWeights = False
+    changeCornAlt = False
+    showRatingWhileFalseChangeRatingsWeights = True
+    error = None;
+
     #validate the options
     gridUSID = None
     viewMode = None
     writeMode = None
     try:
-        gridUSID= request.REQUEST['gridUSID']
-        viewMode= request.REQUEST['viewMode']
-        writeMode= request.REQUEST['writeMode']
+        gridUSID = request.REQUEST['gridUSID']
+        viewMode = request.REQUEST['viewMode']
+        writeMode = request.REQUEST['writeMode']
     except KeyError:
         error = 'Invalid arguments.'
-    
+
     #variable check
     try:
         if not gridUSID:
-            error= 'name of the grid was not specified'
+            error = 'name of the grid was not specified'
         if not viewMode:
-            viewMode= 'all'
+            viewMode = 'all'
         if not writeMode:
-            writeMode= 'write'
-            
+            writeMode = 'write'
+
         if writeMode == 'write':
-            changeCornAlt= True
-            changeRatingsWeights= True
+            changeCornAlt = True
+            changeRatingsWeights = True
             if viewMode == 'ac':
-                showRatingWhileFalseChangeRatingsWeights= False
-        
+                showRatingWhileFalseChangeRatingsWeights = False
+
         if request.REQUEST.has_key('checkTable'):
             if request.REQUEST['checkTable'] == 'true':
-                checkForTableIsSave= True
+                checkForTableIsSave = True
     except:
         if DEBUG == True:
             print "Exception in user code:"
-            print '-'*60
+            print '-' * 60
             traceback.print_exc(file=sys.stdout)
-            print '-'*60
-        error= 'one or more variables were not found'
-    
+            print '-' * 60
+        error = 'one or more variables were not found'
+
     if not error:
         # create the table for the template
-        grids= user1.grid_set
-        gridObj= grids.filter(usid= gridUSID) #gridObj is first a list 
+        grids = user1.grid_set
+        gridObj = grids.filter(usid=gridUSID) #gridObj is first a list
         if len(gridObj) > 0:
-            gridObj= gridObj[0]
+            gridObj = gridObj[0]
             try:
-                templateData= GridTableData(generateGridTable(gridObj))
-                templateData.tableId= randomStringGenerator()
-                templateData.usid= gridObj.usid
-                templateData.changeRatingsWeights= changeRatingsWeights
-                templateData.changeCornAlt= changeCornAlt
-                templateData.showRatingWhileFalseChangeRatingsWeights= showRatingWhileFalseChangeRatingsWeights
-                templateData.checkForTableIsSave= checkForTableIsSave
+                templateData = GridTableData(generateGridTable(gridObj))
+                templateData.tableId = randomStringGenerator()
+                templateData.usid = gridObj.usid
+                templateData.changeRatingsWeights = changeRatingsWeights
+                templateData.changeCornAlt = changeCornAlt
+                templateData.showRatingWhileFalseChangeRatingsWeights = showRatingWhileFalseChangeRatingsWeights
+                templateData.checkForTableIsSave = checkForTableIsSave
                 #dic= __generateGridTable__(gridObj)
-                template= loader.get_template('gridMng/gridTable.html')
-                context= RequestContext(request, {'data': templateData})
-                htmlData= template.render(context)
+                template = loader.get_template('gridMng/gridTable.html')
+                context = RequestContext(request, {'data': templateData})
+                htmlData = template.render(context)
                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                 #return render_to_response('gridMng/gridTable.html', {'table' : table, 'tableHeader': header, 'hiddenFields': hidden, 'weights':concernWeights, 'showRatings':showRatings, 'readOnly':readOnly, 'checkForTableIsSave':checkForTableIsSave }, context_instance=RequestContext(request))
             except:
                 if DEBUG == True:
                     print "Exception in user code:"
-                    print '-'*60
+                    print '-' * 60
                     traceback.print_exc(file=sys.stdout)
-                    print '-'*60
+                    print '-' * 60
                 logger.exception('Unknown error')
-                return HttpResponse(createXmlErrorResponse('unknown error'), content_type='application/xml')                
+                return HttpResponse(createXmlErrorResponse('unknown error'), content_type='application/xml')
         else:
             return HttpResponse(createXmlErrorResponse('Grid was not found'), content_type='application/xml')
     else:
         return HttpResponse(createXmlErrorResponse(error), content_type='application/xml')
-    
+
+
 """
     This function is used to update a grid that has been previously
     saved in the database by the user.
@@ -330,150 +352,172 @@ def ajaxGetGrid(request):
         gridName: string
         
 """
+
+
 def ajaxUpdateGrid(request):
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
-    
+
     if DEBUG:
         for key in request.REQUEST.keys():
             print 'key: ' + key + ' values: ' + repr(request.REQUEST[key])
         print '------'
-    
-    user1= request.user
-    gridObj= None
-    isConcernAlternativeResponseGrid= False
-    
+
+    user1 = request.user
+    gridObj = None
+    isConcernAlternativeResponseGrid = False
+
     #lets determine what type of grid we are dealing with here and do some checks to see if all the parameters are present
     if request.POST.has_key('gridType'):
-        gridType= request.POST['gridType']
+        gridType = request.POST['gridType']
         if gridType == 'session':
             if request.POST.has_key('sessionUSID') and request.POST.has_key('iteration'):
-                facilitatorObj= Facilitator.objects.isFacilitator(request.user)
-                if facilitatorObj :
-                    session= facilitatorObj.session_set.filter(usid= request.POST['sessionUSID'])
+                facilitatorObj = Facilitator.objects.isFacilitator(request.user)
+                if facilitatorObj:
+                    session = facilitatorObj.session_set.filter(usid=request.POST['sessionUSID'])
                     if len(session) >= 1:
-                        session= session[0]
-                        sessionGridRelation= session.sessiongrid_set.filter(iteration= request.POST['iteration'])
+                        session = session[0]
+                        sessionGridRelation = session.sessiongrid_set.filter(iteration=request.POST['iteration'])
                         if len(sessionGridRelation) >= 1:
                             if session.state.name == State.CHECK:
-                                gridObj= sessionGridRelation[0].grid
+                                gridObj = sessionGridRelation[0].grid
                             else:
-                                return HttpResponse(createXmlErrorResponse("Grid can\t be changed in the current session state"), content_type='application/xml')
+                                return HttpResponse(
+                                    createXmlErrorResponse("Grid can\t be changed in the current session state"),
+                                    content_type='application/xml')
                         else:
-                            return HttpResponse(createXmlErrorResponse("Grid was not found"), content_type='application/xml')
+                            return HttpResponse(createXmlErrorResponse("Grid was not found"),
+                                                content_type='application/xml')
                     else:
-                        return HttpResponse(createXmlErrorResponse("Session was not found"), content_type='application/xml')
+                        return HttpResponse(createXmlErrorResponse("Session was not found"),
+                                            content_type='application/xml')
                 else:
-                    return HttpResponse(createXmlErrorResponse("You are not a facilitator, can't change grid"), content_type='application/xml')
+                    return HttpResponse(createXmlErrorResponse("You are not a facilitator, can't change grid"),
+                                        content_type='application/xml')
             else:
-                return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
+                return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"),
+                                    content_type='application/xml')
         elif gridType == 'response':
-            return HttpResponse(createXmlErrorResponse("Invalid request, unsupported operation"), content_type='application/xml')
+            return HttpResponse(createXmlErrorResponse("Invalid request, unsupported operation"),
+                                content_type='application/xml')
         elif gridType == 'user':
-            gridObj= Grid.objects.get(user= user1, usid= request.POST['gridUSID'])
+            gridObj = Grid.objects.get(user=user1, usid=request.POST['gridUSID'])
     else:
         try:
-            gridObj= Grid.objects.get(user= user1, usid= request.POST['gridUSID'])
+            gridObj = Grid.objects.get(user=user1, usid=request.POST['gridUSID'])
         except:
             pass
 
     if request.POST.has_key('gridName'):
-        gridCheckNameResult= validateName(request.POST['gridName'])
-        if  type(gridCheckNameResult) == StringType:
-            gridObj.name= gridCheckNameResult
+        gridCheckNameResult = validateName(request.POST['gridName'])
+        if type(gridCheckNameResult) == StringType:
+            gridObj.name = gridCheckNameResult
         else:
             #if the grid name isn't a string than it is an error
             return gridCheckNameResult
-    #because django will save stuff to the database even if .save() is not called, we need to validate everything before starting to create the objects that will be used to populate the db
-    obj= None
+        #because django will save stuff to the database even if .save() is not called, we need to validate everything before starting to create the objects that will be used to populate the db
+    obj = None
     try:
-        obj= __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
+        obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
     except KeyError as error:
         if DEBUG == True:
             print "Exception in user code:"
-            print '-'*60
+            print '-' * 60
             traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            print '-' * 60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except ValueError as error:
         if DEBUG == True:
             print "Exception in user code:"
-            print '-'*60
+            print '-' * 60
             traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            print '-' * 60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except:
         if DEBUG == True:
             print "Exception in user code:"
-            print '-'*60
+            print '-' * 60
             traceback.print_exc(file=sys.stdout)
-            print '-'*60
+            print '-' * 60
         logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
-    nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues= obj     
-    
+    nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues = obj
+
     #update the grid
     if gridObj != None:
         for i in range(int(nAlternatives)):
             try:
                 str(alternativeValues[i])
             except UnicodeEncodeError as error:
-                errorString= 'Invalid character found in the alternatives. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely'
+                errorString = 'Invalid character found in the alternatives. The "' + error.object[
+                                                                                     error.start:error.end] + '" character can not be convert or used safely'
                 return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
             except:
-                return HttpResponse(createXmlErrorResponse("Invalid alternative name : "+ alternativeValues[i]), content_type='application/xml')
+                return HttpResponse(createXmlErrorResponse("Invalid alternative name : " + alternativeValues[i]),
+                                    content_type='application/xml')
         for i in range(int(nConcerns)):
             try:
                 str(concernValues[i][0])
             except UnicodeEncodeError as error:
-                errorString= 'Invalid character found in left concern. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely'
+                errorString = 'Invalid character found in left concern. The "' + error.object[
+                                                                                 error.start:error.end] + '" character can not be convert or used safely'
                 return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
             except:
-                return HttpResponse(createXmlErrorResponse("Invalid left concern name : "+ concernValues[i][0]), content_type='application/xml')
+                return HttpResponse(createXmlErrorResponse("Invalid left concern name : " + concernValues[i][0]),
+                                    content_type='application/xml')
             try:
                 str(concernValues[i][1])
             except UnicodeEncodeError as error:
-                errorString= 'Invalid character found in right concern. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely'
+                errorString = 'Invalid character found in right concern. The "' + error.object[
+                                                                                  error.start:error.end] + '" character can not be convert or used safely'
                 return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
             except:
-                return HttpResponse(createXmlErrorResponse("Invalid right concern name : "+ concernValues[i][1]), content_type='application/xml')
+                return HttpResponse(createXmlErrorResponse("Invalid right concern name : " + concernValues[i][1]),
+                                    content_type='application/xml')
         try:
-            isGridCreated= updateGrid(gridObj , nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, isConcernAlternativeResponseGrid)
+            isGridCreated = updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues,
+                                       isConcernAlternativeResponseGrid)
             if isGridCreated:
-                return HttpResponse(createXmlSuccessResponse('Grid was saved', createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
+                return HttpResponse(createXmlSuccessResponse('Grid was saved', createDateTimeTag(
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
         except:
             if DEBUG == True:
                 print "Exception in user code:"
-                print '-'*60
+                print '-' * 60
                 traceback.print_exc(file=sys.stdout)
-                print '-'*60
+                print '-' * 60
             logger.exception('Unknown error')
             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
     else:
         return HttpResponse(createXmlErrorResponse("No grid found"), content_type='application/xml')
-    
+
+
 """
     This function is used to delete a grid created by a user.
     
     External arguments:
         gridUSID: string
 """
+
+
 def ajaxDeleteGrid(request):
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
 
     if request.POST.has_key('gridUSID'):
-        gridUSID= request.POST['gridUSID']
-        grid= None
+        gridUSID = request.POST['gridUSID']
+        grid = None
         try:
-            grid= Grid.objects.get(user= request.user, usid= gridUSID)
+            grid = Grid.objects.get(user=request.user, usid=gridUSID)
         except:
             HttpResponse(createXmlErrorResponse('couldn\'t find grid'), content_type='application/xml')
         if grid != None:
             grid.delete()
             return HttpResponse(createXmlSuccessResponse('Grid was deleted'), content_type='application/xml')
     else:
-        return HttpResponse(createXmlErrorResponse('Invalid request, request is missing arguments'), content_type='application/xml')
+        return HttpResponse(createXmlErrorResponse('Invalid request, request is missing arguments'),
+                            content_type='application/xml')
+
 
 """
     This function is used to send a dendrogram back to the client machine 
@@ -482,6 +526,8 @@ def ajaxDeleteGrid(request):
     External arguments:
         gridUSID: string
 """
+
+
 def ajaxGenerateDendogram(request):
     """
 
@@ -491,49 +537,54 @@ def ajaxGenerateDendogram(request):
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
     if request.POST.has_key('gridUSID'):
-        grid1= Grid.objects.filter(user= request.user, usid= request.POST['gridUSID'])
+        grid1 = Grid.objects.filter(user=request.user, usid=request.POST['gridUSID'])
         if len(grid1) >= 1:
             try:
-                grid1= grid1[0]
+                grid1 = grid1[0]
                 if grid1.dendogram != None and grid1.dendogram != '':
-                    imgData= createDendogram(grid1)
-                    responseData= createSvgResponse(imgData, None)
+                    imgData = createDendogram(grid1)
+                    responseData = createSvgResponse(imgData, None)
                     return HttpResponse(responseData, content_type='application/xml')
                 else:
-                    try:     
-                        imgData= createDendogram(grid1)
-                        responseData= createSvgResponse(imgData, None)
+                    try:
+                        imgData = createDendogram(grid1)
+                        responseData = createSvgResponse(imgData, None)
                         return HttpResponse(responseData, content_type='application/xml')
                     except UnicodeEncodeError as error:
-                        errorString= 'Invalid character found in the grid. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely.\nDendogram can not be created.'
+                        errorString = 'Invalid character found in the grid. The "' + error.object[
+                                                                                     error.start:error.end] + '" character can not be convert or used safely.\nDendogram can not be created.'
                         return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
                     except:
-                        if DEBUG == True:
+                        if DEBUG:
                             print "Exception in user code:"
-                            print '-'*60
+                            print '-' * 60
                             traceback.print_exc(file=sys.stdout)
-                            print '-'*60
+                            print '-' * 60
                         logger.exception('Unknown error')
-                        return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'), content_type='application/xml')
+                        return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'),
+                                            content_type='application/xml')
             except:
-                if DEBUG == True:
+                if DEBUG:
                     print "Exception in user code:"
-                    print '-'*60
+                    print '-' * 60
                     traceback.print_exc(file=sys.stdout)
-                    print '-'*60
+                    print '-' * 60
                 logger.exception('Unknown error')
                 return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
         else:
-            return HttpResponse(createXmlErrorResponse('Could not find the grid to generate the dendrogram'), content_type='application/xml')
+            return HttpResponse(createXmlErrorResponse('Could not find the grid to generate the dendrogram'),
+                                content_type='application/xml')
     else:
-        return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'), content_type='application/xml')
+        return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'),
+                            content_type='application/xml')
+
 
 """
-This function will generate the similarity matrix for concers and alternatives ---- MURAT
+This function will generate the similarity matrix for concers and alternatives
 """
+
 
 def ajaxGenerateSimilarity(request):
-
     """
     :param request:
     :return:
@@ -543,27 +594,28 @@ def ajaxGenerateSimilarity(request):
         return redirect('/auth/login/')
 
     if request.POST.has_key('gridUSID'):
-        grid1= Grid.objects.filter(user= request.user, usid= request.POST['gridUSID'])
+        grid1 = Grid.objects.filter(user=request.user, usid=request.POST['gridUSID'])
         if len(grid1) >= 1:
             try:
-                grid1= grid1[0]
+                grid1 = grid1[0]
 
-                matrixConcern= returnMatrix(grid1, "concern")
-                matrixAlternatives= returnMatrix(grid1, "alt") #matrix that will be transposed
+                matrixConcern = returnMatrix(grid1, "concern")
+                matrixAlternatives = returnMatrix(grid1, "alt") #matrix that will be transposed
 
                 consRangeXi = len(matrixConcern[0])
-                consRangeYi = len(matrixConcern)-1
+                consRangeYi = len(matrixConcern) - 1
 
-                consRangeX =  [i+1 for i in range(consRangeXi)]
-                consRangeY =  [j+1 for j in range(consRangeYi)]
+                consRangeX = [i + 1 for i in range(consRangeXi)]
+                consRangeY = [j + 1 for j in range(consRangeYi)]
 
                 altsRangeX = len(matrixAlternatives[0])
                 altsRangeY = len(matrixAlternatives) - 1
 
-
-                template= loader.get_template('gridMng/murat.html')
-                context= RequestContext(request, {'cons': matrixConcern, 'alts': matrixAlternatives, 'consRangeX': consRangeX, 'consRangeY': consRangeY, 'altsRangeX': altsRangeX, 'altsRangeY': altsRangeY})
-                htmlData= template.render(context)
+                template = loader.get_template('gridMng/similaritymatrix.html')
+                context = RequestContext(request,
+                                         {'cons': matrixConcern, 'alts': matrixAlternatives, 'consRangeX': consRangeX,
+                                          'consRangeY': consRangeY, 'altsRangeX': altsRangeX, 'altsRangeY': altsRangeY})
+                htmlData = template.render(context)
                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
 
                 # if grid1.dendogram != None and grid1.dendogram != '':
@@ -587,15 +639,16 @@ def ajaxGenerateSimilarity(request):
                 #         logger.exception('Unknown error')
                 #         return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'), content_type='application/xml')
             except:
-                if DEBUG == True:
+                if DEBUG:
                     print "Exception in user code:"
-                    print '-'*60
+                    print '-' * 60
                     traceback.print_exc(file=sys.stdout)
-                    print '-'*60
+                    print '-' * 60
                 logger.exception('Unknown error')
                 return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
         else:
-            return HttpResponse(createXmlErrorResponse('Could not find the grid to generate similarity matrices'), content_type='application/xml')
+            return HttpResponse(createXmlErrorResponse('Could not find the grid to generate similarity matrices'),
+                                content_type='application/xml')
     else:
         return HttpResponse("Hello World!")
 
@@ -604,15 +657,18 @@ def ajaxGenerateSimilarity(request):
     This function will return the html code that is needed to generate the dialog box 
     that is used to ask to user to which format should a svg image be saved
 """
+
+
 def ajaxGetSaveSvgPage(request):
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
-    
-    template= loader.get_template('gridMng/saveSvg.html')
-    context= RequestContext(request, {})
-    htmlData= template.render(context)
+
+    template = loader.get_template('gridMng/saveSvg.html')
+    context = RequestContext(request, {})
+    htmlData = template.render(context)
     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-    
+
+
 """
     this function will receive a svg string and will convert it to another file type.
     
@@ -623,18 +679,20 @@ def ajaxGetSaveSvgPage(request):
                 svg
         fileName: string
 """
+
+
 def ajaxConvertSvgTo(request):
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
     try:
         if request.POST.has_key('data') and request.POST.has_key('fileName') and request.POST.has_key('convertTo'):
             if request.POST['data'] and request.POST['convertTo']:
-                imgData= __convertSvgStringTo__(request.POST['data'], request.POST['convertTo'])
+                imgData = __convertSvgStringTo__(request.POST['data'], request.POST['convertTo'])
                 if not request.POST['fileName']:
-                    imgData.fileName= randomStringGenerator()
+                    imgData.fileName = randomStringGenerator()
                 else:
-                    imgData.fileName= request.POST['fileName']
-                return createFileResponse(imgData)             
+                    imgData.fileName = request.POST['fileName']
+                return createFileResponse(imgData)
         else:
             if not request.POST.has_key('data'):
                 raise Exception('data key was not received')
@@ -643,15 +701,16 @@ def ajaxConvertSvgTo(request):
     except:
         if DEBUG == True:
             print "Exception in user code:"
-            print '-'*60
+            print '-' * 60
             traceback.print_exc(file=sys.stdout)
-            print '-'*60
-    #in case of an error or checks failing return an image error
-    errorImageData= getImageError()
+            print '-' * 60
+        #in case of an error or checks failing return an image error
+    errorImageData = getImageError()
     # send the file
-    response = HttpResponse(errorImageData, content_type= 'image/jpg')
+    response = HttpResponse(errorImageData, content_type='image/jpg')
     response['Content-Disposition'] = 'attachment; filename=error.jpg'
     return response
+
 
 """
     This function is used to send the user a file containing the svg image of a grid he created.
@@ -663,33 +722,34 @@ def ajaxConvertSvgTo(request):
         usid: string
         fileName: string 
 """
+
+
 def ajaxConvertGridTo(request):
-    
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
     try:
         if request.POST.has_key('usid') and request.POST.has_key('convertTo'):
-            usidData= request.POST['usid']
-            convertToData= request.POST['convertTo']
-            
+            usidData = request.POST['usid']
+            convertToData = request.POST['convertTo']
+
             if usidData != None and convertToData != None:
-                gridObj= Grid.objects.filter(usid= usidData)
+                gridObj = Grid.objects.filter(usid=usidData)
                 if len(gridObj) >= 1:
-                    gridObj= gridObj[0]
+                    gridObj = gridObj[0]
                     #check if the requesting user is the owner of the grid
                     if gridObj.user == request.user or gridObj.user == None:
-                        imgData= FileData()
+                        imgData = FileData()
                         if convertToData == 'svg':
-                            imgData.data=  convertGridTableToSvg(gridObj)
-                            imgData.fileExtention= 'svg'
-                            imgData.ContentType= 'image/svg+xml'
-                        
+                            imgData.data = convertGridTableToSvg(gridObj)
+                            imgData.fileExtention = 'svg'
+                            imgData.ContentType = 'image/svg+xml'
+
                         if request.POST.has_key('fileName'):
-                            imgData.fileName= request.POST['fileName']
-                            
+                            imgData.fileName = request.POST['fileName']
+
                             if not imgData.fileName:
-                                imgData.fileName= randomStringGenerator()
-                            
+                                imgData.fileName = randomStringGenerator()
+
                             return createFileResponse(imgData)
                     else:
                         raise Exception('User is not authorized to access this grid as he is not the creator')
@@ -708,15 +768,16 @@ def ajaxConvertGridTo(request):
     except:
         if DEBUG == True:
             print "Exception in user code:"
-            print '-'*60
+            print '-' * 60
             traceback.print_exc(file=sys.stdout)
-            print '-'*60  
-    #anything else return the img error
-    errorImageData= getImageError()
+            print '-' * 60
+            #anything else return the img error
+    errorImageData = getImageError()
     # send the file
-    response = HttpResponse(errorImageData, content_type= 'image/jpg')
+    response = HttpResponse(errorImageData, content_type='image/jpg')
     response['Content-Disposition'] = 'attachment; filename=error.jpg'
     return response
+
 
 """
     This functions is used to send back an image file to the user
@@ -729,8 +790,9 @@ def ajaxConvertGridTo(request):
         gridUSID: string
         fileName: string 
 """
+
+
 def dendrogramTo(request):
-    
     #########################################
     ############## Options ##################
     #########################################
@@ -738,22 +800,22 @@ def dendrogramTo(request):
     #convertTo: svg                         #
     #gridUSID: usid of the grid in question #
     #########################################
-    
+
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
     try:
         if request.POST.has_key('gridUSID') and request.POST.has_key('convertTo'):
             #check to see if the inputs are not None
             if request.POST['gridUSID'] and request.POST['convertTo']:
-                grid= Grid.objects.filter(usid= request.POST['gridUSID'])
+                grid = Grid.objects.filter(usid=request.POST['gridUSID'])
                 if len(grid) >= 1:
-                    grid= grid[0] 
-                    data= __convertSvgStringTo__(grid.dendogram, request.POST['convertTo'])
+                    grid = grid[0]
+                    data = __convertSvgStringTo__(grid.dendogram, request.POST['convertTo'])
                     if request.POST.has_key('fileName'):
-                        data.fileName= request.POST['fileName']
+                        data.fileName = request.POST['fileName']
                     else:
-                        data.fileName= randomStringGenerator()
-                    
+                        data.fileName = randomStringGenerator()
+
                     #return the file
                     return createFileResponse(data)
             else:
@@ -769,16 +831,17 @@ def dendrogramTo(request):
     except:
         if DEBUG == True:
             print "Exception in user code:"
-            print '-'*60
+            print '-' * 60
             traceback.print_exc(file=sys.stdout)
-            print '-'*60                 
-    #in case of an error or failing of one the checks return an image error
-    errorImageData= getImageError()
+            print '-' * 60
+            #in case of an error or failing of one the checks return an image error
+    errorImageData = getImageError()
     # send the file
-    response = HttpResponse(errorImageData, content_type= 'image/jpg')
-    response['Content-Disposition'] = 'attachment; filename=error.jpg' 
+    response = HttpResponse(errorImageData, content_type='image/jpg')
+    response['Content-Disposition'] = 'attachment; filename=error.jpg'
     return response
-    
+
+
 """
     This function is used to convert a string that contains svg data into
     image data that can be sent over the internet and be downloaded as a file.
@@ -794,64 +857,67 @@ def dendrogramTo(request):
         rgt/gridMng/fileData.FileData
         
 """
-def __convertSvgStringTo__(svgString= None, convertTo= None):
+
+
+def __convertSvgStringTo__(svgString=None, convertTo=None):
     fpInMemory = None
-    imgData= FileData()
+    imgData = FileData()
     if svgString and convertTo:
         if convertTo == 'svg':
-            imgData.data= svgString
-            imgData.ContentType= 'image/svg+xml'
-            imgData.fileExtention= 'svg'
+            imgData.data = svgString
+            imgData.ContentType = 'image/svg+xml'
+            imgData.fileExtention = 'svg'
             #response = HttpResponse(request.POST['data'], content_type='image/svg+xml')
             #response['Content-Disposition'] = 'attachment; filename=' + fileName + '.svg'
             #return response
             return imgData
-        
+
         #################################################################
         ## Warning, old code that wasn't tested with the new functions ##
         #################################################################
         else:
-                (imageFileName, mimeType, fileExtention)= convertSvgTo(svgString, convertTo)
-                imgData.ContentType= mimeType
-                imgData.fileExtention= fileExtention
-                if imageFileName != None:
-                    fpInMemory= BytesIO()
-                    fp= open(imageFileName, "rb")
-                    
-                    #read the file and place it in memory
-                    try:
-                        byte= fp.read(1)
-                        while byte != '':
-                            fpInMemory.write(byte)
-                            byte= fp.read(1)
-                    finally:
-                        fp.close()
-                        os.remove(imageFileName)
-                    
-                    imgData.data= fpInMemory.getvalue()
-                    imgData.length= fpInMemory.tell()
-                    # send the file
-                    #response = HttpResponse(fpInMemory.getvalue(), content_type= mimeType)
-                    #response['Content-Length'] = fpInMemory.tell()
-                    #fileName= request.POST['fileName']
-                    #if fileName != None and fileName != '':
-                    #    response['Content-Disposition'] = 'attachment; filename=' + fileName + fileExtention
-                    #else:
-                    #    response['Content-Disposition'] = 'attachment; filename=' + randomStringGenerator() + fileExtention
-                    #return response
-                    return imgData
-                else:
-                    raise Exception('Error image file name was None')
-#                    imgData.ContentType= 'image/jpg'
-#                    
-#                    errorImageData= getImageError()
-#                    # send the file
-#                    response = HttpResponse(errorImageData, content_type= 'image/jpg')
-#                    response['Content-Length'] = fpInMemory.tell()
-#                    response['Content-Disposition'] = 'attachment; filename=error.jpg' 
-#                    return response
+            (imageFileName, mimeType, fileExtention) = convertSvgTo(svgString, convertTo)
+            imgData.ContentType = mimeType
+            imgData.fileExtention = fileExtention
+            if imageFileName != None:
+                fpInMemory = BytesIO()
+                fp = open(imageFileName, "rb")
+
+                #read the file and place it in memory
+                try:
+                    byte = fp.read(1)
+                    while byte != '':
+                        fpInMemory.write(byte)
+                        byte = fp.read(1)
+                finally:
+                    fp.close()
+                    os.remove(imageFileName)
+
+                imgData.data = fpInMemory.getvalue()
+                imgData.length = fpInMemory.tell()
+                # send the file
+                #response = HttpResponse(fpInMemory.getvalue(), content_type= mimeType)
+                #response['Content-Length'] = fpInMemory.tell()
+                #fileName= request.POST['fileName']
+                #if fileName != None and fileName != '':
+                #    response['Content-Disposition'] = 'attachment; filename=' + fileName + fileExtention
+                #else:
+                #    response['Content-Disposition'] = 'attachment; filename=' + randomStringGenerator() + fileExtention
+                #return response
+                return imgData
+            else:
+                raise Exception('Error image file name was None')
+            #                    imgData.ContentType= 'image/jpg'
+            #
+            #                    errorImageData= getImageError()
+            #                    # send the file
+            #                    response = HttpResponse(errorImageData, content_type= 'image/jpg')
+            #                    response['Content-Length'] = fpInMemory.tell()
+            #                    response['Content-Disposition'] = 'attachment; filename=error.jpg'
+            #                    return response
     else:
         raise ValueError('svgString or convertTo was None')
+
 
 """
     This function is used to validate the input that will be used to create
@@ -875,29 +941,29 @@ def __convertSvgStringTo__(svgString= None, convertTo= None):
                      two contains the weight of the concern.  
         
 """
+
+
 def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
+    concernValues = [] #this will contain a tuple with 3 values, (leftPole, rightPole, weight)
+    alternativeValues = []
+    ratioValues = []
+    usedConcernNames = []
 
-    concernValues= [] #this will contain a tuple with 3 values, (leftPole, rightPole, weight)
-    alternativeValues= []
-    ratioValues= []
-    usedConcernNames= []
-    
+    i = 0
+    j = 0
+    nAlternatives = int(request.POST['nAlternatives'])
+    nConcerns = int(request.POST['nConcerns'])
 
-    i= 0
-    j= 0
-    nAlternatives= int(request.POST['nAlternatives'])
-    nConcerns= int(request.POST['nConcerns'])
-    
     #check if the keys with the alternatives are present
     while i < nAlternatives:
-        keyName= 'alternative_' + str((i + 1)) + '_name'
+        keyName = 'alternative_' + str((i + 1)) + '_name'
         if not request.POST.has_key(keyName):
             #print 'Error key not found: ' + keyName
             raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
             #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
         else:
             #alternative names should be unique in a grid, so lets check for that
-            temp= request.POST[keyName].strip()
+            temp = request.POST[keyName].strip()
             if temp != '':
                 if not temp in alternativeValues:
                     alternativeValues.append(temp)
@@ -907,61 +973,61 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
             else:
                 raise ValueError("No empty values are allowed for alternatives")
                 #return HttpResponse(createXmlErrorResponse("No empty values are allowed for alternatives"), content_type='application/xml') 
-        i+= 1
-    
-    i= 0
+        i += 1
+
+    i = 0
     #check if all the keys for the left and right pole are present
     while i < nConcerns:
-        leftPole= None
-        rightPole= None
+        leftPole = None
+        rightPole = None
         #check the left pole first
-        keyName= 'concern_'+ str((i + 1)) + '_left'
-        if not request.POST.has_key(keyName):
-            #print 'Error key not found: ' + keyName
-            raise KeyError('Invalid request, request is missing argument(s)',  'Error key not found: ' + keyName)
-            #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
-        else:
-            #the right and left pole can be None so convert the empty string into None
-            leftPole= request.POST[keyName]
-            if leftPole == '':
-                leftPole= None
-            #the names of the left and right pole should be unique in a grid, so lets check for that. If the left pole is none, allow it to be saved
-            if not leftPole in usedConcernNames or leftPole == None:
-                usedConcernNames.append(leftPole)
-            else:
-                raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
-                #return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
-        #check the right pole
-        keyName= 'concern_'+ str((i + 1)) + '_right'
+        keyName = 'concern_' + str((i + 1)) + '_left'
         if not request.POST.has_key(keyName):
             #print 'Error key not found: ' + keyName
             raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
             #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
         else:
             #the right and left pole can be None so convert the empty string into None
-            rightPole= request.POST[keyName].strip()
+            leftPole = request.POST[keyName]
+            if leftPole == '':
+                leftPole = None
+                #the names of the left and right pole should be unique in a grid, so lets check for that. If the left pole is none, allow it to be saved
+            if not leftPole in usedConcernNames or leftPole == None:
+                usedConcernNames.append(leftPole)
+            else:
+                raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
+                #return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
+            #check the right pole
+        keyName = 'concern_' + str((i + 1)) + '_right'
+        if not request.POST.has_key(keyName):
+            #print 'Error key not found: ' + keyName
+            raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
+            #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
+        else:
+            #the right and left pole can be None so convert the empty string into None
+            rightPole = request.POST[keyName].strip()
             if rightPole == '':
-                rightPole= None
-            #the names of the left and right pole should be unique in a grid, so lets check for that. If the right pole is none, allow it to be saved
+                rightPole = None
+                #the names of the left and right pole should be unique in a grid, so lets check for that. If the right pole is none, allow it to be saved
             if not rightPole in usedConcernNames or rightPole == None:
                 usedConcernNames.append(rightPole)
             else:
                 raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
                 #return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
-        #if it is a response grid of the alternative.concern we don't need to check for the weights as they will not be there
+            #if it is a response grid of the alternative.concern we don't need to check for the weights as they will not be there
         if not isConcernAlternativeResponseGrid:
             #lets check if the weight key is present
-            keyName= 'weight_concern'+ str((i + 1))
+            keyName = 'weight_concern' + str((i + 1))
             if not request.POST.has_key(keyName):
                 #print 'Error key not found: ' + keyName
                 raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
                 #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
             else:
                 #allowed values for the values are None, '', ' ' and numbers
-                keyValue= request.POST[keyName]
-                if not (keyValue == None or keyValue == ' ' or keyValue == ''): 
+                keyValue = request.POST[keyName]
+                if not (keyValue == None or keyValue == ' ' or keyValue == ''):
                     try:
-                        value= float(keyValue)
+                        value = float(keyValue)
                         concernValues.append((leftPole, rightPole, value))
                     except:
                         raise ValueError("Invalid input " + keyValue)
@@ -970,29 +1036,29 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
                     raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
         else:
             concernValues.append((leftPole, rightPole, None))
-        i+= 1
-    i= 0
-    
+        i += 1
+    i = 0
+
     #we are going to check the ratios now, because the response grid for the alternative/concern doesn't have ratios we don't need to check for them
     if not isConcernAlternativeResponseGrid:
-        i= 0
-        j= 0
-        hasEmptyConcern= False;
+        i = 0
+        j = 0
+        hasEmptyConcern = False;
         while i < nConcerns:
-            ratios= []
+            ratios = []
             #it is not allowed to have rations in an concern that has no leftPole or rightPole
             if concernValues[i][0] != None and concernValues[i][1] != None:
-                hasEmptyConcern= False
+                hasEmptyConcern = False
             else:
-                hasEmptyConcern= True
+                hasEmptyConcern = True
             while j < nAlternatives:
-                keyName= 'ratio_concer' + str((i + 1)) +'_alternative' + str(( j + 1))
+                keyName = 'ratio_concer' + str((i + 1)) + '_alternative' + str(( j + 1))
                 if not request.POST.has_key(keyName):
                     #print 'Error key not found: ' + keyName
                     raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
                     #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
                 else:
-                    keyValue= request.POST[keyName].strip()
+                    keyValue = request.POST[keyName].strip()
                     #valid values for the they are None, ' ', '' and numbers, anything else is not allowed
                     if not (keyValue == None or keyValue == ''):
                         if hasEmptyConcern:
@@ -1000,20 +1066,21 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
                             #return HttpResponse(createXmlErrorResponse('It is not allowed to have ratings while the concern is empty'), content_type='application/xml')
                         else:
                             try:
-                                value= float(keyValue)
+                                value = float(keyValue)
                                 ratios.append(value)
                             except:
                                 raise ValueError("Invalid value: " + keyValue)
                                 #return HttpResponse(createXmlErrorResponse("Invalid value: " + keyValue), content_type='application/xml')
                     else:
-                        raise KeyError('Invalid request, request is missing argument(s)', 'Error rating not found: ' + keyName)
-                j+= 1
+                        raise KeyError('Invalid request, request is missing argument(s)',
+                                       'Error rating not found: ' + keyName)
+                j += 1
             ratioValues.append(ratios)
-            j= 0
-            i+= 1
+            j = 0
+            i += 1
     return (nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues)
-    
-    
+
+
 """
     This function is used to update a grid that was previouly saved in the database.
     
@@ -1034,139 +1101,143 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
     Return:
         boolean
 """
-def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, isConcernAlternativeResponseGrid):
+
+
+def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues,
+               isConcernAlternativeResponseGrid):
     if gridObj != None:
-        valuesChanged= None #use to check if we need to clear the dendogram field in the Grid model
-        objToCommit= []
-        totalConcenrs= gridObj.concerns_set.all().count()
-        totalAlternatives= gridObj.alternatives_set.all().count()
-        alternatives= []
-        concerns= []
-           
+        valuesChanged = None #use to check if we need to clear the dendogram field in the Grid model
+        objToCommit = []
+        totalConcenrs = gridObj.concerns_set.all().count()
+        totalAlternatives = gridObj.alternatives_set.all().count()
+        alternatives = []
+        concerns = []
+
         for obj in gridObj.alternatives_set.all():
             alternatives.append(obj)
-            
+
         for obj in gridObj.concerns_set.all():
             concerns.append(obj)
-            
-        i= 0;
-        j= 0;
-            
+
+        i = 0;
+        j = 0;
+
         #remove the concerns and alternatives first, this is because we want to avoid any type of database errors
         if nConcerns < totalConcenrs:
-            valuesChanged= 1
-            i= totalConcenrs - nConcerns
+            valuesChanged = 1
+            i = totalConcenrs - nConcerns
             while i > 0:
-                concern1= concerns.pop()
+                concern1 = concerns.pop()
                 concern1.delete()
-                i-= 1
+                i -= 1
         if nAlternatives < totalAlternatives:
-            valuesChanged= 1
-            i= totalAlternatives - nAlternatives
+            valuesChanged = 1
+            i = totalAlternatives - nAlternatives
             while i > 0:
-                alternative1= alternatives.pop()
+                alternative1 = alternatives.pop()
                 alternative1.delete()
-                i-= 1
-            
-        i= 0
+                i -= 1
+
+        i = 0
         #lets update what we have
         #lets check what changed with the concerns first
         while i < nConcerns and i < totalConcenrs:
             #check if the name of the concern is the same
             if concerns[i].leftPole != concernValues[i][0] or concerns[i].rightPole != concernValues[i][1]:
-                concern1= concerns[i]
-                concern1.leftPole= concernValues[i][0]
-                concern1.rightPole= concernValues[i][1]
+                concern1 = concerns[i]
+                concern1.leftPole = concernValues[i][0]
+                concern1.rightPole = concernValues[i][1]
                 if not valuesChanged:
-                    valuesChanged= 1
+                    valuesChanged = 1
                 objToCommit.append(concern1)
-            #check if the weight didn't change only if the grid is not an response grid from alternative/concerns as it doesn't have weights or ratios
+                #check if the weight didn't change only if the grid is not an response grid from alternative/concerns as it doesn't have weights or ratios
             if not isConcernAlternativeResponseGrid:
-                newWeight= concernValues[i][2]
-                if concerns[i].weight != newWeight :
-                    concern1= concerns[i]
-                    concern1.weight= newWeight
+                newWeight = concernValues[i][2]
+                if concerns[i].weight != newWeight:
+                    concern1 = concerns[i]
+                    concern1.weight = newWeight
                     if not valuesChanged:
-                        valuesChanged= 1
+                        valuesChanged = 1
                     objToCommit.append(concern1)
-            i+= 1
-        i= 0
+            i += 1
+        i = 0
         #check if the names are the same
         while i < nAlternatives and i < totalAlternatives:
             if alternatives[i].name != alternativeValues[i]:
-                alternatives[i].name= alternativeValues[i]
+                alternatives[i].name = alternativeValues[i]
                 if not valuesChanged:
-                    valuesChanged= 1
+                    valuesChanged = 1
                 objToCommit.append(alternatives[i])
-            i+= 1
-        i= 0
-        j= 0
+            i += 1
+        i = 0
+        j = 0
         #the alternative/concern response grid has no ratios, so just ignore it
         if not isConcernAlternativeResponseGrid:
             while i < nConcerns and i < totalConcenrs:
                 while j < nAlternatives and j < totalAlternatives:
-                    newValue= ratioValues[i][j]
+                    newValue = ratioValues[i][j]
                     #if request.POST.has_key('ratio_concer' + str(i + 1) + '_alternative' + str(j + 1)):
-                        #newValue= float(request.POST['ratio_concer' + str(i + 1) + '_alternative' + str(j + 1)]) 
-                    ratingObjList= Ratings.objects.filter(concern= concerns[i], alternative= alternatives[j])
+                    #newValue= float(request.POST['ratio_concer' + str(i + 1) + '_alternative' + str(j + 1)])
+                    ratingObjList = Ratings.objects.filter(concern=concerns[i], alternative=alternatives[j])
                     if (len(ratingObjList) > 0):
                         ratingObj = ratingObjList[0]
-                    # check to see if the rating had a value before, if not create the new value
+                        # check to see if the rating had a value before, if not create the new value
                     if newValue != ratingObj.rating:
                         #update values here
-                        ratingObj.rating= newValue
+                        ratingObj.rating = newValue
                         objToCommit.append(ratingObj)
                         if not valuesChanged:
-                            valuesChanged= 1
-                    j+= 1
-                i+= 1
-                j= 0
-            
+                            valuesChanged = 1
+                    j += 1
+                i += 1
+                j = 0
+
         #now lets take care of adding stuff
         if nConcerns > totalConcenrs:
-            valuesChanged= 1
-            i= totalConcenrs
-            j= 0
+            valuesChanged = 1
+            i = totalConcenrs
+            j = 0
             while i < nConcerns:
-                concern= Concerns.objects.create(grid= gridObj, leftPole= concernValues[i][0], rightPole= concernValues[i][1], weight= concernValues[i][2])
+                concern = Concerns.objects.create(grid=gridObj, leftPole=concernValues[i][0],
+                                                  rightPole=concernValues[i][1], weight=concernValues[i][2])
                 objToCommit.append(concern)
                 concerns.append(concern)
                 if not isConcernAlternativeResponseGrid:
                     #create ratios for the concern, ratios will be created only for the old known alternatives
                     while j < totalAlternatives:
-                        rate= Ratings(concern= concerns[i], alternative= alternatives[j], rating= ratioValues[i][j])
+                        rate = Ratings(concern=concerns[i], alternative=alternatives[j], rating=ratioValues[i][j])
                         objToCommit.append(rate)
-                        j+= 1
-                    j= 0
-                i+= 1
-        #here we know if we had more concerns it has already been added to the concern list, thus totalConcenrs == nConcerns now.
+                        j += 1
+                    j = 0
+                i += 1
+            #here we know if we had more concerns it has already been added to the concern list, thus totalConcenrs == nConcerns now.
         if nAlternatives > totalAlternatives:
-            valuesChanged= 1
-            i= 0;
-            j= totalAlternatives
+            valuesChanged = 1
+            i = 0;
+            j = totalAlternatives
             #lets create the new alternatives
             while i < (nAlternatives - totalAlternatives):
                 #print request.REQUEST['alternative_' + str((totalAlternatives + i + 1)) + '_name']
-                alternative= Alternatives.objects.create(grid= gridObj, name= alternativeValues[i + totalAlternatives])
+                alternative = Alternatives.objects.create(grid=gridObj, name=alternativeValues[i + totalAlternatives])
                 objToCommit.append(alternative)
                 alternatives.append(alternative)
-                i+= 1
-            i= 0
+                i += 1
+            i = 0
             #create the ratios
             if not isConcernAlternativeResponseGrid:
                 while i < nConcerns:
                     while j < nAlternatives:
-                        rate= Ratings(concern= concerns[i], alternative= alternatives[j], rating= ratioValues[i][j])
+                        rate = Ratings(concern=concerns[i], alternative=alternatives[j], rating=ratioValues[i][j])
                         objToCommit.append(rate);
-                        j+= 1
-                    j= totalAlternatives
-                    i+= 1
+                        j += 1
+                    j = totalAlternatives
+                    i += 1
         if valuesChanged:
-            gridObj.dendogram= ''
+            gridObj.dendogram = ''
             #check to see if the grid obj is already schedule to be saved
             if not (gridObj in objToCommit):
                 objToCommit.append(gridObj)
-        #now that all went ok commit the changes (except delete as that one is done when the function is called)
+            #now that all went ok commit the changes (except delete as that one is done when the function is called)
         for obj in objToCommit:
             obj.save()
         gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
@@ -1174,7 +1245,8 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
         return True
     else:
         raise ValueError('GridObj was None')
-    
+
+
 """
     this function will create and save a grid. After successful creation the grid is returned
     
@@ -1203,13 +1275,15 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
     Return:
         rgt/gridMng/models.Grid
 """
-def createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues, createRatios):
-    
+
+
+def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues,
+               createRatios):
     if userObj != None and gridType != None and nConcerns != None and nAlternatives != None and concernValues != None and alternativeValues != None and ratioValues != None and createRatios != None:
         try:
-            gridObj= Grid.objects.create(user= userObj, grid_type= gridType)
+            gridObj = Grid.objects.create(user=userObj, grid_type=gridType)
             if gridName != None:
-                gridObj.name= gridName
+                gridObj.name = gridName
             gridObj.usid = randomStringGenerator(GRID_USID_KEY_LENGTH)
             gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
             #gridObj.dateTime = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
@@ -1217,20 +1291,20 @@ def createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernVa
                 gridObj.save()
             except IntegrityError as error:
                 # check to see if the usid is duplicated or not
-                results= Grid.objects.filter(usid= gridObj.usid)
+                results = Grid.objects.filter(usid=gridObj.usid)
                 if len(results) >= 1:
                     #in this case the key was duplicated, so lets try to create a new key
-                    maxAttempts= 5
-                    wasGridSaved= False
+                    maxAttempts = 5
+                    wasGridSaved = False
                     while maxAttempts >= 0:
-                        maxAttempts-= 1
-                        key= randomStringGenerator(GRID_USID_KEY_LENGTH)
+                        maxAttempts -= 1
+                        key = randomStringGenerator(GRID_USID_KEY_LENGTH)
                         #check to see if this key is unique
-                        results= Grid.objects.filter(usid= key)
+                        results = Grid.objects.filter(usid=key)
                         if len(results) <= 0:
-                            gridObj.usid= key
+                            gridObj.usid = key
                             gridObj.save()
-                            wasGridSaved= True
+                            wasGridSaved = True
                             break
                     if wasGridSaved == False:
                         #in case we can not create a unique key, raise an error
@@ -1238,24 +1312,26 @@ def createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernVa
                     else:
                         #the integratyError was not caused by a duplicated suid so, raise it again
                         raise error
-            #gridObj= Grid.objects.create(user= userObj, name= gridName)
+                #gridObj= Grid.objects.create(user= userObj, name= gridName)
             #print 'nAlternatives: ' + str(nAlternatives)
-            
-            alternatives= []
-            concerns= []
-            
+
+            alternatives = []
+            concerns = []
+
             for i in range(int(nAlternatives)):
-                alternative= Alternatives.objects.create(grid= gridObj, name= alternativeValues[i])
+                alternative = Alternatives.objects.create(grid=gridObj, name=alternativeValues[i])
                 alternatives.append(alternative)
-            
+
             for i in range(int(nConcerns)):
-                concern= Concerns.objects.create(grid= gridObj, leftPole= concernValues[i][0], rightPole= concernValues[i][1], weight= concernValues[i][2])
+                concern = Concerns.objects.create(grid=gridObj, leftPole=concernValues[i][0],
+                                                  rightPole=concernValues[i][1], weight=concernValues[i][2])
                 concerns.append(concern)
             print ratioValues
             if createRatios:
                 for i in range(int(nConcerns)):
                     for j in range(int(nAlternatives)):
-                        Ratings.objects.create(concern= concerns[i], alternative= alternatives[j], rating= ratioValues[i][j])
+                        Ratings.objects.create(concern=concerns[i], alternative=alternatives[j],
+                                               rating=ratioValues[i][j])
 
             return gridObj
         except:
@@ -1265,15 +1341,15 @@ def createGrid(userObj, gridType,  gridName, nConcerns, nAlternatives, concernVa
                 if DEBUG == True:
                     print 'Could not delete the grid'
                     print "Exception in user code:"
-                    print '-'*60
+                    print '-' * 60
                     traceback.print_exc(file=sys.stdout)
-                    print '-'*60
+                    print '-' * 60
             raise
     else:
         raise ValueError('One or more variables were None')
 
-def pca(request):
 
+def pca(request):
     # imagePath = "C:\Android Dev\RGT-INstall Steps.png"
     # from PIL import Image
     # Image.init()
@@ -1284,6 +1360,7 @@ def pca(request):
     # return response
 
     import matplotlib
+
     matplotlib.use('Agg')
     from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     from matplotlib.figure import Figure
@@ -1301,42 +1378,42 @@ def pca(request):
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
     if request.GET.has_key('gridUSID'):
-        grid1= Grid.objects.filter(user= request.user, usid= request.GET['gridUSID'])
+        grid1 = Grid.objects.filter(user=request.user, usid=request.GET['gridUSID'])
         if len(grid1) >= 1:
             try:
-                grid1= grid1[0]
+                grid1 = grid1[0]
                 #here is sample data
                 #concerns are represented on columns, alternatives on lines
 
 
-        ### DENEMEEEEEE ###
+                ### DENEMEEEEEE ###
 
                 from RGT.gridMng.models import Ratings #can't be declared globally because it will generate an import error
 
                 #lets create a matrix that the hierarchical module understands
-                matrixFull= [] # this is the compleet matrix, it will be used to create the table in the picture
-                matrixConcern= []
-                matrixAlternatives= [] #matrix that will be transposed
-                concerns= grid1.concerns_set.all()
-                alternatives= grid1.alternatives_set.all()
+                matrixFull = [] # this is the compleet matrix, it will be used to create the table in the picture
+                matrixConcern = []
+                matrixAlternatives = [] #matrix that will be transposed
+                concerns = grid1.concerns_set.all()
+                alternatives = grid1.alternatives_set.all()
                 maxValueOfAlternative = -1 # this is to save time later on as i need to loop trough all the alternatives right now so i can check for max value
 
                 if len(concerns) > 1:
                     for concernObj in concerns:
-                        row= []
-                        ratio= None
-                        weight= 1 #concernObj.weight
+                        row = []
+                        ratio = None
+                        weight = 1 #concernObj.weight
                         if concernObj.leftPole != None:
                             row.append(str(concernObj.leftPole))
                             if len(alternatives) >= 1:
                                 for alternativeObj in alternatives:
-                                    ratio= (Ratings.objects.get(concern= concernObj, alternative= alternativeObj)).rating
+                                    ratio = (Ratings.objects.get(concern=concernObj, alternative=alternativeObj)).rating
                                     if ratio != None:
-                                        ratio*= weight
-                                        ratio= round(ratio, 2)
+                                        ratio *= weight
+                                        ratio = round(ratio, 2)
                                         row.append(ratio)
                                         if ratio > maxValueOfAlternative:
-                                            maxValueOfAlternative= ratio
+                                            maxValueOfAlternative = ratio
                                     else:
                                         raise ValueError('Ratings must be complete in order to generate a dendrogram.')
                             else:
@@ -1345,7 +1422,7 @@ def pca(request):
                             raise ValueError('Concerns must be complete in order to generate a dendrogram.')
                         matrixConcern.append(row)
                         matrixAlternatives.append(row[1:])
-                        row= row[0:] #create new obj of row
+                        row = row[0:] #create new obj of row
                         if concernObj.rightPole != None:
                             row.append(str(concernObj.rightPole))
                         else:
@@ -1355,7 +1432,7 @@ def pca(request):
                     raise ValueError('More than one concerns must be present in order to generate a dendrogram.')
 
                 ### ANNE BTTT ###
-                matrixAlternatives= transpose(matrixAlternatives)
+                matrixAlternatives = transpose(matrixAlternatives)
                 var_grid = np.array(matrixAlternatives)
                 #improve output readability
                 np.set_printoptions(precision=2)
@@ -1386,28 +1463,28 @@ def pca(request):
                 fig = plt.figure()
                 ax = fig.add_subplot(111)
                 ax.plot(pcar[:, 0], pcar[:, 1], 'bo')
-                ax.plot(pcan.v[:,0], pcan.v[:,1], 'ro')
+                ax.plot(pcan.v[:, 0], pcan.v[:, 1], 'ro')
 
                 #draw axes
                 ax.axhline(0, color='black')
                 ax.axvline(0, color='black')
 
                 #annotations each concern
-                id=0
+                id = 0
                 for xpoint, ypoint in pcan.v:
-                    ax.annotate('C{:.0f}'.format(id), (xpoint, ypoint+0.1), ha='center',
-                    va='center', bbox=dict(fc='white',ec='none'))
-                    id+=1
-                id=0
+                    ax.annotate('C{:.0f}'.format(id), (xpoint, ypoint + 0.1), ha='center',
+                                va='center', bbox=dict(fc='white', ec='none'))
+                    id += 1
+                id = 0
                 for xpoint, ypoint in pcar:
-                    ax.annotate(alternatives[id].name.format(id), (xpoint, ypoint+0.1), ha='center',
-                    va='center', bbox=dict(fc='0.99',ec='none'))
-                    id+=1
+                    ax.annotate(alternatives[id].name.format(id), (xpoint, ypoint + 0.1), ha='center',
+                                va='center', bbox=dict(fc='0.99', ec='none'))
+                    id += 1
 
 
                 #calculate accounted for variance
-                var_accounted_PC1 = pcan.d[0] * pcan.explained_variance * 100 /(pcan.d[0] + pcan.d[1])
-                var_accounted_PC2 = pcan.d[1] * pcan.explained_variance * 100 /(pcan.d[0] + pcan.d[1])
+                var_accounted_PC1 = pcan.d[0] * pcan.explained_variance * 100 / (pcan.d[0] + pcan.d[1])
+                var_accounted_PC2 = pcan.d[1] * pcan.explained_variance * 100 / (pcan.d[0] + pcan.d[1])
 
                 #Show variance accounted for
                 ax.set_xlabel('Accounted variance on PC1 (%.1f%%)' % (var_accounted_PC1))
@@ -1425,9 +1502,9 @@ def pca(request):
             except:
                 if DEBUG == True:
                     print "Exception in user code:"
-                    print '-'*60
+                    print '-' * 60
                     traceback.print_exc(file=sys.stdout)
-                    print '-'*60
+                    print '-' * 60
                 logger.exception('Unknown error')
                 return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
 
