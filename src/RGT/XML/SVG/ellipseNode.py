@@ -2,64 +2,64 @@ from RGT.XML.SVG.baseShapeNode import BaseShapeNode
 from types import StringType
 from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
+
 class EllipseNode(BaseShapeNode):
+    svgNodeType = BasicSvgNode.SVG_ELLIPSE_NODE
 
-    svgNodeType= BasicSvgNode.SVG_ELLIPSE_NODE
+    ATTRIBUTE_CX = 'cx'
+    ATTRIBUTE_CY = 'cy'
+    ATTRIBUTE_RX = 'rx'
+    ATTRIBUTE_RY = 'ry'
 
-    ATTRIBUTE_CX= 'cx'
-    ATTRIBUTE_CY= 'cy'
-    ATTRIBUTE_RX= 'rx'
-    ATTRIBUTE_RY= 'ry'
-    
-    def __init__(self, ownerDoc, rx= None, ry= None):
+    def __init__(self, ownerDoc, rx=None, ry=None):
         BaseShapeNode.__init__(self, ownerDoc, 'ellipse')
         self.setRx(rx)
         self.setRy(ry)
-    
+
     def setCx(self, data):
         if data != None:
             if type(data) is not StringType:
-                data= str(data)
+                data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_CX, data)
-    
+
     def setCy(self, data):
         if data != None:
             if type(data) is not StringType:
-                data= str(data)
+                data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_CY, data)
-    
+
     def setRx(self, data):
         if data != None:
             if type(data) is not StringType:
-                data= str(data)
+                data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_RX, data)
-    
+
     def setRy(self, data):
         if data != None:
             if type(data) is not StringType:
-                data= str(data)
+                data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_RY, data)
-    
+
     def getCx(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_CX)
+        node = self._getNodeAttribute(self.ATTRIBUTE_CX)
         if node != None:
             return node.nodeValue
         return None
-    
+
     def getCy(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_CY)
+        node = self._getNodeAttribute(self.ATTRIBUTE_CY)
         if node != None:
             return node.nodeValue
         return None
-    
+
     def getRx(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_RX)
+        node = self._getNodeAttribute(self.ATTRIBUTE_RX)
         if node != None:
             return node.nodeValue
         return None
-    
+
     def getRy(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_RY)
+        node = self._getNodeAttribute(self.ATTRIBUTE_RY)
         if node != None:
             return node.nodeValue
         return None

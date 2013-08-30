@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class PassRecoverCode(models.Model):
     email = models.EmailField()
     linkCode = models.CharField(max_length=14, unique=False)

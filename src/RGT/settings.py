@@ -11,12 +11,13 @@ EMAIL_VERIFICATION = True
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME':  projectPath + '/src/sqlite.db',
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3',
+        # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': projectPath + '/src/sqlite.db',
+        'USER': '', # Not used with sqlite3.
+        'PASSWORD': '', # Not used with sqlite3.
+        'HOST': '', # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '', # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -82,7 +83,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -92,7 +93,7 @@ SECRET_KEY = 'USE_YOUR_OWN'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    #     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -152,10 +153,10 @@ LOGGING = {
             'formatter': 'verbose'
         },
         'file': {
-            'level' : 'DEBUG',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
-            'filename':  projectPath + '/log.log'
+            'filename': projectPath + '/log.log'
         },
         'mail_admins': {
             'level': 'ERROR',
@@ -176,11 +177,12 @@ LOGGING = {
 }
 
 # authentication backend settings
-AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend', 'RGT.authentication.backendAuthentication.BackendAuthentication')
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend', 'RGT.authentication.backendAuthentication.BackendAuthentication')
 AUTH_PROFILE_MODULE = 'userProfile.UserProfile'
 
 from ownsettings import *
 
 ######## RGT specific variables ########
-GRID_USID_KEY_LENGTH= 20
-SESSION_USID_KEY_LENGTH= 20
+GRID_USID_KEY_LENGTH = 20
+SESSION_USID_KEY_LENGTH = 20

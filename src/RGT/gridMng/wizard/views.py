@@ -3,19 +3,19 @@ from django.contrib.formtools.wizard.views import SessionWizardView
 from RGT.gridMng.views import createGrid
 from RGT.gridMng.models import Grid
 
-class GridWizard(SessionWizardView):
 
+class GridWizard(SessionWizardView):
     def get_template_names(self):
         # Get the templates to be used for the steps of the wizard.
         return ['gridMng/wizard/gridWizard_step%d.html' % (self.steps.step1)]
-    
+
     def get_context_data(self, form, **kwargs):
         context = super(GridWizard, self).get_context_data(form=form, **kwargs)
         # alternatives step
         if self.steps.step1 == 2:
             try:
                 alternatives_data = self.get_cleaned_data_for_step('1')
-                context.update({'alternatives_length':len(alternatives_data)})
+                context.update({'alternatives_length': len(alternatives_data)})
             except:
                 # Alternatives data do not yet exist
                 pass
@@ -25,7 +25,7 @@ class GridWizard(SessionWizardView):
             # in order to generate the alternatives list.
             try:
                 alternatives_data = self.get_cleaned_data_for_step('1')
-                context.update({'alternatives_data':alternatives_data})
+                context.update({'alternatives_data': alternatives_data})
             except:
                 # Alternatives data do not exist 
                 pass
@@ -44,15 +44,16 @@ class GridWizard(SessionWizardView):
                 if "concern" in key:
                     concerns_data[key] = dict_data[key]
             concern_data_in_pairs = {}
-            for i in range(len(concerns_data)/2):
+            for i in range(len(concerns_data) / 2):
                 try:
-                    concern_data_in_pairs['%d' % (i+1)] = (concerns_data['concern%d-left' % (i+1)], concerns_data['concern%d-right' % (i+1)])
+                    concern_data_in_pairs['%d' % (i + 1)] = (
+                        concerns_data['concern%d-left' % (i + 1)], concerns_data['concern%d-right' % (i + 1)])
                 except:
                     # The field name does not exist
                     pass
-            context.update({'concerns_data':concerns_data,
-                            'concerns_data_in_pairs':concern_data_in_pairs,
-                            'concerns_length':len(concerns_data)/2})
+            context.update({'concerns_data': concerns_data,
+                            'concerns_data_in_pairs': concern_data_in_pairs,
+                            'concerns_length': len(concerns_data) / 2})
         # ratings step
         elif self.steps.step1 == 5:
             # Get the alternatives data from step 1 (zero index) and the concerns data from step 2 (zero index)
@@ -77,19 +78,20 @@ class GridWizard(SessionWizardView):
                     splitted = dict_data[key].split('-')
                     acrd['%s%s' % (splitted[1], splitted[0])] = splitted[2]
             concern_data_in_pairs = {}
-            for i in range(len(concerns_data)/2):
+            for i in range(len(concerns_data) / 2):
                 try:
-                    concern_data_in_pairs['%d' % (i+1)] = (concerns_data['concern%d-left' % (i+1)], concerns_data['concern%d-right' % (i+1)])
+                    concern_data_in_pairs['%d' % (i + 1)] = (
+                        concerns_data['concern%d-left' % (i + 1)], concerns_data['concern%d-right' % (i + 1)])
                 except:
                     # The field name does not exist
                     pass
-            context.update({'alternatives_data':alternatives_data,
-                            'alternatives_length':len(alternatives_data),
-                            'concerns_data':concerns_data,
-                            'concerns_data_in_pairs':concern_data_in_pairs,
-                            'concerns_length':len(concerns_data)/2,
-                            'acrd':acrd})
-        return context  
+            context.update({'alternatives_data': alternatives_data,
+                            'alternatives_length': len(alternatives_data),
+                            'concerns_data': concerns_data,
+                            'concerns_data_in_pairs': concern_data_in_pairs,
+                            'concerns_length': len(concerns_data) / 2,
+                            'acrd': acrd})
+        return context
 
     def done(self, form_list, **kwargs):
         # Get the data of the form, create the grid and redirect to 'grids' page
@@ -123,25 +125,26 @@ class GridWizard(SessionWizardView):
         # Get the alternative values from the form data of step 1 (zero index).
         alternative_values = []
         for i in range(int(num_alternatives)):
-            val = (step_one_data['%s-alternative-%d' % (step_one_prefix, i+1)]).strip()
+            val = (step_one_data['%s-alternative-%d' % (step_one_prefix, i + 1)]).strip()
             alternative_values.append(val)
-        # Get the concern and weight values from the form data of step 2 for concerns, and step 3 for weights (zero index).
+            # Get the concern and weight values from the form data of step 2 for concerns, and step 3 for weights (zero index).
         concern_values = []
         for i in range(int(num_concerns)):
-            left = (step_two_data['%s-concern%d-left' % (step_two_prefix, i+1)]).strip()
-            right = (step_two_data['%s-concern%d-right' % (step_two_prefix, i+1)]).strip()
-            weight = step_three_data['%s-weight%d' % (step_three_prefix, i+1)]
+            left = (step_two_data['%s-concern%d-left' % (step_two_prefix, i + 1)]).strip()
+            right = (step_two_data['%s-concern%d-right' % (step_two_prefix, i + 1)]).strip()
+            weight = step_three_data['%s-weight%d' % (step_three_prefix, i + 1)]
             concern_values.append((left, right, weight))
-        # Get the rating values from the form data of step 4 (zero index).
+            # Get the rating values from the form data of step 4 (zero index).
         rating_values = []
         for i in range(int(num_concerns)):
             ratings = []
             for j in range(int(num_alternatives)):
-                rating = float(step_four_data['%s-rating-concern%d-alternative%d' % (step_four_prefix, i+1, j+1)])
+                rating = float(step_four_data['%s-rating-concern%d-alternative%d' % (step_four_prefix, i + 1, j + 1)])
                 ratings.append(rating)
             rating_values.append(ratings)
-        # We want to create ratings.
+            # We want to create ratings.
         create_ratings = True
         # Create the grid.
-        createGrid(user_obj, grid_type, grid_name, num_concerns, num_alternatives, concern_values, alternative_values, rating_values, create_ratings)
+        createGrid(user_obj, grid_type, grid_name, num_concerns, num_alternatives, concern_values, alternative_values,
+                   rating_values, create_ratings)
         return HttpResponseRedirect('/grids/')

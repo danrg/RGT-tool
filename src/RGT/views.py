@@ -5,6 +5,7 @@ from HelpMessages import HELP_MESSAGES
 #import logging
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlSuccessResponse, createXmlErrorResponse
 
+
 @login_required
 def home(request):
     profile = request.user.get_profile()
@@ -12,7 +13,7 @@ def home(request):
 
 
 @login_required
-def rgtHelp(request, helpMessageId = ''):
+def rgtHelp(request, helpMessageId=''):
     if helpMessageId in HELP_MESSAGES:
         return HttpResponse(createXmlSuccessResponse(HELP_MESSAGES[helpMessageId]), content_type='application/xml')
 

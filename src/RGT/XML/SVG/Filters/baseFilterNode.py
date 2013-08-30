@@ -4,10 +4,8 @@ from RGT.XML.SVG.Attribs.filterPrimitiveAttributes import FilterPrimitiveAttribu
 from RGT.XML.SVG.Attribs.classAttribute import ClassAttribute
 from RGT.XML.SVG.Attribs.styleAttribute import StyleAttribute
 
+
 class BaseFilterNode(BasicSvgNode, PresentationAttributes, FilterPrimitiveAttributes, ClassAttribute, StyleAttribute):
-    
-
-
     def __init__(self, ownerDoc, tagName):
         BasicSvgNode.__init__(self, ownerDoc, tagName)
         PresentationAttributes.__init__(self)

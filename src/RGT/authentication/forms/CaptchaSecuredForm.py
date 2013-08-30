@@ -1,8 +1,8 @@
 from django import forms
 from RGT.authentication import CaptchaVerifier
 
-class CaptchaSecuredForm(forms.Form):
 
+class CaptchaSecuredForm(forms.Form):
     captchaVerifier = CaptchaVerifier()
 
     def __init__(self, *args, **kwargs):

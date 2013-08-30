@@ -5,16 +5,15 @@
     
 """
 
+
 class BasicSvgAttribute(object):
-
-
     def _setNodeAttribute(self, attribName, data):
-        attribNode= self.getAttributeNode(attribName)
+        attribNode = self.getAttributeNode(attribName)
         if attribNode == None:
-            attribNode= self.ownerDocument.createAttribute(attribName)
+            attribNode = self.ownerDocument.createAttribute(attribName)
             self.setAttributeNode(attribNode)
-        
-        attribNode.nodeValue= data
-    
+
+        attribNode.nodeValue = data
+
     def _getNodeAttribute(self, attribName):
         return self.getAttributeNode(attribName)

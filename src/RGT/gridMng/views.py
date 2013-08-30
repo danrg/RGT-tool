@@ -415,7 +415,7 @@ def ajaxUpdateGrid(request):
         else:
             #if the grid name isn't a string than it is an error
             return gridCheckNameResult
-        #because django will save stuff to the database even if .save() is not called, we need to validate everything before starting to create the objects that will be used to populate the db
+            #because django will save stuff to the database even if .save() is not called, we need to validate everything before starting to create the objects that will be used to populate the db
     obj = None
     try:
         obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
@@ -704,7 +704,7 @@ def ajaxConvertSvgTo(request):
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
-        #in case of an error or checks failing return an image error
+            #in case of an error or checks failing return an image error
     errorImageData = getImageError()
     # send the file
     response = HttpResponse(errorImageData, content_type='image/jpg')
@@ -907,14 +907,14 @@ def __convertSvgStringTo__(svgString=None, convertTo=None):
                 return imgData
             else:
                 raise Exception('Error image file name was None')
-            #                    imgData.ContentType= 'image/jpg'
-            #
-            #                    errorImageData= getImageError()
-            #                    # send the file
-            #                    response = HttpResponse(errorImageData, content_type= 'image/jpg')
-            #                    response['Content-Length'] = fpInMemory.tell()
-            #                    response['Content-Disposition'] = 'attachment; filename=error.jpg'
-            #                    return response
+                #                    imgData.ContentType= 'image/jpg'
+                #
+                #                    errorImageData= getImageError()
+                #                    # send the file
+                #                    response = HttpResponse(errorImageData, content_type= 'image/jpg')
+                #                    response['Content-Length'] = fpInMemory.tell()
+                #                    response['Content-Disposition'] = 'attachment; filename=error.jpg'
+                #                    return response
     else:
         raise ValueError('svgString or convertTo was None')
 
@@ -997,7 +997,7 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
             else:
                 raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
                 #return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
-            #check the right pole
+                #check the right pole
         keyName = 'concern_' + str((i + 1)) + '_right'
         if not request.POST.has_key(keyName):
             #print 'Error key not found: ' + keyName
@@ -1014,7 +1014,7 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
             else:
                 raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
                 #return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
-            #if it is a response grid of the alternative.concern we don't need to check for the weights as they will not be there
+                #if it is a response grid of the alternative.concern we don't need to check for the weights as they will not be there
         if not isConcernAlternativeResponseGrid:
             #lets check if the weight key is present
             keyName = 'weight_concern' + str((i + 1))
@@ -1210,7 +1210,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
                         j += 1
                     j = 0
                 i += 1
-            #here we know if we had more concerns it has already been added to the concern list, thus totalConcenrs == nConcerns now.
+                #here we know if we had more concerns it has already been added to the concern list, thus totalConcenrs == nConcerns now.
         if nAlternatives > totalAlternatives:
             valuesChanged = 1
             i = 0;
@@ -1237,7 +1237,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
             #check to see if the grid obj is already schedule to be saved
             if not (gridObj in objToCommit):
                 objToCommit.append(gridObj)
-            #now that all went ok commit the changes (except delete as that one is done when the function is called)
+                #now that all went ok commit the changes (except delete as that one is done when the function is called)
         for obj in objToCommit:
             obj.save()
         gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
@@ -1312,8 +1312,8 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
                     else:
                         #the integratyError was not caused by a duplicated suid so, raise it again
                         raise error
-                #gridObj= Grid.objects.create(user= userObj, name= gridName)
-            #print 'nAlternatives: ' + str(nAlternatives)
+                        #gridObj= Grid.objects.create(user= userObj, name= gridName)
+                        #print 'nAlternatives: ' + str(nAlternatives)
 
             alternatives = []
             concerns = []

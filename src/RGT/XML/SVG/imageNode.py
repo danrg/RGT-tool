@@ -9,13 +9,14 @@ from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from RGT.XML.SVG.Attribs.sizeAttributes import SizeAttributes
 from types import StringType
 
-class ImageNode(BasicSvgNode, ConditionalProcessingAttributes, GraphicalEventAttributes, XlinkAttributes, PresentationAttributes, ClassAttribute, StyleAttribute, PositionAttributes, SizeAttributes):
 
-    svgNodeType= BasicSvgNode.SVG_IMAGE_NODE
+class ImageNode(BasicSvgNode, ConditionalProcessingAttributes, GraphicalEventAttributes, XlinkAttributes,
+                PresentationAttributes, ClassAttribute, StyleAttribute, PositionAttributes, SizeAttributes):
+    svgNodeType = BasicSvgNode.SVG_IMAGE_NODE
 
-    ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
-    ATTRIBUTE_PRESERVE_ASPECT_RATIO= 'preserveAspectRatio'
-    ATTRIBUTE_TRANSFORM= 'transform'
+    ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED = 'externalResourcesRequired'
+    ATTRIBUTE_PRESERVE_ASPECT_RATIO = 'preserveAspectRatio'
+    ATTRIBUTE_TRANSFORM = 'transform'
 
     def __init__(self, ownerDoc):
         BasicSvgNode.__init__(self, ownerDoc, 'image')
@@ -28,46 +29,46 @@ class ImageNode(BasicSvgNode, ConditionalProcessingAttributes, GraphicalEventAtt
         PositionAttributes.__init__(self)
         SizeAttributes.__init__(self)
         self._allowedSvgChildNodes.update(self.SVG_GROUP_ANIMATION_ELEMENTS, self.SVG_GROUP_DESCRIPTIVE_ELEMENTS)
-        
+
     def setExternalResourcesRequired(self, data):
-        allowedValues= ['true', 'false']
-        
+        allowedValues = ['true', 'false']
+
         if data != None:
             if data not in allowedValues:
-                values= ''
+                values = ''
                 for value in allowedValues:
-                    values+= value + ', '
-                values= values[0: len(values)-2]
+                    values += value + ', '
+                values = values[0: len(values) - 2]
                 raise ValueError('Value not allowed, only ' + values + 'are allowed')
             else:
                 self._setNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED, data)
-    
+
     def setPreserveAspectRatio(self, data):
         if data != None:
             if type(data) is not StringType:
-                data= str(data)
+                data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_PRESERVE_ASPECT_RATIO, data)
-    
+
     def setTransform(self, data):
         if data != None:
             if type(data) is not StringType:
-                data= str(data)
+                data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_TRANSFORM, data)
-            
+
     def getExternalResourcesRequired(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED)
+        node = self._getNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED)
         if node != None:
             return node.nodeValue
         return None
-    
+
     def getPreserveAspectRatio(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_PRESERVE_ASPECT_RATIO)
+        node = self._getNodeAttribute(self.ATTRIBUTE_PRESERVE_ASPECT_RATIO)
         if node != None:
             return node.nodeValue
         return None
-    
+
     def getTransform(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_TRANSFORM)
+        node = self._getNodeAttribute(self.ATTRIBUTE_TRANSFORM)
         if node != None:
             return node.nodeValue
         return None

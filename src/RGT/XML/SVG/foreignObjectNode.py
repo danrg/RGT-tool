@@ -8,12 +8,13 @@ from RGT.XML.SVG.Attribs.positionAttributes import PositionAttributes
 from RGT.XML.SVG.Attribs.sizeAttributes import SizeAttributes
 from types import StringType
 
-class ForeignObjectNode(BasicSvgNode, ConditionalProcessingAttributes, GraphicalEventAttributes, PresentationAttributes, ClassAttribute, StyleAttribute, PositionAttributes, SizeAttributes):
-    
-    svgNodeType= BasicSvgNode.SVG_FOREIGN_OBJECT_NODE
-    
-    ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
-    ATTRIBUTE_TRANSFORM= 'transform'
+
+class ForeignObjectNode(BasicSvgNode, ConditionalProcessingAttributes, GraphicalEventAttributes, PresentationAttributes,
+                        ClassAttribute, StyleAttribute, PositionAttributes, SizeAttributes):
+    svgNodeType = BasicSvgNode.SVG_FOREIGN_OBJECT_NODE
+
+    ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED = 'externalResourcesRequired'
+    ATTRIBUTE_TRANSFORM = 'transform'
 
     def __init__(self, ownerDoc):
         BasicSvgNode.__init__(self, ownerDoc, 'foreignObject')
@@ -24,35 +25,35 @@ class ForeignObjectNode(BasicSvgNode, ConditionalProcessingAttributes, Graphical
         StyleAttribute.__init__(self)
         PositionAttributes.__init__(self)
         SizeAttributes.__init__(self)
-        self.allowAllSvgNodesAsChildNodes= True
-    
+        self.allowAllSvgNodesAsChildNodes = True
+
     def setExternalResourcesRequired(self, data):
-        allowedValues= ['true', 'false']
-        
+        allowedValues = ['true', 'false']
+
         if data != None:
             if data not in allowedValues:
-                values= ''
+                values = ''
                 for value in allowedValues:
-                    values+= value + ', '
-                values= values[0: len(values)-2]
+                    values += value + ', '
+                values = values[0: len(values) - 2]
                 raise ValueError('Value not allowed, only ' + values + 'are allowed')
             else:
                 self._setNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED, data)
-    
+
     def setTransform(self, data):
         if data != None:
             if type(data) is not StringType:
-                data= str(data)
+                data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_TRANSFORM, data)
-    
+
     def getExternalResourcesRequired(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED)
+        node = self._getNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED)
         if node != None:
             return node.nodeValue
         return None
-    
+
     def getTransform(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_TRANSFORM)
+        node = self._getNodeAttribute(self.ATTRIBUTE_TRANSFORM)
         if node != None:
             return node.nodeValue
         return None

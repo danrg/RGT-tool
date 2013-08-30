@@ -7,10 +7,11 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, BadHeaderError
 from RGT.contact.contactForm import ContactForm
 
+
 def contact(request):
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
-    
+
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
@@ -32,16 +33,16 @@ def contact(request):
                 print 'another problem'
         else:
             return render_to_response('contact/contact.html',
-                               {'form':form},
-                               context_instance=RequestContext(request))
+                                      {'form': form},
+                                      context_instance=RequestContext(request))
     else:
         form = ContactForm()
         didContact = request.session.get('didContact')
         if didContact != None:
             del request.session['didContact']
-        
+
     return render_to_response('contact/contact.html',
-                              {'form':form, 'didContact':didContact},
+                              {'form': form, 'didContact': didContact},
                               context_instance=RequestContext(request))
     
     

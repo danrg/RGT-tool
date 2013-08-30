@@ -7,6 +7,7 @@ from django.conf import settings
 from RGT.authentication.forms import RegistrationForm
 from RGT.authentication.views.CaptchaSecuredFormView import CaptchaSecuredFormView
 
+
 class RegistrationView(CaptchaSecuredFormView):
     template_name = "authentication/register.html"
     success_url = "/home"
@@ -32,7 +33,7 @@ class RegistrationView(CaptchaSecuredFormView):
         user.save();
 
         #login the user after creation
-        user = authenticate(email= email, password= password)
+        user = authenticate(email=email, password=password)
         login(self.request, user);
 
         verificationCode = utility.randomStringGenerator(14)

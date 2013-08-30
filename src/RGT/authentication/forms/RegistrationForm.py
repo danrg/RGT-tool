@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from RGT.authentication.forms.CaptchaSecuredForm import CaptchaSecuredForm
 
+
 class RegistrationForm(CaptchaSecuredForm):
     email = forms.EmailField(label='E-mail address')
     firstName = forms.CharField(label='First name')
@@ -32,7 +33,7 @@ class RegistrationForm(CaptchaSecuredForm):
         data = self.cleaned_data['email']
 
         try:
-            user = User.objects.get(email= data)
+            user = User.objects.get(email=data)
         except User.DoesNotExist: #do nothing
             pass
 

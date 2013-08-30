@@ -14,6 +14,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from random import randint
 import time
 
+
 class BaseSessionLiveTest(BaseLiveTest):
     """
     This is the base class test which the rest session related test classes must extend.
@@ -80,6 +81,7 @@ class BaseSessionLiveTest(BaseLiveTest):
         body = self.browser.find_element_by_tag_name("body")
         self.assertIn("Session details", body.text)
 
+
 class SessionTests(BaseSessionLiveTest):
     """
     This class includes tests related to the session process.
@@ -102,10 +104,12 @@ class SessionTests(BaseSessionLiveTest):
             else:
                 for j in range(number_of_alternatives):
                     if two_grids:
-                        ratings = self.browser.find_elements_by_name("ratio_concer%d_alternative%d" % ((i + 1), (j + 1)))
+                        ratings = self.browser.find_elements_by_name(
+                            "ratio_concer%d_alternative%d" % ((i + 1), (j + 1)))
                         ratings[1].send_keys(randint(1, 5))
                     else:
-                        self.browser.find_element_by_name("ratio_concer%d_alternative%d" % ((i + 1), (j + 1))).send_keys(randint(1, 5))
+                        self.browser.find_element_by_name(
+                            "ratio_concer%d_alternative%d" % ((i + 1), (j + 1))).send_keys(randint(1, 5))
 
 
     def test_session_process(self):
@@ -159,7 +163,8 @@ class SessionTests(BaseSessionLiveTest):
         start_session_button.click()
 
         # Wait until the menu of the buttons changes to the session handling menu
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("input[value='Request Alt/Con']"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_css_selector("input[value='Request Alt/Con']"))
 
         # The iteration label show iteration 1
         iteration_label = self.browser.find_element_by_id("iteration")
@@ -172,11 +177,13 @@ class SessionTests(BaseSessionLiveTest):
         ### REQUEST ALTERNATIVES / CONCERNS STEP ###
 
         # Facilitator admin clicks the request alternatives and concerns button
-        request_alternatives_concerns_button = self.browser.find_element_by_css_selector("input[value='Request Alt/Con']")
+        request_alternatives_concerns_button = self.browser.find_element_by_css_selector(
+            "input[value='Request Alt/Con']")
         request_alternatives_concerns_button.click()
 
         # Wait until the session menu changes, to include the finish session button
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("input[value='Finish Request']"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_css_selector("input[value='Finish Request']"))
 
         # The iteration status shows 'A/C'
         current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
@@ -202,7 +209,8 @@ class SessionTests(BaseSessionLiveTest):
         ActionChains(self.browser).move_to_element(alternatives_with_name_alternative_2[1]).perform()
 
         # Participant user1 clicks the button to add a column
-        add_column_button = self.browser.find_element_by_xpath("//div[@class='colMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
+        add_column_button = self.browser.find_element_by_xpath(
+            "//div[@class='colMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
         add_column_button.click()
 
         # Participant user1 types value for alternative_3
@@ -245,7 +253,8 @@ class SessionTests(BaseSessionLiveTest):
         ActionChains(self.browser).move_to_element(concerns_with_name_concern_3_left[1]).perform()
 
         # Participant user2 clicks the button to add a row
-        add_row_button = self.browser.find_element_by_xpath("//div[@class='gridRowMenu leftRowMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
+        add_row_button = self.browser.find_element_by_xpath(
+            "//div[@class='gridRowMenu leftRowMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
         add_row_button.click()
 
         # Participant user2 types left and right value for concern_4
@@ -259,7 +268,8 @@ class SessionTests(BaseSessionLiveTest):
         ActionChains(self.browser).move_to_element(concern_4_left).perform()
 
         # Participant user2 clicks the button to add a row
-        add_row_button = self.browser.find_element_by_xpath("//div[@class='gridRowMenu leftRowMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
+        add_row_button = self.browser.find_element_by_xpath(
+            "//div[@class='gridRowMenu leftRowMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
         add_row_button.click()
 
         # Participant user2 types left and right value for concern_5
@@ -300,7 +310,8 @@ class SessionTests(BaseSessionLiveTest):
         finish_request_button.click()
 
         # Wait until the session menu changes, to include the request ratings button
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("input[value='Request Ratings']"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_css_selector("input[value='Request Ratings']"))
 
         # The iteration label shows iteration 2
         iteration_label = self.browser.find_element_by_id("iteration")
@@ -311,17 +322,20 @@ class SessionTests(BaseSessionLiveTest):
         self.assertIn("Check Values", current_iteration_status.text)
 
         # Facilitator admin selects from the select field the results from iteration 1
-        show_respond_from_iterations_options = self.browser.find_elements_by_xpath("//select[@id='mySessionsContentSessionIterationSelect']/option")
+        show_respond_from_iterations_options = self.browser.find_elements_by_xpath(
+            "//select[@id='mySessionsContentSessionIterationSelect']/option")
         show_respond_from_iterations_options[1].click()
 
         # Wait until the results from the selected iteration appear
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("resultAlternativeConcernTablesDiv"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_id("resultAlternativeConcernTablesDiv"))
 
         # Facilitator admin clicks the button to download results
         download_result1_button = self.browser.find_element_by_id("downloadResultsButton")
         download_result1_button.click()
 
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
 
         # User types value for filename
         grid_file_name = self.browser.find_element_by_name("fileName")
@@ -339,7 +353,8 @@ class SessionTests(BaseSessionLiveTest):
         ActionChains(self.browser).move_to_element(alternative_2_name).perform()
 
         # Facilitator admin clicks the button to add a column
-        add_column_button = self.browser.find_element_by_xpath("//div[@class='colMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
+        add_column_button = self.browser.find_element_by_xpath(
+            "//div[@class='colMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
         add_column_button.click()
 
         # Facilitator admin types value for alternative_3
@@ -351,7 +366,8 @@ class SessionTests(BaseSessionLiveTest):
         ActionChains(self.browser).move_to_element(concern_3_left).perform()
 
         # Facilitator admin clicks the button to add a row
-        add_row_button = self.browser.find_element_by_xpath("//div[@class='gridRowMenu leftRowMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
+        add_row_button = self.browser.find_element_by_xpath(
+            "//div[@class='gridRowMenu leftRowMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
         add_row_button.click()
 
         # Facilitator admin types left and right value for concern_4
@@ -365,7 +381,8 @@ class SessionTests(BaseSessionLiveTest):
         ActionChains(self.browser).move_to_element(concern_4_left).perform()
 
         # Facilitator admin clicks the button to add a row
-        add_row_button = self.browser.find_element_by_xpath("//div[@class='gridRowMenu leftRowMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
+        add_row_button = self.browser.find_element_by_xpath(
+            "//div[@class='gridRowMenu leftRowMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
         add_row_button.click()
 
         # Facilitator admin types left and right value for concern5
@@ -388,14 +405,16 @@ class SessionTests(BaseSessionLiveTest):
         clear_results_button.click()
 
         # Wait until the results are cleared
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("mySessionsContentResultDiv").text == "")
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_id("mySessionsContentResultDiv").text == "")
 
         # Facilitator admin clicks the request ratings button
         request_ratings_button = self.browser.find_element_by_css_selector("input[value='Request Ratings']")
         request_ratings_button.click()
 
         # Wait until the session menu changes, to include the finish session button
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("input[value='Finish Request']"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_css_selector("input[value='Finish Request']"))
 
         # The iteration status shows 'R/W'
         current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
@@ -460,7 +479,8 @@ class SessionTests(BaseSessionLiveTest):
         finish_request_button.click()
 
         # Wait until the session menu changes, to include the end session button
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("input[value='End Session']"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_css_selector("input[value='End Session']"))
 
         # The iteration label shows iteration 2
         iteration_label = self.browser.find_element_by_id("iteration")
@@ -471,7 +491,8 @@ class SessionTests(BaseSessionLiveTest):
         self.assertIn("Check Values", current_iteration_status.text)
 
         # Facilitator admin selects from the select field the results from iteration 2
-        show_respond_from_iterations_options = self.browser.find_elements_by_xpath("//select[@id='mySessionsContentSessionIterationSelect']/option")
+        show_respond_from_iterations_options = self.browser.find_elements_by_xpath(
+            "//select[@id='mySessionsContentSessionIterationSelect']/option")
         show_respond_from_iterations_options[2].click()
 
         # Wait until the results from the selected iteration appear
@@ -487,7 +508,8 @@ class SessionTests(BaseSessionLiveTest):
         download_result2_button = self.browser.find_element_by_css_selector("input[id='downloadResultsButton']")
         download_result2_button.click()
 
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
 
         # User types value for filename
         grid_file_name = self.browser.find_element_by_name("fileName")
@@ -522,7 +544,8 @@ class SessionTests(BaseSessionLiveTest):
         end_session_button.click()
 
         # Wait until the status change to Closed
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("currentIterationStatus").text == "Closed")
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_id("currentIterationStatus").text == "Closed")
 
         time.sleep(1)
 
@@ -549,7 +572,8 @@ class SessionTests(BaseSessionLiveTest):
         save_image_button = self.browser.find_element_by_css_selector("img[id='saveButtonImg']")
         save_image_button.click()
 
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
 
         # Facilitator types value for filename
         session_file_name = self.browser.find_element_by_name("fileName")
@@ -570,13 +594,16 @@ class SessionTests(BaseSessionLiveTest):
         # page and selects the session session1 of user admin
         self.participant_can_select_session("test1@test1.com", "123", "admin:session1", False)
 
-        show_participant_respond_from_iterations_options = self.browser.find_elements_by_xpath("//select[@id='responseSelection']/option")
+        show_participant_respond_from_iterations_options = self.browser.find_elements_by_xpath(
+            "//select[@id='responseSelection']/option")
         show_participant_respond_from_iterations_options[2].click()
 
         # Wait until the response from the selected iteration appear
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("participationSessionsContentGridsDiv"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_id("participationSessionsContentGridsDiv"))
 
-        show_participant_result_from_iterations_options = self.browser.find_elements_by_xpath("//select[@id='resultSelection']/option")
+        show_participant_result_from_iterations_options = self.browser.find_elements_by_xpath(
+            "//select[@id='resultSelection']/option")
         show_participant_result_from_iterations_options[2].click()
 
         # Wait until the results from the selected iteration appear
@@ -597,7 +624,8 @@ class SessionTests(BaseSessionLiveTest):
         save_grid_button = self.browser.find_element_by_css_selector("img[title='download grid as']")
         save_grid_button.click()
 
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
 
         # User types value for filename
         grid_file_name = self.browser.find_element_by_name("fileName")
@@ -613,6 +641,7 @@ class SessionTests(BaseSessionLiveTest):
         # Facilitator admin logs out
         logout_link = self.browser.find_element_by_link_text("Log out")
         logout_link.click()
+
 
 class FacilitatorSessionTests(BaseSessionLiveTest):
     """
@@ -644,7 +673,8 @@ class FacilitatorSessionTests(BaseSessionLiveTest):
         option_fields[1].click()
 
         # Wait until the the grid appears successfully
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_class_name("gridTrableContainerDiv"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_class_name("gridTrableContainerDiv"))
 
         # User types session name
         session_name_field = self.browser.find_element_by_id("sessionNameInputBox")
@@ -661,6 +691,7 @@ class FacilitatorSessionTests(BaseSessionLiveTest):
         # A dialog box appears with the message 'Session was created.'
         self.wait_for_dialog_box_with_message("Session was created.")
 
+
 class ParticipantSessionTests(BaseSessionLiveTest):
     """
     This class includes tests related to participant operations.
@@ -671,7 +702,6 @@ class ParticipantSessionTests(BaseSessionLiveTest):
     """
 
     def test_join_session(self):
-
         # Participator logs in successfully, goes to participating session page
         self.can_goto_session_page("test1@test1.com", "123")
 

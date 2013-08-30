@@ -3,8 +3,8 @@ from RGT import settings
 from recaptcha.client import captcha
 import sys
 
-class CaptchaVerifier(object):
 
+class CaptchaVerifier(object):
     def verify_captcha(self, request):
         """
         Will use ReCaptcha to verify the captcha submitted in the specified request.

@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django import forms
 from RGT.authentication.forms.CaptchaSecuredForm import CaptchaSecuredForm
 
+
 class ForgotPasswordForm(CaptchaSecuredForm):
     email = forms.EmailField(label='Enter your email address:')
 
