@@ -61,30 +61,17 @@
     }
 </style>
 
-<!--
-<h3> Concern Matrix </h3>
-<div class="datagrid">
-<table>
-<thead><tr><th>Concern Matrix</th><th>header</th><th>header</th><th>header</th></tr></thead>
-<tbody><tr><td class="murat">data1</td><td>data1</td><td>data1</td><td>data1</td></tr>
-<tr><td class="murat">data</td><td>data</td><td>data</td><td>data</td></tr>
-<tr><td class="murat">data</td><td>data</td><td>data</td><td>data</td></tr>
-<tr><td class="murat">data</td><td>data</td><td>data</td><td>data</td></tr>
-<tr><td class="murat">data</td><td>data</td><td>data</td><td>data</td></tr>
-</tbody>
-</table>
-</div>
--->
+
 
 
 <!-- REAL TABLE -->
-<h3> Concern Matrix </h3>
+<h3>Concerns Similarity Matrix</h3>
 <div class="datagrid">
     <table class="fixed">
 
         <thead>
         <tr>
-            <th>Concern Matrix</th>
+            <th>Similarity</th>
 
             {% for i in cons.0 %}
                 {% if i.0 %}
@@ -98,7 +85,7 @@
                     <tr>
                         {% for k in j %}
                             {% if forloop.first %}
-                                <td class="murat">{{ k.0 }}</td>
+                                <td class="concerns">{{ k.0 }}</td>
                             {% else %}
                                 <td>{{ k }}</td>
                             {% endif %}
@@ -106,20 +93,21 @@
                     </tr>
                 {% endif %}
             {% endfor %}
-        </tbody>
+            </tbody>
 
-        </tr></thead>
+        </tr>
+        </thead>
     </table>
 </div>
 
 <!-- REAL TABLE -->
-<h3> Alternate Matrix </h3>
+<h3>Alternatives Similarity Matrix</h3>
 <div class="datagrid">
     <table>
 
         <thead>
         <tr>
-            <th>Alternate Matrix</th>
+            <th>Similarity</th>
 
             {% for i in alts.0 %}
                 {% if i.0 %}
@@ -133,7 +121,7 @@
                     <tr>
                         {% for k in j %}
                             {% if forloop.first %}
-                                <td class="murat">{{ k.0 }}</td>
+                                <td class="alternatives">{{ k.0 }}</td>
                             {% else %}
                                 <td>{{ k }}</td>
                             {% endif %}

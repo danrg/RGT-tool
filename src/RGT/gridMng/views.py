@@ -26,7 +26,7 @@ from RGT.gridMng.utility import generateGridTable, createDendogram, createFileRe
 from RGT.gridMng.hierarchical import transpose
 from RGT.settings import GRID_USID_KEY_LENGTH, DEBUG
 
-import sys, os
+import sys, os, tempfile
 import traceback
 import logging
 
@@ -1350,29 +1350,17 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
 
 
 def pca(request):
-    # imagePath = "C:\Android Dev\RGT-INstall Steps.png"
-    # from PIL import Image
-    # Image.init()
-    # i = Image.open(imagePath)
-    #
-    # response = HttpResponse(mimetype='image/png')
-    # i.save(response,'PNG')
-    # return response
+    os.environ['MPLCONFIGDIR'] = tempfile.mkdtemp()
 
-    import matplotlib
-
-    matplotlib.use('Agg')
-    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-    from matplotlib.figure import Figure
-    from matplotlib.dates import DateFormatter
-
-    #fig = Figure()
-
-    #make sure these libraries are installed:
+    #these libraries are imported separately, because they are heavyweight
     import mdp
     import numpy as np
     import matplotlib.pyplot as plt
     import gc
+    import matplotlib
+    matplotlib.use('Agg')
+    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+
 
 
     if not request.user.is_authenticated():
