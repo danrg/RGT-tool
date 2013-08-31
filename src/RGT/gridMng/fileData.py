@@ -9,4 +9,3 @@ class FileData(object):
     data = None
     fileName = None
 
-        

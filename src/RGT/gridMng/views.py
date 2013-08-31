@@ -1438,24 +1438,26 @@ def pca(request):
                 np.set_printoptions(precision=2)
                 np.set_printoptions(suppress=True)
 
-                print "var_grid:"
-                print var_grid
 
                 #Create the PCA node and train it
                 pcan = mdp.nodes.PCANode(output_dim=2, svd=True)
                 pcar = pcan.execute(var_grid)
 
-                print "\npcar"
-                print pcar
+                if DEBUG:
+                    print "var_grid:"
+                    print var_grid
 
-                print "\neigenvalues:"
-                print pcan.d
+                    print "\npcar"
+                    print pcar
 
-                print "\nexplained variance:"
-                print pcan.explained_variance
+                    print "\neigenvalues:"
+                    print pcan.d
 
-                print "\neigenvectors:"
-                print pcan.v
+                    print "\nexplained variance:"
+                    print pcan.explained_variance
+
+                    print "\neigenvectors:"
+                    print pcan.v
 
                 #Graph results
                 #pcar[3,0],pcar[3,1] has the projections of alternative3 on the

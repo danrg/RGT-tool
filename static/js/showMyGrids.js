@@ -232,7 +232,7 @@ function showMyGrid(reload)
 						isGridComplete();
 									
 						//set tipsy
-						initiateGridTableToolTip($('#results'))
+						initiateGridTableToolTip($('#results'));
 						
 						//clear the histogram
 //						if($('#dendogramDiv').find('img').is('#dendogramImage'))

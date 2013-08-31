@@ -462,395 +462,394 @@ def drawDendogram2(clustersConcern=[], clustersAlternative=[], matrix=[[]], maxM
 
     #determine the width and height of the picture
     h = yTableTopOffset + (tableCellHeight * len(matrix)) + yAlternativeRulerOffset + (
-        (len(matrix[0]) - 2) * tableCellHeight) + (alternativeMaxWordHeight * (len(matrix[0]) - 2)) +
-    percentageWordSize[
-        1] + yConcernRulerOffset + 10
+        (len(matrix[0]) - 2) * tableCellHeight) + (alternativeMaxWordHeight * (len(matrix[0]) - 2)) + \
+        percentageWordSize[1] + yConcernRulerOffset + 10
 
 
-w = xWordTableOffset + (xWordToTableOffset * 2) + (
-    (len(matrix[0]) - 2) * tableCellWidth) + leftConcernMaxWordWidth + percentageWordSize[0]
-if rightConcernMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + concernRulerLength > alternativeMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + alternativeRulerLength:
-    w += rightConcernMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + concernRulerLength
-else:
-    w += alternativeMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + alternativeRulerLength
-
-    #create new matrix based on the order of the concern and alternative clusters
-tempMatrix = [None] * len(matrix)
-concernIndexToName = {}
-alternativeIndexToName = {}
-concernNameToIndex = {}
-alternativeNameToIndex = {}
-i = 1
-firstRow = [[]]
-
-#create the map of the old matrix to the new matrix
-while i < len(matrix):
-    concernIndexToName[i] = (matrix[i][0], matrix[i][len(matrix[0]) - 1])
-    i += 1
-i = 1
-while i < (len(matrix[0]) - 1):
-    alternativeIndexToName[i] = matrix[0][i]
-    i += 1
-
-i = 0
-temp = clustersConcern[len(clustersConcern) - 1][0]
-while i < len(temp):
-    concernNameToIndex[temp[i]] = i + 1
-    i += 1
-i = 0
-temp = clustersAlternative[len(clustersAlternative) - 1][0]
-nCol = len(clustersAlternative[len(clustersAlternative) - 1][0])
-while i < len(temp):
-    alternativeNameToIndex[temp[
-        i]] = nCol - i #nCol - i is to invert the position of the alternative so the line that we will draw from the table to the alternative names will look good, also the result of the equation is the index for the new table, no correction is needed as the values of the alternatives start at index 1
-    firstRow.append(temp[i])
-    i += 1
-firstRow.append([])
-i = 1
-j = 1
-
-#create the new matrix
-while i < len(matrix):
-    tempRow = [None] * len(matrix[0])
-    while j < len(matrix[0]) - 1:
-        index = alternativeNameToIndex[alternativeIndexToName[j]]
-        tempRow.insert(index, matrix[i][j])
-        tempRow.pop(index + 1)
-        if i == 1:
-            cellAlternativesXPositions[alternativeIndexToName[j]] = ((index - 1) * tableCellWidth) + (
-                tableCellWidth / 2) + xWordTableOffset + xWordToTableOffset + leftConcernMaxWordWidth
-        j += 1
-    tempRow.insert(0, matrix[i][0])
-    tempRow.pop(1)
-    tempCalculcation = len(matrix[i]) - 1
-    tempRow.insert(tempCalculcation, matrix[i][tempCalculcation])
-    tempRow.pop(tempCalculcation + 1)
-    temp = concernIndexToName[i]
-    index = -1
-    if concernNameToIndex.has_key(temp[0]):
-        index = concernNameToIndex[temp[0]]
+    w = xWordTableOffset + (xWordToTableOffset * 2) + (
+        (len(matrix[0]) - 2) * tableCellWidth) + leftConcernMaxWordWidth + percentageWordSize[0]
+    if rightConcernMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + concernRulerLength > alternativeMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + alternativeRulerLength:
+        w += rightConcernMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + concernRulerLength
     else:
-        index = concernNameToIndex[temp[1]]
-    tempMatrix.insert(index, tempRow)
-    tempMatrix.pop(index + 1)
-    i += 1
-    j = 1
-tempMatrix.insert(0, firstRow)
-tempMatrix.pop(1)
-#print tempMatrix
-matrix = tempMatrix
+        w += alternativeMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + alternativeRulerLength
 
-#######end pre-processing #########
+        #create new matrix based on the order of the concern and alternative clusters
+    tempMatrix = [None] * len(matrix)
+    concernIndexToName = {}
+    alternativeIndexToName = {}
+    concernNameToIndex = {}
+    alternativeNameToIndex = {}
+    i = 1
+    firstRow = [[]]
 
-#depth= len(clustersConcern)
-#scaling= float(w - 150)/depth
+    #create the map of the old matrix to the new matrix
+    while i < len(matrix):
+        concernIndexToName[i] = (matrix[i][0], matrix[i][len(matrix[0]) - 1])
+        i += 1
+    i = 1
+    while i < (len(matrix[0]) - 1):
+        alternativeIndexToName[i] = matrix[0][i]
+        i += 1
 
-# Create a new image with a white background
-img = Image.new('RGB', (w, h), imageBackgroundColor)
-draw = ImageDraw.Draw(img)
-#lets draw stuff now
-
-################
-###table draw###
-################
-
-yTableStartPosition = yTableTopOffset + percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset
-xtableStartPosition = xWordToTableOffset + xWordTableOffset + leftConcernMaxWordWidth
-draw.line([(xtableStartPosition, yTableStartPosition),
-           (xtableStartPosition + ( tableCellWidth * (len(matrix[0]) - 2)), yTableStartPosition)],
-          fill=tableLineColor, width=tableLineThickness)
-#remember to add + tableLineThickness to the start position to account for the line thickness, that also goes for the right, left and bottom
-
-#now lets drawn the table row by row
-i = 1;
-j = 0;
-while i < len(matrix):
-    row = matrix[i]
-    #draw the left word
-    wordSize = f.getsize(row[0])
-    #draw.text((xtableStartPosition - xWordToTableOffset - wordSize[0], yTableStartPosition + (((i - 1) * tableCellHeight) + ((tableCellHeight/2) - (wordSize[1]/2))) ), row[0], font= f, fill= tableWordColor)
-    draw.text((xtableStartPosition - xWordToTableOffset - wordSize[0],
-               yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight / 2) ),
-              row[0], font=f, fill=tableWordColor)
-    while j < len(row) - 2:
-        if j == 0:
-            #draw the left line
-            draw.line([(xtableStartPosition, yTableStartPosition + ( (i - 1) * tableCellHeight)),
-                       ( xtableStartPosition, yTableStartPosition + ( i * tableCellHeight) )], fill=tableLineColor,
-                      width=tableLineThickness)
-            #draw the values of the cells
-        cell = row[j + 1]
-        wordSize = f.getsize(str(cell))
-        #xCellValue= xtableStartPosition + (tableCellWidth * j) + (tableCellWidth / 2) - (wordSize[0] / 2)
-        #xCellValue= xtableStartPosition + ((j * tableCellWidth) + ((tableCellWidth/2) - (wordSize[0]/2)))
-        #yCellValue= yTableStartPosition + (tableCellHeight * (i - 1)) + (tableCellHeight / 2) - (wordSize[1] / 2)
-        #yCellValue= yTableStartPosition + (( (i- 1) * tableCellHeight) + ((tableCellHeight/2) - (wordSize[1]/2)))
-        xCellValue = xtableStartPosition + (j * tableCellWidth) + floor((tableCellWidth - wordSize[0]) / 2)
-        yCellValue = yTableStartPosition + ((i - 1) * tableCellHeight) + floor((tableCellHeight - wordSize[1]) / 2)
-        draw.text((xCellValue, yCellValue), str(cell), font=f, fill=tableCellWordColor)
-        #draw.line( [(xtableStartPosition + (j * tableCellWidth), yTableStartPosition + ((i-1) * tableCellHeight)), (xtableStartPosition + (j * tableCellWidth) + wordSize[0], yTableStartPosition + ((i-1) * tableCellHeight))], fill= (0,0,0), width= tableLineThickness)
-        #diagonal
-        #draw.line( [(xCellValue, yCellValue),(xCellValue + wordSize[0], yCellValue +  wordSize[1])], fill= (0,0,0), width= tableLineThickness)
-        #draw.line( [(xtableStartPosition + ( j * tableCellWidth ), yTableStartPosition + ( (i-1) * tableCellHeight)), (xtableStartPosition + ( (j+1) * tableCellWidth ), yTableStartPosition + ( (i-1) * tableCellHeight))], fill= (0,0,0), width= tableLineThickness)
-        #draw.line( [(xtableStartPosition + ( j * tableCellWidth ), yTableStartPosition + ( i * tableCellHeight)), (xtableStartPosition + ( (j+1) * tableCellWidth ), yTableStartPosition + ( i * tableCellHeight))], fill= tableLineColor, width= tableLineThickness)
-        if j == len(row) - 3:
-            #draw right line
-            draw.line([(xtableStartPosition + ( (j + 1) * tableCellWidth),
-                        yTableStartPosition + ( (i - 1) * tableCellHeight)), (
-                           xtableStartPosition + ( (j + 1) * tableCellWidth),
-                           yTableStartPosition + (i * tableCellHeight) )], fill=tableLineColor,
-                      width=tableLineThickness)
-        j += 1
-        #draw the right word
-    wordSize = f.getsize(row[len(row) - 1])
-    draw.text((xtableStartPosition + (tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness,
-               yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight / 2) ),
-              row[len(row) - 1], font=f, fill=tableWordColor)
-    dicMatrixConcernToWordEndPosition[row[0]] = (
-        wordSize[0] + xtableStartPosition + (
-            tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness,
-        yTableStartPosition + (tableCellHeight * (i - 1)) + (wordSize[1] / 2) )
-    dicMatrixConcernToWordEndPosition[row[len(row) - 1]] = dicMatrixConcernToWordEndPosition[row[0]]
-    if rightConcenrMaxX < xtableStartPosition + (
-            tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness + rightConcernMaxWordWidth:
-        rightConcenrMaxX = xtableStartPosition + (
-            tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness + rightConcernMaxWordWidth
-    j = 0
-    i += 1
-    #draw the bottom line
-yTableBottom = yTableStartPosition + (tableCellHeight * (len(matrix) - 1) )
-draw.line([(xtableStartPosition, yTableBottom ),
-           (xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ), yTableBottom )], fill=tableLineColor,
-          width=tableLineThickness)
-
-####### end table draw #########
-
-############################
-###Concern dendogram draw###
-############################
-
-#lets first draw all the individual items, the last sub-cluster should contain all of them
-allClusters = [] # format is ([item1, item2,...], positionX, positionY)
-i = 0;
-while i < len(clustersConcern[len(clustersConcern) - 1][0]):
+    i = 0
     temp = clustersConcern[len(clustersConcern) - 1][0]
-    wordEndPosition = dicMatrixConcernToWordEndPosition[temp[i]]
-    #save the positions we want
-    allClusters.append((temp[i], wordEndPosition[0], wordEndPosition[1]))
-    i += 1
+    while i < len(temp):
+        concernNameToIndex[temp[i]] = i + 1
+        i += 1
+    i = 0
+    temp = clustersAlternative[len(clustersAlternative) - 1][0]
+    nCol = len(clustersAlternative[len(clustersAlternative) - 1][0])
+    while i < len(temp):
+        alternativeNameToIndex[temp[
+            i]] = nCol - i #nCol - i is to invert the position of the alternative so the line that we will draw from the table to the alternative names will look good, also the result of the equation is the index for the new table, no correction is needed as the values of the alternatives start at index 1
+        firstRow.append(temp[i])
+        i += 1
+    firstRow.append([])
+    i = 1
+    j = 1
 
-xConcernRulerStartPoint = rightConcenrMaxX + xOffsetWordToLine + xOffsetLineToRuler
-#now reset all the x to the max word length + an offset
-temp = []
-for cluster in allClusters:
-    newX = xConcernRulerStartPoint #xOffsetWordToLine + cluster[1] + (rightConcenrMaxX - cluster[1]) + xOffsetLineToRuler
-    draw.line([(cluster[1] + xOffsetWordToLine, cluster[2]), ( newX, cluster[2])], fill=concernDendogramLineColor)
-    temp.append((cluster[0], newX, cluster[2]))
-allClusters = temp;
-#now lets draw the ruler
-draw.line([(xConcernRulerStartPoint, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset),
-           (xConcernRulerStartPoint + concernRulerLength,
-            percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset)], fill=concernRulerColor)
-i = 0
-#draw the markers of the ruler
-while i <= nConcernRulerSteps:
-    percentage = str(100 - (i * 10))
-    draw.text(
-        ( xConcernRulerStartPoint + (concernRulerStep * i) - (f.getsize(percentage)[0] / 2), yConcernRulerOffset ),
-        text=percentage, fill=concernRulerPerncetageColor, font=f)
-    draw.line([(xConcernRulerStartPoint + (concernRulerStep * i),
-                percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset), (
-                   (xConcernRulerStartPoint + (concernRulerStep * i)), percentageWordSize[
-                                                                           1] + yConcernRulerOffset + yConcerPercentageToRulerOffset + rulerVerticalLineSize)],
-              fill=concernRulerColor)
-    i += 1
-
-#ok now lets start drawing the combined clustersConcern
-i = 0
-xPositionNewCluster = 0; # the xPosition of a new cluster will be fix and based on the previous run
-while i < len(clustersConcern):
-    cluster = clustersConcern[i]
-    mainClusterSet = set(cluster[0])
-    subSetClusters = []
-    j = 0
-    #find from which sub-clustersConcern is the main cluster composed of
-    while j < len(allClusters):
-        temp = (allClusters[j])[
-            0] #this is needed because if you have a long string like 'java' when you call set it will generate a set for each letter so the set will be (j,a,v,a) instead of (java)
-        if type(temp) is str:
-            temp = [temp]
-        if set(temp).issubset(mainClusterSet):
-            subSetClusters.append(allClusters[j])
-            if (len(subSetClusters) >= len(cluster[0])):
-                break;
-        j += 1;
-        #now draw the lines of the old clustersConcern to the new cluster
-    #assumption, because we created the initial clustersConcern from the last cluster(where we have all the clustersConcern in 1) the position of the sub-clustersConcern are ideal, in terms that they are next to each other after each round
-    #xPositionNewCluster= 0
-    yPositionNewCluster = 0
-    temp = 0 #will be used as the biggest y
-    temp2 = 0 #will be used as the smallest y
-    j = 0
-    while j < len(subSetClusters):
-        if j == 0:
-            temp = (subSetClusters[j])[2]
-            temp2 = (subSetClusters[j])[2]
-            if i == 0:
-                xPositionNewCluster = (subSetClusters[j])[1]
-                #xPositionNewCluster= (subSetClusters[j])[1]
+    #create the new matrix
+    while i < len(matrix):
+        tempRow = [None] * len(matrix[0])
+        while j < len(matrix[0]) - 1:
+            index = alternativeNameToIndex[alternativeIndexToName[j]]
+            tempRow.insert(index, matrix[i][j])
+            tempRow.pop(index + 1)
+            if i == 1:
+                cellAlternativesXPositions[alternativeIndexToName[j]] = ((index - 1) * tableCellWidth) + (
+                    tableCellWidth / 2) + xWordTableOffset + xWordToTableOffset + leftConcernMaxWordWidth
+            j += 1
+        tempRow.insert(0, matrix[i][0])
+        tempRow.pop(1)
+        tempCalculcation = len(matrix[i]) - 1
+        tempRow.insert(tempCalculcation, matrix[i][tempCalculcation])
+        tempRow.pop(tempCalculcation + 1)
+        temp = concernIndexToName[i]
+        index = -1
+        if concernNameToIndex.has_key(temp[0]):
+            index = concernNameToIndex[temp[0]]
         else:
-            if (subSetClusters[j])[2] > temp:
+            index = concernNameToIndex[temp[1]]
+        tempMatrix.insert(index, tempRow)
+        tempMatrix.pop(index + 1)
+        i += 1
+        j = 1
+    tempMatrix.insert(0, firstRow)
+    tempMatrix.pop(1)
+    #print tempMatrix
+    matrix = tempMatrix
+
+    #######end pre-processing #########
+
+    #depth= len(clustersConcern)
+    #scaling= float(w - 150)/depth
+
+    # Create a new image with a white background
+    img = Image.new('RGB', (w, h), imageBackgroundColor)
+    draw = ImageDraw.Draw(img)
+    #lets draw stuff now
+
+    ################
+    ###table draw###
+    ################
+
+    yTableStartPosition = yTableTopOffset + percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset
+    xtableStartPosition = xWordToTableOffset + xWordTableOffset + leftConcernMaxWordWidth
+    draw.line([(xtableStartPosition, yTableStartPosition),
+               (xtableStartPosition + ( tableCellWidth * (len(matrix[0]) - 2)), yTableStartPosition)],
+              fill=tableLineColor, width=tableLineThickness)
+    #remember to add + tableLineThickness to the start position to account for the line thickness, that also goes for the right, left and bottom
+
+    #now lets drawn the table row by row
+    i = 1;
+    j = 0;
+    while i < len(matrix):
+        row = matrix[i]
+        #draw the left word
+        wordSize = f.getsize(row[0])
+        #draw.text((xtableStartPosition - xWordToTableOffset - wordSize[0], yTableStartPosition + (((i - 1) * tableCellHeight) + ((tableCellHeight/2) - (wordSize[1]/2))) ), row[0], font= f, fill= tableWordColor)
+        draw.text((xtableStartPosition - xWordToTableOffset - wordSize[0],
+                   yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight / 2) ),
+                  row[0], font=f, fill=tableWordColor)
+        while j < len(row) - 2:
+            if j == 0:
+                #draw the left line
+                draw.line([(xtableStartPosition, yTableStartPosition + ( (i - 1) * tableCellHeight)),
+                           ( xtableStartPosition, yTableStartPosition + ( i * tableCellHeight) )], fill=tableLineColor,
+                          width=tableLineThickness)
+                #draw the values of the cells
+            cell = row[j + 1]
+            wordSize = f.getsize(str(cell))
+            #xCellValue= xtableStartPosition + (tableCellWidth * j) + (tableCellWidth / 2) - (wordSize[0] / 2)
+            #xCellValue= xtableStartPosition + ((j * tableCellWidth) + ((tableCellWidth/2) - (wordSize[0]/2)))
+            #yCellValue= yTableStartPosition + (tableCellHeight * (i - 1)) + (tableCellHeight / 2) - (wordSize[1] / 2)
+            #yCellValue= yTableStartPosition + (( (i- 1) * tableCellHeight) + ((tableCellHeight/2) - (wordSize[1]/2)))
+            xCellValue = xtableStartPosition + (j * tableCellWidth) + floor((tableCellWidth - wordSize[0]) / 2)
+            yCellValue = yTableStartPosition + ((i - 1) * tableCellHeight) + floor((tableCellHeight - wordSize[1]) / 2)
+            draw.text((xCellValue, yCellValue), str(cell), font=f, fill=tableCellWordColor)
+            #draw.line( [(xtableStartPosition + (j * tableCellWidth), yTableStartPosition + ((i-1) * tableCellHeight)), (xtableStartPosition + (j * tableCellWidth) + wordSize[0], yTableStartPosition + ((i-1) * tableCellHeight))], fill= (0,0,0), width= tableLineThickness)
+            #diagonal
+            #draw.line( [(xCellValue, yCellValue),(xCellValue + wordSize[0], yCellValue +  wordSize[1])], fill= (0,0,0), width= tableLineThickness)
+            #draw.line( [(xtableStartPosition + ( j * tableCellWidth ), yTableStartPosition + ( (i-1) * tableCellHeight)), (xtableStartPosition + ( (j+1) * tableCellWidth ), yTableStartPosition + ( (i-1) * tableCellHeight))], fill= (0,0,0), width= tableLineThickness)
+            #draw.line( [(xtableStartPosition + ( j * tableCellWidth ), yTableStartPosition + ( i * tableCellHeight)), (xtableStartPosition + ( (j+1) * tableCellWidth ), yTableStartPosition + ( i * tableCellHeight))], fill= tableLineColor, width= tableLineThickness)
+            if j == len(row) - 3:
+                #draw right line
+                draw.line([(xtableStartPosition + ( (j + 1) * tableCellWidth),
+                            yTableStartPosition + ( (i - 1) * tableCellHeight)), (
+                               xtableStartPosition + ( (j + 1) * tableCellWidth),
+                               yTableStartPosition + (i * tableCellHeight) )], fill=tableLineColor,
+                          width=tableLineThickness)
+            j += 1
+            #draw the right word
+        wordSize = f.getsize(row[len(row) - 1])
+        draw.text((xtableStartPosition + (tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness,
+                   yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight / 2) ),
+                  row[len(row) - 1], font=f, fill=tableWordColor)
+        dicMatrixConcernToWordEndPosition[row[0]] = (
+            wordSize[0] + xtableStartPosition + (
+                tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness,
+            yTableStartPosition + (tableCellHeight * (i - 1)) + (wordSize[1] / 2) )
+        dicMatrixConcernToWordEndPosition[row[len(row) - 1]] = dicMatrixConcernToWordEndPosition[row[0]]
+        if rightConcenrMaxX < xtableStartPosition + (
+                tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness + rightConcernMaxWordWidth:
+            rightConcenrMaxX = xtableStartPosition + (
+                tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness + rightConcernMaxWordWidth
+        j = 0
+        i += 1
+        #draw the bottom line
+    yTableBottom = yTableStartPosition + (tableCellHeight * (len(matrix) - 1) )
+    draw.line([(xtableStartPosition, yTableBottom ),
+               (xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ), yTableBottom )], fill=tableLineColor,
+              width=tableLineThickness)
+
+    ####### end table draw #########
+
+    ############################
+    ###Concern dendogram draw###
+    ############################
+
+    #lets first draw all the individual items, the last sub-cluster should contain all of them
+    allClusters = [] # format is ([item1, item2,...], positionX, positionY)
+    i = 0;
+    while i < len(clustersConcern[len(clustersConcern) - 1][0]):
+        temp = clustersConcern[len(clustersConcern) - 1][0]
+        wordEndPosition = dicMatrixConcernToWordEndPosition[temp[i]]
+        #save the positions we want
+        allClusters.append((temp[i], wordEndPosition[0], wordEndPosition[1]))
+        i += 1
+
+    xConcernRulerStartPoint = rightConcenrMaxX + xOffsetWordToLine + xOffsetLineToRuler
+    #now reset all the x to the max word length + an offset
+    temp = []
+    for cluster in allClusters:
+        newX = xConcernRulerStartPoint #xOffsetWordToLine + cluster[1] + (rightConcenrMaxX - cluster[1]) + xOffsetLineToRuler
+        draw.line([(cluster[1] + xOffsetWordToLine, cluster[2]), ( newX, cluster[2])], fill=concernDendogramLineColor)
+        temp.append((cluster[0], newX, cluster[2]))
+    allClusters = temp;
+    #now lets draw the ruler
+    draw.line([(xConcernRulerStartPoint, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset),
+               (xConcernRulerStartPoint + concernRulerLength,
+                percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset)], fill=concernRulerColor)
+    i = 0
+    #draw the markers of the ruler
+    while i <= nConcernRulerSteps:
+        percentage = str(100 - (i * 10))
+        draw.text(
+            ( xConcernRulerStartPoint + (concernRulerStep * i) - (f.getsize(percentage)[0] / 2), yConcernRulerOffset ),
+            text=percentage, fill=concernRulerPerncetageColor, font=f)
+        draw.line([(xConcernRulerStartPoint + (concernRulerStep * i),
+                    percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset), (
+                       (xConcernRulerStartPoint + (concernRulerStep * i)), percentageWordSize[
+                                                                               1] + yConcernRulerOffset + yConcerPercentageToRulerOffset + rulerVerticalLineSize)],
+                  fill=concernRulerColor)
+        i += 1
+
+    #ok now lets start drawing the combined clustersConcern
+    i = 0
+    xPositionNewCluster = 0; # the xPosition of a new cluster will be fix and based on the previous run
+    while i < len(clustersConcern):
+        cluster = clustersConcern[i]
+        mainClusterSet = set(cluster[0])
+        subSetClusters = []
+        j = 0
+        #find from which sub-clustersConcern is the main cluster composed of
+        while j < len(allClusters):
+            temp = (allClusters[j])[
+                0] #this is needed because if you have a long string like 'java' when you call set it will generate a set for each letter so the set will be (j,a,v,a) instead of (java)
+            if type(temp) is str:
+                temp = [temp]
+            if set(temp).issubset(mainClusterSet):
+                subSetClusters.append(allClusters[j])
+                if (len(subSetClusters) >= len(cluster[0])):
+                    break;
+            j += 1;
+            #now draw the lines of the old clustersConcern to the new cluster
+        #assumption, because we created the initial clustersConcern from the last cluster(where we have all the clustersConcern in 1) the position of the sub-clustersConcern are ideal, in terms that they are next to each other after each round
+        #xPositionNewCluster= 0
+        yPositionNewCluster = 0
+        temp = 0 #will be used as the biggest y
+        temp2 = 0 #will be used as the smallest y
+        j = 0
+        while j < len(subSetClusters):
+            if j == 0:
                 temp = (subSetClusters[j])[2]
-            if (subSetClusters[j])[2] < temp2:
-                temp2 = (subSetClusters[j])[1]
-                #if (subSetClusters[j])[1] > xPositionNewCluster:
-                #    xPositionNewCluster= (subSetClusters[j])[1]
-        j += 1
-        #calculate the offset from the beginning of the ruler that xPositionNewCluster should be
-    #assumption, ruler starts from 100 thus: |100 |90 |80......
-    # concernRulerStep/10 -> every step = 10% thus this calculation give us the amount of pixels that 1% represents. 100 - concernClusterSimilarity[i] -> this calculation gives us the percentage that a percentage is away from 100%.
-    xPositionNewCluster = (
-                              (concernRulerStep / 10) * (
-                                  100 - concernClusterSimilarity[i]) ) + xConcernRulerStartPoint
-    yPositionNewCluster = temp2 + (temp - temp2) / 2
+                temp2 = (subSetClusters[j])[2]
+                if i == 0:
+                    xPositionNewCluster = (subSetClusters[j])[1]
+                    #xPositionNewCluster= (subSetClusters[j])[1]
+            else:
+                if (subSetClusters[j])[2] > temp:
+                    temp = (subSetClusters[j])[2]
+                if (subSetClusters[j])[2] < temp2:
+                    temp2 = (subSetClusters[j])[1]
+                    #if (subSetClusters[j])[1] > xPositionNewCluster:
+                    #    xPositionNewCluster= (subSetClusters[j])[1]
+            j += 1
+            #calculate the offset from the beginning of the ruler that xPositionNewCluster should be
+        #assumption, ruler starts from 100 thus: |100 |90 |80......
+        # concernRulerStep/10 -> every step = 10% thus this calculation give us the amount of pixels that 1% represents. 100 - concernClusterSimilarity[i] -> this calculation gives us the percentage that a percentage is away from 100%.
+        xPositionNewCluster = (
+                                  (concernRulerStep / 10) * (
+                                      100 - concernClusterSimilarity[i]) ) + xConcernRulerStartPoint
+        yPositionNewCluster = temp2 + (temp - temp2) / 2
 
-    for subCluser in subSetClusters:
-        draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, yPositionNewCluster)],
-                  fill=concernDendogramLineColor)
-        #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, subCluser[2])], fill=(255,0,0))
-        #draw.line((xPositionNewCluster, subCluser[2], xPositionNewCluster, yPositionNewCluster), fill=(255,0,0))
+        for subCluser in subSetClusters:
+            draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, yPositionNewCluster)],
+                      fill=concernDendogramLineColor)
+            #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, subCluser[2])], fill=(255,0,0))
+            #draw.line((xPositionNewCluster, subCluser[2], xPositionNewCluster, yPositionNewCluster), fill=(255,0,0))
 
-        # now remove the old clustersConcern from allClusters
-        allClusters.remove(subCluser)
-        #now add the new cluster to allClusters
-    allClusters.append((cluster[0], xPositionNewCluster, yPositionNewCluster))
-    i += 1
+            # now remove the old clustersConcern from allClusters
+            allClusters.remove(subCluser)
+            #now add the new cluster to allClusters
+        allClusters.append((cluster[0], xPositionNewCluster, yPositionNewCluster))
+        i += 1
 
-####### end concern dendogram draw #########
+    ####### end concern dendogram draw #########
 
-################################
-###Alternative dendogram draw###
-################################
+    ################################
+    ###Alternative dendogram draw###
+    ################################
 
-allClusters = [] # format is ([item1, item2,...], positionX, positionY)
-i = 0;
-while i < len(clustersAlternative[len(clustersAlternative) - 1][0]):
-    allClusters.append(((clustersAlternative[len(clustersAlternative) - 1][0])[i],
-                        xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ) + xWordToTableOffset,
-                        yTableStartPosition + (tableCellHeight * len(matrix)) + (
-                            tableCellHeight * (i)) + yAlternativeRulerOffset + percentageWordSize[
-                            1] + yAlternativePercentageToRulerOffset ))
-    i += 1
-    #now draw the initial clustersAlternative
-temp = []
-maxWordLength = -1
-for cluster in allClusters:
-    draw.text((cluster[1], cluster[2]), cluster[0], font=f, fill=alternativeWordColor);
-    # now reset the y position to the middle of the word and the x to the end of the word, this is the point where the line will start
-    (width, height) = f.getsize(cluster[0])
-    temp.append(( cluster[0], cluster[1] + width, cluster[2] + (height / 2) ))
-    if maxWordLength < width:
-        maxWordLength = width
-        #draw the lines that connect the table with the alternative names
-    draw.line([(cellAlternativesXPositions[cluster[0]], yTableBottom + 1),
-               (cellAlternativesXPositions[cluster[0]], cluster[2] + (height / 2))],
-              fill=tableToAlternativesConnectionLineColor)
-    draw.line([(cellAlternativesXPositions[cluster[0]], cluster[2] + (height / 2)),
-               (cluster[1] - 2, cluster[2] + (height / 2))], fill=tableToAlternativesConnectionLineColor)
-allClusters = temp
-xAlternativeRulerStartPoint = maxWordLength + xOffsetWordToLine + xOffsetLineToRuler + xtableStartPosition + (
-    tableCellWidth * (len(matrix[0]) - 2) )
-yAlternativeRulerStartPoint = yAlternativeRulerOffset + percentageWordSize[
-    1] + yAlternativePercentageToRulerOffset + yTableBottom
-#now reset all the x to the max word length + an offset
-temp = []
-for cluster in allClusters:
-    newX = xAlternativeRulerStartPoint
-    draw.line([(cluster[1] + xOffsetWordToLine, cluster[2]), ( newX, cluster[2])],
-              fill=alternativeDendogramLineColor)
-    temp.append((cluster[0], newX, cluster[2]))
-allClusters = temp;
-#now lets draw the ruler
-draw.line([(xAlternativeRulerStartPoint, yAlternativeRulerStartPoint),
-           (xAlternativeRulerStartPoint + alternativeRulerLength, yAlternativeRulerStartPoint)],
-          fill=alternativeRulerColor)
-i = 0
-#draw the markers of the ruler
-while i <= nAlternativRulerSteps:
-    percentage = str(100 - (i * 10))
-    wordSize = f.getsize(percentage)
-    draw.text((xAlternativeRulerStartPoint + (alternativeRulerStep * i) - (wordSize[0] / 2),
-               yAlternativeRulerStartPoint - yAlternativePercentageToRulerOffset - wordSize[1]), text=percentage,
-              fill=alternativeRulerPerncetageColor, font=f)
-    draw.line([(xAlternativeRulerStartPoint + (alternativeRulerStep * i), yAlternativeRulerStartPoint), (
-        (xAlternativeRulerStartPoint + (alternativeRulerStep * i)),
-        yAlternativeRulerStartPoint + rulerVerticalLineSize)], fill=alternativeRulerColor)
-    i += 1
-
-#ok now lets start drawing the combined clustersAlternative
-i = 0
-xPositionNewCluster = 0; # the xPosition of a new cluster will be fixed and based on the previous run
-while i < len(clustersAlternative):
-    cluster = clustersAlternative[i]
-    mainClusterSet = set(cluster[0])
-    subSetClusters = []
-    j = 0
-    #find from which sub-clustersConcern is the main cluster composed of
-    while j < len(allClusters):
-        temp = (allClusters[j])[
-            0] #this is needed because if you have a long string like 'java' when you call set it will generate a set for each letter so the set will be (j,a,v,a) instead of (java)
-        if type(temp) is str:
-            temp = [temp]
-        if set(temp).issubset(mainClusterSet):
-            subSetClusters.append(allClusters[j])
-            if (len(subSetClusters) >= len(cluster[0])):
-                break;
-        j += 1;
-        #now draw the lines of the old clustersAlternative to the new cluster
-    #assumption, because we created the initial clustersAlternative from the last cluster(where we have all the clustersAlternative in 1) the position of the sub-clustersAlternative are ideal, in terms that they are next to each other after each round
-    #xPositionNewCluster= 0
-    yPositionNewCluster = 0
-    temp = 0 #will be used as the biggest y
-    temp2 = 0 #will be used as the smallest y
-    j = 0
-    while j < len(subSetClusters):
-        if j == 0:
-            temp = (subSetClusters[j])[2]
-            temp2 = (subSetClusters[j])[2]
-            if i == 0:
-                xPositionNewCluster = (subSetClusters[j])[1]
-                #xPositionNewCluster= (subSetClusters[j])[1]
-        else:
-            if (subSetClusters[j])[2] > temp:
-                temp = (subSetClusters[j])[2]
-            if (subSetClusters[j])[2] < temp2:
-                temp2 = (subSetClusters[j])[1]
-                #if (subSetClusters[j])[1] > xPositionNewCluster:
-                #    xPositionNewCluster= (subSetClusters[j])[1]
-        j += 1
-        #calculate the offset from the beginning of the ruler that xPositionNewCluster should be
-    #assumption, ruler starts from 100 thus: |100 |90 |80......
-    # alternativeRulerStep/10 -> every step = 10% thus this calculation give us the amount of pixels that 1% represents. 100 - concernClusterSimilarity[i] -> this calculation gives us the percentage that a percentage is away from 100%.
-    xPositionNewCluster = ((alternativeRulerStep / 10) * (
-        100 - alternativeClusterSimilarity[i]) ) + xAlternativeRulerStartPoint
-    yPositionNewCluster = temp2 + (temp - temp2) / 2
-
-    for subCluser in subSetClusters:
-        draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, yPositionNewCluster)],
+    allClusters = [] # format is ([item1, item2,...], positionX, positionY)
+    i = 0;
+    while i < len(clustersAlternative[len(clustersAlternative) - 1][0]):
+        allClusters.append(((clustersAlternative[len(clustersAlternative) - 1][0])[i],
+                            xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ) + xWordToTableOffset,
+                            yTableStartPosition + (tableCellHeight * len(matrix)) + (
+                                tableCellHeight * (i)) + yAlternativeRulerOffset + percentageWordSize[
+                                1] + yAlternativePercentageToRulerOffset ))
+        i += 1
+        #now draw the initial clustersAlternative
+    temp = []
+    maxWordLength = -1
+    for cluster in allClusters:
+        draw.text((cluster[1], cluster[2]), cluster[0], font=f, fill=alternativeWordColor);
+        # now reset the y position to the middle of the word and the x to the end of the word, this is the point where the line will start
+        (width, height) = f.getsize(cluster[0])
+        temp.append(( cluster[0], cluster[1] + width, cluster[2] + (height / 2) ))
+        if maxWordLength < width:
+            maxWordLength = width
+            #draw the lines that connect the table with the alternative names
+        draw.line([(cellAlternativesXPositions[cluster[0]], yTableBottom + 1),
+                   (cellAlternativesXPositions[cluster[0]], cluster[2] + (height / 2))],
+                  fill=tableToAlternativesConnectionLineColor)
+        draw.line([(cellAlternativesXPositions[cluster[0]], cluster[2] + (height / 2)),
+                   (cluster[1] - 2, cluster[2] + (height / 2))], fill=tableToAlternativesConnectionLineColor)
+    allClusters = temp
+    xAlternativeRulerStartPoint = maxWordLength + xOffsetWordToLine + xOffsetLineToRuler + xtableStartPosition + (
+        tableCellWidth * (len(matrix[0]) - 2) )
+    yAlternativeRulerStartPoint = yAlternativeRulerOffset + percentageWordSize[
+        1] + yAlternativePercentageToRulerOffset + yTableBottom
+    #now reset all the x to the max word length + an offset
+    temp = []
+    for cluster in allClusters:
+        newX = xAlternativeRulerStartPoint
+        draw.line([(cluster[1] + xOffsetWordToLine, cluster[2]), ( newX, cluster[2])],
                   fill=alternativeDendogramLineColor)
-        #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, subCluser[2])], fill=(255,0,0))
-        #draw.line((xPositionNewCluster, subCluser[2], xPositionNewCluster, yPositionNewCluster), fill=(255,0,0))
+        temp.append((cluster[0], newX, cluster[2]))
+    allClusters = temp;
+    #now lets draw the ruler
+    draw.line([(xAlternativeRulerStartPoint, yAlternativeRulerStartPoint),
+               (xAlternativeRulerStartPoint + alternativeRulerLength, yAlternativeRulerStartPoint)],
+              fill=alternativeRulerColor)
+    i = 0
+    #draw the markers of the ruler
+    while i <= nAlternativRulerSteps:
+        percentage = str(100 - (i * 10))
+        wordSize = f.getsize(percentage)
+        draw.text((xAlternativeRulerStartPoint + (alternativeRulerStep * i) - (wordSize[0] / 2),
+                   yAlternativeRulerStartPoint - yAlternativePercentageToRulerOffset - wordSize[1]), text=percentage,
+                  fill=alternativeRulerPerncetageColor, font=f)
+        draw.line([(xAlternativeRulerStartPoint + (alternativeRulerStep * i), yAlternativeRulerStartPoint), (
+            (xAlternativeRulerStartPoint + (alternativeRulerStep * i)),
+            yAlternativeRulerStartPoint + rulerVerticalLineSize)], fill=alternativeRulerColor)
+        i += 1
 
-        # now remove the old clustersConcern from allClusters
-        allClusters.remove(subCluser)
-        #now add the new cluster to allClusters
-    allClusters.append((cluster[0], xPositionNewCluster, yPositionNewCluster))
-    i += 1
+    #ok now lets start drawing the combined clustersAlternative
+    i = 0
+    xPositionNewCluster = 0; # the xPosition of a new cluster will be fixed and based on the previous run
+    while i < len(clustersAlternative):
+        cluster = clustersAlternative[i]
+        mainClusterSet = set(cluster[0])
+        subSetClusters = []
+        j = 0
+        #find from which sub-clustersConcern is the main cluster composed of
+        while j < len(allClusters):
+            temp = (allClusters[j])[
+                0] #this is needed because if you have a long string like 'java' when you call set it will generate a set for each letter so the set will be (j,a,v,a) instead of (java)
+            if type(temp) is str:
+                temp = [temp]
+            if set(temp).issubset(mainClusterSet):
+                subSetClusters.append(allClusters[j])
+                if (len(subSetClusters) >= len(cluster[0])):
+                    break;
+            j += 1;
+            #now draw the lines of the old clustersAlternative to the new cluster
+        #assumption, because we created the initial clustersAlternative from the last cluster(where we have all the clustersAlternative in 1) the position of the sub-clustersAlternative are ideal, in terms that they are next to each other after each round
+        #xPositionNewCluster= 0
+        yPositionNewCluster = 0
+        temp = 0 #will be used as the biggest y
+        temp2 = 0 #will be used as the smallest y
+        j = 0
+        while j < len(subSetClusters):
+            if j == 0:
+                temp = (subSetClusters[j])[2]
+                temp2 = (subSetClusters[j])[2]
+                if i == 0:
+                    xPositionNewCluster = (subSetClusters[j])[1]
+                    #xPositionNewCluster= (subSetClusters[j])[1]
+            else:
+                if (subSetClusters[j])[2] > temp:
+                    temp = (subSetClusters[j])[2]
+                if (subSetClusters[j])[2] < temp2:
+                    temp2 = (subSetClusters[j])[1]
+                    #if (subSetClusters[j])[1] > xPositionNewCluster:
+                    #    xPositionNewCluster= (subSetClusters[j])[1]
+            j += 1
+            #calculate the offset from the beginning of the ruler that xPositionNewCluster should be
+        #assumption, ruler starts from 100 thus: |100 |90 |80......
+        # alternativeRulerStep/10 -> every step = 10% thus this calculation give us the amount of pixels that 1% represents. 100 - concernClusterSimilarity[i] -> this calculation gives us the percentage that a percentage is away from 100%.
+        xPositionNewCluster = ((alternativeRulerStep / 10) * (
+            100 - alternativeClusterSimilarity[i]) ) + xAlternativeRulerStartPoint
+        yPositionNewCluster = temp2 + (temp - temp2) / 2
 
-####### end alternative dendogram draw #########
+        for subCluser in subSetClusters:
+            draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, yPositionNewCluster)],
+                      fill=alternativeDendogramLineColor)
+            #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, subCluser[2])], fill=(255,0,0))
+            #draw.line((xPositionNewCluster, subCluser[2], xPositionNewCluster, yPositionNewCluster), fill=(255,0,0))
 
-#lets return the image
-return img
+            # now remove the old clustersConcern from allClusters
+            allClusters.remove(subCluser)
+            #now add the new cluster to allClusters
+        allClusters.append((cluster[0], xPositionNewCluster, yPositionNewCluster))
+        i += 1
+
+    ####### end alternative dendogram draw #########
+
+    #lets return the image
+    return img
 
 #this is much of the original code to create 1 dendogram, start variables declaration are missing
 """
@@ -1217,577 +1216,576 @@ def drawDendogram3(clustersConcern=[], clustersAlternative=[], matrix=[[]], maxM
 
     #determine the width and height of the picture
     h = yTableTopOffset + (tableCellHeight * len(matrix)) + yAlternativeRulerOffset + (
-        (len(matrix[0]) - 2) * tableCellHeight) + (alternativeMaxWordHeight * (len(matrix[0]) - 2)) +
-    percentageWordSize[
-        1] + yConcernRulerOffset + 10
+        (len(matrix[0]) - 2) * tableCellHeight) + (alternativeMaxWordHeight * (len(matrix[0]) - 2)) + \
+        percentageWordSize[1] + yConcernRulerOffset + 10
 
 
-w = xWordTableOffset + (xWordToTableOffset * 2) + (
-    (len(matrix[0]) - 2) * tableCellWidth) + leftConcernMaxWordWidth + percentageWordSize[0]
-if rightConcernMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + concernRulerLength > alternativeMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + alternativeRulerLength:
-    w += rightConcernMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + concernRulerLength
-else:
-    w += alternativeMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + alternativeRulerLength
-
-    #create new matrix based on the order of the concern and alternative clusters
-tempMatrix = [None] * len(matrix)
-concernIndexToName = {}
-alternativeIndexToName = {}
-concernNameToIndex = {}
-alternativeNameToIndex = {}
-i = 1
-firstRow = [[]]
-
-#create the map of the old matrix to the new matrix
-while i < len(matrix):
-    concernIndexToName[i] = (matrix[i][0], matrix[i][len(matrix[0]) - 1])
-    i += 1
-i = 1
-while i < (len(matrix[0]) - 1):
-    alternativeIndexToName[i] = matrix[0][i]
-    i += 1
-
-i = 0
-temp = clustersConcern[len(clustersConcern) - 1][0]
-while i < len(temp):
-    concernNameToIndex[temp[i]] = i + 1
-    i += 1
-i = 0
-temp = clustersAlternative[len(clustersAlternative) - 1][0]
-nCol = len(clustersAlternative[len(clustersAlternative) - 1][0])
-while i < len(temp):
-    alternativeNameToIndex[temp[
-        i]] = nCol - i #nCol - i is to invert the position of the alternative so the line that we will draw from the table to the alternative names will look good, also the result of the equation is the index for the new table, no correction is needed as the values of the alternatives start at index 1
-    firstRow.append(temp[i])
-    i += 1
-firstRow.append([])
-i = 1
-j = 1
-
-#create the new matrix
-while i < len(matrix):
-    tempRow = [None] * len(matrix[0])
-    while j < len(matrix[0]) - 1:
-        index = alternativeNameToIndex[alternativeIndexToName[j]]
-        tempRow.insert(index, matrix[i][j])
-        tempRow.pop(index + 1)
-        if i == 1:
-            cellAlternativesXPositions[alternativeIndexToName[j]] = ((index - 1) * tableCellWidth) + (
-                tableCellWidth / 2) + xWordTableOffset + xWordToTableOffset + leftConcernMaxWordWidth
-        j += 1
-    tempRow.insert(0, matrix[i][0])
-    tempRow.pop(1)
-    tempCalculcation = len(matrix[i]) - 1
-    tempRow.insert(tempCalculcation, matrix[i][tempCalculcation])
-    tempRow.pop(tempCalculcation + 1)
-    temp = concernIndexToName[i]
-    index = -1
-    if concernNameToIndex.has_key(temp[0]):
-        index = concernNameToIndex[temp[0]]
+    w = xWordTableOffset + (xWordToTableOffset * 2) + (
+        (len(matrix[0]) - 2) * tableCellWidth) + leftConcernMaxWordWidth + percentageWordSize[0]
+    if rightConcernMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + concernRulerLength > alternativeMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + alternativeRulerLength:
+        w += rightConcernMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + concernRulerLength
     else:
-        index = concernNameToIndex[temp[1]]
-    tempMatrix.insert(index, tempRow)
-    tempMatrix.pop(index + 1)
-    i += 1
+        w += alternativeMaxWordWidth + xOffsetWordToLine + xOffsetLineToRuler + alternativeRulerLength
+
+        #create new matrix based on the order of the concern and alternative clusters
+    tempMatrix = [None] * len(matrix)
+    concernIndexToName = {}
+    alternativeIndexToName = {}
+    concernNameToIndex = {}
+    alternativeNameToIndex = {}
+    i = 1
+    firstRow = [[]]
+
+    #create the map of the old matrix to the new matrix
+    while i < len(matrix):
+        concernIndexToName[i] = (matrix[i][0], matrix[i][len(matrix[0]) - 1])
+        i += 1
+    i = 1
+    while i < (len(matrix[0]) - 1):
+        alternativeIndexToName[i] = matrix[0][i]
+        i += 1
+
+    i = 0
+    temp = clustersConcern[len(clustersConcern) - 1][0]
+    while i < len(temp):
+        concernNameToIndex[temp[i]] = i + 1
+        i += 1
+    i = 0
+    temp = clustersAlternative[len(clustersAlternative) - 1][0]
+    nCol = len(clustersAlternative[len(clustersAlternative) - 1][0])
+    while i < len(temp):
+        alternativeNameToIndex[temp[
+            i]] = nCol - i #nCol - i is to invert the position of the alternative so the line that we will draw from the table to the alternative names will look good, also the result of the equation is the index for the new table, no correction is needed as the values of the alternatives start at index 1
+        firstRow.append(temp[i])
+        i += 1
+    firstRow.append([])
+    i = 1
     j = 1
-tempMatrix.insert(0, firstRow)
-tempMatrix.pop(1)
-#print tempMatrix
-matrix = tempMatrix
 
-#######end pre-processing #########
+    #create the new matrix
+    while i < len(matrix):
+        tempRow = [None] * len(matrix[0])
+        while j < len(matrix[0]) - 1:
+            index = alternativeNameToIndex[alternativeIndexToName[j]]
+            tempRow.insert(index, matrix[i][j])
+            tempRow.pop(index + 1)
+            if i == 1:
+                cellAlternativesXPositions[alternativeIndexToName[j]] = ((index - 1) * tableCellWidth) + (
+                    tableCellWidth / 2) + xWordTableOffset + xWordToTableOffset + leftConcernMaxWordWidth
+            j += 1
+        tempRow.insert(0, matrix[i][0])
+        tempRow.pop(1)
+        tempCalculcation = len(matrix[i]) - 1
+        tempRow.insert(tempCalculcation, matrix[i][tempCalculcation])
+        tempRow.pop(tempCalculcation + 1)
+        temp = concernIndexToName[i]
+        index = -1
+        if concernNameToIndex.has_key(temp[0]):
+            index = concernNameToIndex[temp[0]]
+        else:
+            index = concernNameToIndex[temp[1]]
+        tempMatrix.insert(index, tempRow)
+        tempMatrix.pop(index + 1)
+        i += 1
+        j = 1
+    tempMatrix.insert(0, firstRow)
+    tempMatrix.pop(1)
+    #print tempMatrix
+    matrix = tempMatrix
 
-#depth= len(clustersConcern)
-#scaling= float(w - 150)/depth
+    #######end pre-processing #########
 
-#set the svg image size
-root.setWidth(str(w) + 'px')
-root.setHeight(str(h) + 'px')
-root.setXmlns('http://www.w3.org/2000/svg')
-root.setVersion('1.1')
-#root.setViewBox('0 0 ' + str(w) + ' ' + str(h))
+    #depth= len(clustersConcern)
+    #scaling= float(w - 150)/depth
 
-#add shadow
-if useShadow:
-    defNode = xmlDoc.createDefsNode()
-    filterNode = xmlDoc.createFilterNode()
-    filterNode.setId(shadowFilterId)
-    filterNode.setX(0)
-    filterNode.setY(0)
-    filterNode.setWidth('150%')
-    filterNode.setHeight('150%')
-    tempNode = xmlDoc.createFeOffsetNode()
-    tempNode.setDx(shadowXOffset)
-    tempNode.setDy(shadowYOffset)
-    tempNode.setResult('offOut')
-    tempNode.setIn('SourceGraphic')
-    filterNode.appendChild(tempNode)
-    tempNode = xmlDoc.createFeGaussianBlurNode()
-    tempNode.setResult('blurOut')
-    tempNode.setIn('offOut')
-    tempNode.setStdDeviation(shadowBlurSize)
-    filterNode.appendChild(tempNode)
-    tempNode = xmlDoc.createFeBlendNode()
-    tempNode.setIn('SourceGraphic')
-    tempNode.setIn2('blurOut')
-    tempNode.setMode('normal')
-    filterNode.appendChild(tempNode)
-    defNode.appendChild(filterNode)
-    root.appendChild(defNode)
+    #set the svg image size
+    root.setWidth(str(w) + 'px')
+    root.setHeight(str(h) + 'px')
+    root.setXmlns('http://www.w3.org/2000/svg')
+    root.setVersion('1.1')
+    #root.setViewBox('0 0 ' + str(w) + ' ' + str(h))
 
-#        # define the global properties of the image
-#        propertiesNode= xmlDoc.createElement('properties')
-#        #image width
-#        tempNode= xmlDoc.createElement('width');
-#        tempNode.appendChild(xmlDoc.createTextNode(str(w)))
-#        propertiesNode.appendChild(tempNode)
-#        #image height
-#        tempNode= xmlDoc.createElement('height')
-#        tempNode.appendChild(xmlDoc.createTextNode(str(h)))
-#        propertiesNode.appendChild(tempNode)
-#        #global shadow
-#        if useGlobalShadow:
-#            shadowNode= xmlDoc.createElement('shadow')
-#            shadowXOffSetNode= xmlDoc.createElement('xOffSet')
-#            shadowYOffSetNode= xmlDoc.createElement('yOffSet')
-#            shadowBlurSizeNode= xmlDoc.createElement('blurSize')
-#
-#            shadowXOffSetNode.appendChild(xmlDoc.createTextNode(str(shadowXOffset)))
-#            shadowYOffSetNode.appendChild(xmlDoc.createTextNode(str(shadowYOffset)))
-#            shadowBlurSizeNode.appendChild(xmlDoc.createTextNode(str(shadowBlurSize)))
-#
-#            shadowNode.appendChild(shadowXOffSetNode)
-#            shadowNode.appendChild(shadowYOffSetNode)
-#            shadowNode.appendChild(shadowBlurSizeNode)
-#
-#            propertiesNode.appendChild(shadowNode)
-#
-#        topElement.appendChild(propertiesNode)
+    #add shadow
+    if useShadow:
+        defNode = xmlDoc.createDefsNode()
+        filterNode = xmlDoc.createFilterNode()
+        filterNode.setId(shadowFilterId)
+        filterNode.setX(0)
+        filterNode.setY(0)
+        filterNode.setWidth('150%')
+        filterNode.setHeight('150%')
+        tempNode = xmlDoc.createFeOffsetNode()
+        tempNode.setDx(shadowXOffset)
+        tempNode.setDy(shadowYOffset)
+        tempNode.setResult('offOut')
+        tempNode.setIn('SourceGraphic')
+        filterNode.appendChild(tempNode)
+        tempNode = xmlDoc.createFeGaussianBlurNode()
+        tempNode.setResult('blurOut')
+        tempNode.setIn('offOut')
+        tempNode.setStdDeviation(shadowBlurSize)
+        filterNode.appendChild(tempNode)
+        tempNode = xmlDoc.createFeBlendNode()
+        tempNode.setIn('SourceGraphic')
+        tempNode.setIn2('blurOut')
+        tempNode.setMode('normal')
+        filterNode.appendChild(tempNode)
+        defNode.appendChild(filterNode)
+        root.appendChild(defNode)
+
+    #        # define the global properties of the image
+    #        propertiesNode= xmlDoc.createElement('properties')
+    #        #image width
+    #        tempNode= xmlDoc.createElement('width');
+    #        tempNode.appendChild(xmlDoc.createTextNode(str(w)))
+    #        propertiesNode.appendChild(tempNode)
+    #        #image height
+    #        tempNode= xmlDoc.createElement('height')
+    #        tempNode.appendChild(xmlDoc.createTextNode(str(h)))
+    #        propertiesNode.appendChild(tempNode)
+    #        #global shadow
+    #        if useGlobalShadow:
+    #            shadowNode= xmlDoc.createElement('shadow')
+    #            shadowXOffSetNode= xmlDoc.createElement('xOffSet')
+    #            shadowYOffSetNode= xmlDoc.createElement('yOffSet')
+    #            shadowBlurSizeNode= xmlDoc.createElement('blurSize')
+    #
+    #            shadowXOffSetNode.appendChild(xmlDoc.createTextNode(str(shadowXOffset)))
+    #            shadowYOffSetNode.appendChild(xmlDoc.createTextNode(str(shadowYOffset)))
+    #            shadowBlurSizeNode.appendChild(xmlDoc.createTextNode(str(shadowBlurSize)))
+    #
+    #            shadowNode.appendChild(shadowXOffSetNode)
+    #            shadowNode.appendChild(shadowYOffSetNode)
+    #            shadowNode.appendChild(shadowBlurSizeNode)
+    #
+    #            propertiesNode.appendChild(shadowNode)
+    #
+    #        topElement.appendChild(propertiesNode)
 
 
-#define the main node for the table
-#tableGroupNode= xmlDoc.createElement('dendogramTable')
-tableGroupNode = xmlDoc.createGNode()
-if useShadow:
-    tableGroupNode.setFilter('url(#' + shadowFilterId + ')')
-tempNode = None
-#lets draw stuff now
+    #define the main node for the table
+    #tableGroupNode= xmlDoc.createElement('dendogramTable')
+    tableGroupNode = xmlDoc.createGNode()
+    if useShadow:
+        tableGroupNode.setFilter('url(#' + shadowFilterId + ')')
+    tempNode = None
+    #lets draw stuff now
 
-################
-###table draw###
-################
+    ################
+    ###table draw###
+    ################
 
-yTableStartPosition = yTableTopOffset + percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset
-xtableStartPosition = xWordToTableOffset + xWordTableOffset + leftConcernMaxWordWidth
-#tableGroupNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition, yTableStartPosition, xtableStartPosition + ( tableCellWidth * (len(matrix[0]) - 2)), yTableStartPosition, tableLineColor, tableLineThickness))
-tempNode = xmlDoc.createLineNode(xtableStartPosition, yTableStartPosition,
-                                 xtableStartPosition + ( tableCellWidth * (len(matrix[0]) - 2)),
-                                 yTableStartPosition)
-tempNode.setStyle('stroke:' + createColorRGBString(tableLineColor))
-tempNode.setStrokeWidth(tableLineThickness)
-tableGroupNode.appendChild(tempNode)
-#draw.line([(xtableStartPosition, yTableStartPosition), (xtableStartPosition + ( tableCellWidth * (len(matrix[0]) - 2)), yTableStartPosition)], fill= tableLineColor, width= tableLineThickness)
-#remember to add + tableLineThickness to the start position to account for the line thickness, that also goes for the right, left and bottom
-
-#now lets drawn the table row by row
-i = 1;
-j = 0;
-while i < len(matrix):
-    row = matrix[i]
-    #draw the left word
-    wordSize = f.getsize(row[0])
-    tempNode = xmlDoc.createSvgTextNode(xtableStartPosition - xWordToTableOffset - wordSize[0], (
-                                                                                                    yTableStartPosition + (
-                                                                                                        tableCellHeight * (
-                                                                                                            i - 1)) - (
-                                                                                                        wordSize[
-                                                                                                            1] / 2) + (
-                                                                                                        tableCellHeight / 2)) + (
-                                                                                                    wordSize[
-                                                                                                        1] - 4),
-                                        row[0])
-    tempNode.setFontFamily(fontName)
-    tempNode.setFontSize(str(fontSize) + 'px')
-    tempNode.setStyle('fill:' + createColorRGBString(tableWordColor))
+    yTableStartPosition = yTableTopOffset + percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset
+    xtableStartPosition = xWordToTableOffset + xWordTableOffset + leftConcernMaxWordWidth
+    #tableGroupNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition, yTableStartPosition, xtableStartPosition + ( tableCellWidth * (len(matrix[0]) - 2)), yTableStartPosition, tableLineColor, tableLineThickness))
+    tempNode = xmlDoc.createLineNode(xtableStartPosition, yTableStartPosition,
+                                     xtableStartPosition + ( tableCellWidth * (len(matrix[0]) - 2)),
+                                     yTableStartPosition)
+    tempNode.setStyle('stroke:' + createColorRGBString(tableLineColor))
+    tempNode.setStrokeWidth(tableLineThickness)
     tableGroupNode.appendChild(tempNode)
-    #tableGroupNode.appendChild(__createXmlTextNode__(xmlDoc, xtableStartPosition - xWordToTableOffset - wordSize[0], yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2), row[0], wordSize[0], wordSize[1], fontName, fontSize, tableWordColor))
-    #draw.text((xtableStartPosition - xWordToTableOffset - wordSize[0], yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2) ), row[0], font= f, fill= tableWordColor)
-    while j < len(row) - 2:
-        if j == 0:
-            #draw the left line
-            tempNode = xmlDoc.createLineNode(xtableStartPosition,
-                                             yTableStartPosition + ( (i - 1) * tableCellHeight),
-                                             xtableStartPosition, yTableStartPosition + ( i * tableCellHeight))
-            tempNode.setStrokeWidth(tableLineThickness)
-            tempNode.setStyle('stroke:' + createColorRGBString(tableLineColor))
-            tableGroupNode.appendChild(tempNode)
-            #tableGroupNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition, yTableStartPosition + ( (i - 1) * tableCellHeight), xtableStartPosition, yTableStartPosition + ( i * tableCellHeight), tableLineColor, tableLineThickness))
-            #draw.line([(xtableStartPosition , yTableStartPosition + ( (i - 1) * tableCellHeight)), ( xtableStartPosition, yTableStartPosition + ( i * tableCellHeight) )], fill= tableLineColor, width= tableLineThickness)
-        #draw the values of the cells
-        cell = row[j + 1]
-        wordSize = f.getsize(str(cell))
-        xCellValue = xtableStartPosition + (j * tableCellWidth) + floor((tableCellWidth - wordSize[0]) / 2)
-        yCellValue = yTableStartPosition + ((i - 1) * tableCellHeight) + floor((tableCellHeight - wordSize[1]) / 2)
-        tempNode = xmlDoc.createSvgTextNode(xCellValue, yCellValue + (wordSize[1] - 4), str(cell))
+    #draw.line([(xtableStartPosition, yTableStartPosition), (xtableStartPosition + ( tableCellWidth * (len(matrix[0]) - 2)), yTableStartPosition)], fill= tableLineColor, width= tableLineThickness)
+    #remember to add + tableLineThickness to the start position to account for the line thickness, that also goes for the right, left and bottom
+
+    #now lets drawn the table row by row
+    i = 1;
+    j = 0;
+    while i < len(matrix):
+        row = matrix[i]
+        #draw the left word
+        wordSize = f.getsize(row[0])
+        tempNode = xmlDoc.createSvgTextNode(xtableStartPosition - xWordToTableOffset - wordSize[0], (
+                                                                                                        yTableStartPosition + (
+                                                                                                            tableCellHeight * (
+                                                                                                                i - 1)) - (
+                                                                                                            wordSize[
+                                                                                                                1] / 2) + (
+                                                                                                            tableCellHeight / 2)) + (
+                                                                                                        wordSize[
+                                                                                                            1] - 4),
+                                            row[0])
         tempNode.setFontFamily(fontName)
         tempNode.setFontSize(str(fontSize) + 'px')
-        tempNode.setStyle('fill:' + createColorRGBString(tableCellWordColor))
+        tempNode.setStyle('fill:' + createColorRGBString(tableWordColor))
         tableGroupNode.appendChild(tempNode)
-        #tableGroupNode.appendChild(__createXmlTextNode__(xmlDoc, xCellValue, yCellValue, str(cell), wordSize[0], wordSize[1], fontName, fontSize, tableCellWordColor))
-        #draw.text((xCellValue, yCellValue), str(cell), font= f, fill= tableCellWordColor)
-        if j == len(row) - 3:
-            #draw right line
-            tempNode = xmlDoc.createLineNode(xtableStartPosition + ( (j + 1) * tableCellWidth),
-                                             yTableStartPosition + ( (i - 1) * tableCellHeight),
-                                             xtableStartPosition + ( (j + 1) * tableCellWidth),
-                                             yTableStartPosition + (i * tableCellHeight))
-            tempNode.setStrokeWidth(tableLineThickness)
-            tempNode.setStyle('stroke:' + createColorRGBString(tableLineColor))
+        #tableGroupNode.appendChild(__createXmlTextNode__(xmlDoc, xtableStartPosition - xWordToTableOffset - wordSize[0], yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2), row[0], wordSize[0], wordSize[1], fontName, fontSize, tableWordColor))
+        #draw.text((xtableStartPosition - xWordToTableOffset - wordSize[0], yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2) ), row[0], font= f, fill= tableWordColor)
+        while j < len(row) - 2:
+            if j == 0:
+                #draw the left line
+                tempNode = xmlDoc.createLineNode(xtableStartPosition,
+                                                 yTableStartPosition + ( (i - 1) * tableCellHeight),
+                                                 xtableStartPosition, yTableStartPosition + ( i * tableCellHeight))
+                tempNode.setStrokeWidth(tableLineThickness)
+                tempNode.setStyle('stroke:' + createColorRGBString(tableLineColor))
+                tableGroupNode.appendChild(tempNode)
+                #tableGroupNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition, yTableStartPosition + ( (i - 1) * tableCellHeight), xtableStartPosition, yTableStartPosition + ( i * tableCellHeight), tableLineColor, tableLineThickness))
+                #draw.line([(xtableStartPosition , yTableStartPosition + ( (i - 1) * tableCellHeight)), ( xtableStartPosition, yTableStartPosition + ( i * tableCellHeight) )], fill= tableLineColor, width= tableLineThickness)
+            #draw the values of the cells
+            cell = row[j + 1]
+            wordSize = f.getsize(str(cell))
+            xCellValue = xtableStartPosition + (j * tableCellWidth) + floor((tableCellWidth - wordSize[0]) / 2)
+            yCellValue = yTableStartPosition + ((i - 1) * tableCellHeight) + floor((tableCellHeight - wordSize[1]) / 2)
+            tempNode = xmlDoc.createSvgTextNode(xCellValue, yCellValue + (wordSize[1] - 4), str(cell))
+            tempNode.setFontFamily(fontName)
+            tempNode.setFontSize(str(fontSize) + 'px')
+            tempNode.setStyle('fill:' + createColorRGBString(tableCellWordColor))
             tableGroupNode.appendChild(tempNode)
-            #tableGroupNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + ( (i - 1) * tableCellHeight), xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + (i * tableCellHeight), tableLineColor, tableLineThickness))
-            #draw.line([(xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + ( (i - 1) * tableCellHeight)), ( xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + (i * tableCellHeight) )], fill= tableLineColor, width= tableLineThickness)
-        j += 1
-        #draw the right word
-    wordSize = f.getsize(row[len(row) - 1])
-    tempNode = xmlDoc.createSvgTextNode(
-        xtableStartPosition + (tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness,
-        (yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight / 2)) + (
-            wordSize[1] - 4), row[len(row) - 1])
-    tempNode.setFontFamily(fontName)
-    tempNode.setFontSize(str(fontSize) + 'px')
-    tempNode.setStyle('fill:' + createColorRGBString(tableWordColor))
+            #tableGroupNode.appendChild(__createXmlTextNode__(xmlDoc, xCellValue, yCellValue, str(cell), wordSize[0], wordSize[1], fontName, fontSize, tableCellWordColor))
+            #draw.text((xCellValue, yCellValue), str(cell), font= f, fill= tableCellWordColor)
+            if j == len(row) - 3:
+                #draw right line
+                tempNode = xmlDoc.createLineNode(xtableStartPosition + ( (j + 1) * tableCellWidth),
+                                                 yTableStartPosition + ( (i - 1) * tableCellHeight),
+                                                 xtableStartPosition + ( (j + 1) * tableCellWidth),
+                                                 yTableStartPosition + (i * tableCellHeight))
+                tempNode.setStrokeWidth(tableLineThickness)
+                tempNode.setStyle('stroke:' + createColorRGBString(tableLineColor))
+                tableGroupNode.appendChild(tempNode)
+                #tableGroupNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + ( (i - 1) * tableCellHeight), xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + (i * tableCellHeight), tableLineColor, tableLineThickness))
+                #draw.line([(xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + ( (i - 1) * tableCellHeight)), ( xtableStartPosition + ( (j + 1) * tableCellWidth), yTableStartPosition + (i * tableCellHeight) )], fill= tableLineColor, width= tableLineThickness)
+            j += 1
+            #draw the right word
+        wordSize = f.getsize(row[len(row) - 1])
+        tempNode = xmlDoc.createSvgTextNode(
+            xtableStartPosition + (tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness,
+            (yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight / 2)) + (
+                wordSize[1] - 4), row[len(row) - 1])
+        tempNode.setFontFamily(fontName)
+        tempNode.setFontSize(str(fontSize) + 'px')
+        tempNode.setStyle('fill:' + createColorRGBString(tableWordColor))
+        tableGroupNode.appendChild(tempNode)
+        #tableGroupNode.appendChild(__createXmlTextNode__(xmlDoc, xtableStartPosition + (tableCellWidth * (len(row) - 2)) +  xWordToTableOffset + tableLineThickness, yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2), row[len(row) - 1], wordSize[0], wordSize[1], fontName, fontSize, tableWordColor))
+        #draw.text( ( xtableStartPosition + (tableCellWidth * (len(row) - 2)) +  xWordToTableOffset + tableLineThickness, yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2) ), row[len(row) - 1], font= f, fill= tableWordColor)
+        dicMatrixConcernToWordEndPosition[row[0]] = (
+            wordSize[0] + xtableStartPosition + (
+                tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness,
+            yTableStartPosition + (tableCellHeight * (i - 1)) + (wordSize[1] / 2) )
+        dicMatrixConcernToWordEndPosition[row[len(row) - 1]] = dicMatrixConcernToWordEndPosition[row[0]]
+        if rightConcenrMaxX < xtableStartPosition + (
+                tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness + rightConcernMaxWordWidth:
+            rightConcenrMaxX = xtableStartPosition + (
+                tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness + rightConcernMaxWordWidth
+        j = 0
+        i += 1
+        #draw the bottom line
+    yTableBottom = yTableStartPosition + (tableCellHeight * (len(matrix) - 1) )
+    tempNode = xmlDoc.createLineNode(xtableStartPosition, yTableBottom,
+                                     xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ), yTableBottom)
+    tempNode.setStrokeWidth(tableLineThickness)
+    tempNode.setStyle('stroke:' + createColorRGBString(tableLineColor))
     tableGroupNode.appendChild(tempNode)
-    #tableGroupNode.appendChild(__createXmlTextNode__(xmlDoc, xtableStartPosition + (tableCellWidth * (len(row) - 2)) +  xWordToTableOffset + tableLineThickness, yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2), row[len(row) - 1], wordSize[0], wordSize[1], fontName, fontSize, tableWordColor))
-    #draw.text( ( xtableStartPosition + (tableCellWidth * (len(row) - 2)) +  xWordToTableOffset + tableLineThickness, yTableStartPosition + (tableCellHeight * (i - 1)) - (wordSize[1] / 2) + (tableCellHeight/2) ), row[len(row) - 1], font= f, fill= tableWordColor)
-    dicMatrixConcernToWordEndPosition[row[0]] = (
-        wordSize[0] + xtableStartPosition + (
-            tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness,
-        yTableStartPosition + (tableCellHeight * (i - 1)) + (wordSize[1] / 2) )
-    dicMatrixConcernToWordEndPosition[row[len(row) - 1]] = dicMatrixConcernToWordEndPosition[row[0]]
-    if rightConcenrMaxX < xtableStartPosition + (
-            tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness + rightConcernMaxWordWidth:
-        rightConcenrMaxX = xtableStartPosition + (
-            tableCellWidth * (len(row) - 2)) + xWordToTableOffset + tableLineThickness + rightConcernMaxWordWidth
-    j = 0
-    i += 1
-    #draw the bottom line
-yTableBottom = yTableStartPosition + (tableCellHeight * (len(matrix) - 1) )
-tempNode = xmlDoc.createLineNode(xtableStartPosition, yTableBottom,
-                                 xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ), yTableBottom)
-tempNode.setStrokeWidth(tableLineThickness)
-tempNode.setStyle('stroke:' + createColorRGBString(tableLineColor))
-tableGroupNode.appendChild(tempNode)
-#tableGroupNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition, yTableBottom, xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ), yTableBottom, tableLineColor, tableLineThickness))
-#draw.line([(xtableStartPosition, yTableBottom ), (xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ) , yTableBottom )], fill= tableLineColor, width= tableLineThickness)
+    #tableGroupNode.appendChild(__createXmlLineNode__(xmlDoc, xtableStartPosition, yTableBottom, xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ), yTableBottom, tableLineColor, tableLineThickness))
+    #draw.line([(xtableStartPosition, yTableBottom ), (xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ) , yTableBottom )], fill= tableLineColor, width= tableLineThickness)
 
-#topElement.appendChild(tableGroupNode)
-root.appendChild(tableGroupNode)
+    #topElement.appendChild(tableGroupNode)
+    root.appendChild(tableGroupNode)
 
-####### end table draw #########
+    ####### end table draw #########
 
-############################
-###Concern dendogram draw###
-############################
+    ############################
+    ###Concern dendogram draw###
+    ############################
 
-#dendogramConcernsGroup= xmlDoc.createElement('dendogramConcerns')
-dendogramConcernsGroup = xmlDoc.createGNode()
-if useShadow:
-    dendogramConcernsGroup.setFilter('url(#' + shadowFilterId + ')')
+    #dendogramConcernsGroup= xmlDoc.createElement('dendogramConcerns')
+    dendogramConcernsGroup = xmlDoc.createGNode()
+    if useShadow:
+        dendogramConcernsGroup.setFilter('url(#' + shadowFilterId + ')')
 
-#lets first draw all the individual items, the last sub-cluster should contain all of them
-allClusters = [] # format is ([item1, item2,...], positionX, positionY)
-i = 0;
-while i < len(clustersConcern[len(clustersConcern) - 1][0]):
-    temp = clustersConcern[len(clustersConcern) - 1][0]
-    wordEndPosition = dicMatrixConcernToWordEndPosition[temp[i]]
-    #save the positions we want
-    allClusters.append((temp[i], wordEndPosition[0], wordEndPosition[1]))
-    i += 1
+    #lets first draw all the individual items, the last sub-cluster should contain all of them
+    allClusters = [] # format is ([item1, item2,...], positionX, positionY)
+    i = 0;
+    while i < len(clustersConcern[len(clustersConcern) - 1][0]):
+        temp = clustersConcern[len(clustersConcern) - 1][0]
+        wordEndPosition = dicMatrixConcernToWordEndPosition[temp[i]]
+        #save the positions we want
+        allClusters.append((temp[i], wordEndPosition[0], wordEndPosition[1]))
+        i += 1
 
-xConcernRulerStartPoint = rightConcenrMaxX + xOffsetWordToLine + xOffsetLineToRuler
-#now reset all the x to the max word length + an offset
-temp = []
-for cluster in allClusters:
-    newX = xConcernRulerStartPoint #xOffsetWordToLine + cluster[1] + (rightConcenrMaxX - cluster[1]) + xOffsetLineToRuler
-    tempNode = xmlDoc.createLineNode(cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2])
-    tempNode.setStrokeWidth(1)
-    tempNode.setStyle('stroke:' + createColorRGBString(concernDendogramLineColor))
-    dendogramConcernsGroup.appendChild(tempNode)
-    #dendogramConcernsGroup.appendChild(__createXmlLineNode__(xmlDoc, cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2], concernDendogramLineColor, 1))
-    #draw.line([(cluster[1] + xOffsetWordToLine, cluster[2]), ( newX , cluster[2])], fill= concernDendogramLineColor)
-    temp.append((cluster[0], newX, cluster[2]))
-allClusters = temp;
-#now lets draw the ruler
-tempNode = xmlDoc.createLineNode(xConcernRulerStartPoint,
-                                 percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset,
-                                 xConcernRulerStartPoint + concernRulerLength,
-                                 percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset)
-tempNode.setStrokeWidth(1)
-tempNode.setStyle('stroke:' + createColorRGBString(concernDendogramLineColor))
-dendogramConcernsGroup.appendChild(tempNode)
-#dendogramConcernsGroup.appendChild(__createXmlLineNode__(xmlDoc, xConcernRulerStartPoint, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, xConcernRulerStartPoint + concernRulerLength, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, concernRulerColor, 1))
-#draw.line( [(xConcernRulerStartPoint, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset), (xConcernRulerStartPoint + concernRulerLength, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset)], fill= concernRulerColor)
-i = 0
-#draw the markers of the ruler
-while i <= nConcernRulerSteps:
-    percentage = str(100 - (i * 10))
-    wordSize = f.getsize(percentage)
-    tempNode = xmlDoc.createSvgTextNode(xConcernRulerStartPoint + (concernRulerStep * i) - (wordSize[0] / 2),
-                                        yConcernRulerOffset + (wordSize[1] - 4), percentage)
-    tempNode.setFontFamily(fontName)
-    tempNode.setFontSize(str(fontSize) + 'px')
-    tempNode.setStyle('fill:' + createColorRGBString(concernRulerPerncetageColor))
-    dendogramConcernsGroup.appendChild(tempNode)
-    #dendogramConcernsGroup.appendChild(__createXmlTextNode__(xmlDoc, xConcernRulerStartPoint + (concernRulerStep * i) -  (wordSize[0] / 2), yConcernRulerOffset, percentage, wordSize[0], wordSize[1], fontName, fontSize, concernRulerPerncetageColor))
-    #draw.text(( xConcernRulerStartPoint + (concernRulerStep * i) -  (f.getsize(percentage)[0] / 2) , yConcernRulerOffset ), text= percentage, fill= concernRulerPerncetageColor, font= f)
-    tempNode = xmlDoc.createLineNode(xConcernRulerStartPoint + (concernRulerStep * i),
-                                     percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset,
-                                     xConcernRulerStartPoint + (concernRulerStep * i), percentageWordSize[
-                                                                                           1] + yConcernRulerOffset + yConcerPercentageToRulerOffset + rulerVerticalLineSize)
-    tempNode.setStrokeWidth(1)
-    tempNode.setStyle('stroke:' + createColorRGBString(concernRulerColor))
-    dendogramConcernsGroup.appendChild(tempNode)
-    #dendogramConcernsGroup.appendChild(__createXmlLineNode__(xmlDoc, xConcernRulerStartPoint + (concernRulerStep * i), percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, xConcernRulerStartPoint + (concernRulerStep * i), percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset + rulerVerticalLineSize, concernRulerColor, 1))
-    #draw.line( [ (xConcernRulerStartPoint + (concernRulerStep * i) , percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset), ( (xConcernRulerStartPoint + (concernRulerStep * i)), percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset + rulerVerticalLineSize) ], fill= concernRulerColor)
-    i += 1
-
-#ok now lets start drawing the combined clustersConcern
-i = 0
-xPositionNewCluster = 0; # the xPosition of a new cluster will be fix and based on the previous run
-while i < len(clustersConcern):
-    cluster = clustersConcern[i]
-    mainClusterSet = set(cluster[0])
-    subSetClusters = []
-    j = 0
-    #find from which sub-clustersConcern is the main cluster composed of
-    while j < len(allClusters):
-        temp = (allClusters[j])[
-            0] #this is needed because if you have a long string like 'java' when you call set it will generate a set for each letter so the set will be (j,a,v,a) instead of (java)
-        if type(temp) is str:
-            temp = [temp]
-        if set(temp).issubset(mainClusterSet):
-            subSetClusters.append(allClusters[j])
-            if (len(subSetClusters) >= len(cluster[0])):
-                break;
-        j += 1;
-        #now draw the lines of the old clustersConcern to the new cluster
-    #assumption, because we created the initial clustersConcern from the last cluster(where we have all the clustersConcern in 1) the position of the sub-clustersConcern are ideal, in terms that they are next to each other after each round
-    #xPositionNewCluster= 0
-    yPositionNewCluster = 0
-    temp = 0 #will be used as the biggest y
-    temp2 = 0 #will be used as the smallest y
-    j = 0
-    while j < len(subSetClusters):
-        if j == 0:
-            temp = (subSetClusters[j])[2]
-            temp2 = (subSetClusters[j])[2]
-            if i == 0:
-                xPositionNewCluster = (subSetClusters[j])[1]
-                #xPositionNewCluster= (subSetClusters[j])[1]
-        else:
-            if (subSetClusters[j])[2] > temp:
-                temp = (subSetClusters[j])[2]
-            if (subSetClusters[j])[2] < temp2:
-                temp2 = (subSetClusters[j])[2]
-                #if (subSetClusters[j])[1] > xPositionNewCluster:
-                #    xPositionNewCluster= (subSetClusters[j])[1]
-        j += 1
-        #calculate the offset from the beginning of the ruler that xPositionNewCluster should be
-    #assumption, ruler starts from 100 thus: |100 |90 |80......
-    # concernRulerStep/10 -> every step = 10% thus this calculation give us the amount of pixels that 1% represents. 100 - concernClusterSimilarity[i] -> this calculation gives us the percentage that a percentage is away from 100%.
-    xPositionNewCluster = int(
-        ( (concernRulerStep / 10.0) * ( 100 - concernClusterSimilarity[i]) ) + xConcernRulerStartPoint)
-    yPositionNewCluster = temp2 + (temp - temp2) / 2
-
-    for subCluser in subSetClusters:
-        tempNode = xmlDoc.createLineNode(subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster)
+    xConcernRulerStartPoint = rightConcenrMaxX + xOffsetWordToLine + xOffsetLineToRuler
+    #now reset all the x to the max word length + an offset
+    temp = []
+    for cluster in allClusters:
+        newX = xConcernRulerStartPoint #xOffsetWordToLine + cluster[1] + (rightConcenrMaxX - cluster[1]) + xOffsetLineToRuler
+        tempNode = xmlDoc.createLineNode(cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2])
         tempNode.setStrokeWidth(1)
         tempNode.setStyle('stroke:' + createColorRGBString(concernDendogramLineColor))
         dendogramConcernsGroup.appendChild(tempNode)
-        #dendogramConcernsGroup.appendChild(__createXmlLineNode__(xmlDoc, subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster, concernDendogramLineColor, 1))
-        #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, yPositionNewCluster)], fill= concernDendogramLineColor)
-        #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, subCluser[2])], fill=(255,0,0))
-        #draw.line((xPositionNewCluster, subCluser[2], xPositionNewCluster, yPositionNewCluster), fill=(255,0,0))
-
-        # now remove the old clustersConcern from allClusters
-        allClusters.remove(subCluser)
-        #now add the new cluster to allClusters
-    allClusters.append((cluster[0], xPositionNewCluster, yPositionNewCluster))
-    i += 1
-    #topElement.appendChild(dendogramConcernsGroup)
-root.appendChild(dendogramConcernsGroup)
-####### end concern dendogram draw #########
-
-################################
-###Alternative dendogram draw###
-################################
-
-#dendogramAlternativesGroup= xmlDoc.createElement('dendogramAlternative')
-dendogramAlternativesGroup = xmlDoc.createGNode()
-if useShadow:
-    dendogramAlternativesGroup.setFilter('url(#' + shadowFilterId + ')')
-
-allClusters = [] # format is ([item1, item2,...], positionX, positionY)
-i = 0;
-while i < len(clustersAlternative[len(clustersAlternative) - 1][0]):
-    allClusters.append(((clustersAlternative[len(clustersAlternative) - 1][0])[i],
-                        xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ) + xWordToTableOffset,
-                        yTableStartPosition + (tableCellHeight * len(matrix)) + (
-                            tableCellHeight * (i)) + yAlternativeRulerOffset + percentageWordSize[
-                            1] + yAlternativePercentageToRulerOffset ))
-    i += 1
-    #now draw the initial clustersAlternative
-temp = []
-maxWordLength = -1
-for cluster in allClusters:
-    (width, height) = f.getsize(cluster[0])
-    tempNode = xmlDoc.createSvgTextNode(cluster[1], cluster[2] + (wordSize[1] - 4), cluster[0])
-    tempNode.setFontFamily(fontName)
-    tempNode.setFontSize(str(fontSize) + 'px')
-    tempNode.setStyle('fill:' + createColorRGBString(alternativeWordColor))
-    dendogramAlternativesGroup.appendChild(tempNode)
-    #dendogramAlternativesGroup.appendChild(__createXmlTextNode__(xmlDoc, cluster[1], cluster[2], cluster[0], width, height, fontName, fontSize, alternativeWordColor))
-    #draw.text((cluster[1], cluster[2]), cluster[0], font= f, fill= alternativeWordColor );
-    # now reset the y position to the middle of the word and the x to the end of the word, this is the point where the line will start
-    temp.append(( cluster[0], cluster[1] + width, cluster[2] + (height / 2) ))
-    if maxWordLength < width:
-        maxWordLength = width
-        #draw the lines that connect the table with the alternative names
-    tempNode = xmlDoc.createLineNode(cellAlternativesXPositions[cluster[0]], yTableBottom + 1,
-                                     cellAlternativesXPositions[cluster[0]], cluster[2] + (height / 2))
+        #dendogramConcernsGroup.appendChild(__createXmlLineNode__(xmlDoc, cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2], concernDendogramLineColor, 1))
+        #draw.line([(cluster[1] + xOffsetWordToLine, cluster[2]), ( newX , cluster[2])], fill= concernDendogramLineColor)
+        temp.append((cluster[0], newX, cluster[2]))
+    allClusters = temp;
+    #now lets draw the ruler
+    tempNode = xmlDoc.createLineNode(xConcernRulerStartPoint,
+                                     percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset,
+                                     xConcernRulerStartPoint + concernRulerLength,
+                                     percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset)
     tempNode.setStrokeWidth(1)
-    tempNode.setStyle('stroke:' + createColorRGBString(tableToAlternativesConnectionLineColor))
-    dendogramAlternativesGroup.appendChild(tempNode)
-    #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, cellAlternativesXPositions[cluster[0]], yTableBottom + 1, cellAlternativesXPositions[cluster[0]], cluster[2] + (height/2), tableToAlternativesConnectionLineColor, 1))
-    #draw.line([(cellAlternativesXPositions[cluster[0]] , yTableBottom + 1), (cellAlternativesXPositions[cluster[0]], cluster[2] + (height/2))], fill= tableToAlternativesConnectionLineColor)
-    tempNode = xmlDoc.createLineNode(cellAlternativesXPositions[cluster[0]], cluster[2] + (height / 2),
-                                     cluster[1] - 2, cluster[2] + (height / 2))
-    tempNode.setStrokeWidth(1)
-    tempNode.setStyle('stroke:' + createColorRGBString(tableToAlternativesConnectionLineColor))
-    dendogramAlternativesGroup.appendChild(tempNode)
-    #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, cellAlternativesXPositions[cluster[0]],  cluster[2] + (height/2), cluster[1] - 2,  cluster[2] + (height/2), tableToAlternativesConnectionLineColor, 1))
-    #draw.line([(cellAlternativesXPositions[cluster[0]] , cluster[2] + (height/2)), (cluster[1] - 2, cluster[2] + (height/2))], fill= tableToAlternativesConnectionLineColor)
-allClusters = temp
-xAlternativeRulerStartPoint = maxWordLength + xOffsetWordToLine + xOffsetLineToRuler + xtableStartPosition + (
-    tableCellWidth * (len(matrix[0]) - 2) )
-yAlternativeRulerStartPoint = yAlternativeRulerOffset + percentageWordSize[
-    1] + yAlternativePercentageToRulerOffset + yTableBottom
-#now reset all the x to the max word length + an offset
-temp = []
-for cluster in allClusters:
-    newX = xAlternativeRulerStartPoint
-    tempNode = xmlDoc.createLineNode(cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2])
-    tempNode.setStrokeWidth(1)
-    tempNode.setStyle('stroke:' + createColorRGBString(alternativeDendogramLineColor))
-    dendogramAlternativesGroup.appendChild(tempNode)
-    #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2], alternativeDendogramLineColor, 1))
-    #draw.line([(cluster[1] + xOffsetWordToLine, cluster[2]), ( newX , cluster[2])], fill= alternativeDendogramLineColor)
-    temp.append((cluster[0], newX, cluster[2]))
-allClusters = temp;
-#now lets draw the ruler
-newX = xAlternativeRulerStartPoint
-tempNode = xmlDoc.createLineNode(xAlternativeRulerStartPoint, yAlternativeRulerStartPoint,
-                                 xAlternativeRulerStartPoint + alternativeRulerLength, yAlternativeRulerStartPoint)
-tempNode.setStrokeWidth(1)
-tempNode.setStyle('stroke:' + createColorRGBString(alternativeRulerColor))
-dendogramAlternativesGroup.appendChild(tempNode)
-#dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, xAlternativeRulerStartPoint, yAlternativeRulerStartPoint, xAlternativeRulerStartPoint + alternativeRulerLength, yAlternativeRulerStartPoint, alternativeRulerColor, 1))
-#draw.line( [(xAlternativeRulerStartPoint, yAlternativeRulerStartPoint), (xAlternativeRulerStartPoint + alternativeRulerLength, yAlternativeRulerStartPoint)], fill= alternativeRulerColor)
-i = 0
-#draw the markers of the ruler
-while i <= nAlternativRulerSteps:
-    percentage = str(100 - (i * 10))
-    wordSize = f.getsize(percentage)
-    tempNode = xmlDoc.createSvgTextNode(
-        xAlternativeRulerStartPoint + (alternativeRulerStep * i) - (wordSize[0] / 2),
-        yAlternativeRulerStartPoint - yAlternativePercentageToRulerOffset - wordSize[1] + (wordSize[1] - 4),
-        percentage)
-    tempNode.setFontFamily(fontName)
-    tempNode.setFontSize(str(fontSize) + 'px')
-    tempNode.setStyle('fill:' + createColorRGBString(alternativeRulerPerncetageColor))
-    dendogramAlternativesGroup.appendChild(tempNode)
-    #dendogramAlternativesGroup.appendChild(__createXmlTextNode__(xmlDoc, xAlternativeRulerStartPoint + (alternativeRulerStep * i) -  (wordSize[0] / 2), yAlternativeRulerStartPoint -  yAlternativePercentageToRulerOffset - wordSize[1], percentage, wordSize[0], wordSize[1], fontName, fontSize, alternativeRulerPerncetageColor))
-    #draw.text(( xAlternativeRulerStartPoint + (alternativeRulerStep * i) -  (wordSize[0] / 2) , yAlternativeRulerStartPoint -  yAlternativePercentageToRulerOffset - wordSize[1]), text= percentage, fill= alternativeRulerPerncetageColor, font= f)
-    tempNode = xmlDoc.createLineNode(xAlternativeRulerStartPoint + (alternativeRulerStep * i),
-                                     yAlternativeRulerStartPoint,
-                                     xAlternativeRulerStartPoint + (alternativeRulerStep * i),
-                                     yAlternativeRulerStartPoint + rulerVerticalLineSize)
-    tempNode.setStrokeWidth(1)
-    tempNode.setStyle('stroke:' + createColorRGBString(alternativeRulerColor))
-    dendogramAlternativesGroup.appendChild(tempNode)
-    #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, xAlternativeRulerStartPoint + (alternativeRulerStep * i), yAlternativeRulerStartPoint, xAlternativeRulerStartPoint + (alternativeRulerStep * i), yAlternativeRulerStartPoint + rulerVerticalLineSize, alternativeRulerColor, 1))
-    #draw.line( [ (xAlternativeRulerStartPoint + (alternativeRulerStep * i) , yAlternativeRulerStartPoint), ( (xAlternativeRulerStartPoint + (alternativeRulerStep * i)), yAlternativeRulerStartPoint + rulerVerticalLineSize) ], fill= alternativeRulerColor)
-    i += 1
+    tempNode.setStyle('stroke:' + createColorRGBString(concernDendogramLineColor))
+    dendogramConcernsGroup.appendChild(tempNode)
+    #dendogramConcernsGroup.appendChild(__createXmlLineNode__(xmlDoc, xConcernRulerStartPoint, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, xConcernRulerStartPoint + concernRulerLength, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, concernRulerColor, 1))
+    #draw.line( [(xConcernRulerStartPoint, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset), (xConcernRulerStartPoint + concernRulerLength, percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset)], fill= concernRulerColor)
+    i = 0
+    #draw the markers of the ruler
+    while i <= nConcernRulerSteps:
+        percentage = str(100 - (i * 10))
+        wordSize = f.getsize(percentage)
+        tempNode = xmlDoc.createSvgTextNode(xConcernRulerStartPoint + (concernRulerStep * i) - (wordSize[0] / 2),
+                                            yConcernRulerOffset + (wordSize[1] - 4), percentage)
+        tempNode.setFontFamily(fontName)
+        tempNode.setFontSize(str(fontSize) + 'px')
+        tempNode.setStyle('fill:' + createColorRGBString(concernRulerPerncetageColor))
+        dendogramConcernsGroup.appendChild(tempNode)
+        #dendogramConcernsGroup.appendChild(__createXmlTextNode__(xmlDoc, xConcernRulerStartPoint + (concernRulerStep * i) -  (wordSize[0] / 2), yConcernRulerOffset, percentage, wordSize[0], wordSize[1], fontName, fontSize, concernRulerPerncetageColor))
+        #draw.text(( xConcernRulerStartPoint + (concernRulerStep * i) -  (f.getsize(percentage)[0] / 2) , yConcernRulerOffset ), text= percentage, fill= concernRulerPerncetageColor, font= f)
+        tempNode = xmlDoc.createLineNode(xConcernRulerStartPoint + (concernRulerStep * i),
+                                         percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset,
+                                         xConcernRulerStartPoint + (concernRulerStep * i), percentageWordSize[
+                                                                                               1] + yConcernRulerOffset + yConcerPercentageToRulerOffset + rulerVerticalLineSize)
+        tempNode.setStrokeWidth(1)
+        tempNode.setStyle('stroke:' + createColorRGBString(concernRulerColor))
+        dendogramConcernsGroup.appendChild(tempNode)
+        #dendogramConcernsGroup.appendChild(__createXmlLineNode__(xmlDoc, xConcernRulerStartPoint + (concernRulerStep * i), percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset, xConcernRulerStartPoint + (concernRulerStep * i), percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset + rulerVerticalLineSize, concernRulerColor, 1))
+        #draw.line( [ (xConcernRulerStartPoint + (concernRulerStep * i) , percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset), ( (xConcernRulerStartPoint + (concernRulerStep * i)), percentageWordSize[1] + yConcernRulerOffset + yConcerPercentageToRulerOffset + rulerVerticalLineSize) ], fill= concernRulerColor)
+        i += 1
 
-#ok now lets start drawing the combined clustersAlternative
-i = 0
-xPositionNewCluster = 0; # the xPosition of a new cluster will be fixed and based on the previous run
-while i < len(clustersAlternative):
-    cluster = clustersAlternative[i]
-    mainClusterSet = set(cluster[0])
-    subSetClusters = []
-    j = 0
-    #find from which sub-clustersConcern is the main cluster composed of
-    while j < len(allClusters):
-        temp = (allClusters[j])[
-            0] #this is needed because if you have a long string like 'java' when you call set it will generate a set for each letter so the set will be (j,a,v,a) instead of (java)
-        if type(temp) is str:
-            temp = [temp]
-        if set(temp).issubset(mainClusterSet):
-            subSetClusters.append(allClusters[j])
-            if (len(subSetClusters) >= len(cluster[0])):
-                break;
-        j += 1;
-        #now draw the lines of the old clustersAlternative to the new cluster
-    #assumption, because we created the initial clustersAlternative from the last cluster(where we have all the clustersAlternative in 1) the position of the sub-clustersAlternative are ideal, in terms that they are next to each other after each round
-    #xPositionNewCluster= 0
-    yPositionNewCluster = 0
-    temp = 0 #will be used as the biggest y
-    temp2 = 0 #will be used as the smallest y
-    j = 0
-    while j < len(subSetClusters):
-        if j == 0:
-            temp = (subSetClusters[j])[2]
-            temp2 = (subSetClusters[j])[2]
-            if i == 0:
-                xPositionNewCluster = (subSetClusters[j])[1]
-                #xPositionNewCluster= (subSetClusters[j])[1]
-        else:
-            if (subSetClusters[j])[2] > temp:
+    #ok now lets start drawing the combined clustersConcern
+    i = 0
+    xPositionNewCluster = 0; # the xPosition of a new cluster will be fix and based on the previous run
+    while i < len(clustersConcern):
+        cluster = clustersConcern[i]
+        mainClusterSet = set(cluster[0])
+        subSetClusters = []
+        j = 0
+        #find from which sub-clustersConcern is the main cluster composed of
+        while j < len(allClusters):
+            temp = (allClusters[j])[
+                0] #this is needed because if you have a long string like 'java' when you call set it will generate a set for each letter so the set will be (j,a,v,a) instead of (java)
+            if type(temp) is str:
+                temp = [temp]
+            if set(temp).issubset(mainClusterSet):
+                subSetClusters.append(allClusters[j])
+                if (len(subSetClusters) >= len(cluster[0])):
+                    break;
+            j += 1;
+            #now draw the lines of the old clustersConcern to the new cluster
+        #assumption, because we created the initial clustersConcern from the last cluster(where we have all the clustersConcern in 1) the position of the sub-clustersConcern are ideal, in terms that they are next to each other after each round
+        #xPositionNewCluster= 0
+        yPositionNewCluster = 0
+        temp = 0 #will be used as the biggest y
+        temp2 = 0 #will be used as the smallest y
+        j = 0
+        while j < len(subSetClusters):
+            if j == 0:
                 temp = (subSetClusters[j])[2]
-            if (subSetClusters[j])[2] < temp2:
                 temp2 = (subSetClusters[j])[2]
-                #if (subSetClusters[j])[1] > xPositionNewCluster:
-                #    xPositionNewCluster= (subSetClusters[j])[1]
-        j += 1
-        #calculate the offset from the beginning of the ruler that xPositionNewCluster should be
-    #assumption, ruler starts from 100 thus: |100 |90 |80......
-    # alternativeRulerStep/10 -> every step = 10% thus this calculation give us the amount of pixels that 1% represents. 100 - concernClusterSimilarity[i] -> this calculation gives us the percentage that a percentage is away from 100%.
-    xPositionNewCluster = int(
-        ( (alternativeRulerStep / 10.0) * ( 100 - alternativeClusterSimilarity[i]) ) + xAlternativeRulerStartPoint)
-    yPositionNewCluster = temp2 + (temp - temp2) / 2
+                if i == 0:
+                    xPositionNewCluster = (subSetClusters[j])[1]
+                    #xPositionNewCluster= (subSetClusters[j])[1]
+            else:
+                if (subSetClusters[j])[2] > temp:
+                    temp = (subSetClusters[j])[2]
+                if (subSetClusters[j])[2] < temp2:
+                    temp2 = (subSetClusters[j])[2]
+                    #if (subSetClusters[j])[1] > xPositionNewCluster:
+                    #    xPositionNewCluster= (subSetClusters[j])[1]
+            j += 1
+            #calculate the offset from the beginning of the ruler that xPositionNewCluster should be
+        #assumption, ruler starts from 100 thus: |100 |90 |80......
+        # concernRulerStep/10 -> every step = 10% thus this calculation give us the amount of pixels that 1% represents. 100 - concernClusterSimilarity[i] -> this calculation gives us the percentage that a percentage is away from 100%.
+        xPositionNewCluster = int(
+            ( (concernRulerStep / 10.0) * ( 100 - concernClusterSimilarity[i]) ) + xConcernRulerStartPoint)
+        yPositionNewCluster = temp2 + (temp - temp2) / 2
 
-    for subCluser in subSetClusters:
-        tempNode = xmlDoc.createLineNode(subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster)
+        for subCluser in subSetClusters:
+            tempNode = xmlDoc.createLineNode(subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster)
+            tempNode.setStrokeWidth(1)
+            tempNode.setStyle('stroke:' + createColorRGBString(concernDendogramLineColor))
+            dendogramConcernsGroup.appendChild(tempNode)
+            #dendogramConcernsGroup.appendChild(__createXmlLineNode__(xmlDoc, subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster, concernDendogramLineColor, 1))
+            #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, yPositionNewCluster)], fill= concernDendogramLineColor)
+            #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, subCluser[2])], fill=(255,0,0))
+            #draw.line((xPositionNewCluster, subCluser[2], xPositionNewCluster, yPositionNewCluster), fill=(255,0,0))
+
+            # now remove the old clustersConcern from allClusters
+            allClusters.remove(subCluser)
+            #now add the new cluster to allClusters
+        allClusters.append((cluster[0], xPositionNewCluster, yPositionNewCluster))
+        i += 1
+        #topElement.appendChild(dendogramConcernsGroup)
+    root.appendChild(dendogramConcernsGroup)
+    ####### end concern dendogram draw #########
+
+    ################################
+    ###Alternative dendogram draw###
+    ################################
+
+    #dendogramAlternativesGroup= xmlDoc.createElement('dendogramAlternative')
+    dendogramAlternativesGroup = xmlDoc.createGNode()
+    if useShadow:
+        dendogramAlternativesGroup.setFilter('url(#' + shadowFilterId + ')')
+
+    allClusters = [] # format is ([item1, item2,...], positionX, positionY)
+    i = 0;
+    while i < len(clustersAlternative[len(clustersAlternative) - 1][0]):
+        allClusters.append(((clustersAlternative[len(clustersAlternative) - 1][0])[i],
+                            xtableStartPosition + (tableCellWidth * (len(matrix[0]) - 2) ) + xWordToTableOffset,
+                            yTableStartPosition + (tableCellHeight * len(matrix)) + (
+                                tableCellHeight * (i)) + yAlternativeRulerOffset + percentageWordSize[
+                                1] + yAlternativePercentageToRulerOffset ))
+        i += 1
+        #now draw the initial clustersAlternative
+    temp = []
+    maxWordLength = -1
+    for cluster in allClusters:
+        (width, height) = f.getsize(cluster[0])
+        tempNode = xmlDoc.createSvgTextNode(cluster[1], cluster[2] + (wordSize[1] - 4), cluster[0])
+        tempNode.setFontFamily(fontName)
+        tempNode.setFontSize(str(fontSize) + 'px')
+        tempNode.setStyle('fill:' + createColorRGBString(alternativeWordColor))
+        dendogramAlternativesGroup.appendChild(tempNode)
+        #dendogramAlternativesGroup.appendChild(__createXmlTextNode__(xmlDoc, cluster[1], cluster[2], cluster[0], width, height, fontName, fontSize, alternativeWordColor))
+        #draw.text((cluster[1], cluster[2]), cluster[0], font= f, fill= alternativeWordColor );
+        # now reset the y position to the middle of the word and the x to the end of the word, this is the point where the line will start
+        temp.append(( cluster[0], cluster[1] + width, cluster[2] + (height / 2) ))
+        if maxWordLength < width:
+            maxWordLength = width
+            #draw the lines that connect the table with the alternative names
+        tempNode = xmlDoc.createLineNode(cellAlternativesXPositions[cluster[0]], yTableBottom + 1,
+                                         cellAlternativesXPositions[cluster[0]], cluster[2] + (height / 2))
+        tempNode.setStrokeWidth(1)
+        tempNode.setStyle('stroke:' + createColorRGBString(tableToAlternativesConnectionLineColor))
+        dendogramAlternativesGroup.appendChild(tempNode)
+        #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, cellAlternativesXPositions[cluster[0]], yTableBottom + 1, cellAlternativesXPositions[cluster[0]], cluster[2] + (height/2), tableToAlternativesConnectionLineColor, 1))
+        #draw.line([(cellAlternativesXPositions[cluster[0]] , yTableBottom + 1), (cellAlternativesXPositions[cluster[0]], cluster[2] + (height/2))], fill= tableToAlternativesConnectionLineColor)
+        tempNode = xmlDoc.createLineNode(cellAlternativesXPositions[cluster[0]], cluster[2] + (height / 2),
+                                         cluster[1] - 2, cluster[2] + (height / 2))
+        tempNode.setStrokeWidth(1)
+        tempNode.setStyle('stroke:' + createColorRGBString(tableToAlternativesConnectionLineColor))
+        dendogramAlternativesGroup.appendChild(tempNode)
+        #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, cellAlternativesXPositions[cluster[0]],  cluster[2] + (height/2), cluster[1] - 2,  cluster[2] + (height/2), tableToAlternativesConnectionLineColor, 1))
+        #draw.line([(cellAlternativesXPositions[cluster[0]] , cluster[2] + (height/2)), (cluster[1] - 2, cluster[2] + (height/2))], fill= tableToAlternativesConnectionLineColor)
+    allClusters = temp
+    xAlternativeRulerStartPoint = maxWordLength + xOffsetWordToLine + xOffsetLineToRuler + xtableStartPosition + (
+        tableCellWidth * (len(matrix[0]) - 2) )
+    yAlternativeRulerStartPoint = yAlternativeRulerOffset + percentageWordSize[
+        1] + yAlternativePercentageToRulerOffset + yTableBottom
+    #now reset all the x to the max word length + an offset
+    temp = []
+    for cluster in allClusters:
+        newX = xAlternativeRulerStartPoint
+        tempNode = xmlDoc.createLineNode(cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2])
         tempNode.setStrokeWidth(1)
         tempNode.setStyle('stroke:' + createColorRGBString(alternativeDendogramLineColor))
         dendogramAlternativesGroup.appendChild(tempNode)
-        #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster, alternativeDendogramLineColor, 1))
-        #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, yPositionNewCluster)], fill= alternativeDendogramLineColor)
-        #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, subCluser[2])], fill=(255,0,0))
-        #draw.line((xPositionNewCluster, subCluser[2], xPositionNewCluster, yPositionNewCluster), fill=(255,0,0))
+        #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, cluster[1] + xOffsetWordToLine, cluster[2], newX, cluster[2], alternativeDendogramLineColor, 1))
+        #draw.line([(cluster[1] + xOffsetWordToLine, cluster[2]), ( newX , cluster[2])], fill= alternativeDendogramLineColor)
+        temp.append((cluster[0], newX, cluster[2]))
+    allClusters = temp;
+    #now lets draw the ruler
+    newX = xAlternativeRulerStartPoint
+    tempNode = xmlDoc.createLineNode(xAlternativeRulerStartPoint, yAlternativeRulerStartPoint,
+                                     xAlternativeRulerStartPoint + alternativeRulerLength, yAlternativeRulerStartPoint)
+    tempNode.setStrokeWidth(1)
+    tempNode.setStyle('stroke:' + createColorRGBString(alternativeRulerColor))
+    dendogramAlternativesGroup.appendChild(tempNode)
+    #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, xAlternativeRulerStartPoint, yAlternativeRulerStartPoint, xAlternativeRulerStartPoint + alternativeRulerLength, yAlternativeRulerStartPoint, alternativeRulerColor, 1))
+    #draw.line( [(xAlternativeRulerStartPoint, yAlternativeRulerStartPoint), (xAlternativeRulerStartPoint + alternativeRulerLength, yAlternativeRulerStartPoint)], fill= alternativeRulerColor)
+    i = 0
+    #draw the markers of the ruler
+    while i <= nAlternativRulerSteps:
+        percentage = str(100 - (i * 10))
+        wordSize = f.getsize(percentage)
+        tempNode = xmlDoc.createSvgTextNode(
+            xAlternativeRulerStartPoint + (alternativeRulerStep * i) - (wordSize[0] / 2),
+            yAlternativeRulerStartPoint - yAlternativePercentageToRulerOffset - wordSize[1] + (wordSize[1] - 4),
+            percentage)
+        tempNode.setFontFamily(fontName)
+        tempNode.setFontSize(str(fontSize) + 'px')
+        tempNode.setStyle('fill:' + createColorRGBString(alternativeRulerPerncetageColor))
+        dendogramAlternativesGroup.appendChild(tempNode)
+        #dendogramAlternativesGroup.appendChild(__createXmlTextNode__(xmlDoc, xAlternativeRulerStartPoint + (alternativeRulerStep * i) -  (wordSize[0] / 2), yAlternativeRulerStartPoint -  yAlternativePercentageToRulerOffset - wordSize[1], percentage, wordSize[0], wordSize[1], fontName, fontSize, alternativeRulerPerncetageColor))
+        #draw.text(( xAlternativeRulerStartPoint + (alternativeRulerStep * i) -  (wordSize[0] / 2) , yAlternativeRulerStartPoint -  yAlternativePercentageToRulerOffset - wordSize[1]), text= percentage, fill= alternativeRulerPerncetageColor, font= f)
+        tempNode = xmlDoc.createLineNode(xAlternativeRulerStartPoint + (alternativeRulerStep * i),
+                                         yAlternativeRulerStartPoint,
+                                         xAlternativeRulerStartPoint + (alternativeRulerStep * i),
+                                         yAlternativeRulerStartPoint + rulerVerticalLineSize)
+        tempNode.setStrokeWidth(1)
+        tempNode.setStyle('stroke:' + createColorRGBString(alternativeRulerColor))
+        dendogramAlternativesGroup.appendChild(tempNode)
+        #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, xAlternativeRulerStartPoint + (alternativeRulerStep * i), yAlternativeRulerStartPoint, xAlternativeRulerStartPoint + (alternativeRulerStep * i), yAlternativeRulerStartPoint + rulerVerticalLineSize, alternativeRulerColor, 1))
+        #draw.line( [ (xAlternativeRulerStartPoint + (alternativeRulerStep * i) , yAlternativeRulerStartPoint), ( (xAlternativeRulerStartPoint + (alternativeRulerStep * i)), yAlternativeRulerStartPoint + rulerVerticalLineSize) ], fill= alternativeRulerColor)
+        i += 1
 
-        # now remove the old clustersConcern from allClusters
-        allClusters.remove(subCluser)
-        #now add the new cluster to allClusters
-    allClusters.append((cluster[0], xPositionNewCluster, yPositionNewCluster))
-    i += 1
-    #topElement.appendChild(dendogramAlternativesGroup)
-root.appendChild(dendogramAlternativesGroup)
-####### end alternative dendogram draw #########
+    #ok now lets start drawing the combined clustersAlternative
+    i = 0
+    xPositionNewCluster = 0; # the xPosition of a new cluster will be fixed and based on the previous run
+    while i < len(clustersAlternative):
+        cluster = clustersAlternative[i]
+        mainClusterSet = set(cluster[0])
+        subSetClusters = []
+        j = 0
+        #find from which sub-clustersConcern is the main cluster composed of
+        while j < len(allClusters):
+            temp = (allClusters[j])[
+                0] #this is needed because if you have a long string like 'java' when you call set it will generate a set for each letter so the set will be (j,a,v,a) instead of (java)
+            if type(temp) is str:
+                temp = [temp]
+            if set(temp).issubset(mainClusterSet):
+                subSetClusters.append(allClusters[j])
+                if (len(subSetClusters) >= len(cluster[0])):
+                    break;
+            j += 1;
+            #now draw the lines of the old clustersAlternative to the new cluster
+        #assumption, because we created the initial clustersAlternative from the last cluster(where we have all the clustersAlternative in 1) the position of the sub-clustersAlternative are ideal, in terms that they are next to each other after each round
+        #xPositionNewCluster= 0
+        yPositionNewCluster = 0
+        temp = 0 #will be used as the biggest y
+        temp2 = 0 #will be used as the smallest y
+        j = 0
+        while j < len(subSetClusters):
+            if j == 0:
+                temp = (subSetClusters[j])[2]
+                temp2 = (subSetClusters[j])[2]
+                if i == 0:
+                    xPositionNewCluster = (subSetClusters[j])[1]
+                    #xPositionNewCluster= (subSetClusters[j])[1]
+            else:
+                if (subSetClusters[j])[2] > temp:
+                    temp = (subSetClusters[j])[2]
+                if (subSetClusters[j])[2] < temp2:
+                    temp2 = (subSetClusters[j])[2]
+                    #if (subSetClusters[j])[1] > xPositionNewCluster:
+                    #    xPositionNewCluster= (subSetClusters[j])[1]
+            j += 1
+            #calculate the offset from the beginning of the ruler that xPositionNewCluster should be
+        #assumption, ruler starts from 100 thus: |100 |90 |80......
+        # alternativeRulerStep/10 -> every step = 10% thus this calculation give us the amount of pixels that 1% represents. 100 - concernClusterSimilarity[i] -> this calculation gives us the percentage that a percentage is away from 100%.
+        xPositionNewCluster = int(
+            ( (alternativeRulerStep / 10.0) * ( 100 - alternativeClusterSimilarity[i]) ) + xAlternativeRulerStartPoint)
+        yPositionNewCluster = temp2 + (temp - temp2) / 2
 
-#lets return the image
-return xmlDoc
+        for subCluser in subSetClusters:
+            tempNode = xmlDoc.createLineNode(subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster)
+            tempNode.setStrokeWidth(1)
+            tempNode.setStyle('stroke:' + createColorRGBString(alternativeDendogramLineColor))
+            dendogramAlternativesGroup.appendChild(tempNode)
+            #dendogramAlternativesGroup.appendChild(__createXmlLineNode__(xmlDoc, subCluser[1], subCluser[2], xPositionNewCluster, yPositionNewCluster, alternativeDendogramLineColor, 1))
+            #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, yPositionNewCluster)], fill= alternativeDendogramLineColor)
+            #draw.line([(subCluser[1], subCluser[2]), (xPositionNewCluster, subCluser[2])], fill=(255,0,0))
+            #draw.line((xPositionNewCluster, subCluser[2], xPositionNewCluster, yPositionNewCluster), fill=(255,0,0))
+
+            # now remove the old clustersConcern from allClusters
+            allClusters.remove(subCluser)
+            #now add the new cluster to allClusters
+        allClusters.append((cluster[0], xPositionNewCluster, yPositionNewCluster))
+        i += 1
+        #topElement.appendChild(dendogramAlternativesGroup)
+    root.appendChild(dendogramAlternativesGroup)
+    ####### end alternative dendogram draw #########
+
+    #lets return the image
+    return xmlDoc
 
 #prototype function that will be used to create an image using xml
 def getSimilarities(clustersConcern=[], clustersAlternative=[], matrix=[[]], maxMatrixCellValue=1, which="concern"):
