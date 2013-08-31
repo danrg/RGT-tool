@@ -5,8 +5,6 @@ projectPath = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../')
 
 DENDROGRAM_FONT_LOCATION = projectPath + '/src/RGT/LiberationSans-Regular.ttf'
 
-HOST_NAME = 'USE_YOUR_OWN'
-
 EMAIL_VERIFICATION = True
 
 DATABASES = {
