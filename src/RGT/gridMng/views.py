@@ -59,7 +59,7 @@ def getCreateMyGridPage(request):
 
     except:
         #do nothing
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
@@ -114,21 +114,21 @@ def ajaxCreateGrid(request):
     try:
         obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
     except KeyError as error:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except ValueError as error:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
@@ -292,7 +292,7 @@ def ajaxGetGrid(request):
             if request.REQUEST['checkTable'] == 'true':
                 checkForTableIsSave = True
     except:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
@@ -320,7 +320,7 @@ def ajaxGetGrid(request):
                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                 #return render_to_response('gridMng/gridTable.html', {'table' : table, 'tableHeader': header, 'hiddenFields': hidden, 'weights':concernWeights, 'showRatings':showRatings, 'readOnly':readOnly, 'checkForTableIsSave':checkForTableIsSave }, context_instance=RequestContext(request))
             except:
-                if DEBUG == True:
+                if DEBUG:
                     print "Exception in user code:"
                     print '-' * 60
                     traceback.print_exc(file=sys.stdout)
@@ -420,21 +420,21 @@ def ajaxUpdateGrid(request):
     try:
         obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
     except KeyError as error:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except ValueError as error:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
@@ -481,7 +481,7 @@ def ajaxUpdateGrid(request):
                 return HttpResponse(createXmlSuccessResponse('Grid was saved', createDateTimeTag(
                     datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
         except:
-            if DEBUG == True:
+            if DEBUG:
                 print "Exception in user code:"
                 print '-' * 60
                 traceback.print_exc(file=sys.stdout)
@@ -631,7 +631,7 @@ def ajaxGenerateSimilarity(request):
                 #         errorString= 'Invalid character found in the grid. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely.\nDendogram can not be created.'
                 #         return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
                 #     except:
-                #         if DEBUG == True:
+                #         if DEBUG:
                 #             print "Exception in user code:"
                 #             print '-'*60
                 #             traceback.print_exc(file=sys.stdout)
@@ -699,7 +699,7 @@ def ajaxConvertSvgTo(request):
             if not request.POST.has_key('convertTo'):
                 raise Exception('convertTo key was not received')
     except:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
@@ -766,7 +766,7 @@ def ajaxConvertGridTo(request):
             if not request.POST.has_key('convertTo'):
                 raise Exception('convertTo key was not received')
     except:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
@@ -829,7 +829,7 @@ def dendrogramTo(request):
             if not request.POST.has_key('convertTo'):
                 raise Exception('convertTo key was not received')
     except:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
@@ -1338,7 +1338,7 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
             try:
                 gridObj.delete()
             except:
-                if DEBUG == True:
+                if DEBUG:
                     print 'Could not delete the grid'
                     print "Exception in user code:"
                     print '-' * 60
@@ -1350,6 +1350,7 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
 
 
 def pca(request):
+    #this is a setting for matplotlib
     os.environ['MPLCONFIGDIR'] = tempfile.mkdtemp()
 
     #these libraries are imported separately, because they are heavyweight
@@ -1372,9 +1373,6 @@ def pca(request):
                 grid1 = grid1[0]
                 #here is sample data
                 #concerns are represented on columns, alternatives on lines
-
-
-                ### DENEMEEEEEE ###
 
                 from RGT.gridMng.models import Ratings #can't be declared globally because it will generate an import error
 
@@ -1419,7 +1417,6 @@ def pca(request):
                 else:
                     raise ValueError('More than one concerns must be present in order to generate a dendrogram.')
 
-                ### ANNE BTTT ###
                 matrixAlternatives = transpose(matrixAlternatives)
                 var_grid = np.array(matrixAlternatives)
                 #improve output readability
@@ -1490,7 +1487,7 @@ def pca(request):
                 gc.collect()
                 return response
             except:
-                if DEBUG == True:
+                if DEBUG:
                     print "Exception in user code:"
                     print '-' * 60
                     traceback.print_exc(file=sys.stdout)
