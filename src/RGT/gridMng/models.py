@@ -93,6 +93,11 @@ class Alternatives(models.Model):
         #unique_together= ('grid', 'name')
         ordering= ['id']
 
+class Composite(models.Model):
+    compid= models.CharField(max_length=20, unique=True)
+    user= models.ForeignKey(User, null= True)
+    rule = models.CharField(max_length=200, null=True)
+
 class Concerns(models.Model):
     grid= models.ForeignKey(Grid)
     leftPole= models.CharField(max_length= 150, null= True)

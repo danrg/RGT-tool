@@ -25,6 +25,7 @@ class GridWizard(SessionWizardView):
             # in order to generate the alternatives list.
             try:
                 alternatives_data = self.get_cleaned_data_for_step('1')
+                print alternatives_data
                 context.update({'alternatives_data':alternatives_data})
             except:
                 # Alternatives data do not exist 

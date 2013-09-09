@@ -7,7 +7,7 @@ MAX_RATING = 5
 class GeneralsForm(forms.Form):
     grid_name = forms.CharField(widget=forms.TextInput(attrs={'size':'45'}))
     description = forms.CharField(widget=forms.Textarea(), required=False)
-    
+
 class AlternativesForm(forms.Form):
     # Override the initialize in order to dynamically add fields to the form in order to be saved,
     # the fields are saved only when the user selects 'Next Step'.
@@ -21,7 +21,9 @@ class AlternativesForm(forms.Form):
                 # always adds '1-' % (where 1 the number of the step with zero index) prefix in the name,
                 # with this the names are kept always the same.
                 self.fields[alternativeName] = forms.CharField(widget=forms.TextInput(attrs={'tabindex':'%d'%(x+1),'size':'30'}))
-    
+
+        print self.fields
+
     def clean(self):
         cleaned_data = super(AlternativesForm, self).clean()
         alternatives = []
@@ -89,7 +91,7 @@ class ConcernsForm(forms.Form):
         if len(concerns) != len(set(concerns)):
             raise forms.ValidationError('It is not allowed to have the same name for concerns.')
         return cleaned_data
-    
+
 class WeightsForm(forms.Form):
     # Override the initialize in order to dynamically add fields to the form in order to be saved,
     # the fields are saved only when the user selects 'Next Step'.

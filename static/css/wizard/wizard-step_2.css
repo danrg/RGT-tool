@@ -23,3 +23,5 @@ div.form-errors-wrapper .error {
 #btn-add-wrapper {
 	margin-top: 5px;
 }
+
+.container { border:2px solid #ccc; width:300px; height: 100px; overflow-y: scroll; }
