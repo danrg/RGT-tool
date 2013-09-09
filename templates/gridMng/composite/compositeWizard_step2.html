@@ -1,0 +1,49 @@
+{% extends 'gridMng/composite/compositeWizard_base.html' %}
+{% load wizard_extras %}
+
+{% block stylesheet %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/wizard/wizard-step_2.css" />
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/wizard/wizard-step_2.js"></script>
+{% endblock javascript %}
+
+{% block step_info %}
+<div class="step-header">
+	<p>In this step you can choose the grids you want to use</p>
+</div>
+{% endblock step_info %}
+
+{% block wizard_form_content %}
+<div id="alt-list">
+	<div id="alt-list-header">
+		<h4>Grids List</h4>
+	</div>
+	<div id="alt-list-data" class="container">
+        {% for grid in data.grids %}
+            <input id="id_1-gridChoices_{{ forloop.counter}}" name="1-gridChoices" type="checkbox" value="{{ grid.usid }}">&nbsp;{{ grid.name }}<br>
+        {% endfor %}
+	</div>
+</div>
+{% if wizard.form.errors %}
+<div class="form-errors-wrapper">
+	<div class="error">
+	{% for error in wizard.form.non_field_errors %}
+		<p>{{ error }}</p>
+	{% endfor %}
+	</div>
+</div>
+{% endif %}
+<input type="hidden" name="num-grids" value="{{ data.grids|length }}" id="num-grids" />
+<input type="hidden" name="user" value="{{ data.user }}" id="user" />
+{% endblock wizard_form_content %}
+
+{% block after_wizard_form_content %}
+
+{% endblock after_wizard_form_content %}
+
+{% block prev_step_but_tab %}{% if alternatives_length %}{{ alternatives_length|add:'3' }}{% else %}6{% endif %}{% endblock prev_step_but_tab %}
+
+{% block next_step_but_tab %}{% if alternatives_length %}{{ alternatives_length|add:'2' }}{% else %}5{% endif %}{% endblock next_step_but_tab %}

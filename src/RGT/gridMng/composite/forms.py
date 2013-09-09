@@ -1,0 +1,37 @@
+from django import forms
+from RGT.gridMng.models import Grid
+from django.contrib.auth.models import User
+from RGT.gridMng.template.showGridsData import ShowGridsData
+
+class FirstStepForm(forms.Form):
+    # CC = (('deneme11', 'deneme11'), ('Cars', 'Cars'), ('asd', 'asd'), ('grid11', 'grid11'))
+    composite_name = forms.CharField(widget=forms.TextInput(attrs={'size':'45'}))
+    description = forms.CharField(widget=forms.Textarea(), required=False)
+    # deli = forms.MultipleChoiceField(required=False, choices=CC, widget=forms.CheckboxSelectMultiple)
+
+class WhichGridsForm(forms.Form):
+#     Override the initialize in order to dynamically add fields to the form in order to be saved,
+#     the fields are saved only when the user selects 'Next Step'.
+    def __init__(self, *args, **kwargs):
+        super(WhichGridsForm, self).__init__(*args, **kwargs)
+        if len(self.data) > 0:
+            choices2 = ()
+            self.num_grids = self.data['num-grids']
+            user_name = self.data['user']
+            user1 = User.objects.filter(username=user_name)
+            gridtype = Grid.GridType.USER_GRID
+            templateData = ShowGridsData()
+            templateData.grids = Grid.objects.filter(user=user1, grid_type=gridtype)
+            i=1
+            for grid in templateData.grids:
+                dummy1 = ()
+                gridUsid = grid.usid
+                gridName = grid.name
+                dummy1 = (str(gridUsid), str(gridName))
+                choices2 = (dummy1,) + choices2
+                i += 1
+            self.fields['gridChoices'] = forms.MultipleChoiceField(required=False, choices=choices2, widget=forms.CheckboxSelectMultiple)
+
+class BlaStepForm(forms.Form):
+    bla_composite_name = forms.CharField(widget=forms.TextInput(attrs={'size':'45'}))
+    blo_description = forms.CharField(widget=forms.Textarea(), required=False)

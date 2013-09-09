@@ -1,0 +1,35 @@
+{% extends 'gridMng/composite/compositeWizard_base.html' %}
+
+{% block stylesheet %}
+{{ block.super }}
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/wizard/wizard-step_1.js"></script>
+{% endblock javascript %}
+
+{% block step_info %}
+<div class="step-info">
+	<p>In this step you can type the name of the grid, as well as a description for it.</p>
+</div>
+{% endblock step_info %}
+
+{% block wizard_form_content %}
+	{% for field in wizard.form %}
+		<div class="field-wrapper">
+			<div class="field-label-wrapper">
+				{{ field.label_tag }}
+			</div>
+			<div class="field-input-wrapper">
+				{{ field }}
+			</div>
+			{% if field.errors %}
+				<div class="error">
+				{% for error in field.errors %}
+					<span>{{ error }}</span>
+				{% endfor %}
+				</div>
+			{% endif %}
+		</div>
+	{% endfor %}
+{% endblock wizard_form_content %}
