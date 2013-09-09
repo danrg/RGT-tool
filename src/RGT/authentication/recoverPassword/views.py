@@ -9,10 +9,11 @@ from django.utils.timezone import utc
 from recoverPassForm import RecoverPassForm
 from RGT.authentication.models import PassRecoverCode
 
+
 def recoverPass(request, passRecoverCode=''):
     if request.user.is_authenticated():
         return redirect('/home/')
-    
+
     if request.method == 'POST':
         postLinkCode = request.POST['linkCode']
         form = RecoverPassForm(request.POST)
@@ -37,19 +38,19 @@ def recoverPass(request, passRecoverCode=''):
                         pass
                 else:
                     # form has errors
-                    return render_to_response('authentication/recoverPassword.html', 
-                                      {'form': form, 'invalidLink': invalidLink, 'linkCode': code.linkCode},
-                                      context_instance=RequestContext(request))
+                    return render_to_response('authentication/recoverPassword.html',
+                                              {'form': form, 'invalidLink': invalidLink, 'linkCode': code.linkCode},
+                                              context_instance=RequestContext(request))
             else:
                 # code has been used
                 invalidLink = True
         except PassRecoverCode.DoesNotExist:
             # code does not exist
             invalidLink = True
-            
-        return render_to_response('authentication/recoverPassword.html', 
-                              {'invalidLink': invalidLink},
-                              context_instance=RequestContext(request))
+
+        return render_to_response('authentication/recoverPassword.html',
+                                  {'invalidLink': invalidLink},
+                                  context_instance=RequestContext(request))
     else:
         # GET request
         # check if the link is still active
@@ -63,9 +64,9 @@ def recoverPass(request, passRecoverCode=''):
                 if (dateSub.seconds / 60 < 10):
                     form = RecoverPassForm()
                     invalidLink = False
-                    return render_to_response('authentication/recoverPassword.html', 
-                                  {'form': form, 'invalidLink': invalidLink, 'linkCode': code.linkCode},
-                                  context_instance=RequestContext(request))
+                    return render_to_response('authentication/recoverPassword.html',
+                                              {'form': form, 'invalidLink': invalidLink, 'linkCode': code.linkCode},
+                                              context_instance=RequestContext(request))
                 else:
                     # probably this should not happen here, we should check the time
                     # somehow different. maybe with a script in the database
@@ -79,9 +80,9 @@ def recoverPass(request, passRecoverCode=''):
         except PassRecoverCode.DoesNotExist:
             # code does not exist
             invalidLink = True
-            
-        return render_to_response('authentication/recoverPassword.html', 
-                              {'invalidLink': invalidLink},
-                              context_instance=RequestContext(request))
+
+        return render_to_response('authentication/recoverPassword.html',
+                                  {'invalidLink': invalidLink},
+                                  context_instance=RequestContext(request))
         
     

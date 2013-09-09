@@ -26,7 +26,7 @@ from RGT.gridMng.utility import generateGridTable, createDendogram, createFileRe
 from RGT.gridMng.hierarchical import transpose
 from RGT.settings import GRID_USID_KEY_LENGTH, DEBUG
 
-import sys, os
+import sys, os, tempfile
 import traceback
 import logging
 
@@ -59,7 +59,7 @@ def getCreateMyGridPage(request):
 
     except:
         #do nothing
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
@@ -114,21 +114,21 @@ def ajaxCreateGrid(request):
     try:
         obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
     except KeyError as error:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except ValueError as error:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
@@ -292,7 +292,7 @@ def ajaxGetGrid(request):
             if request.REQUEST['checkTable'] == 'true':
                 checkForTableIsSave = True
     except:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
@@ -320,7 +320,7 @@ def ajaxGetGrid(request):
                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                 #return render_to_response('gridMng/gridTable.html', {'table' : table, 'tableHeader': header, 'hiddenFields': hidden, 'weights':concernWeights, 'showRatings':showRatings, 'readOnly':readOnly, 'checkForTableIsSave':checkForTableIsSave }, context_instance=RequestContext(request))
             except:
-                if DEBUG == True:
+                if DEBUG:
                     print "Exception in user code:"
                     print '-' * 60
                     traceback.print_exc(file=sys.stdout)
@@ -415,26 +415,26 @@ def ajaxUpdateGrid(request):
         else:
             #if the grid name isn't a string than it is an error
             return gridCheckNameResult
-        #because django will save stuff to the database even if .save() is not called, we need to validate everything before starting to create the objects that will be used to populate the db
+            #because django will save stuff to the database even if .save() is not called, we need to validate everything before starting to create the objects that will be used to populate the db
     obj = None
     try:
         obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
     except KeyError as error:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except ValueError as error:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
         return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
     except:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
@@ -481,7 +481,7 @@ def ajaxUpdateGrid(request):
                 return HttpResponse(createXmlSuccessResponse('Grid was saved', createDateTimeTag(
                     datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
         except:
-            if DEBUG == True:
+            if DEBUG:
                 print "Exception in user code:"
                 print '-' * 60
                 traceback.print_exc(file=sys.stdout)
@@ -631,7 +631,7 @@ def ajaxGenerateSimilarity(request):
                 #         errorString= 'Invalid character found in the grid. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely.\nDendogram can not be created.'
                 #         return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
                 #     except:
-                #         if DEBUG == True:
+                #         if DEBUG:
                 #             print "Exception in user code:"
                 #             print '-'*60
                 #             traceback.print_exc(file=sys.stdout)
@@ -699,12 +699,12 @@ def ajaxConvertSvgTo(request):
             if not request.POST.has_key('convertTo'):
                 raise Exception('convertTo key was not received')
     except:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
-        #in case of an error or checks failing return an image error
+            #in case of an error or checks failing return an image error
     errorImageData = getImageError()
     # send the file
     response = HttpResponse(errorImageData, content_type='image/jpg')
@@ -766,7 +766,7 @@ def ajaxConvertGridTo(request):
             if not request.POST.has_key('convertTo'):
                 raise Exception('convertTo key was not received')
     except:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
@@ -829,7 +829,7 @@ def dendrogramTo(request):
             if not request.POST.has_key('convertTo'):
                 raise Exception('convertTo key was not received')
     except:
-        if DEBUG == True:
+        if DEBUG:
             print "Exception in user code:"
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
@@ -907,14 +907,14 @@ def __convertSvgStringTo__(svgString=None, convertTo=None):
                 return imgData
             else:
                 raise Exception('Error image file name was None')
-            #                    imgData.ContentType= 'image/jpg'
-            #
-            #                    errorImageData= getImageError()
-            #                    # send the file
-            #                    response = HttpResponse(errorImageData, content_type= 'image/jpg')
-            #                    response['Content-Length'] = fpInMemory.tell()
-            #                    response['Content-Disposition'] = 'attachment; filename=error.jpg'
-            #                    return response
+                #                    imgData.ContentType= 'image/jpg'
+                #
+                #                    errorImageData= getImageError()
+                #                    # send the file
+                #                    response = HttpResponse(errorImageData, content_type= 'image/jpg')
+                #                    response['Content-Length'] = fpInMemory.tell()
+                #                    response['Content-Disposition'] = 'attachment; filename=error.jpg'
+                #                    return response
     else:
         raise ValueError('svgString or convertTo was None')
 
@@ -997,7 +997,7 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
             else:
                 raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
                 #return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
-            #check the right pole
+                #check the right pole
         keyName = 'concern_' + str((i + 1)) + '_right'
         if not request.POST.has_key(keyName):
             #print 'Error key not found: ' + keyName
@@ -1014,7 +1014,7 @@ def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
             else:
                 raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
                 #return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
-            #if it is a response grid of the alternative.concern we don't need to check for the weights as they will not be there
+                #if it is a response grid of the alternative.concern we don't need to check for the weights as they will not be there
         if not isConcernAlternativeResponseGrid:
             #lets check if the weight key is present
             keyName = 'weight_concern' + str((i + 1))
@@ -1210,7 +1210,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
                         j += 1
                     j = 0
                 i += 1
-            #here we know if we had more concerns it has already been added to the concern list, thus totalConcenrs == nConcerns now.
+                #here we know if we had more concerns it has already been added to the concern list, thus totalConcenrs == nConcerns now.
         if nAlternatives > totalAlternatives:
             valuesChanged = 1
             i = 0;
@@ -1237,7 +1237,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
             #check to see if the grid obj is already schedule to be saved
             if not (gridObj in objToCommit):
                 objToCommit.append(gridObj)
-            #now that all went ok commit the changes (except delete as that one is done when the function is called)
+                #now that all went ok commit the changes (except delete as that one is done when the function is called)
         for obj in objToCommit:
             obj.save()
         gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
@@ -1312,8 +1312,8 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
                     else:
                         #the integratyError was not caused by a duplicated suid so, raise it again
                         raise error
-                #gridObj= Grid.objects.create(user= userObj, name= gridName)
-            #print 'nAlternatives: ' + str(nAlternatives)
+                        #gridObj= Grid.objects.create(user= userObj, name= gridName)
+                        #print 'nAlternatives: ' + str(nAlternatives)
 
             alternatives = []
             concerns = []
@@ -1338,7 +1338,7 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
             try:
                 gridObj.delete()
             except:
-                if DEBUG == True:
+                if DEBUG:
                     print 'Could not delete the grid'
                     print "Exception in user code:"
                     print '-' * 60
@@ -1350,29 +1350,18 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
 
 
 def pca(request):
-    # imagePath = "C:\Android Dev\RGT-INstall Steps.png"
-    # from PIL import Image
-    # Image.init()
-    # i = Image.open(imagePath)
-    #
-    # response = HttpResponse(mimetype='image/png')
-    # i.save(response,'PNG')
-    # return response
+    #this is a setting for matplotlib
+    os.environ['MPLCONFIGDIR'] = tempfile.mkdtemp()
 
-    import matplotlib
-
-    matplotlib.use('Agg')
-    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-    from matplotlib.figure import Figure
-    from matplotlib.dates import DateFormatter
-
-    #fig = Figure()
-
-    #make sure these libraries are installed:
+    #these libraries are imported separately, because they are heavyweight
     import mdp
     import numpy as np
     import matplotlib.pyplot as plt
     import gc
+    import matplotlib
+    matplotlib.use('Agg')
+    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+
 
 
     if not request.user.is_authenticated():
@@ -1384,9 +1373,6 @@ def pca(request):
                 grid1 = grid1[0]
                 #here is sample data
                 #concerns are represented on columns, alternatives on lines
-
-
-                ### DENEMEEEEEE ###
 
                 from RGT.gridMng.models import Ratings #can't be declared globally because it will generate an import error
 
@@ -1431,31 +1417,32 @@ def pca(request):
                 else:
                     raise ValueError('More than one concerns must be present in order to generate a dendrogram.')
 
-                ### ANNE BTTT ###
                 matrixAlternatives = transpose(matrixAlternatives)
                 var_grid = np.array(matrixAlternatives)
                 #improve output readability
                 np.set_printoptions(precision=2)
                 np.set_printoptions(suppress=True)
 
-                print "var_grid:"
-                print var_grid
 
                 #Create the PCA node and train it
                 pcan = mdp.nodes.PCANode(output_dim=2, svd=True)
                 pcar = pcan.execute(var_grid)
 
-                print "\npcar"
-                print pcar
+                if DEBUG:
+                    print "var_grid:"
+                    print var_grid
 
-                print "\neigenvalues:"
-                print pcan.d
+                    print "\npcar"
+                    print pcar
 
-                print "\nexplained variance:"
-                print pcan.explained_variance
+                    print "\neigenvalues:"
+                    print pcan.d
 
-                print "\neigenvectors:"
-                print pcan.v
+                    print "\nexplained variance:"
+                    print pcan.explained_variance
+
+                    print "\neigenvectors:"
+                    print pcan.v
 
                 #Graph results
                 #pcar[3,0],pcar[3,1] has the projections of alternative3 on the
@@ -1500,7 +1487,7 @@ def pca(request):
                 gc.collect()
                 return response
             except:
-                if DEBUG == True:
+                if DEBUG:
                     print "Exception in user code:"
                     print '-' * 60
                     traceback.print_exc(file=sys.stdout)

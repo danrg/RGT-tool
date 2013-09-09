@@ -1,9 +1,7 @@
-
 class CreateMyGridBaseData(object):
-    
-    gridTableData= None #gridTableData object 
+    gridTableData = None #gridTableData object
 
-    def __init__(self, gridData= None):
-        self.gridTableData= gridData
+    def __init__(self, gridData=None):
+        self.gridTableData = gridData
        
         

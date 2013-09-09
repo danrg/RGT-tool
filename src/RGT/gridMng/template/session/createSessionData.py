@@ -1,8 +1,7 @@
 class CreateSessionData(object):
-    
-    grids= None
+    grids = None
 
     def __init__(self, grids):
-        self.grids= grids
+        self.grids = grids
         
         

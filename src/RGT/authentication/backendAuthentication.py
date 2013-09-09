@@ -1,13 +1,13 @@
 from django.contrib.auth.models import User, check_password
 
-class BackendAuthentication(object):
 
+class BackendAuthentication(object):
     def authenticate(self, email=None, password=None):
         if (email is None) or (password is None):
             return None # Fail early.
 
         try:
-            user= User.objects.get(email= email)
+            user = User.objects.get(email=email)
 
             pwd_valid = check_password(password, user.password)
 

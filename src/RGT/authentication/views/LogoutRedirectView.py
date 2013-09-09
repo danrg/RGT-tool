@@ -1,6 +1,7 @@
 from django.contrib.auth import logout
 from django.views.generic.base import RedirectView
 
+
 class LogoutRedirectView(RedirectView):
     permanent = False
     url = '/'

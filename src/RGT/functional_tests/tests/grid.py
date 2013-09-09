@@ -15,6 +15,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from random import randint
 import time
 
+
 class BaseGridLiveTest(BaseLiveTest):
     """
     This is the base class test which the GridTests class must extend. It defines some
@@ -25,6 +26,7 @@ class BaseGridLiveTest(BaseLiveTest):
         - can_show_grid
         
     """
+
     def can_goto_grid_page(self, email='', password=''):
         # User logs in successfully
         self.can_login(email, password)
@@ -50,9 +52,11 @@ class BaseGridLiveTest(BaseLiveTest):
         option_fields[1].click()
 
         # Wait until the the grid appears successfully
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_class_name("gridTrableContainerDiv"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_class_name("gridTrableContainerDiv"))
         grid_name_field = self.browser.find_element_by_name("gridName")
         self.assertEquals('grid1', grid_name_field.get_attribute('value'))
+
 
 class GridTests(BaseGridLiveTest):
     """
@@ -112,7 +116,8 @@ class GridTests(BaseGridLiveTest):
         hide_legend_button = self.browser.find_element_by_class_name('gridTableToggleLegendImg')
         hide_legend_button.click()
 
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_xpath('//div[@class="tableLegendDiv" and contains(@style, "none")]'))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_xpath('//div[@class="tableLegendDiv" and contains(@style, "none")]'))
 
         # User clicks the save button
         save_button = self.browser.find_element_by_css_selector("input[value='Save']")
@@ -131,7 +136,8 @@ class GridTests(BaseGridLiveTest):
         save_grid_button = self.browser.find_element_by_css_selector("img[title='download grid as']")
         save_grid_button.click()
 
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
 
         # User types value for filename
         grid_file_name = self.browser.find_element_by_name("fileName")
@@ -151,7 +157,8 @@ class GridTests(BaseGridLiveTest):
         ActionChains(self.browser).move_to_element(alternative_2_name).perform()
 
         # User clicks the button to add a column
-        add_column_button = self.browser.find_element_by_xpath("//div[@class='colMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
+        add_column_button = self.browser.find_element_by_xpath(
+            "//div[@class='colMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
         add_column_button.click()
 
         # User types value for alternative3
@@ -168,7 +175,8 @@ class GridTests(BaseGridLiveTest):
         ActionChains(self.browser).move_to_element(concern_3_left).perform()
 
         # User clicks the button to add a row
-        add_row_button = self.browser.find_element_by_xpath("//div[@class='gridRowMenu leftRowMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
+        add_row_button = self.browser.find_element_by_xpath(
+            "//div[@class='gridRowMenu leftRowMenuDiv' and contains(@style, 'block')]/a[2]/img[@class='addImage']")
         add_row_button.click()
 
         # User types left and right value for concern4
@@ -189,7 +197,8 @@ class GridTests(BaseGridLiveTest):
         ActionChains(self.browser).move_to_element(concern_2_right).perform()
 
         # User clicks the button to delete the second row
-        delete_row_button = self.browser.find_element_by_xpath("//div[@class='gridRowMenu rightRowMenuDiv' and contains(@style, 'block')]/a[1]/img[@class='deleteImage']")
+        delete_row_button = self.browser.find_element_by_xpath(
+            "//div[@class='gridRowMenu rightRowMenuDiv' and contains(@style, 'block')]/a[1]/img[@class='deleteImage']")
         delete_row_button.click()
 
         # User mouse over to alternative_1_name.
@@ -197,7 +206,8 @@ class GridTests(BaseGridLiveTest):
         ActionChains(self.browser).move_to_element(alternative_1_name).perform()
 
         # User clicks the button to delete the first column
-        delete_column_button = self.browser.find_element_by_xpath("//div[@class='colMenuDiv' and contains(@style, 'block')]/a[1]/img[@class='deleteImage']")
+        delete_column_button = self.browser.find_element_by_xpath(
+            "//div[@class='colMenuDiv' and contains(@style, 'block')]/a[1]/img[@class='deleteImage']")
         delete_column_button.click()
 
         # User clicks the save button
@@ -247,7 +257,8 @@ class GridTests(BaseGridLiveTest):
         save_image_button = self.browser.find_element_by_css_selector("img[id='saveButtonImg']")
         save_image_button.click()
 
-        WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_css_selector("select[name='convertTo']"))
 
         # User types value for filename
         grid_file_name = self.browser.find_element_by_name("fileName")

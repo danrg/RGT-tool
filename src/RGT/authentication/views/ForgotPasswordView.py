@@ -5,6 +5,7 @@ from RGT.authentication.EmailService import EmailService
 from RGT.gridMng import utility #for randomStringGenerator.....
 from RGT.authentication.views.CaptchaSecuredFormView import CaptchaSecuredFormView
 
+
 class ForgotPasswordView(CaptchaSecuredFormView):
     template_name = 'authentication/forgotPass.html'
     form_class = ForgotPasswordForm
@@ -22,7 +23,7 @@ class ForgotPasswordView(CaptchaSecuredFormView):
 
         if emailService.sendForgotPasswordEmail(user, code):
             code.save()
-            return self.render_to_response(self.get_context_data(form=form, checkEmail = True))
+            return self.render_to_response(self.get_context_data(form=form, checkEmail=True))
         else:
             # error in sending mail
             pass

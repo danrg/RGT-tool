@@ -6,18 +6,19 @@ from RGT.XML.SVG.Attribs.sizeAttributes import SizeAttributes
 from types import StringType
 from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
-class PatternNode(BaseContainerNode, PositionAttributes, SizeAttributes, ConditionalProcessingAttributes, XlinkAttributes):
 
-    svgNodeType= BasicSvgNode.SVG_PATTERN_NODE
+class PatternNode(BaseContainerNode, PositionAttributes, SizeAttributes, ConditionalProcessingAttributes,
+                  XlinkAttributes):
+    svgNodeType = BasicSvgNode.SVG_PATTERN_NODE
 
-    ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED= 'externalResourcesRequired'
-    ATTRIBUTE_VIEW_BOX= 'viewBox'
-    ATTRIBUTE_PRESERVE_ASPECT_RATIO= 'preserveAspectRatio'
-    ATTRIBUTE_WIDTH= 'width'
-    ATTRIBUTE_HEIGHT= 'height'
-    ATTRIBUTE_PATTERN_UNITS= 'patternUnits'
-    ATTRIBUTE_PATTERN_CONTENT_UNITS= 'patternContentUnits'
-    ATTRIBUTE_PATTERN_TRANSFORM= 'patternTransform'
+    ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED = 'externalResourcesRequired'
+    ATTRIBUTE_VIEW_BOX = 'viewBox'
+    ATTRIBUTE_PRESERVE_ASPECT_RATIO = 'preserveAspectRatio'
+    ATTRIBUTE_WIDTH = 'width'
+    ATTRIBUTE_HEIGHT = 'height'
+    ATTRIBUTE_PATTERN_UNITS = 'patternUnits'
+    ATTRIBUTE_PATTERN_CONTENT_UNITS = 'patternContentUnits'
+    ATTRIBUTE_PATTERN_TRANSFORM = 'patternTransform'
 
     def __init__(self, ownerDoc):
         BaseContainerNode.__init__(self, ownerDoc, 'pattern')
@@ -26,101 +27,106 @@ class PatternNode(BaseContainerNode, PositionAttributes, SizeAttributes, Conditi
         ConditionalProcessingAttributes.__init__(self)
         XlinkAttributes.__init__(self)
         #add groups
-        self._allowedSvgChildNodes.update(self.SVG_GROUP_ANIMATION_ELEMENTS, self.SVG_GROUP_DESCRIPTIVE_ELEMENTS, self.SVG_GROUP_SHAPE_ELEMENTS, self.SVG_GROUP_STRUCTURAL_ELEMENTS, self.SVG_GROUP_GRADIENT_ELEMENTS)
+        self._allowedSvgChildNodes.update(self.SVG_GROUP_ANIMATION_ELEMENTS, self.SVG_GROUP_DESCRIPTIVE_ELEMENTS,
+                                          self.SVG_GROUP_SHAPE_ELEMENTS, self.SVG_GROUP_STRUCTURAL_ELEMENTS,
+                                          self.SVG_GROUP_GRADIENT_ELEMENTS)
         #add indivudual elements
-        self._allowedSvgChildNodes.update({self.SVG_A_NODE, self.SVG_ALT_GLYPH_DEF_NODE, self.SVG_CLIP_PATH_NODE, self.SVG_COLOR_PROFILE_NODE, self.SVG_CURSOR_NODE, self.SVG_FILTER_NODE, self.SVG_FONT_NODE,
-                                           self.SVG_FONT_FACE_NODE, self.SVG_FOREIGN_OBJECT_NODE, self.SVG_IMAGE_NODE, self.SVG_MARKER_NODE, self.SVG_MASK_NODE, self.SVG_PATTERN_NODE, self.SVG_SCRIPT_NODE,
-                                           self.SVG_STYLE_NODE, self.SVG_SWITCH_NODE, self.SVG_TEXT_NODE, self.SVG_VIEW_NODE})        
-        
+        self._allowedSvgChildNodes.update(
+            {self.SVG_A_NODE, self.SVG_ALT_GLYPH_DEF_NODE, self.SVG_CLIP_PATH_NODE, self.SVG_COLOR_PROFILE_NODE,
+             self.SVG_CURSOR_NODE, self.SVG_FILTER_NODE, self.SVG_FONT_NODE,
+             self.SVG_FONT_FACE_NODE, self.SVG_FOREIGN_OBJECT_NODE, self.SVG_IMAGE_NODE, self.SVG_MARKER_NODE,
+             self.SVG_MASK_NODE, self.SVG_PATTERN_NODE, self.SVG_SCRIPT_NODE,
+             self.SVG_STYLE_NODE, self.SVG_SWITCH_NODE, self.SVG_TEXT_NODE, self.SVG_VIEW_NODE})
+
     def setExternalResourcesRequired(self, data):
-        allowedValues= ['true', 'false']
-        
+        allowedValues = ['true', 'false']
+
         if data != None:
             if data not in allowedValues:
-                values= ''
+                values = ''
                 for value in allowedValues:
-                    values+= value + ', '
-                values= values[0: len(values)-2]
+                    values += value + ', '
+                values = values[0: len(values) - 2]
                 raise ValueError('Value not allowed, only ' + values + 'are allowed')
             else:
                 self._setNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED, data)
-    
+
     def setViewBox(self, data):
         if data != None:
             if type(data) is not StringType:
-                data= str(data)
+                data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_VIEW_BOX, data)
-    
+
     def setPreserveAspectRatio(self, data):
         if data != None:
             if type(data) is not StringType:
-                data= str(data)
+                data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_PRESERVE_ASPECT_RATIO, data)
-    
+
     def setPatternUnits(self, data):
-        allowedValues= ['userSpaceOnUse', 'objectBoundingBox']
-        
+        allowedValues = ['userSpaceOnUse', 'objectBoundingBox']
+
         if data != None:
             if data not in allowedValues:
-                values= ''
+                values = ''
                 for value in allowedValues:
-                    values+= value + ', '
-                values= values[0: len(values)-2]
+                    values += value + ', '
+                values = values[0: len(values) - 2]
                 raise ValueError('Value not allowed, only ' + values + 'are allowed')
             else:
                 self._setNodeAttribute(self.ATTRIBUTE_PATTERN_UNITS, data)
-    
+
     def setPatternContentUnits(self, data):
-        allowedValues= ['userSpaceOnUse', 'objectBoundingBox']
-        
+        allowedValues = ['userSpaceOnUse', 'objectBoundingBox']
+
         if data != None:
             if data not in allowedValues:
-                values= ''
+                values = ''
                 for value in allowedValues:
-                    values+= value + ', '
-                values= values[0: len(values)-2]
+                    values += value + ', '
+                values = values[0: len(values) - 2]
                 raise ValueError('Value not allowed, only ' + values + 'are allowed')
             else:
                 self._setNodeAttribute(self.ATTRIBUTE_PATTERN_CONTENT_UNITS, data)
-    
+
     def setPatternTranform(self, data):
         if data != None:
             if type(data) is not StringType:
-                data= str(data)
+                data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_PATTERN_TRANSFORM, data)
-    
+
     def getExternalResourcesRequired(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED)
+        node = self._getNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED)
         if node != None:
             return node.nodeValue
         return None
-    
+
     def getViewBox(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_VIEW_BOX)
+        node = self._getNodeAttribute(self.ATTRIBUTE_VIEW_BOX)
         if node != None:
             return node.nodeValue
         return None
-    
+
     def getPreserveAspectRatio(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_PRESERVE_ASPECT_RATIO)
+        node = self._getNodeAttribute(self.ATTRIBUTE_PRESERVE_ASPECT_RATIO)
         if node != None:
             return node.nodeValue
         return None
-    
+
     def getPatternUnits(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_PATTERN_UNITS)
+        node = self._getNodeAttribute(self.ATTRIBUTE_PATTERN_UNITS)
         if node != None:
             return node.nodeValue
         return None
-    
+
     def getPatternContentUnits(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_PATTERN_CONTENT_UNITS)
+        node = self._getNodeAttribute(self.ATTRIBUTE_PATTERN_CONTENT_UNITS)
         if node != None:
             return node.nodeValue
         return None
-    
+
     def getPatternTransform(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_PATTERN_TRANSFORM)
+        node = self._getNodeAttribute(self.ATTRIBUTE_PATTERN_TRANSFORM)
         if node != None:
             return node.nodeValue
         return None

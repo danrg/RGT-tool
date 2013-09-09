@@ -3,13 +3,13 @@ from django.template import Context
 from django.core.mail import EmailMultiAlternatives, BadHeaderError
 from RGT import settings
 
-class EmailService(object):
 
+class EmailService(object):
     def sendForgotPasswordEmail(self, user, passRecoverCode):
         # send the email for the new password request
         subject = 'New password request for RGT!'
         htmlContentTemplate = 'authentication/forgotPassEmail.html'
-        linkInitialPart = settings.HOST_NAME+'/accounts/recover/'
+        linkInitialPart = settings.HOST_NAME + '/accounts/recover/'
 
         verifyEmailCode = passRecoverCode.linkCode + '/'
         link = linkInitialPart + verifyEmailCode
@@ -23,7 +23,7 @@ class EmailService(object):
         subject = 'Email verification for RGT!'
         htmlContentTemplate = 'authentication/verifyEmail.html'
 
-        linkInitialPart = settings.HOST_NAME+'/auth/verify/'
+        linkInitialPart = settings.HOST_NAME + '/auth/verify/'
         link = linkInitialPart + verificationCode + '/'
 
         htmlContent = get_template(htmlContentTemplate)

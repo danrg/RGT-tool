@@ -5,11 +5,12 @@ from RGT.XML.SVG.Attribs.animationValueAttributes import AnimationValueAttribute
 from RGT.XML.SVG.Attribs.animationAdditionAttributes import AnimationAdditionAttributes
 from RGT.XML.SVG.basicSvgNode import BasicSvgNode
 
-class AnimateTransformNode(BaseAnimationNode, AnimationAdditionAttributes, AnimationAttributeTargetAttributes, AnimationEventAttributes, AnimationValueAttributes):
-    
-    svgNodeType= BasicSvgNode.SVG_ANIMATE_TRANSFORM_NODE
-    
-    ATTRIBUTE_TYPE= 'type'
+
+class AnimateTransformNode(BaseAnimationNode, AnimationAdditionAttributes, AnimationAttributeTargetAttributes,
+                           AnimationEventAttributes, AnimationValueAttributes):
+    svgNodeType = BasicSvgNode.SVG_ANIMATE_TRANSFORM_NODE
+
+    ATTRIBUTE_TYPE = 'type'
 
     def __init__(self, ownerDoc):
         BaseAnimationNode.__init__(self, ownerDoc, 'animateTransform')
@@ -17,23 +18,23 @@ class AnimateTransformNode(BaseAnimationNode, AnimationAdditionAttributes, Anima
         AnimationAttributeTargetAttributes.__init__(self)
         AnimationEventAttributes.__init__(self)
         AnimationValueAttributes.__init__(self)
-        
-    
+
+
     def setType(self, data):
-        allowedValues= ['translate', 'scale', 'rotate', 'skewX', 'skewY']
-        
+        allowedValues = ['translate', 'scale', 'rotate', 'skewX', 'skewY']
+
         if data != None:
             if data not in allowedValues:
-                values= ''
+                values = ''
                 for value in allowedValues:
-                    values+= value + ', '
-                values= values[0: len(values)-2]
+                    values += value + ', '
+                values = values[0: len(values) - 2]
                 raise ValueError('Value not allowed, only ' + values + 'are allowed')
             else:
                 self._setNodeAttribute(self.ATTRIBUTE_TYPE, data)
-    
+
     def getType(self):
-        node= self._getNodeAttribute(self.ATTRIBUTE_TYPE)
+        node = self._getNodeAttribute(self.ATTRIBUTE_TYPE)
         if node != None:
             return node.nodeValue
         return None

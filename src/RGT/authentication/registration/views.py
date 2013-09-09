@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from RGT.userProfile.models import UserProfile
 from django.contrib.auth.models import User
 
+
 def verify(request, verifyEmailCode=''):
     if request.method == 'GET':
         Code = verifyEmailCode

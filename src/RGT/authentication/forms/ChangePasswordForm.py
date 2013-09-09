@@ -1,5 +1,6 @@
 from django import forms
 
+
 class ChangePasswordForm(forms.Form):
     oldPassword = forms.CharField(label=('Old Password'), widget=forms.PasswordInput(render_value=False))
     newPassword = forms.CharField(label=('New Password'), widget=forms.PasswordInput(render_value=False))

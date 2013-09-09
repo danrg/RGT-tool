@@ -45,23 +45,23 @@ print pcan.v
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.plot(pcar[:, 0], pcar[:, 1], 'bo')
-ax.plot(pcan.v[:,0], pcan.v[:,1], 'ro')
+ax.plot(pcan.v[:, 0], pcan.v[:, 1], 'ro')
 
 #draw axes
 ax.axhline(0, color='black')
 ax.axvline(0, color='black')
 
 #annotations each concern
-id=0
+id = 0
 for xpoint, ypoint in pcan.v:
     ax.annotate('C{:.0f}'.format(id), (xpoint, ypoint), ha='center',
-    va='center', bbox=dict(fc='white',ec='none'))
-    id+=1
+                va='center', bbox=dict(fc='white', ec='none'))
+    id += 1
 
 
 #calculate accounted for variance
-var_accounted_PC1 = pcan.d[0] * pcan.explained_variance * 100 /(pcan.d[0] + pcan.d[1])
-var_accounted_PC2 = pcan.d[1] * pcan.explained_variance * 100 /(pcan.d[0] + pcan.d[1])
+var_accounted_PC1 = pcan.d[0] * pcan.explained_variance * 100 / (pcan.d[0] + pcan.d[1])
+var_accounted_PC2 = pcan.d[1] * pcan.explained_variance * 100 / (pcan.d[0] + pcan.d[1])
 
 #Show variance accounted for
 ax.set_xlabel('Accounted variance on PC1 (%.1f%%)' % (var_accounted_PC1))

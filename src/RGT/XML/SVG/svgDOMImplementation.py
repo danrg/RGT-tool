@@ -1,4 +1,4 @@
-from xml.dom.minidom import  DOMImplementation
+from xml.dom.minidom import DOMImplementation
 from xml.dom.minidom import Document
 from RGT.XML.SVG.svgNode import SvgNode
 from RGT.XML.SVG.gNode import GNode
@@ -35,7 +35,7 @@ from RGT.XML.SVG.Filters.feDistantLightNode import FeDistantLightNode
 from RGT.XML.SVG.Filters.fePointLightNode import FePointLightNode
 from RGT.XML.SVG.Filters.feSpotLightNode import FeSpotLightNode
 from RGT.XML.SVG.Filters.feBlendNode import FeBlendNode
-from RGT.XML.SVG.Filters.feColorMatrixNode import FeColorMatrixNode 
+from RGT.XML.SVG.Filters.feColorMatrixNode import FeColorMatrixNode
 from RGT.XML.SVG.Filters.feComponentTransferNode import FeComponentTransferNode
 from RGT.XML.SVG.Filters.feFuncRNode import FeFuncRNode
 from RGT.XML.SVG.Filters.feFuncGNode import FeFuncGNode
@@ -91,292 +91,289 @@ from RGT.XML.SVG.stopNode import StopNode
 
 #class copied from minidom
 class SvgDOMImplementation(DOMImplementation):
-   
-        def createSvgDocument(self):
-            #namespaceURI= None
-            doctype= None
-            #qualifiedName= 'svg'
-            
-            doc = SvgDocument()
-    
-            element = doc.createSvgNode()
-            doc.appendChild(element)
-    
-    
-            doc.doctype = doctype
-            doc.implementation = self
-            return doc
+    def createSvgDocument(self):
+        #namespaceURI= None
+        doctype = None
+        #qualifiedName= 'svg'
+
+        doc = SvgDocument()
+
+        element = doc.createSvgNode()
+        doc.appendChild(element)
+
+        doc.doctype = doctype
+        doc.implementation = self
+        return doc
 
 #class copied from minidom
 class SvgDocument(Document):
-    
     implementation = SvgDOMImplementation
-    
+
     def __init__(self):
         Document.__init__(self)
-    
+
     def createSvgNode(self):
         return SvgNode(self)
-    
+
     def createGNode(self):
         return GNode(self)
-    
+
     def createDefsNode(self):
         return DefsNode(self)
-    
+
     def createDescNode(self):
         return DescNode(self)
-    
+
     def createTitleNode(self):
         return TitleNode(self)
-    
+
     def createSymbolNode(self):
         return SymbolNode(self)
-    
+
     def createUseNode(self):
         return UseNode(self)
-    
+
     def createImageNode(self):
         return ImageNode(self)
-    
+
     def createSwitchNode(self):
         return SwitchNode(self)
-    
+
     def createStyleNode(self):
         return StyleNode(self)
-    
+
     def createPathNode(self):
         return PathNode(self)
-    
-    def createRectNode(self, x= None, y= None, height= None, width= None):
+
+    def createRectNode(self, x=None, y=None, height=None, width=None):
         return RectNode(self, x, y, height, width)
-    
-    def createCircleNode(self, cx= None, cy= None, r= None):
+
+    def createCircleNode(self, cx=None, cy=None, r=None):
         return CircleNode(self, cx, cy, r)
-    
-    def createEllipseNode(self, rx= None, ry= None):
+
+    def createEllipseNode(self, rx=None, ry=None):
         return EllipseNode(self, rx, ry)
-    
-    def createLineNode(self, x1= None, y1= None, x2= None, y2= None):
-        lineNode= LineNode(self, x1, y1, x2, y2)
+
+    def createLineNode(self, x1=None, y1=None, x2=None, y2=None):
+        lineNode = LineNode(self, x1, y1, x2, y2)
         return lineNode
-    
-    def createPolylineNode(self, points= None):
+
+    def createPolylineNode(self, points=None):
         return PolylineNode(self, points)
-    
-    def createPolygonNode(self, points= None):
+
+    def createPolygonNode(self, points=None):
         return PolygonNode(self, points)
-    
-    def createSvgTextNode(self, x= None, y= None, text= None):
+
+    def createSvgTextNode(self, x=None, y=None, text=None):
         return TextNode(self, x, y, text)
-    
-    def createTspanNode(self, x= None, y= None):
+
+    def createTspanNode(self, x=None, y=None):
         return TspanNode(self, x, y)
-    
+
     def createTrefNode(self):
         return TrefNode(self)
-    
+
     def createTextPathNode(self):
         return TextPathNode(self)
-    
+
     def createAltGlyphNode(self):
         return AltGlyphNode(self)
-    
+
     def createAltGlyphDefNode(self):
         return AltGlyphDefNode(self)
-    
+
     def createAltGlyphItemNode(self):
         return AltGlyphItemNode(self)
-    
+
     def createGlyphRefNode(self):
         return GlyphRefNode(self)
-    
+
     def createMarkerNode(self):
         return MarkerNode(self)
-    
+
     def createColorProfileNode(self):
         return ColorProfileNode(self)
-    
+
     def createClipPathNode(self):
         return ClipPathNode(self)
-    
+
     def createMaskNode(self):
         return MaskNode(self)
-    
+
     def createFilterNode(self):
         return FilterNode(self)
-    
+
     #filters
-    
-    def createFeDistantLightNode(self, azimuth= None, elevation= None):
+
+    def createFeDistantLightNode(self, azimuth=None, elevation=None):
         return FeDistantLightNode(self, azimuth, elevation)
-    
-    def createFePointLightNode(self, x= None, y= None, z= None):
+
+    def createFePointLightNode(self, x=None, y=None, z=None):
         return FePointLightNode(self, x, y, z)
-    
-    def createFeSpotLightNode(self, x= None, y= None, z= None, specularExponent= None, limitingConeAngle= None):
+
+    def createFeSpotLightNode(self, x=None, y=None, z=None, specularExponent=None, limitingConeAngle=None):
         return FeSpotLightNode(self, x, y, z, specularExponent, limitingConeAngle)
-    
+
     def createFeBlendNode(self):
         return FeBlendNode(self)
-    
+
     def createFeColorMatrixNode(self):
         return FeColorMatrixNode(self)
-    
+
     def createFeComponentTransferNode(self):
         return FeComponentTransferNode(self)
-    
+
     def createFeFuncRNode(self):
         return FeFuncRNode(self)
-    
+
     def createFeFuncGNode(self):
         return FeFuncGNode(self)
-    
+
     def createFeFuncA(self):
         return FeFuncANode(self)
-    
+
     def createFeFuncB(self):
         return FeFuncBNode(self)
-    
+
     def createFeCompositeNode(self):
         return FeCompositeNode(self)
-    
+
     def createrFeConvolveMatrixNode(self):
         return FeConvolveMatrixNode(self)
-    
+
     def createFeDiffuseLightingNode(self):
         return FeDiffuseLightingNode(self)
-    
+
     def createFeDisplacementMapNode(self):
         return FeDisplacementMapNode(self)
-    
+
     def createFeFloodNode(self):
         return FeFloodNode(self)
-    
+
     def createFeGaussianBlurNode(self):
         return FeGaussianBlurNode(self)
-    
+
     def createFeImageNode(self):
         return FeImageNode(self)
-    
+
     def createFeMergeNode(self):
         return FeMergeNode(self)
-    
+
     def createFeMergeNodeNode(self):
         return FeMergeNodeNode(self)
-    
+
     def createFeMorphologyNode(self):
         return FeMorphologyNode(self)
-    
+
     def createFeOffsetNode(self):
         return FeOffsetNode(self)
-    
+
     def createFeSpecularLightingNode(self):
         return FeSpecularLightingNode(self)
-    
+
     def createFeTileNode(self):
         return FeTileNode(self)
-    
+
     def createFeTurbulenceNode(self):
         return FeTurbulenceNode(self)
-    
+
     #end filters
-    
-    def createCursorNode(self, x= None, y= None):
+
+    def createCursorNode(self, x=None, y=None):
         return CursorNode(self, x, y)
-    
+
     def createANode(self):
         return ANode(self)
-    
+
     def createViewNode(self):
         return ViewNode(self)
-    
+
     def createScriptNode(self):
         return ScriptNode(self)
-    
+
     #animate
-    
+
     def createAnimateNode(self):
         return AnimateNode(self)
-    
+
     def createSetNode(self):
         return SetNode(self)
-    
+
     def createAnimateMotionNode(self):
         return AnimateMotionNode(self)
-    
+
     def createMPathNode(self):
         return MpathNode(self)
-    
+
     def createAnimateColorNode(self):
         return AnimateColorNode(self)
-    
+
     def createAnimateTransformNode(self):
         return AnimateTransformNode(self)
-    
+
     #end animate
-    
+
     #font
-    
+
     def createFontNode(self):
         return FontNode(self)
-    
+
     def createGlypthNode(self):
         return GlyphNode(self)
-    
+
     def createMissingGlypthNode(self):
         return MissingGlyph(self)
-    
+
     def createHkernNode(self):
         return HkernNode(self)
-    
+
     def createVkernNode(self):
         return VkernNode(self)
-    
+
     def createFontFaceNode(self):
         return FontFaceNode(self)
-    
+
     def createFontFaceSrcNode(self):
         return FontFaceSrcNode(self)
-    
+
     def createFontFaceUriNode(self):
         return FontFaceUriNode(self)
-    
+
     def createFontFaceFormatNode(self):
         return FontFaceFormatNode(self)
-    
+
     def createFontFaceNameNode(self):
         return FontFaceNameNode(self)
-    
+
     #end font
-    
+
     def createMetadataNode(self):
         return MetadataNode(self)
-    
+
     def createForeignObjectNode(self):
         return ForeignObjectNode(self)
-    
+
     #gradient
-    
-    def createLinearGradientNode(self, x1= None, y1= None, x2= None, y2= None):
+
+    def createLinearGradientNode(self, x1=None, y1=None, x2=None, y2=None):
         return LinearGradientNode(self, x1, y1, x2, y2)
-    
+
     def createRadialGradientNode(self):
         return RadialGradientNode(self)
-    
+
     #end gradient
-    
+
     def createGlyphNode(self):
         return GlyphNode(self)
-    
+
     def createPatternNode(self):
         return PatternNode(self)
-    
-    def createStopNode(self, offset= None, stopColor= None, stopOpacity= None, style= None):
+
+    def createStopNode(self, offset=None, stopColor=None, stopOpacity=None, style=None):
         return StopNode(self, offset, stopColor, stopOpacity, style)
-        
+
     #copy from minidom, removed the part that writes the <?xml version="1.0" ?> and the encoding
     def writexml(self, writer, indent="", addindent="", newl="",
-                 encoding = None):
+                 encoding=None):
         for node in self.childNodes:
             node.writexml(writer, indent, addindent, newl)        

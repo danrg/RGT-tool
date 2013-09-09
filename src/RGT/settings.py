@@ -1,12 +1,11 @@
 # Django settings for RGT project.
 import os
-from ownsettings import *
 
 projectPath = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../'))
 
-DENDROGRAM_FONT_LOCATION = projectPath + '\src\RGT\LiberationSans-Regular.ttf'
+DENDROGRAM_FONT_LOCATION = projectPath + '/src/RGT/LiberationSans-Regular.ttf'
 
-HOST_NAME = 'localhost'
+HOST_NAME = 'USE_YOUR_OWN'
 
 EMAIL_VERIFICATION = True
 
@@ -35,8 +34,6 @@ USE_TZ = True
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
-
-LOGIN_URL = '/auth/login/' #With this line, no need for unnecessary URL redirection
 
 SITE_ID = 1
 
@@ -182,10 +179,8 @@ LOGGING = {
 AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend', 'RGT.authentication.backendAuthentication.BackendAuthentication')
 AUTH_PROFILE_MODULE = 'userProfile.UserProfile'
 
+from ownsettings import *
 
 ######## RGT specific variables ########
 GRID_USID_KEY_LENGTH= 20
 SESSION_USID_KEY_LENGTH= 20
-
-
-TEMPLATE_DEBUG = True
