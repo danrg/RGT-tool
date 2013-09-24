@@ -3,8 +3,6 @@ from RGT.gridMng.wizard.views import GridWizard
 from RGT.gridMng.wizard.forms import GeneralsForm, AlternativesForm, ConcernsForm, WeightsForm, RatingsForm
 from RGT.gridMng.composite.views import CompositeWizard
 from RGT.gridMng.composite.forms import FirstStepForm, WhichGridsForm, RulesForm
-from RGT.gridMng.trial.forms import ContactForm1, ContactForm2
-from RGT.gridMng.trial.views import ContactWizard
 
 grid_wizard_forms = [GeneralsForm, AlternativesForm, ConcernsForm, WeightsForm, RatingsForm]
 
