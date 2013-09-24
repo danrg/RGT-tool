@@ -80,7 +80,7 @@ class Grid(models.Model):
     dendogram = models.TextField(null=True)
     dateTime = models.DateTimeField(default=datetime.utcnow().replace(tzinfo=utc), null=True)
     grid_types = (('u', 'User grid'), ('s', 'Session grid'), ('ac', 'Response grid, Alternative/Concern'),
-                  ('rw', 'Response grid, Ratings/Weight') )
+                  ('rw', 'Response grid, Ratings/Weight'), ('cg', 'Composite Grid') )
     grid_type = models.CharField(max_length=2, choices=grid_types, default='u')
     objects = GridManager()
 
@@ -92,6 +92,7 @@ class Grid(models.Model):
         SESSION_GRID = 's'
         RESPONSE_GRID_ALTERNATIVE_CONCERN = 'ac'
         RESPONSE_GRID_RATING_WEIGHT = 'rw'
+        COMPOSITE_GRID = 'cg'
 
         #class Meta:
         #    unique_together= ('user', 'name')
@@ -108,9 +109,13 @@ class Alternatives(models.Model):
 
 
 class Composite(models.Model):
-    compid= models.CharField(max_length=20, unique=True)
+    compid= models.CharField(max_length=20, unique=False)
     user= models.ForeignKey(User, null= True)
     rule = models.CharField(max_length=200, null=True)
+    status = models.CharField(max_length=200, null=True)
+
+    class Meta:
+        ordering = ['id']
 
 class Concerns(models.Model):
     grid = models.ForeignKey(Grid)

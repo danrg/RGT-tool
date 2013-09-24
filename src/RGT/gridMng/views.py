@@ -11,6 +11,8 @@ from RGT.gridMng.models import Alternatives
 from RGT.gridMng.models import Concerns
 from RGT.gridMng.models import Ratings
 from RGT.gridMng.models import Facilitator
+from RGT.gridMng.models import Composite
+from RGT.gridMng.prototypes.compositeParse import CompositeParse
 from RGT.gridMng.utility import randomStringGenerator, validateName, convertSvgTo, getImageError, convertGridTableToSvg, convertGridTableToSvg, returnMatrix
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
@@ -202,9 +204,9 @@ def getShowGridPage(request):
         return redirect('/auth/login/')
 
     user1 = request.user
-    gridtype = Grid.GridType.USER_GRID
+    #gridtype = Grid.GridType.USER_GRID
     templateData = ShowGridsData()
-    templateData.grids = Grid.objects.filter(user=user1, grid_type=gridtype)
+    templateData.grids = Grid.objects.filter(user=user1)
 
     if len(templateData.grids) <= 0:
         templateData.grids = None
@@ -651,6 +653,58 @@ def ajaxGenerateSimilarity(request):
                                 content_type='application/xml')
     else:
         return HttpResponse("Hello World!")
+
+
+"""
+This function will add rules to the newly constructed composite grid
+"""
+
+def addRules(request):
+    """
+    :param request:
+    :return:
+    """
+
+    if not request.user.is_authenticated():
+        return redirect('/auth/login/')
+
+    if (request.POST.has_key('rule') and request.POST.has_key('status')):
+
+        user1 = request.user
+        if(request.POST.has_key('gridid')):
+            gridID = request.POST['gridid']
+        else:
+            gridID = randomStringGenerator(GRID_USID_KEY_LENGTH) #Grid ID must be same for GRID, so we are creating it in here before the 'createCompositeGrid' function
+            results = Grid.objects.filter(usid=gridID)
+            if len(results) >= 1:
+            #in this case the key was duplicated, so lets try to create a new key
+                maxAttempts = 50
+                while maxAttempts >= 0:
+                    maxAttempts -= 1
+                    key = randomStringGenerator(GRID_USID_KEY_LENGTH)
+                    #check to see if this key is unique
+                    results = Grid.objects.filter(usid=key)
+                    if len(results) <= 0:
+                        gridID = key
+                        maxAttempts = 0
+
+        parser = CompositeParse(request.POST['rule'])
+        rules_list = parser.getCompositions()
+
+        print "Rule:"
+        print request.POST['rule']
+        print "List:"
+        print rules_list
+
+        for r in rules_list:
+            print "One Rule:"
+            print r
+            Composite.objects.create(compid=gridID, user=user1, rule=str(r), status=request.POST['status'])
+
+        return HttpResponse(gridID, mimetype="text/plain")
+    else:
+        return HttpResponse("Error!")
+
 
 
 """
@@ -1332,6 +1386,60 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
                     for j in range(int(nAlternatives)):
                         Ratings.objects.create(concern=concerns[i], alternative=alternatives[j],
                                                rating=ratioValues[i][j])
+
+            return gridObj
+        except:
+            try:
+                gridObj.delete()
+            except:
+                if DEBUG:
+                    print 'Could not delete the grid'
+                    print "Exception in user code:"
+                    print '-' * 60
+                    traceback.print_exc(file=sys.stdout)
+                    print '-' * 60
+            raise
+    else:
+        raise ValueError('One or more variables were None')
+
+"""
+This function is a modificated version of 'createGrid' function. What is different is we don't have any numeric values here, just alternative names(combinations of valid rules),
+and also we are providing grid.usid beforehand
+"""
+def createCompositeGrid(userObj, gridName, gridId):
+    if userObj != None and gridId != None:
+        try:
+            gridObj = Grid.objects.create(user=userObj, grid_type='cg')
+            if gridName != None:
+                gridObj.name = gridName
+            gridObj.usid = gridId
+            gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
+            #gridObj.dateTime = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+            try:
+                gridObj.save()
+            except IntegrityError as error:
+                pass
+
+            rules = Composite.objects.filter(compid=gridId, status="valid")
+            concernValues = [['lc1', 'rc1'],['lc2', 'rc2'],['lc3', 'rc3']]
+            concerns = []
+            alternatives = []
+
+            for r in rules:
+                a = r.rule
+                a = a.replace("u'", "")
+                alternative = Alternatives.objects.create(grid=gridObj, name=str(a.replace("'", "")))
+                alternatives.append(alternative)
+
+            for i in range(int(len(concernValues))):
+                concern = Concerns.objects.create(grid=gridObj, leftPole=concernValues[i][0],
+                                                  rightPole=concernValues[i][1])
+                concerns.append(concern)
+
+            # for i in range(len(concernValues)):
+            #     for j in range(rules.count()):
+            #         Ratings.objects.create(concern=concerns[i], alternative=alternatives[j], rating=3)
+
 
             return gridObj
         except:

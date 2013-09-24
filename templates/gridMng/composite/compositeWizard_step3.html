@@ -1,35 +1,60 @@
 {% extends 'gridMng/composite/compositeWizard_base.html' %}
+{% load wizard_extras %}
 
 {% block stylesheet %}
 {{ block.super }}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/wizard/wizard-step_2.css" />
 {% endblock stylesheet %}
 
 {% block javascript %}
-<script type="text/javascript" src="{{ STATIC_URL }}js/wizard/wizard-step_1.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/composite/composite-step_3.js"></script>
 {% endblock javascript %}
 
 {% block step_info %}
-<div class="step-info">
-	<p>In this step you can type the name of the grid, as well as a description for it.</p>
+<div class="step-header">
+	<p>In this step you can define the rules for you composite grid.</p>
 </div>
 {% endblock step_info %}
 
 {% block wizard_form_content %}
-	{% for field in wizard.form %}
-		<div class="field-wrapper">
-			<div class="field-label-wrapper">
-				{{ field.label_tag }}
-			</div>
-			<div class="field-input-wrapper">
-				{{ field }}
-			</div>
-			{% if field.errors %}
-				<div class="error">
-				{% for error in field.errors %}
-					<span>{{ error }}</span>
-				{% endfor %}
-				</div>
-			{% endif %}
-		</div>
+<div id="alt-list">
+	<div id="alt-list-header">
+		<h4>Alternates Lists</h4>
+	</div>
+    {% for alternate_list in data.alternates %}
+	    <div id="alt-list-data-{{ forloop.counter }}" class="container">
+        {% for alternate in alternate_list %}
+            <input id="alternate_grid-{{forloop.parentloop.counter}}-{{ forloop.counter}}" name="1-gridChoices" type="checkbox" value="{{ alternate.0 }}">&nbsp;{{ alternate.0 }}<br>
+        {% endfor %}
+	    </div><br>
+    {% endfor %}
+
+<h5>Status: </h5>
+<div id="alt-list-data-{{ forloop.counter }}" class="container">
+    <input id="valid" name="status" type="radio" value="valid">Valid<br>
+    <input id="invalid" name="status" type="radio" value="invalid">Invalid<br>
+    <input id="unknown" name="status" type="radio" value="unknown" checked>Unknown<br>
+</div><br>
+
+</div>
+{% if wizard.form.errors %}
+<div class="form-errors-wrapper">
+	<div class="error">
+	{% for error in wizard.form.non_field_errors %}
+		<p>{{ error }}</p>
 	{% endfor %}
+	</div>
+</div>
+{% endif %}
+<input type="hidden" name="gridUSid" value="" id="gridUSid" />
 {% endblock wizard_form_content %}
+
+{% block after_wizard_form_content %}
+<div id="btn-add-wrapper">
+   	<input type="button" id="btn-add" value="Add Rule" />
+</div>
+{% endblock after_wizard_form_content %}
+
+{% block prev_step_but_tab %}{% if alternatives_length %}{{ alternatives_length|add:'3' }}{% else %}6{% endif %}{% endblock prev_step_but_tab %}
+
+{% block next_step_but_tab %}{% if alternatives_length %}{{ alternatives_length|add:'2' }}{% else %}5{% endif %}{% endblock next_step_but_tab %}

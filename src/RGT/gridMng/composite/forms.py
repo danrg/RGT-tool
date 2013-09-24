@@ -6,8 +6,7 @@ from RGT.gridMng.template.showGridsData import ShowGridsData
 class FirstStepForm(forms.Form):
     # CC = (('deneme11', 'deneme11'), ('Cars', 'Cars'), ('asd', 'asd'), ('grid11', 'grid11'))
     composite_name = forms.CharField(widget=forms.TextInput(attrs={'size':'45'}))
-    description = forms.CharField(widget=forms.Textarea(), required=False)
-    # deli = forms.MultipleChoiceField(required=False, choices=CC, widget=forms.CheckboxSelectMultiple)
+    description = forms.CharField(widget=forms.Textarea(), required=False) #No field in database yet
 
 class WhichGridsForm(forms.Form):
 #     Override the initialize in order to dynamically add fields to the form in order to be saved,
@@ -32,6 +31,8 @@ class WhichGridsForm(forms.Form):
                 i += 1
             self.fields['gridChoices'] = forms.MultipleChoiceField(required=False, choices=choices2, widget=forms.CheckboxSelectMultiple)
 
-class BlaStepForm(forms.Form):
-    bla_composite_name = forms.CharField(widget=forms.TextInput(attrs={'size':'45'}))
-    blo_description = forms.CharField(widget=forms.Textarea(), required=False)
+class RulesForm(forms.Form):
+     def __init__(self, *args, **kwargs):
+        super(RulesForm, self).__init__(*args, **kwargs)
+        if len(self.data) > 0:
+            self.gridUSid = self.data['gridUSid']

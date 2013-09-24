@@ -154,7 +154,7 @@ def generateGridTable(gridObj):
         concernWeights.reverse() #this is needed because the list will be poped during the template execution
         i = 0;
         while i < nAlternatives:
-            header.append(alternatives[i].name)
+            header.append(str(alternatives[i].name))
             i += 1
     else:
 

@@ -23,7 +23,7 @@ class FooTests(unittest.TestCase):
     def testNumberOfCompositions(self):
         c = CompositeParse("A0&B1&C2")
         self.failUnlessEqual(c.getNumberOfCompositions(), 1)
-        c = CompositeParse("A0&(B1|B2|B3)&C4&(D5|D6)")
+        c = CompositeParse("(A0)&(B1|B2|B3)&C4&(D5|D6)") #SHOULD ACCEPT ONE ELEMENT WITH PARATHESIS
         self.failUnlessEqual(c.getNumberOfCompositions(), 6)
         c = CompositeParse("A1")
         self.failUnlessEqual(c.getNumberOfCompositions(),1)

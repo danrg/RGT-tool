@@ -17,14 +17,14 @@ class CompositeParse():
 
         n = self.getCountItems()
 
-        words = self.initialString.split("&")
+        words = self.initialString.split("*")
         listOfLists = []
 
         for w in words:
             if '|' in w:
                 listOfLists.append(w.replace('(','').replace(')','').split("|"))
             else:
-                listOfLists.append([w])
+                listOfLists.append([w.replace('(','').replace(')','')])
 
         self.listOfCompositions = list(itertools.product(*listOfLists))
         return self.listOfCompositions
