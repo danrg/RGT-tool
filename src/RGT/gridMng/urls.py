@@ -26,6 +26,5 @@ urlpatterns = patterns('',
     url(r'^create/wizard/$', GridWizard.as_view(grid_wizard_forms)),
     url(r'^create/composite/$', CompositeWizard.as_view(composite_wizard_forms)),
     url(r'^result.png$', 'RGT.gridMng.views.pca'),
-    url(r'^addRule/$', 'RGT.gridMng.views.addRules'),
-    url(r'^trial', ContactWizard.as_view([ContactForm1, ContactForm2]))
+    url(r'^addRule/$', 'RGT.gridMng.views.addRules')
 )
