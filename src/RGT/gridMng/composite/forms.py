@@ -31,6 +31,17 @@ class WhichGridsForm(forms.Form):
                 i += 1
             self.fields['gridChoices'] = forms.MultipleChoiceField(required=False, choices=choices2, widget=forms.CheckboxSelectMultiple)
 
+    def clean(self):
+        cleaned_data = super(WhichGridsForm, self).clean()
+
+        choices = cleaned_data['gridChoices']
+        if len(choices) < 2:
+             raise forms.ValidationError('You need to select at least two grids from the list.')
+
+        # if len(alternatives) != len(set(alternatives)):
+        #     raise forms.ValidationError('It is not allowed to have the same name for alternatives.')
+        return cleaned_data
+
 class RulesForm(forms.Form):
      def __init__(self, *args, **kwargs):
         super(RulesForm, self).__init__(*args, **kwargs)
