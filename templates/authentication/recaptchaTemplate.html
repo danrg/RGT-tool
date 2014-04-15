@@ -1,3 +1,5 @@
+{% load authentication_tags %}
+
 <div id="recaptcha_widget" style="display: none;">
     <label for="recaptcha_response_field" class="recaptcha_only_if_image">Enter the words shown below:</label>
     <label for="recaptcha_response_field" class="recaptcha_only_if_audio">Enter the numbers you hear:</label>
@@ -11,11 +13,11 @@
     <div class="recaptcha_only_if_audio"><a href="javascript:Recaptcha.switch_type('image')">Get an image CAPTCHA</a></div>
 </div>
 
-<script type="text/javascript" src="http://www.google.com/recaptcha/api/challenge?k=6LcPu-QSAAAAALuAw5eJ90xVv8mODsWgnMQnpA-s">
+<script type="text/javascript" src="http://www.google.com/recaptcha/api/challenge?k={% recaptcha_public_key %}">
 </script>
 
 <noscript>
-    <iframe src="http://www.google.com/recaptcha/api/noscript?k=6LcPu-QSAAAAALuAw5eJ90xVv8mODsWgnMQnpA-s"
+    <iframe src="http://www.google.com/recaptcha/api/noscript?k={% recaptcha_public_key %}"
             height="300" width="500" frameborder="0"></iframe><br>
     <textarea name="recaptcha_challenge_field" rows="3" cols="40">
     </textarea>
