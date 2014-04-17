@@ -143,7 +143,6 @@ class GridTests(BaseGridLiveTest):
         grid_file_name = self.browser.find_element_by_name("fileName")
         grid_file_name.send_keys('grid1')
 
-
     def test_can_update_grid(self):
         # User logs in successfully, goes to grid page and selects a saved grid
         self.can_select_grid('admin@admin.com', '123')
@@ -241,8 +240,8 @@ class GridTests(BaseGridLiveTest):
         # User logs in successfully, goes to grid page and selects a saved grid
         self.can_select_grid('admin@admin.com', '123')
 
-        # User clicks the show dendrogram button
-        show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show Dendrogram']")
+        # User clicks the cluster analysis link
+        show_dendrogram_button = self.browser.find_element_by_link_text("Cluster Analysis")
         show_dendrogram_button.click()
 
         # Wait until the dendrogram appears successfully

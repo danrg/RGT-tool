@@ -155,8 +155,8 @@ class SessionTests(BaseSessionLiveTest):
 
         # Participants panel shows two users with names user1 and user2
         participants_in_panel = self.browser.find_elements_by_class_name("respondedRequest")
-        self.assertEqual(participants_in_panel[0].text, "test1")
-        self.assertEqual(participants_in_panel[1].text, "test2")
+        self.assertEqual(participants_in_panel[0].text, "user1")
+        self.assertEqual(participants_in_panel[1].text, "user2")
 
         # Facilitator admin clicks the start session button
         start_session_button = self.browser.find_element_by_css_selector("input[value='Start Session']")
@@ -197,7 +197,7 @@ class SessionTests(BaseSessionLiveTest):
 
         # Participant user1 logs in, goes to participating session
         # page and selects the session session1 of admin
-        self.participant_can_select_session("test1@test1.com", "123", "admin:session1", False)
+        self.participant_can_select_session("user1@example.com", "123", "admin:session1", False)
 
         # The number of participants shows 0/2 which means that none participant responded yet
         session_details_body = self.browser.find_element_by_id("sessionDetails")
@@ -241,7 +241,7 @@ class SessionTests(BaseSessionLiveTest):
 
         # Participant user2 logs in, goes to participating session
         # page and selects the session session1 of user admin
-        self.participant_can_select_session("test2@test2.com", "123", "admin:session1", False)
+        self.participant_can_select_session("user2@example.com", "123", "admin:session1", False)
 
         # The number of participants shows 1/2 which means that one out of 2 participants responded
         session_details_body = self.browser.find_element_by_id("sessionDetails")
@@ -288,7 +288,7 @@ class SessionTests(BaseSessionLiveTest):
         refresh_button = self.browser.find_element_by_id("participatingSessionsRefreshImage")
         refresh_button.click()
 
-        time.sleep(10)
+        time.sleep(1)
 
         # The number of participants shows 2/2 which means that all participants responded
         # and the response status says Response was sent
@@ -424,7 +424,7 @@ class SessionTests(BaseSessionLiveTest):
         show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show Dendrogram']")
         show_dendrogram_button.click()
 
-        time.sleep(10)
+        time.sleep(2)
 
         # Wait until the dendrogram appears successfully
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_class_name("dendrogramTitle"))
@@ -437,7 +437,7 @@ class SessionTests(BaseSessionLiveTest):
 
         # Participant with the name user1 logs in, goes to participating session
         # page and selects the session session1 of user admin
-        self.participant_can_select_session("test1@test1.com", "123", "admin:session1", False)
+        self.participant_can_select_session("user1@example.com", "123", "admin:session1", False)
 
         # Participant user1 types some values for the ratings
         #self.fill_empty_ratings(True)
@@ -454,7 +454,7 @@ class SessionTests(BaseSessionLiveTest):
 
         # Participant with the name user2 logs in, goes to participating session
         # page and selects the session session1 of user admin
-        self.participant_can_select_session("test2@test2.com", "123", "admin:session1", False)
+        self.participant_can_select_session("user2@example.com", "123", "admin:session1", False)
 
         # Participant user2 types some values for the ratings
         #self.fill_empty_ratings(True)
@@ -592,7 +592,7 @@ class SessionTests(BaseSessionLiveTest):
 
         # Participant with the name user1 logs in, goes to participating session
         # page and selects the session session1 of user admin
-        self.participant_can_select_session("test1@test1.com", "123", "admin:session1", False)
+        self.participant_can_select_session("user1@example.com", "123", "admin:session1", False)
 
         show_participant_respond_from_iterations_options = self.browser.find_elements_by_xpath(
             "//select[@id='responseSelection']/option")
@@ -703,7 +703,7 @@ class ParticipantSessionTests(BaseSessionLiveTest):
 
     def test_join_session(self):
         # Participator logs in successfully, goes to participating session page
-        self.can_goto_session_page("test1@test1.com", "123")
+        self.can_goto_session_page("user1@example.com", "123")
 
         # Participant clicks the link to go the the participants page
         participant_page_link = self.browser.find_element_by_link_text("here")
