@@ -11,6 +11,7 @@ from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+from RGT.settings import TEST_IN_BACKGROUND
 import time
 
 
@@ -18,6 +19,8 @@ class BaseLiveTest(LiveServerTestCase):
     @classmethod
     def setUp(self):
         self.browser = webdriver.Chrome()
+        if TEST_IN_BACKGROUND:
+            self.browser.set_window_position(10000, 10000)
 
     @classmethod
     def tearDown(self):

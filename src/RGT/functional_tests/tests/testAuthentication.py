@@ -6,7 +6,7 @@ Test Classes Used:
     - Register Test
 
 """
-from RGT.functional_tests.tests.base import BaseLiveTest
+from RGT.functional_tests.tests.testBase import BaseLiveTest
 from selenium.webdriver.common.keys import Keys
 
 

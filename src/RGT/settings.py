@@ -126,7 +126,7 @@ INSTALLED_APPS = (
     'RGT.gridMng',
     'RGT.contact',
     'south',
-    'functional_tests',
+    'RGT.functional_tests',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -137,6 +137,11 @@ INSTALLED_APPS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
@@ -159,6 +164,7 @@ LOGGING = {
         },
         'mail_admins': {
             'level': 'ERROR',
+            'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         }
     },

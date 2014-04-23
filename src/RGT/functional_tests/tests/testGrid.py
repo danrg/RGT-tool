@@ -8,7 +8,7 @@ This file also includes the base test for the grids which includes general funct
 by the test cases.
 
 """
-from RGT.functional_tests.tests.base import BaseLiveTest
+from RGT.functional_tests.tests.testBase import BaseLiveTest
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
