@@ -15,7 +15,6 @@ function showMySession()
 			$.post('/sessions/show/', str, function(data){
 				try
 				{
-					//if(data.search('<error>.*?</error>') <= -1)
 					if ($(data).find('error').length <= 0)
 					{
 						$('#concentDiv').html($(data).find('htmlData').text());

@@ -1,8 +1,7 @@
 from django.shortcuts import render_to_response, render, redirect
-#from django.views.generic.simple import redirect_to
 from django.template import RequestContext
 from django.template import loader
-from django.http import HttpResponse #,HttpResponseRedirect
+from django.http import HttpResponse
 from RGT.gridMng.models import Grid
 from RGT.gridMng.models import Ratings
 from RGT.gridMng.models import Facilitator
@@ -78,25 +77,20 @@ def getMySessionsPage(request):
         return redirect('/auth/login/')
 
     try:
-        facilitator1 = Facilitator.objects.isFacilitator(request.user)
-        if facilitator1:
-            sessions = Session.objects.filter(facilitator=facilitator1)
+        facilitator = Facilitator.objects.isFacilitator(request.user)
+        if facilitator:
+            sessions = Session.objects.filter(facilitator=facilitator)
             if sessions and len(sessions) > 0:
                 sessionList = []
                 for session in sessions:
                     sessionList.append((session.name, session.usid))
-                    #print session.name + ' ' + str(session.usid)
 
                 templateData = MySessionsData(sessionList)
                 context = RequestContext(request, {'data': templateData})
 
                 return render(request, 'gridMng/mySessions.html', context_instance=context)
     except:
-        if DEBUG == True:
-            print "Exception in user code:"
-            print '-' * 60
-            traceback.print_exc(file=sys.stdout)
-            print '-' * 60
+        __debug_print_stacktrace()
 
     context = RequestContext(request, {})
     return render(request, 'gridMng/mySessions.html', context_instance=context)
@@ -109,14 +103,11 @@ def ajaxGetMySessionContentPage(request):
     try:
         if request.POST.has_key('sessionUSID'):
             try:
-                facilitator1 = Facilitator.objects.isFacilitator(request.user)
-                if facilitator1:
-                    sessionObj = Session.objects.get(usid=request.POST['sessionUSID'], facilitator=facilitator1)
-                    #get the users
-                    #participants= sessionObj.getParticipators()
-
+                facilitator = Facilitator.objects.isFacilitator(request.user)
+                if facilitator:
+                    sessionObj = Session.objects.get(usid=request.POST['sessionUSID'], facilitator=facilitator)
                     templateData = MySessionsContentData()
-                    templateData.participantTableData = ParticipantsData(__createPaticipantPanelData__(sessionObj))
+                    templateData.participantTableData = ParticipantsData(__createPaticipantPanelData(sessionObj))
                     iteration = sessionObj.iteration
                     sessionGrid = sessionObj.sessiongrid_set.all()[iteration].grid
                     gridTemplateData = GridTableData(generateGridTable(sessionGrid))
@@ -125,10 +116,8 @@ def ajaxGetMySessionContentPage(request):
                     templateData.tableData = gridTemplateData
                     iterationValueType = {}
                     iterationTypes = SessionIterationState.objects.filter(session=sessionObj)
-                    i = 0;
-                    # -1 because the last iteration is the one currently on, which does not
-                    # produce any results anyway
-                    while i <= iteration - 1:
+
+                    for i in range(0, iteration): # Last iteration not included, because it doesn't produce results
                         if i == 0:
                             iterationValueType[i] = {'': '', '': ''}
                         else:
@@ -138,9 +127,6 @@ def ajaxGetMySessionContentPage(request):
                             elif iterationTypes[i - 1].state.name == SessionState.RW:
                                 iterationValueType[i] = {'stateNameKey': SessionState.RW,
                                                          'stateName': 'Ratings and Weights'}
-                        i += 1
-                        #hidden.append(( str(len(dic['table'])), 'nConcerns'))
-                    #hidden.append(( str(len(dic['table'][0]) - 2), 'nAlternatives'))
 
                     templateData.iterationValueType = iterationValueType
                     templateData.sessionName = sessionObj.name
@@ -185,26 +171,16 @@ def ajaxGetMySessionContentPage(request):
                     context = RequestContext(request, {'data': templateData})
                     htmlData = template.render(context)
                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-                    #return render_to_response('gridMng/mySessionsContent.html', {'participants':participants, 'iteration': iteration, 'invitationKey': sessionObj.invitationKey, 'table' : dic['table'], 'tableHeader': dic['tableHeader'], 'weights':dic['weights'], 'hiddenFields':hidden, 'showRatings':True, 'readOnly':True}, context_instance=RequestContext(request))
                 else:
                     return HttpResponse(createXmlErrorResponse('You are not the facilitator for this session'),
                                         content_type='application/xml')
             except:
-                if DEBUG == True:
-                    print "Exception in user code:"
-                    print '-' * 60
-                    traceback.print_exc(file=sys.stdout)
-                    print '-' * 60
+                logger.exception("Exception in user code")
                 return HttpResponse(createXmlErrorResponse('No session found'), content_type='application/xml')
         else:
             return HttpResponse(createXmlErrorResponse('No session id found in the request'),
                                 content_type='application/xml')
     except:
-        if DEBUG == True:
-            print "Exception in user code:"
-            print '-' * 60
-            traceback.print_exc(file=sys.stdout)
-            print '-' * 60
         logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('unknown error'), content_type='application/xml')
 
@@ -273,11 +249,7 @@ def ajaxCreateSession(request):
                                 newSession.delete()
                                 hasError = True
                                 errorMsg = 'unable to relate the grid with the session'
-                                if DEBUG == True:
-                                    print "Exception in user code:"
-                                    print '-' * 60
-                                    traceback.print_exc(file=sys.stdout)
-                                    print '-' * 60
+                                __debug_print_stacktrace()
                     except:
                         try:
                             newSession.delete()
@@ -285,27 +257,15 @@ def ajaxCreateSession(request):
                             print 'Could\'t delete the session'
                         hasError = True
                         errorMsg = 'unable to copy the grid to the session'
-                        if DEBUG == True:
-                            print "Exception in user code:"
-                            print '-' * 60
-                            traceback.print_exc(file=sys.stdout)
-                            print '-' * 60
+                        __debug_print_stacktrace()
                 except:
                     hasError = True
                     errorMsg = 'unable to create the session'
-                    if DEBUG == True:
-                        print "Exception in user code:"
-                        print '-' * 60
-                        traceback.print_exc(file=sys.stdout)
-                        print '-' * 60
+                    __debug_print_stacktrace()
             except:
                 hasError = True
                 errorMsg = 'unable to create or set the facilitator for the session'
-                if DEBUG == True:
-                    print "Exception in user code:"
-                    print '-' * 60
-                    traceback.print_exc(file=sys.stdout)
-                    print '-' * 60
+                __debug_print_stacktrace()
         if hasError:
             try:
                 #revert changes
@@ -313,11 +273,7 @@ def ajaxCreateSession(request):
                 sessionGrid.delete()
             except:
                 #do nothing
-                if DEBUG == True:
-                    print "Exception in user code:"
-                    print '-' * 60
-                    traceback.print_exc(file=sys.stdout)
-                    print '-' * 60
+                __debug_print_stacktrace()
             return HttpResponse(createXmlErrorResponse(errorMsg), content_type='application/xml')
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
     return ajaxGetCreateSessionPage(request)
@@ -336,7 +292,7 @@ def getParticipatingSessionsPage(request):
 
     templateDate.sessions = sessions
     pendingResponses = PedingResponsesData()
-    pendingResponses.pedingResponsesTable = __createPendingResponseData__(request.user)
+    pendingResponses.pedingResponsesTable = __createPendingResponseData(request.user)
     templateDate.pendingResponses = pendingResponses
 
     context = RequestContext(request, {'data': templateDate})
@@ -376,11 +332,7 @@ def ajaxJoinSession(request):
                 'You are the facilitator of the session, facilitators can\'t be added as participants'),
                                 content_type='application/xml')
         except:
-            if DEBUG == True:
-                print "Exception in user code:"
-                print '-' * 60
-                traceback.print_exc(file=sys.stdout)
-                print '-' * 60
+            __debug_print_stacktrace()
             logger.exception('Unknown error')
             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
     else:
@@ -405,33 +357,20 @@ def ajaxChangeSessionState(request):
                         if name == 'finish':
 
                             try:
-                                __saveSessionGridAsUserGrid__(request)
+                                __saveSessionGridAsUserGrid(request)
                             except:
-                                if DEBUG == True:
-                                    print "Exception in user code:"
-                                    print '-' * 60
-                                    traceback.print_exc(file=sys.stdout)
-                                    print '-' * 60
-                                    print 'Could not save session grid as user grid'
+                                __debug_print_stacktrace()
                         session.changeState(stateObj)
                         return ajaxGetMySessionContentPage(request)
                     else:
                         return HttpResponse(createXmlErrorResponse('Invalid state given in the request'),
                                             content_type='application/xml')
                 except WrongState:
-                    if DEBUG == True:
-                        print "Exception in user code:"
-                        print '-' * 60
-                        traceback.print_exc(file=sys.stdout)
-                        print '-' * 60
+                    __debug_print_stacktrace()
                     return HttpResponse(createXmlErrorResponse('Can\'t change states, session is in the wrong state'),
                                         content_type='application/xml')
                 except:
-                    if DEBUG == True:
-                        print "Exception in user code:"
-                        print '-' * 60
-                        traceback.print_exc(file=sys.stdout)
-                        print '-' * 60
+                    __debug_print_stacktrace()
                     logger.exception('Unknown error')
                     return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
             else:
@@ -465,7 +404,7 @@ def ajaxGetParticipatingSessionContentPage(request):
 
                 #lets create a list of iteration that i have responded
                 responseGridRelations = ResponseGrid.objects.filter(session=sessionObj, user=request.user)
-                gridTablesData = __generateParticipatingSessionsGridsData__(sessionObj, iteration,
+                gridTablesData = __generateParticipatingSessionsGridsData(sessionObj, iteration,
                                                                             responseGridRelations)
                 if len(responseGridRelations) >= 1:
                     for responseGridRelation in responseGridRelations:
@@ -531,12 +470,8 @@ def ajaxGetParticipatingSessionContentPage(request):
                         templateData.nReceivedResponses = len(sessionObj.getUsersThatRespondedRequest())
                         templateData.nParticipants = len(sessionObj.getParticipators())
                     except:
-                        if DEBUG == True:
-                            print "Exception in user code:"
-                            print '-' * 60
-                            traceback.print_exc(file=sys.stdout)
-                            print '-' * 60
-                            #check if i have sent a response grid
+                        __debug_print_stacktrace()
+                    #check if i have sent a response grid
                     responseGrid = request.user.responsegrid_set.filter(user=request.user, iteration=iteration,
                                                                         session=sessionObj)
                     if len(responseGrid) <= 0:
@@ -621,27 +556,15 @@ def ajaxRespond(request):
                     #if the response is for a concern/alternative request, run extra validation code (no empty concerns or alternatives allowed)
                     if sessionObj.state.name == State.objects.getWaitingForAltAndConState().name:
                         try:
-                            __validateAltConResponse__(request)
+                            __validateAltConResponse(request)
                         except ValueError as error:
-                            if DEBUG == True:
-                                print "Exception in user code:"
-                                print '-' * 60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-' * 60
+                            __debug_print_stacktrace()
                             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                         except KeyError as error:
-                            if DEBUG == True:
-                                print "Exception in user code:"
-                                print '-' * 60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-' * 60
+                            __debug_print_stacktrace()
                             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                         except:
-                            if DEBUG == True:
-                                print "Exception in user code:"
-                                print '-' * 60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-' * 60
+                            __debug_print_stacktrace()
                             logger.exception('Unknown error')
                             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                             #determine if it is a new response grid or not
@@ -655,25 +578,13 @@ def ajaxRespond(request):
                         try:
                             obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
                         except KeyError as error:
-                            if DEBUG == True:
-                                print "Exception in user code:"
-                                print '-' * 60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-' * 60
+                            __debug_print_stacktrace()
                             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                         except ValueError as error:
-                            if DEBUG == True:
-                                print "Exception in user code:"
-                                print '-' * 60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-' * 60
+                            __debug_print_stacktrace()
                             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                         except:
-                            if DEBUG == True:
-                                print "Exception in user code:"
-                                print '-' * 60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-' * 60
+                            __debug_print_stacktrace()
                             logger.exception('Unknown error')
                             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                         nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues = obj
@@ -707,11 +618,7 @@ def ajaxRespond(request):
                                     return HttpResponse(createXmlSuccessResponse('Grid was saved', createDateTimeTag(
                                         datetime.now().strftime("%Y-%m-%d %H:%M:%S"))), content_type='application/xml')
                             except:
-                                if DEBUG == True:
-                                    print "Exception in user code:"
-                                    print '-' * 60
-                                    traceback.print_exc(file=sys.stdout)
-                                    print '-' * 60
+                                __debug_print_stacktrace()
                                 logger.exception('Unknown error')
                                 return HttpResponse(createXmlErrorResponse('Unknown error'),
                                                     content_type='application/xml')
@@ -735,25 +642,13 @@ def ajaxRespond(request):
                         try:
                             obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
                         except KeyError as error:
-                            if DEBUG == True:
-                                print "Exception in user code:"
-                                print '-' * 60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-' * 60
+                            __debug_print_stacktrace()
                             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                         except ValueError as error:
-                            if DEBUG == True:
-                                print "Exception in user code:"
-                                print '-' * 60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-' * 60
+                            __debug_print_stacktrace()
                             return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
                         except:
-                            if DEBUG == True:
-                                print "Exception in user code:"
-                                print '-' * 60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-' * 60
+                            __debug_print_stacktrace()
                             logger.exception('Unknown error')
                             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
 
@@ -785,11 +680,7 @@ def ajaxRespond(request):
                                     createXmlSuccessResponse('Grid created successfully.', extraDataToUse),
                                     content_type='application/xml')
                         except:
-                            if DEBUG == True:
-                                print "Exception in user code:"
-                                print '-' * 60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-' * 60
+                            __debug_print_stacktrace()
                             logger.exception('Unknown error')
                             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                 else:
@@ -827,7 +718,7 @@ def ajaxGetParticipatingSessionsContentGrids(request):
                 if iteration_ > sessionObj.iteration or iteration_ < 0:
                     return HttpResponse(createXmlErrorResponse('Invalid iteration value'),
                                         content_type='application/xml')
-                gridTablesData = __generateParticipatingSessionsGridsData__(sessionObj, iteration_,
+                gridTablesData = __generateParticipatingSessionsGridsData(sessionObj, iteration_,
                                                                             ResponseGrid.objects.filter(
                                                                                 session=sessionObj, user=request.user))
 
@@ -927,11 +818,7 @@ def ajaxGetParticipatingSessionsContentGrids(request):
             return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'),
                                 content_type='application/xml')
     except:
-        if DEBUG == True:
-            print "Exception in user code:"
-            print '-' * 60
-            traceback.print_exc(file=sys.stdout)
-            print '-' * 60
+        __debug_print_stacktrace()
         logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
 
@@ -963,7 +850,7 @@ def ajaxGetResults(request):
                     else:
                         iteration_ = int(request.POST['iteration'])
                         try:
-                            templateData = __generateSessionIterationResult__(request_, session_, iteration_)
+                            templateData = __generateSessionIterationResult(request_, session_, iteration_)
                             if templateData != None:
                                 template = None
                                 if type(templateData) == ResultRatingWeightTablesData:
@@ -988,11 +875,7 @@ def ajaxGetResults(request):
                             return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                             #return ajaxGenerateResultsData(request_, session_, iteration_)
     except:
-        if DEBUG == True:
-            print "Exception in user code:"
-            print '-' * 60
-            traceback.print_exc(file=sys.stdout)
-            print '-' * 60
+        __debug_print_stacktrace()
         logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
 
@@ -1028,7 +911,7 @@ def ajaxGetResponseResults(request):
                 else:
                     iteration_ = int(request.POST['iteration'])
                     try:
-                        templateData = __generateSessionIterationResult__(request_, session_, iteration_)
+                        templateData = __generateSessionIterationResult(request_, session_, iteration_)
                         if templateData != None:
                             template = None
                             if type(templateData) == ResultRatingWeightTablesData:
@@ -1053,11 +936,7 @@ def ajaxGetResponseResults(request):
                         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
                         #return ajaxGenerateResultsData(request_, session_, iteration_)
     except:
-        if DEBUG == True:
-            print "Exception in user code:"
-            print '-' * 60
-            traceback.print_exc(file=sys.stdout)
-            print '-' * 60
+        __debug_print_stacktrace()
         logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
 
@@ -1087,7 +966,7 @@ def ajaxDonwloandSessionResults(request):
                         raise Exception('User is  not a facilitator for session ' + request.POST['sessionUSID'])
                     else:
                         iteration_ = int(request.POST['iteration'])
-                        templateData = __generateSessionIterationResult__(request, session_, iteration_)
+                        templateData = __generateSessionIterationResult(request, session_, iteration_)
                         #check which type of response it is and convert the data so a svg can be created
                         responseGridRelation = session_.responsegrid_set.filter(iteration=iteration_)
                         if len(responseGridRelation) >= 1:
@@ -1114,8 +993,6 @@ def ajaxDonwloandSessionResults(request):
 
                                 #the header object is shared among all the 3 tables
                                 templateData.rangeData.headers.append('weight')
-                                #templateData.rangeData.headers.insert(0, '')
-                                #templateData.rangeData.headers.append('')
 
                                 #range
                                 rangeData.tableHeader = templateData.rangeData.headers
@@ -1225,12 +1102,8 @@ def ajaxDonwloandSessionResults(request):
 
                                 return createFileResponse(imgData)
     except:
-        if DEBUG == True:
-            print "Exception in user code:"
-            print '-' * 60
-            traceback.print_exc(file=sys.stdout)
-            print '-' * 60
-            #in case of an error or checks failing return an image error
+        __debug_print_stacktrace()
+    #in case of an error or checks failing return an image error
     errorImageData = getImageError()
     # send the file
     response = HttpResponse(errorImageData, content_type='image/jpg')
@@ -1253,7 +1126,7 @@ def ajaxGetParticipatingPage(request):
                 if len(facilitatorObj) >= 1 and sessionObj.facilitator == facilitatorObj[0]:
                     #get all the users that reponded to the request
                     templateData = ParticipantsData()
-                    templateData.participants = __createPaticipantPanelData__(sessionObj)
+                    templateData.participants = __createPaticipantPanelData(sessionObj)
                     template = loader.get_template('gridMng/participants.html')
                     context = RequestContext(request, {'data': templateData})
                     htmlData = template.render(context)
@@ -1268,11 +1141,7 @@ def ajaxGetParticipatingPage(request):
             return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'),
                                 content_type='application/xml')
     except:
-        if DEBUG == True:
-            print "Exception in user code:"
-            print '-' * 60
-            traceback.print_exc(file=sys.stdout)
-            print '-' * 60
+        __debug_print_stacktrace()
         logger.exception('Unknown error')
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
 
@@ -1309,11 +1178,7 @@ def ajaxGenerateSessionDendrogram(request):
                                                                                          error.start:error.end] + '" character can not be convert or used safely.\nDendogram can not be created.'
                             return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
                         except Exception:
-                            if DEBUG == True:
-                                print "Exception in user code:"
-                                print '-' * 60
-                                traceback.print_exc(file=sys.stdout)
-                                print '-' * 60
+                            __debug_print_stacktrace()
                             logger.exception('Unknown error')
                             return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'),
                                                 content_type='application/xml')
@@ -1325,11 +1190,7 @@ def ajaxGenerateSessionDendrogram(request):
             else:
                 return HttpResponse(createXmlErrorResponse('You are not a facilitator'), content_type='application/xml')
         except:
-            if DEBUG == True:
-                print "Exception in user code:"
-                print '-' * 60
-                traceback.print_exc(file=sys.stdout)
-                print '-' * 60
+            __debug_print_stacktrace()
     else:
         return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'),
                             content_type='application/xml')
@@ -1380,7 +1241,7 @@ def test(request):
     return render_to_response('gridMng/createGrid.html', {}, context_instance=RequestContext(request))
 
 
-def __calcutateMeans__(ratioMatrices=None):
+def __calcutateMeans(ratioMatrices=None):
     if ratioMatrices == None or ratioMatrices[0] == None or ratioMatrices[0][0] == None:
         return None
 
@@ -1418,7 +1279,7 @@ def __calcutateMeans__(ratioMatrices=None):
     return meanMatrix
 
 
-def __calculateRange__(ratioMatrices=None):
+def __calculateRange(ratioMatrices=None):
     if ratioMatrices == None or ratioMatrices[0] == None or ratioMatrices[0][0] == None:
         return None
 
@@ -1460,7 +1321,7 @@ def __calculateRange__(ratioMatrices=None):
     return rangeMatrix
 
 
-def __calculateStandardDeviation__(ratioMatrices=None, meanMatrix=None):
+def __calculateStandardDeviation(ratioMatrices=None, meanMatrix=None):
     if ratioMatrices == None or ratioMatrices[0] == None or ratioMatrices[0][0] == None or meanMatrix == None:
         return None
 
@@ -1501,7 +1362,7 @@ def __calculateStandardDeviation__(ratioMatrices=None, meanMatrix=None):
     return stdMatrix
 
 
-def __findMinMaxInMatrix__(matrix=None):
+def __findMinMaxInMatrix(matrix=None):
     if matrix == None or matrix[0] == None:
         return None
 
@@ -1533,7 +1394,7 @@ def __findMinMaxInMatrix__(matrix=None):
     return (minValue, maxValue)
 
 
-def __createJSforRatioWeightSessionResultsChart__(ratioMatrices=None, weightMatrices=None, participantNames=None):
+def __createJSforRatioWeightSessionResultsChart(ratioMatrices=None, weightMatrices=None, participantNames=None):
     if ratioMatrices == None or weightMatrices == None:
         return None
         #create the data for the javascript. format should be a string --> [[name,value], [name,value], ....., [name,value]].
@@ -1633,7 +1494,7 @@ def __createJSforRatioWeightSessionResultsChart__(ratioMatrices=None, weightMatr
 """
 
 
-def __generateAlternativeConcernResultTable__(data=[], sessionGridObj=None):
+def __generateAlternativeConcernResultTable(data=[], sessionGridObj=None):
     concernsResult = [] #obj that will be returned with the concerns as following: (leftconcern, right concern, nPair, nLeftConcern, nRightConcern, isNew)
     alternativeResult = [] #obj that will be returned with the alternative as following: (alternative, nTime, isNew)
     oldConcernsPair = []
@@ -1732,10 +1593,10 @@ def __createRangeTableColorMap__(globalMax, globalMin, rangeTable):
     #part of the old code (used with the old ajaxGetResults function)
     #maxRange= globalMax - globalMin
 
-    return __createColorMap__(100, globalMax, colorStart, colorEnd, rangeTable)
+    return __createColorMap(100, globalMax, colorStart, colorEnd, rangeTable)
 
 
-def __createStdTableColorMap__(globalMax, globalMin, stdTable):
+def __createStdTableColorMap(globalMax, globalMin, stdTable):
     #end color
     colorEnd = (255, 255, 255)
 
@@ -1747,10 +1608,10 @@ def __createStdTableColorMap__(globalMax, globalMin, stdTable):
     #maxStd= sqrt(((globalMax - mean)**2 + (globalMin - mean)**2)/2)
 
 
-    return __createColorMap__(100, globalMax, colorStart, colorEnd, stdTable)
+    return __createColorMap(100, globalMax, colorStart, colorEnd, stdTable)
 
 
-def __createColorMap__(colorStep, maxValue, startColor, endColor, table):
+def __createColorMap(colorStep, maxValue, startColor, endColor, table):
     #code from http://www.designchemical.com/blog/index.php/jquery/jquery-tutorial-create-a-flexible-data-heat-map/
     yr, yg, yb = startColor
     xr, xg, xb = endColor
@@ -1787,7 +1648,7 @@ def __createColorMap__(colorStep, maxValue, startColor, endColor, table):
     return colorMap
 
 #this function is used to create the data tha is used in the participants.html page
-def __createPaticipantPanelData__(sessionObj):
+def __createPaticipantPanelData(sessionObj):
     usersAndDateTimes = sessionObj.getUsersThatRespondedRequest()
     participantData = []
     for user in sessionObj.getParticipators():
@@ -1825,7 +1686,7 @@ def __createPaticipantPanelData__(sessionObj):
 """
 
 
-def __createPendingResponseData__(userObj=None):
+def __createPendingResponseData(userObj=None):
     table = None
 
     if userObj != None:
@@ -1846,7 +1707,7 @@ def __createPendingResponseData__(userObj=None):
     return table
 
 
-def __validateAltConResponse__(request):
+def __validateAltConResponse(request):
     #general validation
     if request.POST.has_key('nAlternatives') and request.POST.has_key('nConcerns'):
         nAlternatives = int(request.POST['nAlternatives'])
@@ -1859,7 +1720,6 @@ def __validateAltConResponse__(request):
             keyName = 'concern_' + str((i + 1)) + '_left'
             if request.POST.has_key(keyName):
                 if request.POST[keyName] == None or request.POST[keyName].strip() == '':
-                    #print 'Error concern ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"'
                     raise ValueError('One or more concerns are empty',
                                      'Error concern ' + keyName + ' has an invalid value: "' + request.POST[
                                          keyName] + '"')
@@ -1872,12 +1732,10 @@ def __validateAltConResponse__(request):
             keyName = 'concern_' + str((i + 1)) + '_right'
             if request.POST.has_key(keyName):
                 if request.POST[keyName] == None or request.POST[keyName].strip() == '':
-                    #print 'Error concern ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"'
                     raise ValueError('One or more concerns are empty',
                                      'Error concern ' + keyName + ' has an invalid value: "' + request.POST[
                                          keyName] + '"')
             else:
-                #print 'Error request is missing argument: ' + keyName
                 raise KeyError('Invalid request, request is missing argument(s)',
                                'Error request is missing argument: ' + keyName)
             i += 1;
@@ -1888,25 +1746,22 @@ def __validateAltConResponse__(request):
             keyName = 'alternative_' + str((i + 1)) + '_name'
             if request.POST.has_key(keyName):
                 if request.POST[keyName] == None or request.POST[keyName].strip() == '':
-                    #print 'Error alternative ' + keyName + ' has an invalid value: "' + request.POST[keyName] + '"'
                     raise ValueError('One or more alternatives are empty',
                                      'Error alternative ' + keyName + ' has an invalid value: "' + request.POST[
                                          keyName] + '"')
             else:
-                #print 'Error request is missing argument: ' + keyName
                 raise KeyError('Invalid request, request is missing argument(s)',
                                'Error request is missing argument: ' + keyName)
             i += 1
         return True
     else:
-        #print 'Error request is missing arguments: nAlternatives: ' + str(request.POST.has_key('nAlternatives')) + ' nConcerns: ' + str(request.POST.has_key('nConcerns'))
         raise KeyError('Invalid request, request is missing argument(s)',
                        'Error request is missing arguments: nAlternatives: ' + str(
                            request.POST.has_key('nAlternatives')) + ' nConcerns: ' + str(
                            request.POST.has_key('nConcerns')))
 
 
-def __isGridStateEqualSessionState__(sesssionState, gridObj):
+def __isGridStateEqualSessionState(sesssionState, gridObj):
     if sesssionState.name == SessionState.AC:
         if gridObj.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
             return True
@@ -1917,7 +1772,7 @@ def __isGridStateEqualSessionState__(sesssionState, gridObj):
 
 #This function will generate the data that is needed for the participatingSessionsContentGrids.html template
 #returns a dictionary that MAY contain the following keys:  previousResponseGrid, sessionGridTable, currentResponseGridTable
-def __generateParticipatingSessionsGridsData__(sessionObj, iteration_, responseGridRelation):
+def __generateParticipatingSessionsGridsData(sessionObj, iteration_, responseGridRelation):
     data = {}
     currentResponseGridRelation = responseGridRelation.filter(iteration=iteration_)
 
@@ -1930,7 +1785,7 @@ def __generateParticipatingSessionsGridsData__(sessionObj, iteration_, responseG
         previousResponseGrid = None
         if len(previousResponseGridRelation) >= 1:
             previousResponseGrid = previousResponseGridRelation[0].grid
-            if previousResponseGrid != None and __isGridStateEqualSessionState__(sessionObj.state,
+            if previousResponseGrid != None and __isGridStateEqualSessionState(sessionObj.state,
                                                                                  previousResponseGrid) and (
                         previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT or previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN):
                 #generate the data for the previous response grid
@@ -1946,7 +1801,7 @@ def __generateParticipatingSessionsGridsData__(sessionObj, iteration_, responseG
 
 # function saves session grid as user grid. This happens only when the facilitator click "end session" button
 # to make the creation of session possible from the session that previously completed
-def __saveSessionGridAsUserGrid__(request):
+def __saveSessionGridAsUserGrid(request):
     for key in request.REQUEST.keys():
         print 'key: ' + key + ' values: ' + request.REQUEST[key]
     print '------'
@@ -2002,11 +1857,7 @@ def __saveSessionGridAsUserGrid__(request):
     try:
         obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
     except:
-        if DEBUG == True:
-            print "Exception in user code:"
-            print '-' * 60
-            traceback.print_exc(file=sys.stdout)
-            print '-' * 60
+        __debug_print_stacktrace()
         return False
     nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues = obj
 
@@ -2025,7 +1876,7 @@ def __saveSessionGridAsUserGrid__(request):
 #this function will generate the data for the ResultRatingWeightTablesData or ResultAlternativeConcernTableData template data objects
 #this function also returns one of those objects depending on the type of requested the results will be based on.
 #if no results were found none is returned
-def __generateSessionIterationResult__(request, sessionObj, iterationObj):
+def __generateSessionIterationResult(request, sessionObj, iterationObj):
     if sessionObj.iteration < iterationObj:
         raise WrongSessionIteration('Session does not contain that iteration')
 
@@ -2040,26 +1891,17 @@ def __generateSessionIterationResult__(request, sessionObj, iterationObj):
                 sessionGrid = SessionGrid.objects.filter(session=sessionObj, iteration=iterationObj)
                 if len(sessionGrid) >= 1:
                     sessionGrid = sessionGrid[0].grid
-                    templateData.concerns, templateData.alternatives = __generateAlternativeConcernResultTable__(
+                    templateData.concerns, templateData.alternatives = __generateAlternativeConcernResultTable(
                         responseGridRelation, sessionGrid)
                 else:
-                    templateData.concerns, templateData.alternatives = __generateAlternativeConcernResultTable__(
+                    templateData.concerns, templateData.alternatives = __generateAlternativeConcernResultTable(
                         responseGridRelation)
                 if len(templateData.concerns) >= 1:
-                    #template= loader.get_template('gridMng/resultAlternativeConcernTable.html')
-                    #context= RequestContext(request, {'data': templateData})
-                    #htmlData= template.render(context)
                     return templateData
-                    #return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                 else:
                     return None
-                    #return HttpResponse(createXmlErrorResponse('No results found. This means that the participants did not provide any responses for this particular iteration.'), content_type='application/xml')
             except Exception as e:
-                if DEBUG == True:
-                    print "Exception in user code:"
-                    print '-' * 60
-                    traceback.print_exc(file=sys.stdout)
-                    print '-' * 60
+                __debug_print_stacktrace()
                 raise e
                 #return HttpResponse(createXmlErrorResponse('Unknown Error'), content_type='application/xml')
         elif gridType == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:
@@ -2131,12 +1973,12 @@ def __generateSessionIterationResult__(request, sessionObj, iterationObj):
 
             #calculate the rage, mean and std for the weight and ratio
             #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
-            meanRatioMatrix = __calcutateMeans__(ratioMatrices)
-            rangeRatioMatrix = __calculateRange__(ratioMatrices)
-            stdRatioMatrix = __calculateStandardDeviation__(ratioMatrices, meanRatioMatrix)
-            meanWeightMatrix = __calcutateMeans__(weightMatrices)
-            rangeWeightMatrix = __calculateRange__(weightMatrices)
-            stdWeightMatrix = __calculateStandardDeviation__(weightMatrices, meanWeightMatrix)
+            meanRatioMatrix = __calcutateMeans(ratioMatrices)
+            rangeRatioMatrix = __calculateRange(ratioMatrices)
+            stdRatioMatrix = __calculateStandardDeviation(ratioMatrices, meanRatioMatrix)
+            meanWeightMatrix = __calcutateMeans(weightMatrices)
+            rangeWeightMatrix = __calculateRange(weightMatrices)
+            stdWeightMatrix = __calculateStandardDeviation(weightMatrices, meanWeightMatrix)
             #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
 
             #first lets create the header
@@ -2149,16 +1991,16 @@ def __generateSessionIterationResult__(request, sessionObj, iterationObj):
             #generate color map
             #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
             #minMaxRangeRatio= __findMinMaxInMatrix__(rangeRatioMatrix)
-            minMaxRangeWeight = __findMinMaxInMatrix__(stdRatioMatrix)
+            minMaxRangeWeight = __findMinMaxInMatrix(stdRatioMatrix)
 
             #minMaxStdRatio= __findMinMaxInMatrix__(rangeWeightMatrix)
-            minMaxStdWeight = __findMinMaxInMatrix__(stdWeightMatrix)
+            minMaxStdWeight = __findMinMaxInMatrix(stdWeightMatrix)
 
             rangeRatioColorMap = __createRangeTableColorMap__(4, 0,
                                                               rangeRatioMatrix) # for as the max range is 1-5= 4 (as right now the user can only use the numbers between 1 and 5)
             rangeWeightColorMap = __createRangeTableColorMap__(minMaxRangeWeight[1], 0, rangeWeightMatrix[0])
-            stdRatioColorMap = __createStdTableColorMap__(4, 0, stdRatioMatrix)
-            stdWeightColorMap = __createStdTableColorMap__(minMaxStdWeight[1], 0, stdWeightMatrix[0])
+            stdRatioColorMap = __createStdTableColorMap(4, 0, stdRatioMatrix)
+            stdWeightColorMap = __createStdTableColorMap(minMaxStdWeight[1], 0, stdWeightMatrix[0])
             #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
 
 
@@ -2174,7 +2016,7 @@ def __generateSessionIterationResult__(request, sessionObj, iterationObj):
                     participantNames.append(responseGridRelation[i].user.first_name)
                 i += 1
             i = 0
-            ratioJsChartData, weightJsChartData = __createJSforRatioWeightSessionResultsChart__(ratioMatrices,
+            ratioJsChartData, weightJsChartData = __createJSforRatioWeightSessionResultsChart(ratioMatrices,
                                                                                                 weightMatrices,
                                                                                                 participantNames)
 
@@ -2256,15 +2098,19 @@ def __generateSessionIterationResult__(request, sessionObj, iterationObj):
             templateData.meanData = meanData
             templateData.stdData = stdData
 
-            #template= loader.get_template('gridMng/resultRatingWeightTables.html')
-            #context= RequestContext(request, {'data': templateData})
-            #htmlData= template.render(context)
             return templateData
-            #return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
         else:
             raise WrongGridType('Unexpected type grid found')
-            #return HttpResponse(createXmlErrorResponse('Unexpected type grid found'), content_type='application/xml')
     else:
         return None
-        #return HttpResponse(createXmlErrorResponse('No results found. This means that the participants of this session did not provide any responses for this particular iteration.'), content_type='application/xml')
 
+
+def __debug_print_stacktrace():
+    """
+    TODO: Switch to the default logging system
+    """
+    if DEBUG == True:
+        print "Exception in user code:"
+        print '-' * 60
+        traceback.print_exc(file=sys.stdout)
+        print '-' * 60
