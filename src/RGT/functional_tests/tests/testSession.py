@@ -2,7 +2,7 @@
 This file is used for the functional tests related to session operations,
 using the python selenium module. These will pass when you run:
     
-    manage.py test functional_tests.SessionTests
+    manage.py test RGT.functional_tests.tests.SessionTests
     
 This file also includes the base test for the session which includes general functions needed
 by the test cases.
@@ -185,9 +185,9 @@ class SessionTests(BaseSessionLiveTest):
         WebDriverWait(self.browser, 10).until(
             lambda x: self.browser.find_element_by_css_selector("input[value='Finish Request']"))
 
-        # The iteration status shows 'A/C'
+        # The iteration status shows 'Alternatives / Concerns'
         current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
-        self.assertIn("A/C", current_iteration_status.text)
+        self.assertIn("Alternatives / Concerns", current_iteration_status.text)
 
         # Facilitator admin logs out
         logout_link = self.browser.find_element_by_link_text("Log out")
@@ -227,7 +227,7 @@ class SessionTests(BaseSessionLiveTest):
         refresh_button = self.browser.find_element_by_id("participatingSessionsRefreshImage")
         refresh_button.click()
 
-        time.sleep(10)
+        time.sleep(2)
 
         # The number of participants shows 1/2 which means that one out of 2 participants responded
         # and the response status says Response was sent
@@ -416,9 +416,9 @@ class SessionTests(BaseSessionLiveTest):
         WebDriverWait(self.browser, 10).until(
             lambda x: self.browser.find_element_by_css_selector("input[value='Finish Request']"))
 
-        # The iteration status shows 'R/W'
+        # The iteration status shows 'Ratings / Weights'
         current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
-        self.assertIn("R/W", current_iteration_status.text)
+        self.assertIn("Ratings / Weights", current_iteration_status.text)
 
         # Facilitator clicks the show dendrogram button and gets the dendrogram
         show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show Dendrogram']")
@@ -546,8 +546,6 @@ class SessionTests(BaseSessionLiveTest):
         # Wait until the status change to Closed
         WebDriverWait(self.browser, 10).until(
             lambda x: self.browser.find_element_by_id("currentIterationStatus").text == "Closed")
-
-        time.sleep(1)
 
         # Facilitator admin logs out
         logout_link = self.browser.find_element_by_link_text("Log out")

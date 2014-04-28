@@ -2,7 +2,7 @@
 This file is used for the functional tests related to grid operations,
 using the python selenium module. These will pass when you run:
 
-    manage.py test functional_tests.GridTests
+    manage.py test RGT.functional_tests.tests.GridTests
 
 This file also includes the base test for the grids which includes general functions needed
 by the test cases.

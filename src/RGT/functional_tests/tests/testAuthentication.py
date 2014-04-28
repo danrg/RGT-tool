@@ -1,6 +1,8 @@
 """
 This file is used for the functional tests related to authentication operations,
-using the python selenium module. These will pass when you run "manage.py test functional_tests.AuthenticationTests".
+using the python selenium module. These will pass when you run
+
+    manage.py test RGT.functional_tests.tests.AuthenticationTests
 
 Test Classes Used:
     - Register Test

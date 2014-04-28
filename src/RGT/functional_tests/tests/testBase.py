@@ -11,6 +11,7 @@ from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+from xvfbwrapper import Xvfb
 from RGT.settings import TEST_IN_BACKGROUND
 import time
 
@@ -18,13 +19,16 @@ import time
 class BaseLiveTest(LiveServerTestCase):
     @classmethod
     def setUp(self):
-        self.browser = webdriver.Chrome()
         if TEST_IN_BACKGROUND:
-            self.browser.set_window_position(10000, 10000)
+            self.xvfb = Xvfb(width=1280, height=720)
+            self.xvfb.start()
+        self.browser = webdriver.Chrome()
 
     @classmethod
     def tearDown(self):
         self.browser.quit()
+        if TEST_IN_BACKGROUND:
+            self.xvfb.stop()
 
     # This function performs an implicit test that the user can login. This is used in the base
     # test class, as the login operation is required in the majority of the test cases.

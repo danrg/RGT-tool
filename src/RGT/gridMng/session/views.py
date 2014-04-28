@@ -141,13 +141,13 @@ def ajaxGetMySessionContentPage(request):
                         gridTemplateData.showRatingWhileFalseChangeRatingsWeights = True
 
                     elif sessionObj.state.name == SessionState.AC:
-                        templateData.state = 'A/C'
+                        templateData.state = 'Alternatives / Concerns'
                         templateData.hasSessionStarted = True
                         templateData.showFinishButton = True
                         gridTemplateData.showRatingWhileFalseChangeRatingsWeights = True
 
                     elif sessionObj.state.name == SessionState.RW:
-                        templateData.state = 'R/W'
+                        templateData.state = 'Ratings / Weights'
                         templateData.hasSessionStarted = True
                         templateData.showFinishButton = True
                         gridTemplateData.showRatingWhileFalseChangeRatingsWeights = True
@@ -227,7 +227,6 @@ def ajaxCreateSession(request):
             try:
                 # now lets create a new session with a copy of the current grid
                 facilitator1 = Facilitator.objects.isFacilitator(user1)
-                print facilitator1
                 #create the facilitator if it doesn't exist in the facilitator table
                 if not facilitator1:
                     facilitator1 = Facilitator.objects.create(user=user1)
@@ -1724,7 +1723,6 @@ def __validateAltConResponse(request):
                                      'Error concern ' + keyName + ' has an invalid value: "' + request.POST[
                                          keyName] + '"')
             else:
-                #print 'Error request is missing argument: ' + keyName
                 raise KeyError('Invalid request, request is missing argument(s)',
                                'Error request is missing argument: ' + keyName)
 
@@ -1802,10 +1800,6 @@ def __generateParticipatingSessionsGridsData(sessionObj, iteration_, responseGri
 # function saves session grid as user grid. This happens only when the facilitator click "end session" button
 # to make the creation of session possible from the session that previously completed
 def __saveSessionGridAsUserGrid(request):
-    for key in request.REQUEST.keys():
-        print 'key: ' + key + ' values: ' + request.REQUEST[key]
-    print '------'
-
     user1 = request.user
     gridObj = None
     isConcernAlternativeResponseGrid = False
