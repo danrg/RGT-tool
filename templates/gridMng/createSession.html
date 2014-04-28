@@ -32,7 +32,8 @@
 <p>Follow these four easy steps to create a new session.</p>
 <div id="createSessionBody">
     <div class="formelms">
-        <h3>Step 1: Select a grid</h3>
+        <h3>Step 1: Create or select a grid</h3>
+        <p>Create a new grid <a href="{% url 'grid_in_place' %}">in place</a> or via the <a href="{% url 'grid_wizard' %}">wizard</a>.</p><br />
         <label for="gridSessionSelection">Select grid name:</label>
         <select id="gridSessionSelection" onchange="showGridSessionSelection()">
             {% if data.grids %}
