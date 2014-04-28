@@ -280,7 +280,7 @@
         "model": "auth.user",
         "fields": {
             "username": "admin@admin.com",
-            "first_name": "admin",
+            "first_name": "Admin",
             "last_name": "Istrator",
             "is_active": true,
             "is_superuser": true,
@@ -298,8 +298,8 @@
         "model": "auth.user",
         "fields": {
             "username": "user1@example.com",
-            "first_name": "user1",
-            "last_name": "participant",
+            "first_name": "User1",
+            "last_name": "Participant",
             "is_active": true,
             "is_superuser": false,
             "is_staff": false,
@@ -316,8 +316,8 @@
         "model": "auth.user",
         "fields": {
             "username": "user2@example.com",
-            "first_name": "user2",
-            "last_name": "participant",
+            "first_name": "User2",
+            "last_name": "Participant",
             "is_active": true,
             "is_superuser": false,
             "is_staff": false,

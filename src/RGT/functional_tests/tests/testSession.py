@@ -153,10 +153,10 @@ class SessionTests(BaseSessionLiveTest):
         # Facilitator admin logs in and selects the session with name session1
         self.facilitator_can_select_session("admin@admin.com", "123", "session1")
 
-        # Participants panel shows two users with names user1 and user2
+        # Participants panel shows two users with names User1 and User2
         participants_in_panel = self.browser.find_elements_by_class_name("respondedRequest")
-        self.assertEqual(participants_in_panel[0].text, "user1")
-        self.assertEqual(participants_in_panel[1].text, "user2")
+        self.assertEqual(participants_in_panel[0].text, "User1 Participant")
+        self.assertEqual(participants_in_panel[1].text, "User2 Participant")
 
         # Facilitator admin clicks the start session button
         start_session_button = self.browser.find_element_by_css_selector("input[value='Start Session']")
@@ -197,7 +197,7 @@ class SessionTests(BaseSessionLiveTest):
 
         # Participant user1 logs in, goes to participating session
         # page and selects the session session1 of admin
-        self.participant_can_select_session("user1@example.com", "123", "admin:session1", False)
+        self.participant_can_select_session("user1@example.com", "123", "Admin Istrator: session1", False)
 
         # The number of participants shows 0/2 which means that none participant responded yet
         session_details_body = self.browser.find_element_by_id("sessionDetails")
@@ -241,7 +241,7 @@ class SessionTests(BaseSessionLiveTest):
 
         # Participant user2 logs in, goes to participating session
         # page and selects the session session1 of user admin
-        self.participant_can_select_session("user2@example.com", "123", "admin:session1", False)
+        self.participant_can_select_session("user2@example.com", "123", "Admin Istrator: session1", False)
 
         # The number of participants shows 1/2 which means that one out of 2 participants responded
         session_details_body = self.browser.find_element_by_id("sessionDetails")
@@ -437,7 +437,7 @@ class SessionTests(BaseSessionLiveTest):
 
         # Participant with the name user1 logs in, goes to participating session
         # page and selects the session session1 of user admin
-        self.participant_can_select_session("user1@example.com", "123", "admin:session1", False)
+        self.participant_can_select_session("user1@example.com", "123", "Admin Istrator: session1", False)
 
         # Participant user1 types some values for the ratings
         #self.fill_empty_ratings(True)
@@ -454,7 +454,7 @@ class SessionTests(BaseSessionLiveTest):
 
         # Participant with the name user2 logs in, goes to participating session
         # page and selects the session session1 of user admin
-        self.participant_can_select_session("user2@example.com", "123", "admin:session1", False)
+        self.participant_can_select_session("user2@example.com", "123", "Admin Istrator: session1", False)
 
         # Participant user2 types some values for the ratings
         #self.fill_empty_ratings(True)
@@ -590,7 +590,7 @@ class SessionTests(BaseSessionLiveTest):
 
         # Participant with the name user1 logs in, goes to participating session
         # page and selects the session session1 of user admin
-        self.participant_can_select_session("user1@example.com", "123", "admin:session1", False)
+        self.participant_can_select_session("user1@example.com", "123", "Admin Istrator: session1", False)
 
         show_participant_respond_from_iterations_options = self.browser.find_elements_by_xpath(
             "//select[@id='responseSelection']/option")
@@ -717,8 +717,8 @@ class ParticipantSessionTests(BaseSessionLiveTest):
         # Wait for a success message to appear in dialog box
         self.wait_for_dialog_box_with_message('You have been added as participant in session: "session2".')
 
-        # The participating session with name admin:session2 appears in the select tag
+        # The participating session with name Admin Istrator: session2 appears in the select tag
         select_field = self.browser.find_element_by_css_selector("select")
-        self.assertIn('admin:session2', select_field.text)
+        self.assertIn('Admin Istrator: session2', select_field.text)
 
         time.sleep(1)

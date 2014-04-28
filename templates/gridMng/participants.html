@@ -6,7 +6,7 @@
 	</thead>
 	{% for participant, class, dateTime in data.participants %}
 	<tr>
-		<td class="{{class}}">{{ participant.first_name }} {% if dateTime %}responded at: {% localtime on %}{{ dateTime|date:"Y-m-d H:i:s" }}{% endlocaltime %}{% endif %}</td>
+		<td class="{{class}}">{{ participant.get_full_name }} {% if dateTime %}responded at: {% localtime on %}{{ dateTime|date:"Y-m-d H:i:s" }}{% endlocaltime %}{% endif %}</td>
     </tr>
     {% endfor %}
 </table>

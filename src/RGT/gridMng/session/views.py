@@ -107,7 +107,7 @@ def ajaxGetMySessionContentPage(request):
                 if facilitator:
                     sessionObj = Session.objects.get(usid=request.POST['sessionUSID'], facilitator=facilitator)
                     templateData = MySessionsContentData()
-                    templateData.participantTableData = ParticipantsData(__createPaticipantPanelData(sessionObj))
+                    templateData.participantTableData = ParticipantsData(__createParticipantPanelData(sessionObj))
                     iteration = sessionObj.iteration
                     sessionGrid = sessionObj.sessiongrid_set.all()[iteration].grid
                     gridTemplateData = GridTableData(generateGridTable(sessionGrid))
@@ -282,19 +282,19 @@ def getParticipatingSessionsPage(request):
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
     sessions = []
-    templateDate = ParticipatingSessionsData()
-    for userParticipateSession in request.user.userparticipatesession_set.all():
-        sessions.append((userParticipateSession.session.usid,
-                         userParticipateSession.session.facilitator.user.first_name + ':' + userParticipateSession.session.name))
+    templateData = ParticipatingSessionsData()
+    for participation in request.user.userparticipatesession_set.all():
+        session = participation.session
+        sessions.append((session.usid, session.get_descriptive_name()))
     if len(sessions) > 0:
-        templateDate.hasSessions = True
+        templateData.hasSessions = True
 
-    templateDate.sessions = sessions
+    templateData.sessions = sessions
     pendingResponses = PedingResponsesData()
     pendingResponses.pedingResponsesTable = __createPendingResponseData(request.user)
-    templateDate.pendingResponses = pendingResponses
+    templateData.pendingResponses = pendingResponses
 
-    context = RequestContext(request, {'data': templateDate})
+    context = RequestContext(request, {'data': templateData})
     return render(request, 'gridMng/participatingSessions.html', context)
 
 
@@ -305,7 +305,7 @@ def ajaxJoinSession(request):
     invitationKey1 = None
     error = None
     if request.POST.has_key('invitationKey'):
-        invitationKey1 = request.POST['invitationKey']
+        invitationKey1 = request.POST['invitationKey'].strip()
     else:
         error = 'no invitation key was received'
     if not error:
@@ -314,7 +314,7 @@ def ajaxJoinSession(request):
             if len(session) > 0:
                 session[0].addParticipant(user1)
                 data = {};
-                data[session[0].usid] = session[0].facilitator.user.first_name + ':' + session[0].name
+                data[session[0].usid] = session[0].get_descriptive_name()
                 return HttpResponse(createXmlSuccessResponse(
                     'You have been added as participant in session: "' + session[0].name + '".',
                     createXmlForComboBox(data)), content_type='application/xml')
@@ -1125,7 +1125,7 @@ def ajaxGetParticipatingPage(request):
                 if len(facilitatorObj) >= 1 and sessionObj.facilitator == facilitatorObj[0]:
                     #get all the users that reponded to the request
                     templateData = ParticipantsData()
-                    templateData.participants = __createPaticipantPanelData(sessionObj)
+                    templateData.participants = __createParticipantPanelData(sessionObj)
                     template = loader.get_template('gridMng/participants.html')
                     context = RequestContext(request, {'data': templateData})
                     htmlData = template.render(context)
@@ -1647,7 +1647,7 @@ def __createColorMap(colorStep, maxValue, startColor, endColor, table):
     return colorMap
 
 #this function is used to create the data tha is used in the participants.html page
-def __createPaticipantPanelData(sessionObj):
+def __createParticipantPanelData(sessionObj):
     usersAndDateTimes = sessionObj.getUsersThatRespondedRequest()
     participantData = []
     for user in sessionObj.getParticipators():

@@ -163,7 +163,7 @@ class State(models.Model):
         ordering = ['id']
 
 #manager for facilitator
-class FaciliatatorManager(models.Manager):
+class FacilitatorManager(models.Manager):
     def isFacilitator(self, userObj):
         facilitator1 = None
         try:
@@ -178,7 +178,7 @@ class FaciliatatorManager(models.Manager):
 #model for facilitator
 class Facilitator(models.Model):
     user = models.ForeignKey(User, unique=True)
-    objects = FaciliatatorManager()
+    objects = FacilitatorManager()
 
     class Meta:
         ordering = ['id']
@@ -198,7 +198,7 @@ class Session(models.Model):
         ordering = ['id']
 
     def getParticipators(self):
-        participators = self.userparticipatesession_set.all() #UserParticipateSession.objects.filter(session= self.id)
+        participators = self.userparticipatesession_set.all()
         users = []
         for participator in participators:
             users.append(participator.user)
@@ -228,7 +228,7 @@ class Session(models.Model):
                 if state.name == SessionState.CHECK:
                     self.state = state
                     #now lets change the iteration
-                    self.__changeIteration__()
+                    self.__changeIteration()
                     self.save()
                 else:
                     raise WrongState(
@@ -247,7 +247,7 @@ class Session(models.Model):
                 if state.name == SessionState.CHECK:
                     self.state = state
                     #now lets change the iteration
-                    self.__changeIteration__()
+                    self.__changeIteration()
                     self.save()
                 else:
                     raise WrongState(
@@ -259,7 +259,7 @@ class Session(models.Model):
                 if state.name == SessionState.CHECK:
                     self.state = state
                     #now lets change the iteration
-                    self.__changeIteration__()
+                    self.__changeIteration()
                     self.save()
                 else:
                     raise WrongState(
@@ -281,8 +281,10 @@ class Session(models.Model):
             respondedUsers.append({'user': relation.user, 'dateTime': relation.grid.dateTime})
         return respondedUsers
 
+    def get_descriptive_name(self):
+        return '%s: %s' % (self.facilitator.user.get_full_name(), self.name)
 
-    def __changeIteration__(self):
+    def __changeIteration(self):
         sessionGrid1 = SessionGrid.objects.filter(session=self, iteration=self.iteration)
         sessionGrid1 = sessionGrid1[0].grid
         newSessionGrid = Grid.objects.duplicateGrid(sessionGrid1)
