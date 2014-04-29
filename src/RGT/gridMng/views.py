@@ -22,7 +22,7 @@ from RGT.gridMng.template.gridTableData import GridTableData
 from RGT.gridMng.template.createMyGridBaseData import CreateMyGridBaseData
 from RGT.gridMng.template.createMyGridData import CreateMyGridData
 from django.db import IntegrityError
-from RGT.gridMng.error.unablaToCreateUSID import UnablaToCreateUSID
+from RGT.gridMng.error.unableToCreateUSID import UnablaToCreateUSID
 
 from RGT.gridMng.utility import generateGridTable, createDendogram, createFileResponse
 from RGT.gridMng.hierarchical import transpose

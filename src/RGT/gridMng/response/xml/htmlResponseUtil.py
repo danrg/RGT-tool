@@ -1,4 +1,11 @@
 from xml.dom.minidom import getDOMImplementation
+from django.http import HttpResponse
+
+
+class HttpErrorResponse(HttpResponse):
+    def __init__(self, error_message):
+        response = createXmlErrorResponse(error_message)
+        HttpResponse.__init__(self, response, content_type='application/xml')
 
 
 def createXmlSuccessResponse(htmlData, extraData=None):
@@ -31,6 +38,7 @@ def createXmlErrorResponse(errorData):
     topElement.appendChild(errorNode)
     return doc.toxml('utf-8')
 
+
 #data is a dictionary, key would be the the 'value' used in the comboBox and the value would be the displaying element in the comboBox
 def createXmlForComboBox(data):
     impl = getDOMImplementation()
@@ -46,6 +54,7 @@ def createXmlForComboBox(data):
         elementNode.appendChild(displayNode)
         topElement.appendChild(elementNode)
     return topElement
+
 
 # Create a dateTime tag that is returned to participant (along with the XmlSuccessResponse),
 # in order to show the time that he sent the response.

@@ -1,7 +1,13 @@
-from django.shortcuts import render_to_response, render, redirect
+from math import sqrt, ceil
+import uuid
+import logging
+from datetime import datetime
+
+from django.shortcuts import render
 from django.template import RequestContext
 from django.template import loader
-from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+
 from RGT.gridMng.models import Grid
 from RGT.gridMng.models import Ratings
 from RGT.gridMng.models import Facilitator
@@ -17,12 +23,11 @@ from RGT.gridMng.error.wrongState import WrongState
 from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
 from RGT.gridMng.error.wrongGridType import WrongGridType
 from RGT.gridMng.error.wrongSessionIteration import WrongSessionIteration
-from RGT.gridMng.utility import randomStringGenerator, validateName, SessionResultImageConvertionData, convertRatingWeightSessionResultToSvg, createFileResponse, convertAlternativeConcernSessionResultToSvg
-from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createXmlForComboBox, createDateTimeTag
+from RGT.gridMng.utility import *
+from RGT.gridMng.response.xml.htmlResponseUtil import *
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode, createXmlNumberOfResponseNode
 from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid__
-from math import sqrt, ceil
 from RGT.gridMng.template.session.createSessionData import CreateSessionData
 from RGT.gridMng.template.session.mySessionsData import MySessionsData
 from RGT.gridMng.template.session.mySessionsContentData import MySessionsContentData
@@ -34,30 +39,21 @@ from RGT.gridMng.template.session.resultRatingWeightTableData import ResultRatin
 from RGT.gridMng.template.session.resultRatingWeightTablesData import ResultRatingWeightTablesData
 from RGT.gridMng.template.session.participantsData import ParticipantsData
 from RGT.gridMng.template.gridTableData import GridTableData
-from RGT.gridMng.template.session.pedingResponsesData import PedingResponsesData
+from RGT.gridMng.template.session.pendingResponsesData import PendingResponsesData
 from RGT.gridMng.fileData import FileData
 from RGT.gridMng.utility import generateGridTable, createDendogram, getImageError
 from RGT.settings import SESSION_USID_KEY_LENGTH, DEBUG
 
-import uuid
-import sys
-import traceback
-import logging
-from types import StringType
-from datetime import datetime
 
 logger = logging.getLogger('django.request')
 
-"""
+
+@login_required
+def ajaxGetCreateSessionPage(request):
+    """
     This function is used to send back the page that the user sees when he
     press the button to create a new session.
-"""
-
-
-def ajaxGetCreateSessionPage(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
-
+    """
     user1 = request.user
     gridtype = Grid.GridType.USER_GRID
     grids = Grid.objects.filter(user=user1, grid_type=gridtype)
@@ -72,10 +68,8 @@ def ajaxGetCreateSessionPage(request):
     return render(request, 'gridMng/createSession.html', context_instance=context);
 
 
+@login_required
 def getMySessionsPage(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
-
     try:
         facilitator = Facilitator.objects.isFacilitator(request.user)
         if facilitator:
@@ -96,9 +90,8 @@ def getMySessionsPage(request):
     return render(request, 'gridMng/mySessions.html', context_instance=context)
 
 
+@login_required
 def ajaxGetMySessionContentPage(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
     sessionObj = None
     try:
         if request.POST.has_key('sessionUSID'):
@@ -117,7 +110,7 @@ def ajaxGetMySessionContentPage(request):
                     iterationValueType = {}
                     iterationTypes = SessionIterationState.objects.filter(session=sessionObj)
 
-                    for i in range(0, iteration): # Last iteration not included, because it doesn't produce results
+                    for i in range(0, iteration):  # Last iteration not included, because it doesn't produce results
                         if i == 0:
                             iterationValueType[i] = {'': '', '': ''}
                         else:
@@ -172,23 +165,19 @@ def ajaxGetMySessionContentPage(request):
                     htmlData = template.render(context)
                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                 else:
-                    return HttpResponse(createXmlErrorResponse('You are not the facilitator for this session'),
-                                        content_type='application/xml')
+                    return HttpErrorResponse('You are not the facilitator for this session')
             except:
                 logger.exception("Exception in user code")
-                return HttpResponse(createXmlErrorResponse('No session found'), content_type='application/xml')
+                return HttpErrorResponse('No session found')
         else:
-            return HttpResponse(createXmlErrorResponse('No session id found in the request'),
-                                content_type='application/xml')
+            return HttpErrorResponse('No session id found in the request')
     except:
         logger.exception('Unknown error')
-        return HttpResponse(createXmlErrorResponse('unknown error'), content_type='application/xml')
+        return HttpErrorResponse('Unknown error')
 
 
+@login_required
 def ajaxCreateSession(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
-
     if request.method == 'POST':
         user1 = request.user
         gridUSID = request.POST['gridUSID']
@@ -199,7 +188,7 @@ def ajaxCreateSession(request):
         facilitator1 = None
         newSession = None
         showResults = False
-        sessionGridName = 'untitled' #default name
+        sessionGridName = 'untitled'  #default name
         try:
             gridObj = Grid.objects.get(user=user1, usid=gridUSID)
             if request.POST.has_key('sessionName'):
@@ -247,23 +236,23 @@ def ajaxCreateSession(request):
                             except:
                                 newSession.delete()
                                 hasError = True
-                                errorMsg = 'unable to relate the grid with the session'
+                                errorMsg = 'Unable to relate the grid with the session'
                                 __debug_print_stacktrace()
                     except:
                         try:
                             newSession.delete()
                         except:
-                            print 'Could\'t delete the session'
+                            print 'Couldn\'t delete the session'
                         hasError = True
-                        errorMsg = 'unable to copy the grid to the session'
+                        errorMsg = 'Unable to copy the grid to the session'
                         __debug_print_stacktrace()
                 except:
                     hasError = True
-                    errorMsg = 'unable to create the session'
+                    errorMsg = 'Unable to create the session'
                     __debug_print_stacktrace()
             except:
                 hasError = True
-                errorMsg = 'unable to create or set the facilitator for the session'
+                errorMsg = 'Unable to create or set the facilitator for the session'
                 __debug_print_stacktrace()
         if hasError:
             try:
@@ -273,14 +262,13 @@ def ajaxCreateSession(request):
             except:
                 #do nothing
                 __debug_print_stacktrace()
-            return HttpResponse(createXmlErrorResponse(errorMsg), content_type='application/xml')
-        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+            return HttpErrorResponse(errorMsg)
+        return HttpErrorResponse('Unknown error')
     return ajaxGetCreateSessionPage(request)
 
 
+@login_required
 def getParticipatingSessionsPage(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
     sessions = []
     templateData = ParticipatingSessionsData()
     for participation in request.user.userparticipatesession_set.all():
@@ -290,7 +278,7 @@ def getParticipatingSessionsPage(request):
         templateData.hasSessions = True
 
     templateData.sessions = sessions
-    pendingResponses = PedingResponsesData()
+    pendingResponses = PendingResponsesData()
     pendingResponses.pedingResponsesTable = __createPendingResponseData(request.user)
     templateData.pendingResponses = pendingResponses
 
@@ -298,9 +286,8 @@ def getParticipatingSessionsPage(request):
     return render(request, 'gridMng/participatingSessions.html', context)
 
 
+@login_required
 def ajaxJoinSession(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
     user1 = request.user
     invitationKey1 = None
     error = None
@@ -319,28 +306,24 @@ def ajaxJoinSession(request):
                     'You have been added as participant in session: "' + session[0].name + '".',
                     createXmlForComboBox(data)), content_type='application/xml')
             else:
-                return HttpResponse(createXmlErrorResponse('Session does not exist'), content_type='application/xml')
+                return HttpErrorResponse('Session does not exist')
         except UserAlreadyParticipating:
-            return HttpResponse(createXmlErrorResponse('You are already participating in the session'),
-                                content_type='application/xml')
+            return HttpErrorResponse('You are already participating in the session')
         except WrongState:
-            return HttpResponse(createXmlErrorResponse('Can\'t join session as it is passed \'initial\' state'),
-                                content_type='application/xml')
+            return HttpErrorResponse('Can\'t join session as it is passed \'initial\' state')
         except UserIsFacilitator:
-            return HttpResponse(createXmlErrorResponse(
-                'You are the facilitator of the session, facilitators can\'t be added as participants'),
-                                content_type='application/xml')
+            return HttpErrorResponse(
+                'You are the facilitator of the session and can\'t be added as participant as well'),
         except:
             __debug_print_stacktrace()
             logger.exception('Unknown error')
-            return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+            return HttpErrorResponse('Unknown error')
     else:
-        return HttpResponse(createXmlErrorResponse(error), content_type='application/xml')
+        return HttpErrorResponse(error)
 
 
+@login_required
 def ajaxChangeSessionState(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
     if request.POST.has_key('sessionUSID') and request.POST.has_key('newState'):
         facilitatorObj = request.user.facilitator_set.all()
         if len(facilitatorObj) >= 1:
@@ -362,31 +345,24 @@ def ajaxChangeSessionState(request):
                         session.changeState(stateObj)
                         return ajaxGetMySessionContentPage(request)
                     else:
-                        return HttpResponse(createXmlErrorResponse('Invalid state given in the request'),
-                                            content_type='application/xml')
+                        return HttpErrorResponse('Invalid state given in the request')
                 except WrongState:
                     __debug_print_stacktrace()
-                    return HttpResponse(createXmlErrorResponse('Can\'t change states, session is in the wrong state'),
-                                        content_type='application/xml')
+                    return HttpErrorResponse('Can\'t change states, session is in the wrong state')
                 except:
                     __debug_print_stacktrace()
                     logger.exception('Unknown error')
-                    return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+                    return HttpErrorResponse('Unknown error')
             else:
-                return HttpResponse(createXmlErrorResponse('Session not found'), content_type='application/xml')
+                return HttpErrorResponse('Session not found')
         else:
-            return HttpResponse(
-                createXmlErrorResponse('You are not a facilitator for the session, can\'t change states.'),
-                content_type='application/xml')
+            return HttpErrorResponse('You are not a facilitator for the session, can\'t change states.')
     else:
-        return HttpResponse(createXmlErrorResponse('Invalid request, request is missing arguments'),
-                            content_type='application/xml')
+        return HttpErrorResponse('Invalid request, request is missing arguments')
 
 
+@login_required
 def ajaxGetParticipatingSessionContentPage(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
-
     if request.method == 'POST':
         if request.POST.has_key('sessionUSID'):
             sessionID = Session.objects.get(usid=request.POST['sessionUSID'])
@@ -404,7 +380,7 @@ def ajaxGetParticipatingSessionContentPage(request):
                 #lets create a list of iteration that i have responded
                 responseGridRelations = ResponseGrid.objects.filter(session=sessionObj, user=request.user)
                 gridTablesData = __generateParticipatingSessionsGridsData(sessionObj, iteration,
-                                                                            responseGridRelations)
+                                                                          responseGridRelations)
                 if len(responseGridRelations) >= 1:
                     for responseGridRelation in responseGridRelations:
                         iterations.append(responseGridRelation.iteration)
@@ -518,21 +494,18 @@ def ajaxGetParticipatingSessionContentPage(request):
                             context = RequestContext(request, {'data': templateData})
                             htmlData = template.render(context)
                             return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-                    return HttpResponse(createXmlErrorResponse('Unable to identify current session state'),
-                                        content_type='application/xml')
+                    return HttpErrorResponse('Unable to identify current session state')
             else:
-                return HttpResponse(createXmlErrorResponse('You are not participating in the given session'),
-                                    content_type='application/xml')
+                return HttpErrorResponse('You are not participating in the given session')
         else:
-            return HttpResponse(createXmlErrorResponse('Invalid request, request is missing arguments'),
-                                content_type='application/xml')
+            return HttpErrorResponse('Invalid request, request is missing arguments')
     return getParticipatingSessionsPage(request)
 
-#this function will determine if we are creating a new response grid or updating an old one
+
+@login_required
 def ajaxRespond(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
-        #check inputs
+    """ This function will determine if we are creating a new response grid or updating an old one """
+
     userObj = request.user
     nConcerns = None
     nAlternatives = None
@@ -556,16 +529,13 @@ def ajaxRespond(request):
                     if sessionObj.state.name == State.objects.getWaitingForAltAndConState().name:
                         try:
                             __validateAltConResponse(request)
-                        except ValueError as error:
+                        except (ValueError, KeyError) as error:
                             __debug_print_stacktrace()
-                            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
-                        except KeyError as error:
-                            __debug_print_stacktrace()
-                            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+                            return HttpErrorResponse(error.args[0])
                         except:
                             __debug_print_stacktrace()
                             logger.exception('Unknown error')
-                            return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+                            return HttpErrorResponse('Unknown error')
                             #determine if it is a new response grid or not
                     if len(userResponseGridRelation) >= 1:
                         #this is an update
@@ -576,16 +546,13 @@ def ajaxRespond(request):
                         obj = None
                         try:
                             obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
-                        except KeyError as error:
+                        except (KeyError, ValueError) as error:
                             __debug_print_stacktrace()
-                            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
-                        except ValueError as error:
-                            __debug_print_stacktrace()
-                            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+                            return HttpErrorResponse(error.args[0])
                         except:
                             __debug_print_stacktrace()
                             logger.exception('Unknown error')
-                            return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+                            return HttpErrorResponse('Unknown error')
                         nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues = obj
 
                         if gridObj != None:
@@ -593,22 +560,16 @@ def ajaxRespond(request):
                                 try:
                                     str(alternativeValues[i])
                                 except:
-                                    return HttpResponse(
-                                        createXmlErrorResponse("Invalid alternative name : " + alternativeValues[i]),
-                                        content_type='application/xml')
+                                    return HttpErrorResponse("Invalid alternative name : " + alternativeValues[i])
                             for i in range(int(nConcerns)):
                                 try:
                                     str(concernValues[i][0])
                                 except:
-                                    return HttpResponse(
-                                        createXmlErrorResponse("Invalid left concern name : " + concernValues[i][0]),
-                                        content_type='application/xml')
+                                    return HttpErrorResponse("Invalid left concern name : " + concernValues[i][0])
                                 try:
                                     str(concernValues[i][1])
                                 except:
-                                    return HttpResponse(
-                                        createXmlErrorResponse("Invalid right concern name : " + concernValues[i][1]),
-                                        content_type='application/xml')
+                                    return HttpErrorResponse("Invalid right concern name : " + concernValues[i][1])
                             try:
                                 isGridCreated = updateGrid(gridObj, nConcerns, nAlternatives, concernValues,
                                                            alternativeValues, ratioValues,
@@ -619,10 +580,9 @@ def ajaxRespond(request):
                             except:
                                 __debug_print_stacktrace()
                                 logger.exception('Unknown error')
-                                return HttpResponse(createXmlErrorResponse('Unknown error'),
-                                                    content_type='application/xml')
+                                return HttpErrorResponse('Unknown error')
                         else:
-                            return HttpResponse(createXmlErrorResponse("No grid found"), content_type='application/xml')
+                            return HttpErrorResponse("No grid found")
                             #return ajaxUpdateGrid(request)
                     else:
                         #this is a new grid, which means first response
@@ -640,16 +600,13 @@ def ajaxRespond(request):
                         #validate and retrieve the data that is going to be used in the grid
                         try:
                             obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
-                        except KeyError as error:
+                        except (KeyError, ValueError) as error:
                             __debug_print_stacktrace()
-                            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
-                        except ValueError as error:
-                            __debug_print_stacktrace()
-                            return HttpResponse(createXmlErrorResponse(error.args[0]), content_type='application/xml')
+                            return HttpErrorResponse(error.args[0])
                         except:
                             __debug_print_stacktrace()
                             logger.exception('Unknown error')
-                            return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+                            return HttpErrorResponse('Unknown error')
 
                         nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues = obj
                         try:
@@ -681,27 +638,21 @@ def ajaxRespond(request):
                         except:
                             __debug_print_stacktrace()
                             logger.exception('Unknown error')
-                            return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+                            return HttpErrorResponse('Unknown error')
                 else:
-                    return HttpResponse(createXmlErrorResponse(
-                        'Can\'t create response grid, session is in a state where that is not permitted'),
-                                        content_type='application/xml')
-                    #return ajaxCreateGrid(request, createXmlNumberOfResponseNode(len(sessionObj.getUsersThatRespondedRequest()) + 1))
+                    return HttpErrorResponse(
+                        'Can\'t create response grid, session is in a state where that is not permitted')
             else:
-                return HttpResponse(
-                    createXmlErrorResponse('You are not participating in the session, can\'t send response grid'),
-                    content_type='application/xml')
+                return HttpErrorResponse('You are not participating in the session, can\'t send response grid')
         else:
-            return HttpResponse(createXmlErrorResponse('Session was not found'), content_type='application/xml')
+            return HttpErrorResponse('Session was not found')
     else:
-        return HttpResponse(createXmlErrorResponse('Invalid request, request is missing arguments'),
-                            content_type='application/xml')
+        return HttpErrorResponse('Invalid request, request is missing arguments')
+
 
 #this function only return the content grids!!
+@login_required
 def ajaxGetParticipatingSessionsContentGrids(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
-
     try:
         #check for the mandatory keys
         if request.POST.has_key('iteration') and request.POST.has_key('sessionUSID'):
@@ -715,11 +666,9 @@ def ajaxGetParticipatingSessionsContentGrids(request):
                 hasPreviousResponseRelationGrid = False
                 #check if the iteration is valid
                 if iteration_ > sessionObj.iteration or iteration_ < 0:
-                    return HttpResponse(createXmlErrorResponse('Invalid iteration value'),
-                                        content_type='application/xml')
-                gridTablesData = __generateParticipatingSessionsGridsData(sessionObj, iteration_,
-                                                                            ResponseGrid.objects.filter(
-                                                                                session=sessionObj, user=request.user))
+                    return HttpErrorResponse('Invalid iteration value')
+                response_grids = ResponseGrid.objects.filter(session=sessionObj, user=request.user)
+                gridTablesData = __generateParticipatingSessionsGridsData(sessionObj, iteration_, response_grids)
 
                 #there is always a session grid, so add it
                 templateData.sessionGridData = GridTableData(gridTablesData['sessionGridTable'])
@@ -805,47 +754,41 @@ def ajaxGetParticipatingSessionsContentGrids(request):
                                     '<div id="participatinSessionsMessageDiv"><p>Session is in a state where no grids are available</p></div>'),
                                                     content_type='application/xml')
                         else:
-                            return HttpResponse(createXmlErrorResponse(
-                                'No response found for the session in iteration ' + request.POST['iteration']))
+                            return HttpErrorResponse(
+                                'No response found for the session in iteration ' + request.POST['iteration'])
                 else:
-                    return HttpResponse(createXmlErrorResponse('You are not participating in the session'),
-                                        content_type='application/xml')
+                    return HttpErrorResponse('You are not participating in the session')
             else:
-                return HttpResponse(createXmlErrorResponse('Can\'t find session'), content_type='application/xml')
+                return HttpErrorResponse('Can\'t find session')
                 #sessionObj= request.user.userparticipatesession_set.filter()
         else:
-            return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'),
-                                content_type='application/xml')
+            return HttpErrorResponse('Invalid request, request is missing argument(s)')
     except:
         __debug_print_stacktrace()
         logger.exception('Unknown error')
-        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+        return HttpErrorResponse('Unknown error')
 
-# function is to get the session results for the facilitator for completed iterations
+
+@login_required
 def ajaxGetResults(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
+    """ Function is to get the session results for the facilitator for completed iterations """
     try:
         request_ = request
         if not (request.POST.has_key('sessionUSID') and request.POST.has_key('iteration')):
-            return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'),
-                                content_type='application/xml')
+            return HttpErrorResponse('Invalid request, request is missing argument(s)')
         else:
             facilitatorObj = None
             if len(request.user.facilitator_set.all()) < 1:
-                return HttpResponse(createXmlErrorResponse('You are not a facilitator for this session'),
-                                    content_type='application/xml')
+                return HttpErrorResponse('You are not a facilitator for this session')
             else:
                 facilitatorObj = request.user.facilitator_set.all()[0]
                 sessionObj = Session.objects.filter(usid=request.POST['sessionUSID'])
                 if len(sessionObj) < 1:
-                    return HttpResponse(createXmlErrorResponse('Couldn\'t find session'),
-                                        content_type='application/xml')
+                    return HttpErrorResponse('Couldn\'t find session')
                 else:
                     session_ = sessionObj[0]
                     if session_.facilitator != facilitatorObj:
-                        return HttpResponse(createXmlErrorResponse('You are not a facilitator for this session'),
-                                            content_type='application/xml')
+                        return HttpErrorResponse('You are not a facilitator for this session')
                     else:
                         iteration_ = int(request.POST['iteration'])
                         try:
@@ -860,53 +803,36 @@ def ajaxGetResults(request):
                                 htmlData = template.render(context)
                                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                             else:
-                                return HttpResponse(createXmlErrorResponse(
-                                    'No results found. This means that the participants of this session did not provide any responses for this particular iteration.'),
-                                                    content_type='application/xml')
+                                return HttpErrorResponse(
+                                    'No results found. This means that the participants of this session did not provide any responses for this particular iteration.')
                         except WrongGridType:
-                            return HttpResponse(createXmlErrorResponse('Unexpected type grid found'),
-                                                content_type='application/xml')
+                            return HttpErrorResponse('Unexpected type grid found')
                         except WrongSessionIteration:
-                            return HttpResponse(createXmlErrorResponse('Session does not contain that iteration'),
-                                                content_type='application/xml')
+                            return HttpErrorResponse('Session does not contain that iteration')
                         except:
                             logger.exception('Unknown error')
-                            return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
-                            #return ajaxGenerateResultsData(request_, session_, iteration_)
+                            return HttpErrorResponse('Unknown error')
     except:
         __debug_print_stacktrace()
         logger.exception('Unknown error')
-        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+        return HttpErrorResponse('Unknown error')
 
 
-"""
-    This function is used to return html code that is used to display the results of a sesssion to a 
-    participant if the facilitator has allowed participants to see session results.
-    
-    External arguments:
-        sessionUSID: string
-        iteration: int    
-"""
-
-
+@login_required
 def ajaxGetResponseResults(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
     try:
         request_ = request
         if not (request.POST.has_key('sessionUSID') and request.POST.has_key('iteration')):
-            return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'),
-                                content_type='application/xml')
+            return HttpErrorResponse('Invalid request, request is missing argument(s)')
         else:
             sessionObj = Session.objects.filter(usid=request.POST['sessionUSID'])
             if len(sessionObj) < 1:
-                return HttpResponse(createXmlErrorResponse('Couldn\'t find session'), content_type='application/xml')
+                return HttpErrorResponse('Couldn\'t find session')
             else:
                 session_ = sessionObj[0]
                 showResultsYes = True
                 if session_.showResult != showResultsYes:
-                    return HttpResponse(createXmlErrorResponse('Results are not available for the Participants'),
-                                        content_type='application/xml')
+                    return HttpErrorResponse('Results are not available for the Participants')
                 else:
                     iteration_ = int(request.POST['iteration'])
                     try:
@@ -921,35 +847,29 @@ def ajaxGetResponseResults(request):
                             htmlData = template.render(context)
                             return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                         else:
-                            return HttpResponse(createXmlErrorResponse(
-                                'No results found. This means that the participants of this session did not provide any responses for this particular iteration.'),
-                                                content_type='application/xml')
+                            return HttpErrorResponse(
+                                'No results found. This means that the participants of this session did not provide any responses for this particular iteration.')
                     except WrongGridType:
-                        return HttpResponse(createXmlErrorResponse('Unexpected type grid found'),
-                                            content_type='application/xml')
+                        return HttpErrorResponse('Unexpected type grid found')
                     except WrongSessionIteration:
-                        return HttpResponse(createXmlErrorResponse('Session does not contain that iteration'),
-                                            content_type='application/xml')
+                        return HttpErrorResponse('Session does not contain that iteration')
                     except:
                         logger.exception('Unknown error')
-                        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
-                        #return ajaxGenerateResultsData(request_, session_, iteration_)
+                        return HttpErrorResponse('Unknown error')
     except:
         __debug_print_stacktrace()
         logger.exception('Unknown error')
-        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+        return HttpErrorResponse('Unknown error')
 
-#download the results from a session in the form of an image
-def ajaxDonwloandSessionResults(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
 
+@login_required
+def ajaxDownloadSessionResults(request):
+    """ Download the results from a session in the form of an image """
     try:
-        if not request.POST.has_key('sessionUSID') or not request.POST.has_key('iteration'):
-            if not request.POST.has_key('sessionUSID'):
-                raise Exception('sessionUSID key was not received')
-            else:
-                raise Exception('iteration key was not received')
+        if not request.POST.has_key('sessionUSID'):
+            raise Exception('sessionUSID key was not received')
+        elif not request.POST.has_key('iteration'):
+            raise Exception('iteration key was not received')
         else:
             facilitatorObj = None
             if len(request.user.facilitator_set.all()) < 1:
@@ -962,7 +882,7 @@ def ajaxDonwloandSessionResults(request):
                 else:
                     session_ = sessionObj[0]
                     if session_.facilitator != facilitatorObj:
-                        raise Exception('User is  not a facilitator for session ' + request.POST['sessionUSID'])
+                        raise Exception('User is not a facilitator for session ' + request.POST['sessionUSID'])
                     else:
                         iteration_ = int(request.POST['iteration'])
                         templateData = __generateSessionIterationResult(request, session_, iteration_)
@@ -1109,10 +1029,10 @@ def ajaxDonwloandSessionResults(request):
     response['Content-Disposition'] = 'attachment; filename=error.jpg'
     return response
 
+
 #function that will get the page that display the participants of a session
+@login_required
 def ajaxGetParticipatingPage(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
     try:
         #check if the mandatory variables are present
         if request.POST.has_key('sessionUSID'):
@@ -1131,24 +1051,19 @@ def ajaxGetParticipatingPage(request):
                     htmlData = template.render(context)
                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                 else:
-                    return HttpResponse(
-                        createXmlErrorResponse('Can\'t complete request, you are not a facilitator for this session'),
-                        content_type='application/xml')
+                    return HttpErrorResponse('Can\'t complete request, you are not a facilitator for this session')
             else:
-                return HttpResponse(createXmlErrorResponse('Session does not exist'), content_type='application/xml')
+                return HttpErrorResponse('Session does not exist')
         else:
-            return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'),
-                                content_type='application/xml')
+            return HttpErrorResponse('Invalid request, request is missing argument(s)')
     except:
         __debug_print_stacktrace()
         logger.exception('Unknown error')
-        return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
+        return HttpErrorResponse('Unknown error')
 
 
+@login_required
 def ajaxGenerateSessionDendrogram(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
-
     #check if all the mandatory keys are present
     if request.POST.has_key('sessionUSID') and request.POST.has_key('iteration'):
         #check to see if the user is a facilitator
@@ -1175,30 +1090,25 @@ def ajaxGenerateSessionDendrogram(request):
                         except UnicodeEncodeError as error:
                             errorString = 'Invalid character found in the grid. The "' + error.object[
                                                                                          error.start:error.end] + '" character can not be convert or used safely.\nDendogram can not be created.'
-                            return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
+                            return HttpErrorResponse(errorString)
                         except Exception:
                             __debug_print_stacktrace()
                             logger.exception('Unknown error')
-                            return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'),
-                                                content_type='application/xml')
+                            return HttpErrorResponse('Unknown dendrogram error')
                     else:
-                        return HttpResponse(createXmlErrorResponse('No grid found for the selected iteration'),
-                                            content_type='application/xml')
+                        return HttpErrorResponse('No grid found for the selected iteration')
                 else:
-                    return HttpResponse(createXmlErrorResponse('Session was not found'), content_type='application/xml')
+                    return HttpErrorResponse('Session was not found')
             else:
-                return HttpResponse(createXmlErrorResponse('You are not a facilitator'), content_type='application/xml')
+                return HttpErrorResponse('You are not a facilitator')
         except:
             __debug_print_stacktrace()
     else:
-        return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'),
-                            content_type='application/xml')
+        return HttpErrorResponse('Invalid request, request is missing argument(s)')
 
 
+@login_required
 def ajaxGetSessionGrid(request):
-    if not request.user.is_authenticated():
-        return redirect('/auth/login/')
-
     #check if all the mandatory keys are present
     if request.POST.has_key('sessionUSID'):
         #check if the user is an facilitator
@@ -1226,21 +1136,16 @@ def ajaxGetSessionGrid(request):
                     htmlData = template.render(context)
                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                 else:
-                    return HttpResponse(createXmlErrorResponse('Grid not found'), content_type='application/xml')
+                    return HttpErrorResponse('Grid not found')
             else:
-                return HttpResponse(createXmlErrorResponse('Session was not found'), content_type='application/xml')
+                return HttpErrorResponse('Session was not found')
         else:
-            return HttpResponse(createXmlErrorResponse('You are not a facilitator'), content_type='application/xml')
+            return HttpErrorResponse('You are not a facilitator')
     else:
-        return HttpResponse(createXmlErrorResponse('Invalid request, request is missing argument(s)'),
-                            content_type='application/xml')
+        return HttpErrorResponse('Invalid request, request is missing argument(s)')
 
 
-def test(request):
-    return render_to_response('gridMng/createGrid.html', {}, context_instance=RequestContext(request))
-
-
-def __calcutateMeans(ratioMatrices=None):
+def __calculateMeans(ratioMatrices=None):
     if ratioMatrices == None or ratioMatrices[0] == None or ratioMatrices[0][0] == None:
         return None
 
@@ -1248,7 +1153,7 @@ def __calcutateMeans(ratioMatrices=None):
     nMatrixs = len(ratioMatrices)
     nCols = len(ratioMatrices[0][0])
     nRows = len(ratioMatrices[0])
-    nAvailableAnswers = 0 # used to see how many ratios are numbers in the same cell over multible ratio matrixes
+    nAvailableAnswers = 0  # used to see how many ratios are numbers in the same cell over multible ratio matrixes
     totalRatio = 0
     temp = None
     meanMatrix = []
@@ -1343,7 +1248,7 @@ def __calculateStandardDeviation(ratioMatrices=None, meanMatrix=None):
                 temp = ratioMatrices[k][i][j]
                 if temp != None:
                     temp -= tempMean
-                    temp = temp ** 2
+                    temp **= 2
                     total += temp
                     nAvailableAnswers += 1
                 k += 1
@@ -1397,8 +1302,8 @@ def __createJSforRatioWeightSessionResultsChart(ratioMatrices=None, weightMatric
     if ratioMatrices == None or weightMatrices == None:
         return None
         #create the data for the javascript. format should be a string --> [[name,value], [name,value], ....., [name,value]].
-    javascriptRatioData = [] #format should be [[cell with js string data], [cell with js string data], ...]
-    javascriptWeightData = [] #format should be [[cell with js string data], [cell with js string data], ...]
+    javascriptRatioData = []  #format should be [[cell with js string data], [cell with js string data], ...]
+    javascriptWeightData = []  #format should be [[cell with js string data], [cell with js string data], ...]
     i = 0
     j = 0
     k = 0
@@ -1420,7 +1325,7 @@ def __createJSforRatioWeightSessionResultsChart(ratioMatrices=None, weightMatric
             #now add all other elements
         j = 0
         while j < nResponseGrids:
-            tempWeight = weightMatrices[j + 1][0][i] #j+1 because the session grid weights are in position 0
+            tempWeight = weightMatrices[j + 1][0][i]  #j+1 because the session grid weights are in position 0
             if tempWeight != None and tempWeight >= 1:
                 temp += ',[\'' + participantNames[j] + '\',' + str(tempWeight) + ']'
             else:
@@ -1445,7 +1350,7 @@ def __createJSforRatioWeightSessionResultsChart(ratioMatrices=None, weightMatric
                 temp += '0]'
                 #now add all other elements
             while j < nResponseGrids:
-                tempRating = ratioMatrices[j + 1][i][k] #j+1 because the session grid ratios are in position 0
+                tempRating = ratioMatrices[j + 1][i][k]  #j+1 because the session grid ratios are in position 0
                 if tempRating != None and tempRating >= 1:
                     temp += ',[\'' + participantNames[j] + '\',' + str(tempRating) + ']'
                 else:
@@ -1462,20 +1367,21 @@ def __createJSforRatioWeightSessionResultsChart(ratioMatrices=None, weightMatric
     return (javascriptRatioData, javascriptWeightData)
 
 
-"""
+def __generateAlternativeConcernResultTable(data=[], sessionGridObj=None):
+    """
     This function is used to generate the input used for the resultAlternativeConcernTable.html template
-    
+
     Arguemnts:
         data: obejct of QuerySet
             information: The QuerySet must contain all the grids that were submitted as response for a session with a iteration
         sessionGridObj: rgt.gridMng.models.Grid object
             nformation: The grid object must be of a session.
-    
+
     Return:
         Tulip
             information: The tulip has two positions, the first position contains the data for the concern table and the
                          second position contains the data for the alternative table.
-                         
+
                          The concern data is an array containing a tulip in each position. The tulip represents a row of a table.
                          The first position of the tulip contains a string representing the left concern name. The second
                          position contains a string representing the right concern name. The third posisition contains an int
@@ -1484,25 +1390,22 @@ def __createJSforRatioWeightSessionResultsChart(ratioMatrices=None, weightMatric
                          The fifth position contains an int indication how many times the right concern was mentioned individially.
                          The sixth poisition contains a boolean that indicates if the pair was previously was present in the session
                          grid or not. The seventh position contains a string with the names of the users who suggested something.
-                         
+
                          The alternative data is an array containing a tulip. The tulip represents a row of a table. The tulip has four
                          positions. The first position contains a string representing the name of the alternative. The second position
                          contains an int that represents how many times that alternative was mentioned in the response grids. The third
                          position has a boolean indicating if the alternative was previously found in the session grid or not. The fourth
                          position has a string with the names of the users who suggested something.
-"""
-
-
-def __generateAlternativeConcernResultTable(data=[], sessionGridObj=None):
-    concernsResult = [] #obj that will be returned with the concerns as following: (leftconcern, right concern, nPair, nLeftConcern, nRightConcern, isNew)
-    alternativeResult = [] #obj that will be returned with the alternative as following: (alternative, nTime, isNew)
+    """
+    concernsResult = []  #obj that will be returned with the concerns as following: (leftconcern, right concern, nPair, nLeftConcern, nRightConcern, isNew)
+    alternativeResult = []  #obj that will be returned with the alternative as following: (alternative, nTime, isNew)
     oldConcernsPair = []
     oldAlternatives = []
     concerns = {}
-    concernPairs = {} #key is a tulp value is the number the pair is present together
-    concernUsers = {} # this tuple is for the list of participants who suggested the concerns in the responseGrid
+    concernPairs = {}  #key is a tulp value is the number the pair is present together
+    concernUsers = {}  # this tuple is for the list of participants who suggested the concerns in the responseGrid
     alternatives = {}
-    alternativeUsers = {} #this tuple is for the list of participants who suggested the alternative in the responseGrid
+    alternativeUsers = {}  #this tuple is for the list of participants who suggested the alternative in the responseGrid
     temp = None
     i = 0
 
@@ -1525,7 +1428,7 @@ def __generateAlternativeConcernResultTable(data=[], sessionGridObj=None):
 
     for relation in data:
         grid = relation.grid
-        i = i + 1
+        i += 1
         if i == 2:
             userID = relation.user.first_name + '\n'
             i = 0
@@ -1537,13 +1440,13 @@ def __generateAlternativeConcernResultTable(data=[], sessionGridObj=None):
                 if not concerns.has_key(temp):
                     concerns[temp] = 1
                 else:
-                    concerns[temp] = concerns[temp] + 1
+                    concerns[temp] += 1
             if concern.rightPole:
                 temp = concern.rightPole.lower()
                 if not concerns.has_key(temp):
                     concerns[temp] = 1
                 else:
-                    concerns[temp] = concerns[temp] + 1
+                    concerns[temp] += 1
             if concernPairs.has_key((concern.leftPole.lower(), concern.rightPole.lower())):
                 concernPairs[(concern.leftPole.lower(), concern.rightPole.lower())] += 1
             else:
@@ -1559,7 +1462,7 @@ def __generateAlternativeConcernResultTable(data=[], sessionGridObj=None):
                 if not alternatives.has_key(temp):
                     alternatives[temp] = 1
                 else:
-                    alternatives[temp] = alternatives[temp] + 1
+                    alternatives[temp] += 1
                 if not alternativeUsers.has_key(temp):
                     alternativeUsers[temp] = userID
                 else:
@@ -1582,30 +1485,16 @@ def __generateAlternativeConcernResultTable(data=[], sessionGridObj=None):
     return (concernsResult, alternativeResult)
 
 
-def __createRangeTableColorMap__(globalMax, globalMin, rangeTable):
-    #end color
+def __createRangeTableColorMap(globalMax, globalMin, rangeTable):
     colorEnd = (255, 255, 255)
-
-    #start color
     colorStart = (240, 72, 74)
-
-    #part of the old code (used with the old ajaxGetResults function)
-    #maxRange= globalMax - globalMin
 
     return __createColorMap(100, globalMax, colorStart, colorEnd, rangeTable)
 
 
 def __createStdTableColorMap(globalMax, globalMin, stdTable):
-    #end color
     colorEnd = (255, 255, 255)
-
-    #start color
     colorStart = (240, 72, 74)
-
-    #part of the old code (used with the old ajaxGetResults function)
-    #mean= (globalMax + globalMin)/2
-    #maxStd= sqrt(((globalMax - mean)**2 + (globalMin - mean)**2)/2)
-
 
     return __createColorMap(100, globalMax, colorStart, colorEnd, stdTable)
 
@@ -1646,6 +1535,7 @@ def __createColorMap(colorStep, maxValue, startColor, endColor, table):
                 colorMap.append(endColor)
     return colorMap
 
+
 #this function is used to create the data tha is used in the participants.html page
 def __createParticipantPanelData(sessionObj):
     usersAndDateTimes = sessionObj.getUsersThatRespondedRequest()
@@ -1669,23 +1559,21 @@ def __createParticipantPanelData(sessionObj):
     return participantData
 
 
-"""
-    This function is used to create the data required to be used in the pendingResponses.html 
+def __createPendingResponseData(userObj=None):
+    """
+    This function is used to create the data required to be used in the pendingResponses.html
     template.
-    
-    ARguments:
+
+    Arguments:
         userObj: django.contrib.auth.models.User
-    
+
     Return
         Array
         information: The returned array contains a tulip in each position. Each tulip represents a row.
-                     The tulips have two positions. The first position contains a string , this string is a 
+                     The tulips have two positions. The first position contains a string , this string is a
                      composite of the session name and the facilitator name. The second position contains a
                      string representing the session USID.
-"""
-
-
-def __createPendingResponseData(userObj=None):
+    """
     table = None
 
     if userObj != None:
@@ -1768,6 +1656,7 @@ def __isGridStateEqualSessionState(sesssionState, gridObj):
             return True
     return False
 
+
 #This function will generate the data that is needed for the participatingSessionsContentGrids.html template
 #returns a dictionary that MAY contain the following keys:  previousResponseGrid, sessionGridTable, currentResponseGridTable
 def __generateParticipatingSessionsGridsData(sessionObj, iteration_, responseGridRelation):
@@ -1784,8 +1673,8 @@ def __generateParticipatingSessionsGridsData(sessionObj, iteration_, responseGri
         if len(previousResponseGridRelation) >= 1:
             previousResponseGrid = previousResponseGridRelation[0].grid
             if previousResponseGrid != None and __isGridStateEqualSessionState(sessionObj.state,
-                                                                                 previousResponseGrid) and (
-                        previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT or previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN):
+                                                                               previousResponseGrid) and (
+                            previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT or previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN):
                 #generate the data for the previous response grid
                 data['previousResponseGrid'] = generateGridTable(previousResponseGridRelation[0].grid)
 
@@ -1796,6 +1685,7 @@ def __generateParticipatingSessionsGridsData(sessionObj, iteration_, responseGri
         data['currentResponseGridTable'] = generateGridTable(currentResponseGridRelation[0].grid)
 
     return data
+
 
 # function saves session grid as user grid. This happens only when the facilitator click "end session" button
 # to make the creation of session possible from the session that previously completed
@@ -1867,6 +1757,7 @@ def __saveSessionGridAsUserGrid(request):
     else:
         return False
 
+
 #this function will generate the data for the ResultRatingWeightTablesData or ResultAlternativeConcernTableData template data objects
 #this function also returns one of those objects depending on the type of requested the results will be based on.
 #if no results were found none is returned
@@ -1897,7 +1788,6 @@ def __generateSessionIterationResult(request, sessionObj, iterationObj):
             except Exception as e:
                 __debug_print_stacktrace()
                 raise e
-                #return HttpResponse(createXmlErrorResponse('Unknown Error'), content_type='application/xml')
         elif gridType == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:
             #create a list with a matrix of ratios in each position of the list.
             ratioMatrices = []
@@ -1967,10 +1857,10 @@ def __generateSessionIterationResult(request, sessionObj, iterationObj):
 
             #calculate the rage, mean and std for the weight and ratio
             #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
-            meanRatioMatrix = __calcutateMeans(ratioMatrices)
+            meanRatioMatrix = __calculateMeans(ratioMatrices)
             rangeRatioMatrix = __calculateRange(ratioMatrices)
             stdRatioMatrix = __calculateStandardDeviation(ratioMatrices, meanRatioMatrix)
-            meanWeightMatrix = __calcutateMeans(weightMatrices)
+            meanWeightMatrix = __calculateMeans(weightMatrices)
             rangeWeightMatrix = __calculateRange(weightMatrices)
             stdWeightMatrix = __calculateStandardDeviation(weightMatrices, meanWeightMatrix)
             #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
@@ -1990,9 +1880,9 @@ def __generateSessionIterationResult(request, sessionObj, iterationObj):
             #minMaxStdRatio= __findMinMaxInMatrix__(rangeWeightMatrix)
             minMaxStdWeight = __findMinMaxInMatrix(stdWeightMatrix)
 
-            rangeRatioColorMap = __createRangeTableColorMap__(4, 0,
-                                                              rangeRatioMatrix) # for as the max range is 1-5= 4 (as right now the user can only use the numbers between 1 and 5)
-            rangeWeightColorMap = __createRangeTableColorMap__(minMaxRangeWeight[1], 0, rangeWeightMatrix[0])
+            rangeRatioColorMap = __createRangeTableColorMap(4, 0,
+                                                            rangeRatioMatrix)  # for as the max range is 1-5= 4 (as right now the user can only use the numbers between 1 and 5)
+            rangeWeightColorMap = __createRangeTableColorMap(minMaxRangeWeight[1], 0, rangeWeightMatrix[0])
             stdRatioColorMap = __createStdTableColorMap(4, 0, stdRatioMatrix)
             stdWeightColorMap = __createStdTableColorMap(minMaxStdWeight[1], 0, stdWeightMatrix[0])
             #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
@@ -2011,18 +1901,18 @@ def __generateSessionIterationResult(request, sessionObj, iterationObj):
                 i += 1
             i = 0
             ratioJsChartData, weightJsChartData = __createJSforRatioWeightSessionResultsChart(ratioMatrices,
-                                                                                                weightMatrices,
-                                                                                                participantNames)
+                                                                                              weightMatrices,
+                                                                                              participantNames)
 
             #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
 
             #clue everything together now and return the page
-            tableRatingRangeColor = [] #final table with the value to be displayed, the background color and js code
-            tableRatingStdColor = [] #final table with the value to be displayed, the background color and js code
-            tableRatingMean = [] #final table with the value to be displayed and js code
-            tableWeightMean = [] #final table with the weights and js code
-            tableWeightStd = [] #final table with the weights and js code
-            tableWeightRange = [] #final table with the weights and js code
+            tableRatingRangeColor = []  #final table with the value to be displayed, the background color and js code
+            tableRatingStdColor = []  #final table with the value to be displayed, the background color and js code
+            tableRatingMean = []  #final table with the value to be displayed and js code
+            tableWeightMean = []  #final table with the weights and js code
+            tableWeightStd = []  #final table with the weights and js code
+            tableWeightRange = []  #final table with the weights and js code
             i = 0
 
             #reverse the weight color maps, this is done because we use pop in the template!!!
@@ -2034,11 +1924,11 @@ def __generateSessionIterationResult(request, sessionObj, iterationObj):
                 rowStd = []
                 rowMean = []
                 tableWeightMean.append((meanWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[(
-                                                                                                        nConcerns - 1) - i]))#meanWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                                                                                                        nConcerns - 1) - i]))  #meanWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
                 tableWeightStd.append((stdWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[(
-                                                                                                      nConcerns - 1) - i]))#stdWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                                                                                                      nConcerns - 1) - i]))  #stdWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
                 tableWeightRange.append((rangeWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[(
-                                                                                                          nConcerns - 1) - i]))#rangeWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                                                                                                          nConcerns - 1) - i]))  #rangeWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
                 #create a tulip with the value that should be displayed in the td and the color of the background for each cell in the row
                 while k < nAlternatives:
                     rowRange.append((rangeRatioMatrix[i][k], rangeRatioColorMap[i][k], ratioJsChartData[i][k]))
