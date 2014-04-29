@@ -1,11 +1,13 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
-#from django.db import transaction
+from django.db import IntegrityError, transaction
 from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
 from RGT.gridMng.error.wrongState import WrongState
 from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
 from RGT.gridMng.session.state import State as SessionState
 from sets import Set
+from RGT.settings import SESSION_USID_KEY_LENGTH
 from utility import randomStringGenerator
 from datetime import datetime
 from django.utils.timezone import utc
@@ -14,8 +16,6 @@ from django.utils.timezone import utc
 class GridManager(models.Manager):
     def duplicateGrid(self, gridObj, userObj=None, gridName=None, gridType=None):
         #create new grid
-        newGrid = None
-        temp = None
         if userObj:
             if gridName != None:
                 newGrid = Grid(user=userObj, description=gridObj.description, name=gridName,
@@ -94,9 +94,6 @@ class Grid(models.Model):
         RESPONSE_GRID_RATING_WEIGHT = 'rw'
         COMPOSITE_GRID = 'cg'
 
-        #class Meta:
-        #    unique_together= ('user', 'name')
-
 
 class Alternatives(models.Model):
     grid = models.ForeignKey(Grid)
@@ -104,7 +101,6 @@ class Alternatives(models.Model):
     description = models.TextField(null=True)
 
     class Meta:
-        #unique_together= ('grid', 'name')
         ordering = ['id']
 
 
@@ -124,7 +120,6 @@ class Concerns(models.Model):
     weight = models.FloatField(null=True)
 
     class Meta:
-        #unique_together= (('grid', 'leftPole', 'rightPole'),)
         ordering = ['id']
 
 
@@ -183,7 +178,26 @@ class Facilitator(models.Model):
     class Meta:
         ordering = ['id']
 
-# model of session
+class SessionManager(models.Manager):
+
+    @transaction.atomic
+    def create_session(self, facilitating_user, original_grid, name=None, show_results=None):
+        if name is None or name == '':
+            name = 'untitled'
+        if show_results is None:
+            show_results = False
+
+        facilitator, created = Facilitator.objects.get_or_create(user=facilitating_user)
+        usid = randomStringGenerator(SESSION_USID_KEY_LENGTH)
+        state = State.objects.getInitialState()
+        invitation_key = str(uuid.uuid4())
+
+        session = self.create(usid=usid, facilitator=facilitator, name=name, showResult=show_results, state=state, invitationKey=invitation_key)
+        duplicateGrid = Grid.objects.duplicateGrid(original_grid, gridType=Grid.GridType.SESSION_GRID)
+        SessionGrid.objects.create(session=session, grid=duplicateGrid, iteration=0)
+
+        return session
+
 class Session(models.Model):
     usid = models.CharField(max_length=20, unique=True)
     facilitator = models.ForeignKey(Facilitator)
@@ -193,6 +207,7 @@ class Session(models.Model):
     showResult = models.BooleanField(default=False)
     invitationKey = models.TextField(null=True)
     description = models.TextField(null=True)
+    objects = SessionManager()
 
     class Meta:
         ordering = ['id']
@@ -291,7 +306,6 @@ class Session(models.Model):
         self.iteration += 1
         sessionGridRelation = SessionGrid(iteration=self.iteration, session=self, grid=newSessionGrid)
         sessionGridRelation.save()
-
 
 class SessionIterationState(models.Model):
     iteration = models.IntegerField()

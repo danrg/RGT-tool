@@ -7,6 +7,10 @@ class HttpErrorResponse(HttpResponse):
         response = createXmlErrorResponse(error_message)
         HttpResponse.__init__(self, response, content_type='application/xml')
 
+class HttpSuccessResponse(HttpResponse):
+    def __init__(self, success_message):
+        response = createXmlSuccessResponse(success_message)
+        HttpResponse.__init__(self, response, content_type='application/xml')
 
 def createXmlSuccessResponse(htmlData, extraData=None):
     impl = getDOMImplementation()

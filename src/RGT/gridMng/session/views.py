@@ -2,6 +2,7 @@ from math import sqrt, ceil
 import uuid
 import logging
 from datetime import datetime
+from django.core.exceptions import ObjectDoesNotExist
 
 from django.shortcuts import render
 from django.template import RequestContext
@@ -27,7 +28,7 @@ from RGT.gridMng.utility import *
 from RGT.gridMng.response.xml.htmlResponseUtil import *
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode, createXmlNumberOfResponseNode
-from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid__
+from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid
 from RGT.gridMng.template.session.createSessionData import CreateSessionData
 from RGT.gridMng.template.session.mySessionsData import MySessionsData
 from RGT.gridMng.template.session.mySessionsContentData import MySessionsContentData
@@ -65,7 +66,7 @@ def ajaxGetCreateSessionPage(request):
 
     context = RequestContext(request, {'data': templateData})
 
-    return render(request, 'gridMng/createSession.html', context_instance=context);
+    return render(request, 'gridMng/createSession.html', context_instance=context)
 
 
 @login_required
@@ -92,9 +93,8 @@ def getMySessionsPage(request):
 
 @login_required
 def ajaxGetMySessionContentPage(request):
-    sessionObj = None
     try:
-        if request.POST.has_key('sessionUSID'):
+        if 'sessionUSID' in request.POST:
             try:
                 facilitator = Facilitator.objects.isFacilitator(request.user)
                 if facilitator:
@@ -112,7 +112,7 @@ def ajaxGetMySessionContentPage(request):
 
                     for i in range(0, iteration):  # Last iteration not included, because it doesn't produce results
                         if i == 0:
-                            iterationValueType[i] = {'': '', '': ''}
+                            iterationValueType[i] = {'': ''}
                         else:
                             if iterationTypes[i - 1].state.name == SessionState.AC:
                                 iterationValueType[i] = {'stateNameKey': SessionState.AC,
@@ -127,8 +127,7 @@ def ajaxGetMySessionContentPage(request):
                     templateData.invitationKey = sessionObj.invitationKey
 
                     template = loader.get_template('gridMng/mySessionsContent.html')
-                    context = None
-                    #now lets see what we have to return
+                    # now lets see what we have to return
                     if sessionObj.state.name == SessionState.INITIAL:
                         templateData.state = 'Invitation'
                         gridTemplateData.showRatingWhileFalseChangeRatingsWeights = True
@@ -178,93 +177,33 @@ def ajaxGetMySessionContentPage(request):
 
 @login_required
 def ajaxCreateSession(request):
-    if request.method == 'POST':
-        user1 = request.user
-        gridUSID = request.POST['gridUSID']
-        gridObj = None
-        hasError = False
-        errorMsg = ''
-        sessionGrid = None
-        facilitator1 = None
-        newSession = None
-        showResults = False
-        sessionGridName = 'untitled'  #default name
-        try:
-            gridObj = Grid.objects.get(user=user1, usid=gridUSID)
-            if request.POST.has_key('sessionName'):
-                temp = request.POST['sessionName']
-                result = validateName(temp)
-                if type(result) == StringType:
-                    sessionGridName = result
-                else:
-                    return result
+    if request.method == 'GET':
+        return ajaxGetCreateSessionPage(request)
+    elif request.method == 'POST':
+        gridUSID = request.POST.get('gridUSID')
+        if not gridUSID:
+            return HttpErrorResponse('gridUSID can not be empty')
 
-            if request.POST.has_key('showResults'):
-                temp1 = request.POST['showResults']
-                result1 = validateName(temp1)
-                if type(result1) == StringType:
-                    if result1 == 'Y':
-                        showResults = True
-                    else:
-                        showResults = False
-                else:
-                    return result1
-        except:
-            hasError = True
-            errorMsg = 'grid was not found'
-        if gridObj:
-            try:
-                # now lets create a new session with a copy of the current grid
-                facilitator1 = Facilitator.objects.isFacilitator(user1)
-                #create the facilitator if it doesn't exist in the facilitator table
-                if not facilitator1:
-                    facilitator1 = Facilitator.objects.create(user=user1)
-                    #now copy the grid
-                try:
-                    state1 = State.objects.getInitialState()
-                    newSession = Session.objects.create(usid=randomStringGenerator(SESSION_USID_KEY_LENGTH),
-                                                        facilitator=facilitator1, iteration=0, name=sessionGridName,
-                                                        showResult=showResults, state=state1,
-                                                        invitationKey=str(uuid.uuid4()))
-                    try:
-                        sessionGrid = Grid.objects.duplicateGrid(gridObj, gridType=Grid.GridType.SESSION_GRID)
-                        if sessionGrid:
-                            try:
-                                SessionGrid.objects.create(session=newSession, grid=sessionGrid, iteration=0)
-                                return HttpResponse(createXmlSuccessResponse('Session was created.'),
-                                                    content_type='application/xml')
-                            except:
-                                newSession.delete()
-                                hasError = True
-                                errorMsg = 'Unable to relate the grid with the session'
-                                __debug_print_stacktrace()
-                    except:
-                        try:
-                            newSession.delete()
-                        except:
-                            print 'Couldn\'t delete the session'
-                        hasError = True
-                        errorMsg = 'Unable to copy the grid to the session'
-                        __debug_print_stacktrace()
-                except:
-                    hasError = True
-                    errorMsg = 'Unable to create the session'
-                    __debug_print_stacktrace()
-            except:
-                hasError = True
-                errorMsg = 'Unable to create or set the facilitator for the session'
-                __debug_print_stacktrace()
-        if hasError:
-            try:
-                #revert changes
-                newSession.delete()
-                sessionGrid.delete()
-            except:
-                #do nothing
-                __debug_print_stacktrace()
-            return HttpErrorResponse(errorMsg)
-        return HttpErrorResponse('Unknown error')
-    return ajaxGetCreateSessionPage(request)
+        try:
+            grid = Grid.objects.get(user=request.user, usid=gridUSID)
+        except ObjectDoesNotExist:
+            return HttpErrorResponse('Grid was not found')
+
+        name = None
+        if 'sessionName' in request.POST:
+            name = request.POST.get('sessionName','').strip()
+            if not name:
+                return HttpErrorResponse('Name can not be empty')
+
+        show_results = None
+        if 'showResults' in request.POST:
+            if request.POST.get('showResults') == "Y":
+                show_results = True
+            elif request.POST.get('showResults') != "N":
+                return HttpErrorResponse('Invalid value for showResults given')
+
+        session = Session.objects.create_session(request.user, grid, name, show_results)
+        return HttpSuccessResponse('Session was created.')
 
 
 @login_required
@@ -291,7 +230,7 @@ def ajaxJoinSession(request):
     user1 = request.user
     invitationKey1 = None
     error = None
-    if request.POST.has_key('invitationKey'):
+    if 'invitationKey' in request.POST:
         invitationKey1 = request.POST['invitationKey'].strip()
     else:
         error = 'no invitation key was received'
@@ -300,8 +239,7 @@ def ajaxJoinSession(request):
             session = Session.objects.filter(invitationKey=invitationKey1)
             if len(session) > 0:
                 session[0].addParticipant(user1)
-                data = {};
-                data[session[0].usid] = session[0].get_descriptive_name()
+                data = {session[0].usid: session[0].get_descriptive_name()}
                 return HttpResponse(createXmlSuccessResponse(
                     'You have been added as participant in session: "' + session[0].name + '".',
                     createXmlForComboBox(data)), content_type='application/xml')
@@ -324,7 +262,7 @@ def ajaxJoinSession(request):
 
 @login_required
 def ajaxChangeSessionState(request):
-    if request.POST.has_key('sessionUSID') and request.POST.has_key('newState'):
+    if 'sessionUSID' in request.POST and 'newState' in request.POST:
         facilitatorObj = request.user.facilitator_set.all()
         if len(facilitatorObj) >= 1:
             facilitatorObj = facilitatorObj[0]
@@ -364,7 +302,7 @@ def ajaxChangeSessionState(request):
 @login_required
 def ajaxGetParticipatingSessionContentPage(request):
     if request.method == 'POST':
-        if request.POST.has_key('sessionUSID'):
+        if 'sessionUSID' in request.POST:
             sessionID = Session.objects.get(usid=request.POST['sessionUSID'])
             sessionObj = request.user.userparticipatesession_set.filter(session=sessionID)
             if len(sessionObj) >= 1:
@@ -377,7 +315,7 @@ def ajaxGetParticipatingSessionContentPage(request):
                 templateData.iteration = iteration
                 templateData.responseStatus = '-----'
 
-                #lets create a list of iteration that i have responded
+                # lets create a list of iteration that i have responded
                 responseGridRelations = ResponseGrid.objects.filter(session=sessionObj, user=request.user)
                 gridTablesData = __generateParticipatingSessionsGridsData(sessionObj, iteration,
                                                                           responseGridRelations)
@@ -410,26 +348,26 @@ def ajaxGetParticipatingSessionContentPage(request):
 
                     templateParticipatingSessions = ParticipatingSessionsContentGridsData()
                     templateData.participatingSessionsContentGridsData = templateParticipatingSessions
-                    #there always is a session table being displayed to the user, so add this table in here
+                    # there always is a session table being displayed to the user, so add this table in here
                     templateParticipatingSessions.displaySessionGrid = True
                     templateParticipatingSessions.sessionGridData = GridTableData(gridTablesData['sessionGridTable'])
                     templateParticipatingSessions.sessionGridData.tableId = randomStringGenerator()
                     templateParticipatingSessions.sessionGridData.doesNotShowLegend = True
-                    #check to see if there is a response table, if so add it
-                    if gridTablesData.has_key('currentResponseGridTable'):
+                    # check to see if there is a response table, if so add it
+                    if 'currentResponseGridTable' in gridTablesData:
                         templateParticipatingSessions.responseGridData = GridTableData(
                             gridTablesData['currentResponseGridTable'])
                     else:
-                        #if there is no response display a table with the data as seem in the session grid
+                        # if there is no response display a table with the data as seem in the session grid
                         templateParticipatingSessions.responseGridData = GridTableData(
                             gridTablesData['sessionGridTable'])
-                        #the weights need to be duplicated in a new object as  the list will be poped later on
+                        # the weights need to be duplicated in a new object as  the list will be poped later on
                         templateParticipatingSessions.responseGridData.weights = templateParticipatingSessions.sessionGridData.weights[
-                                                                                 :]
+                            :]
                     templateParticipatingSessions.responseGridData.tableId = randomStringGenerator()
                     templateParticipatingSessions.displayResponseGrid = True
-                    #if the gridTablesData contains a previous response table add it
-                    if gridTablesData.has_key('previousResponseGrid'):
+                    # if the gridTablesData contains a previous response table add it
+                    if 'previousResponseGrid' in gridTablesData:
                         templateParticipatingSessions.previousResponseGridData = GridTableData(
                             gridTablesData['previousResponseGrid'])
                         templateParticipatingSessions.previousResponseGridData.tableId = randomStringGenerator()
@@ -437,7 +375,7 @@ def ajaxGetParticipatingSessionContentPage(request):
                         hasPreviousResponseRelationGrid = True
                         templateParticipatingSessions.displayPreviousResponseGrid = True
 
-                    #calculate how many participants there are in this session and how many have sent a response
+                    # calculate how many participants there are in this session and how many have sent a response
                     templateData.nReceivedResponses = 0
                     templateData.nParticipants = 0
                     templateData.showNParticipantsAndResponces = True
@@ -446,14 +384,14 @@ def ajaxGetParticipatingSessionContentPage(request):
                         templateData.nParticipants = len(sessionObj.getParticipators())
                     except:
                         __debug_print_stacktrace()
-                    #check if i have sent a response grid
+                    # check if i have sent a response grid
                     responseGrid = request.user.responsegrid_set.filter(user=request.user, iteration=iteration,
                                                                         session=sessionObj)
                     if len(responseGrid) <= 0:
-                        #i didn't respond, so display a page with the correct settings to answer it
+                        # i didn't respond, so display a page with the correct settings to answer it
                         templateData.responseStatus = 'No response was sent'
                         if state.name == SessionState.AC:
-                            #first get the current session grid to display to the user
+                            # first get the current session grid to display to the user
                             templateParticipatingSessions.responseGridData.changeCornAlt = True
                             templateParticipatingSessions.responseGridData.doesNotShowLegend = True
                             templateData.sessionStatus = 'Waiting for Alternative and concerns'
@@ -466,14 +404,14 @@ def ajaxGetParticipatingSessionContentPage(request):
                             templateParticipatingSessions.sessionGridData.showRatingWhileFalseChangeRatingsWeights = True
                             templateParticipatingSessions.responseGridData.changeRatingsWeights = True
                             template = loader.get_template('gridMng/participatingSessionsContent.html')
-                            if hasPreviousResponseRelationGrid == True:
+                            if hasPreviousResponseRelationGrid:
                                 templateParticipatingSessions.previousResponseGridData.showRatingWhileFalseChangeRatingsWeights = True
 
                             context = RequestContext(request, {'data': templateData})
                             htmlData = template.render(context)
                             return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                     else:
-                        #if i did respond show me my response and the current session grid so if i changed my mind i still can change the response
+                        # if i did respond show me my response and the current session grid so if i changed my mind i still can change the response
                         templateData.responseStatus = 'Response was sent at: '
                         templateData.dateTime = responseGrid[0].grid.dateTime
                         if state.name == SessionState.AC:
@@ -488,7 +426,7 @@ def ajaxGetParticipatingSessionContentPage(request):
                             templateParticipatingSessions.responseGridData.changeRatingsWeights = True
                             templateData.sessionStatus = 'Waiting for Ratings and Weights'
                             template = loader.get_template('gridMng/participatingSessionsContent.html')
-                            if hasPreviousResponseRelationGrid == True:
+                            if hasPreviousResponseRelationGrid:
                                 templateParticipatingSessions.previousResponseGridData.showRatingWhileFalseChangeRatingsWeights = True
 
                             context = RequestContext(request, {'data': templateData})
@@ -507,25 +445,20 @@ def ajaxRespond(request):
     """ This function will determine if we are creating a new response grid or updating an old one """
 
     userObj = request.user
-    nConcerns = None
-    nAlternatives = None
-    concernValues = None
-    alternativeValues = None
-    ratioValues = None
-    if request.POST.has_key('sessionUSID') and request.POST.has_key('gridType') and request.POST.has_key('iteration'):
-        #check if user can answer to the session
+    if 'sessionUSID' in request.POST and 'gridType' in request.POST and 'iteration' in request.POST:
+        # check if user can answer to the session
         sessionObj = Session.objects.filter(usid=request.POST['sessionUSID'])
         if len(sessionObj) >= 1:
             sessionObj = sessionObj[0]
             userSessionRelation = userObj.userparticipatesession_set.filter(session=sessionObj)
             if len(userSessionRelation) >= 1:
                 sessionIteration = int(request.POST['iteration'])
-                #check if the session is in a state where it is allowed to send a response
+                # check if the session is in a state where it is allowed to send a response
                 if sessionIteration == sessionObj.iteration:
                     userResponseGridRelation = userObj.responsegrid_set.filter(iteration=sessionIteration,
                                                                                session=sessionObj)
 
-                    #if the response is for a concern/alternative request, run extra validation code (no empty concerns or alternatives allowed)
+                    # if the response is for a concern/alternative request, run extra validation code (no empty concerns or alternatives allowed)
                     if sessionObj.state.name == State.objects.getWaitingForAltAndConState().name:
                         try:
                             __validateAltConResponse(request)
@@ -536,16 +469,15 @@ def ajaxRespond(request):
                             __debug_print_stacktrace()
                             logger.exception('Unknown error')
                             return HttpErrorResponse('Unknown error')
-                            #determine if it is a new response grid or not
+                            # determine if it is a new response grid or not
                     if len(userResponseGridRelation) >= 1:
-                        #this is an update
+                        # this is an update
                         gridObj = userResponseGridRelation[0].grid
-                        isConcernAlternativeResponseGrid = False;
+                        isConcernAlternativeResponseGrid = False
                         if gridObj.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
                             isConcernAlternativeResponseGrid = True
-                        obj = None
                         try:
-                            obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
+                            obj = __validateInputForGrid(request, isConcernAlternativeResponseGrid)
                         except (KeyError, ValueError) as error:
                             __debug_print_stacktrace()
                             return HttpErrorResponse(error.args[0])
@@ -555,7 +487,7 @@ def ajaxRespond(request):
                             return HttpErrorResponse('Unknown error')
                         nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues = obj
 
-                        if gridObj != None:
+                        if gridObj is not None:
                             for i in range(int(nAlternatives)):
                                 try:
                                     str(alternativeValues[i])
@@ -583,23 +515,22 @@ def ajaxRespond(request):
                                 return HttpErrorResponse('Unknown error')
                         else:
                             return HttpErrorResponse("No grid found")
-                            #return ajaxUpdateGrid(request)
+                            # return ajaxUpdateGrid(request)
                     else:
-                        #this is a new grid, which means first response
+                        # this is a new grid, which means first response
                         gridType = None
                         showRatings = True
                         isConcernAlternativeResponseGrid = False
-                        #discover the response grid type
+                        # discover the response grid type
                         if sessionObj.state.name == SessionState.AC:
                             gridType = Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN
                             showRatings = False
                             isConcernAlternativeResponseGrid = True
                         elif sessionObj.state.name == SessionState.RW:
                             gridType = Grid.GridType.RESPONSE_GRID_RATING_WEIGHT
-                        obj = None
-                        #validate and retrieve the data that is going to be used in the grid
+                        # validate and retrieve the data that is going to be used in the grid
                         try:
-                            obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
+                            obj = __validateInputForGrid(request, isConcernAlternativeResponseGrid)
                         except (KeyError, ValueError) as error:
                             __debug_print_stacktrace()
                             return HttpErrorResponse(error.args[0])
@@ -610,7 +541,7 @@ def ajaxRespond(request):
 
                         nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues = obj
                         try:
-                            #set the relation ship of the response grid with the session
+                            # set the relation ship of the response grid with the session
                             gridObj = createGrid(userObj, gridType, None, nConcerns, nAlternatives, concernValues,
                                                  alternativeValues, ratioValues, showRatings)
                             gridResponseRelation = ResponseGrid(grid=gridObj, session=sessionObj,
@@ -619,13 +550,12 @@ def ajaxRespond(request):
 
                             extraXmlData = createXmlNumberOfResponseNode(
                                 len(sessionObj.getUsersThatRespondedRequest()) + 1)
-                            if extraXmlData == None:
+                            if extraXmlData is None:
                                 return HttpResponse(createXmlSuccessResponse('Grid created successfully.',
                                                                              createDateTimeTag(datetime.now().strftime(
                                                                                  "%Y-%m-%d %H:%M:%S"))),
                                                     content_type='application/xml')
                             else:
-                                extraDataToUse = None
                                 if isinstance(extraXmlData, list):
                                     extraXmlData.append(createDateTimeTag(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
                                     extraDataToUse = extraXmlData
@@ -650,12 +580,12 @@ def ajaxRespond(request):
         return HttpErrorResponse('Invalid request, request is missing arguments')
 
 
-#this function only return the content grids!!
+# this function only return the content grids!!
 @login_required
 def ajaxGetParticipatingSessionsContentGrids(request):
     try:
-        #check for the mandatory keys
-        if request.POST.has_key('iteration') and request.POST.has_key('sessionUSID'):
+        # check for the mandatory keys
+        if 'iteration' in request.POST and 'sessionUSID' in request.POST:
             sessionObj = Session.objects.filter(usid=request.POST['sessionUSID'])
             if len(sessionObj) >= 1:
                 templateData = ParticipatingSessionsContentGridsData()
@@ -664,29 +594,29 @@ def ajaxGetParticipatingSessionsContentGrids(request):
                 iteration_ = int(request.POST['iteration'])
                 sessionObj = sessionObj[0]
                 hasPreviousResponseRelationGrid = False
-                #check if the iteration is valid
+                # check if the iteration is valid
                 if iteration_ > sessionObj.iteration or iteration_ < 0:
                     return HttpErrorResponse('Invalid iteration value')
                 response_grids = ResponseGrid.objects.filter(session=sessionObj, user=request.user)
                 gridTablesData = __generateParticipatingSessionsGridsData(sessionObj, iteration_, response_grids)
 
-                #there is always a session grid, so add it
+                # there is always a session grid, so add it
                 templateData.sessionGridData = GridTableData(gridTablesData['sessionGridTable'])
                 templateData.sessionGridData.tableId = randomStringGenerator()
                 templateData.sessionGridData.doesNotShowLegend = True
                 templateData.displaySessionGrid = True
-                #if the user sent a response display that grid
-                if gridTablesData.has_key('currentResponseGridTable'):
+                # if the user sent a response display that grid
+                if 'currentResponseGridTable' in gridTablesData:
                     templateData.responseGridData = GridTableData(gridTablesData['currentResponseGridTable'])
                 else:
-                    #if he hasn't sent a response display a grid with the values of the session grid
+                    # if he hasn't sent a response display a grid with the values of the session grid
                     templateData.responseGridData = GridTableData(gridTablesData['sessionGridTable'])
-                    #the weights need to be in a new object as we will pop it later (in the template)
+                    # the weights need to be in a new object as we will pop it later (in the template)
                     templateData.responseGridData.weights = templateData.responseGridData.weights[:]
                 templateData.responseGridData.tableId = randomStringGenerator()
                 templateData.displayResponseGrid = True
-                #if the gridTablesData contains a previous response table add it
-                if gridTablesData.has_key('previousResponseGrid'):
+                # if the gridTablesData contains a previous response table add it
+                if 'previousResponseGrid' in gridTablesData:
                     templateData.previousResponseGridData = GridTableData(gridTablesData['previousResponseGrid'])
                     templateData.previousResponseGridData.tableId = randomStringGenerator()
                     templateData.previousResponseGridData.doesNotShowLegend = True
@@ -696,41 +626,39 @@ def ajaxGetParticipatingSessionsContentGrids(request):
                 if len(request.user.userparticipatesession_set.filter(session=sessionObj)) >= 1:
                     responseGridRelation = ResponseGrid.objects.filter(session=sessionObj, iteration=iteration_,
                                                                        user=request.user)
-                    #check to see if the user has already send an response grid
+                    # check to see if the user has already send an response grid
                     if len(responseGridRelation) >= 1:
-                        #if he has sent an response grid display it again and let him edit it
+                        # if he has sent an response grid display it again and let him edit it
 
                         responseGridRelation = responseGridRelation[0]
                         template = loader.get_template('gridMng/participatingSessionsContentGrids.html')
-                        context = None
                         if responseGridRelation.grid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
                             templateData.responseGridData.doesNotShowLegend = True
-                            #check to see if the user should be allowed to change the response
+                            # check to see if the user should be allowed to change the response
                             if iteration_ == sessionObj.iteration:
                                 templateData.responseGridData.changeCornAlt = True
                         else:
-                            #check to see if the user should be allowed to change the response
+                            # check to see if the user should be allowed to change the response
                             templateData.sessionGridData.showRatingWhileFalseChangeRatingsWeights = True
                             templateData.responseGridData.showRatingWhileFalseChangeRatingsWeights = True
                             if iteration_ == sessionObj.iteration:
                                 templateData.responseGridData.changeRatingsWeights = True
-                                #if the previous response grid is displayed make sure it is displayed correctly
-                                if hasPreviousResponseRelationGrid == True:
+                                # if the previous response grid is displayed make sure it is displayed correctly
+                                if hasPreviousResponseRelationGrid:
                                     templateData.previousResponseGridData.showRatingWhileFalseChangeRatingsWeights = True
                             else:
-                                #if the previous response grid is displayed make sure it is displayed correctly
-                                if hasPreviousResponseRelationGrid == True:
+                                # if the previous response grid is displayed make sure it is displayed correctly
+                                if hasPreviousResponseRelationGrid:
                                     templateData.previousResponseGridData.showRatingWhileFalseChangeRatingsWeights = True
 
                         context = RequestContext(request, {'data': templateData})
                         htmlData = template.render(context)
                         return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
                     else:
-                        #if he hasn't send a response grid check to see if he still can send it and if so display it
+                        # if he hasn't send a response grid check to see if he still can send it and if so display it
                         if iteration_ == sessionObj.iteration:
                             if sessionObj.state.name == SessionState.AC:
                                 template = loader.get_template('gridMng/participatingSessionsContentGrids.html')
-                                context = None
                                 templateData.responseGridData.changeCornAlt = True
                                 templateData.responseGridData.doesNotShowLegend = True
 
@@ -740,10 +668,9 @@ def ajaxGetParticipatingSessionsContentGrids(request):
 
                             elif sessionObj.state.name == SessionState.RW:
                                 template = loader.get_template('gridMng/participatingSessionsContentGrids.html')
-                                context = None
                                 templateData.sessionGridData.showRatingWhileFalseChangeRatingsWeights = True
                                 templateData.responseGridData.changeRatingsWeights = True
-                                if hasPreviousResponseRelationGrid == True:
+                                if hasPreviousResponseRelationGrid:
                                     templateData.previousResponseGridData.showRatingWhileFalseChangeRatingsWeights = True
 
                                 context = RequestContext(request, {'data': templateData})
@@ -752,7 +679,7 @@ def ajaxGetParticipatingSessionsContentGrids(request):
                             else:
                                 return HttpResponse(createXmlSuccessResponse(
                                     '<div id="participatinSessionsMessageDiv"><p>Session is in a state where no grids are available</p></div>'),
-                                                    content_type='application/xml')
+                                    content_type='application/xml')
                         else:
                             return HttpErrorResponse(
                                 'No response found for the session in iteration ' + request.POST['iteration'])
@@ -774,10 +701,9 @@ def ajaxGetResults(request):
     """ Function is to get the session results for the facilitator for completed iterations """
     try:
         request_ = request
-        if not (request.POST.has_key('sessionUSID') and request.POST.has_key('iteration')):
+        if not ('sessionUSID' in request.POST and 'iteration' in request.POST):
             return HttpErrorResponse('Invalid request, request is missing argument(s)')
         else:
-            facilitatorObj = None
             if len(request.user.facilitator_set.all()) < 1:
                 return HttpErrorResponse('You are not a facilitator for this session')
             else:
@@ -793,7 +719,7 @@ def ajaxGetResults(request):
                         iteration_ = int(request.POST['iteration'])
                         try:
                             templateData = __generateSessionIterationResult(request_, session_, iteration_)
-                            if templateData != None:
+                            if templateData is not None:
                                 template = None
                                 if type(templateData) == ResultRatingWeightTablesData:
                                     template = loader.get_template('gridMng/resultRatingWeightTables.html')
@@ -822,7 +748,7 @@ def ajaxGetResults(request):
 def ajaxGetResponseResults(request):
     try:
         request_ = request
-        if not (request.POST.has_key('sessionUSID') and request.POST.has_key('iteration')):
+        if not ('sessionUSID' in request.POST and 'iteration' in request.POST):
             return HttpErrorResponse('Invalid request, request is missing argument(s)')
         else:
             sessionObj = Session.objects.filter(usid=request.POST['sessionUSID'])
@@ -837,7 +763,7 @@ def ajaxGetResponseResults(request):
                     iteration_ = int(request.POST['iteration'])
                     try:
                         templateData = __generateSessionIterationResult(request_, session_, iteration_)
-                        if templateData != None:
+                        if templateData is not None:
                             template = None
                             if type(templateData) == ResultRatingWeightTablesData:
                                 template = loader.get_template('gridMng/resultRatingWeightTables.html')
@@ -866,12 +792,11 @@ def ajaxGetResponseResults(request):
 def ajaxDownloadSessionResults(request):
     """ Download the results from a session in the form of an image """
     try:
-        if not request.POST.has_key('sessionUSID'):
+        if not 'sessionUSID' in request.POST:
             raise Exception('sessionUSID key was not received')
-        elif not request.POST.has_key('iteration'):
+        elif not 'iteration' in request.POST:
             raise Exception('iteration key was not received')
         else:
-            facilitatorObj = None
             if len(request.user.facilitator_set.all()) < 1:
                 raise Exception('User is not a facilitator for a session')
             else:
@@ -886,7 +811,7 @@ def ajaxDownloadSessionResults(request):
                     else:
                         iteration_ = int(request.POST['iteration'])
                         templateData = __generateSessionIterationResult(request, session_, iteration_)
-                        #check which type of response it is and convert the data so a svg can be created
+                        # check which type of response it is and convert the data so a svg can be created
                         responseGridRelation = session_.responsegrid_set.filter(iteration=iteration_)
                         if len(responseGridRelation) >= 1:
                             gridType = responseGridRelation[0].grid.grid_type
@@ -898,7 +823,7 @@ def ajaxDownloadSessionResults(request):
                                     imgData.fileExtention = 'svg'
                                     imgData.ContentType = 'image/svg+xml'
 
-                                if request.POST.has_key('fileName'):
+                                if 'fileName' in request.POST:
                                     imgData.fileName = request.POST['fileName']
 
                                     if not imgData.fileName:
@@ -910,13 +835,12 @@ def ajaxDownloadSessionResults(request):
                                 meanData = SessionResultImageConvertionData()
                                 stdData = SessionResultImageConvertionData()
 
-                                #the header object is shared among all the 3 tables
+                                # the header object is shared among all the 3 tables
                                 templateData.rangeData.headers.append('weight')
 
-                                #range
+                                # range
                                 rangeData.tableHeader = templateData.rangeData.headers
                                 sizeWeights = len(templateData.rangeData.weights)
-                                i = 0
                                 temp = templateData.rangeData.table
                                 finalTable = []
                                 concerns = []
@@ -944,13 +868,12 @@ def ajaxDownloadSessionResults(request):
                                 rangeData.header = templateData.rangeData.tableHead
                                 rangeData.concerns = concerns
 
-                                #mean
+                                # mean
                                 meanData.tableHeader = templateData.meanData.headers
-                                #meanData.tableHeader.append('weight')
+                                # meanData.tableHeader.append('weight')
                                 finalTable = []
                                 concerns = []
                                 sizeWeights = len(templateData.meanData.weights)
-                                i = 0
                                 temp = templateData.meanData.table
 
                                 i = 0
@@ -975,12 +898,11 @@ def ajaxDownloadSessionResults(request):
                                 meanData.header = templateData.meanData.tableHead
                                 meanData.concerns = concerns
 
-                                #std
+                                # std
                                 finalTable = []
                                 concerns = []
                                 stdData.tableHeader = templateData.stdData.headers
                                 sizeWeights = len(templateData.stdData.weights)
-                                i = 0
                                 temp = templateData.stdData.table
 
                                 i = 0
@@ -1013,7 +935,7 @@ def ajaxDownloadSessionResults(request):
                                     imgData.fileExtention = 'svg'
                                     imgData.ContentType = 'image/svg+xml'
 
-                                if request.POST.has_key('fileName'):
+                                if 'fileName' in request.POST:
                                     imgData.fileName = request.POST['fileName']
 
                                     if not imgData.fileName:
@@ -1022,7 +944,7 @@ def ajaxDownloadSessionResults(request):
                                 return createFileResponse(imgData)
     except:
         __debug_print_stacktrace()
-    #in case of an error or checks failing return an image error
+    # in case of an error or checks failing return an image error
     errorImageData = getImageError()
     # send the file
     response = HttpResponse(errorImageData, content_type='image/jpg')
@@ -1030,20 +952,20 @@ def ajaxDownloadSessionResults(request):
     return response
 
 
-#function that will get the page that display the participants of a session
+# function that will get the page that display the participants of a session
 @login_required
 def ajaxGetParticipatingPage(request):
     try:
-        #check if the mandatory variables are present
-        if request.POST.has_key('sessionUSID'):
-            #get the session
+        # check if the mandatory variables are present
+        if 'sessionUSID' in request.POST:
+            # get the session
             sessionObj = Session.objects.get(usid=request.POST['sessionUSID'])
-            if sessionObj != None:
+            if sessionObj is not None:
                 #sessionObj= sessionObj[0]
-                #check if the user is a facilitator and if he is the facilitator for this session
+                # check if the user is a facilitator and if he is the facilitator for this session
                 facilitatorObj = request.user.facilitator_set.all()
                 if len(facilitatorObj) >= 1 and sessionObj.facilitator == facilitatorObj[0]:
-                    #get all the users that reponded to the request
+                    # get all the users that reponded to the request
                     templateData = ParticipantsData()
                     templateData.participants = __createParticipantPanelData(sessionObj)
                     template = loader.get_template('gridMng/participants.html')
@@ -1064,19 +986,19 @@ def ajaxGetParticipatingPage(request):
 
 @login_required
 def ajaxGenerateSessionDendrogram(request):
-    #check if all the mandatory keys are present
-    if request.POST.has_key('sessionUSID') and request.POST.has_key('iteration'):
-        #check to see if the user is a facilitator
+    # check if all the mandatory keys are present
+    if 'sessionUSID' in request.POST and 'iteration' in request.POST:
+        # check to see if the user is a facilitator
         try:
             facilitatorObj = Facilitator.objects.filter(user=request.user)
             if len(facilitatorObj) >= 1:
                 facilitatorObj = facilitatorObj[0]
-                #find the session
+                # find the session
                 sessionObj = Session.objects.filter(usid=request.POST['sessionUSID'], facilitator=facilitatorObj)
                 if len(sessionObj) >= 1:
                     sessionObj = sessionObj[0]
                     iterationObj = int(request.POST['iteration'])
-                    #display the current iteration if there was no iteration specified
+                    # display the current iteration if there was no iteration specified
                     if iterationObj < 0:
                         iterationObj = sessionObj.iteration
                     sessionGridRelation = SessionGrid.objects.filter(session=sessionObj, iteration=iterationObj)
@@ -1089,7 +1011,7 @@ def ajaxGenerateSessionDendrogram(request):
                             return HttpResponse(responseData, content_type='application/xml')
                         except UnicodeEncodeError as error:
                             errorString = 'Invalid character found in the grid. The "' + error.object[
-                                                                                         error.start:error.end] + '" character can not be convert or used safely.\nDendogram can not be created.'
+                                error.start:error.end] + '" character can not be convert or used safely.\nDendogram can not be created.'
                             return HttpErrorResponse(errorString)
                         except Exception:
                             __debug_print_stacktrace()
@@ -1109,24 +1031,24 @@ def ajaxGenerateSessionDendrogram(request):
 
 @login_required
 def ajaxGetSessionGrid(request):
-    #check if all the mandatory keys are present
-    if request.POST.has_key('sessionUSID'):
-        #check if the user is an facilitator
+    # check if all the mandatory keys are present
+    if 'sessionUSID' in request.POST:
+        # check if the user is an facilitator
         facilitatorObj = request.user.facilitator_set.all()
         if len(facilitatorObj) >= 1:
             facilitatorObj = facilitatorObj[0]
-            #check if the session exists
+            # check if the session exists
             sessionObj = Session.objects.filter(usid=request.POST['sessionUSID'], facilitator=facilitatorObj)
             if len(sessionObj) >= 1:
                 sessionObj = sessionObj[0]
-                #check if the grid exists
+                # check if the grid exists
                 gridObj = SessionGrid.objects.filter(session=sessionObj, iteration=sessionObj.iteration)
                 if len(gridObj) >= 1:
                     gridObj = gridObj[0].grid
                     templateData = GridTableData(generateGridTable(gridObj))
                     templateData.tableId = randomStringGenerator()
                     templateData.usid = gridObj.usid
-                    #if the state is not check then return a table where nothing can be changed, else return a table that can be changed
+                    # if the state is not check then return a table where nothing can be changed, else return a table that can be changed
                     if sessionObj.state.name == State.objects.getCheckState().name:
                         templateData.changeRatingsWeights = True
                         templateData.changeCornAlt = True
@@ -1146,16 +1068,15 @@ def ajaxGetSessionGrid(request):
 
 
 def __calculateMeans(ratioMatrices=None):
-    if ratioMatrices == None or ratioMatrices[0] == None or ratioMatrices[0][0] == None:
+    if ratioMatrices is None or ratioMatrices[0] is None or ratioMatrices[0][0] is None:
         return None
 
-    #find out the dimensions of the ratio matrix
+    # find out the dimensions of the ratio matrix
     nMatrixs = len(ratioMatrices)
     nCols = len(ratioMatrices[0][0])
     nRows = len(ratioMatrices[0])
     nAvailableAnswers = 0  # used to see how many ratios are numbers in the same cell over multible ratio matrixes
     totalRatio = 0
-    temp = None
     meanMatrix = []
     i = 0
     j = 0
@@ -1165,26 +1086,25 @@ def __calculateMeans(ratioMatrices=None):
         while j < nCols:
             while k < nMatrixs:
                 temp = ratioMatrices[k][i][j]
-                #calculate the total ratio between all the cell in the same position of all the reponse grids
-                if temp != None:
+                # calculate the total ratio between all the cell in the same position of all the reponse grids
+                if temp is not None:
                     totalRatio += temp
                     nAvailableAnswers += 1
                 k += 1
             k = 0
             j += 1
-            #calculate the mean
+            # calculate the mean
             tempRow.append(float("{0:.2f}".format(totalRatio / nAvailableAnswers)))
             totalRatio = 0
             nAvailableAnswers = 0
         j = 0
         i += 1
         meanMatrix.append(tempRow)
-    i = 0
     return meanMatrix
 
 
 def __calculateRange(ratioMatrices=None):
-    if ratioMatrices == None or ratioMatrices[0] == None or ratioMatrices[0][0] == None:
+    if ratioMatrices is None or ratioMatrices[0] is None or ratioMatrices[0][0] is None:
         return None
 
     nMatrixs = len(ratioMatrices)
@@ -1192,7 +1112,6 @@ def __calculateRange(ratioMatrices=None):
     nRows = len(ratioMatrices[0])
     globalMin = None
     globalMax = None
-    temp = None
     rangeMatrix = []
     i = 0
     j = 0
@@ -1202,9 +1121,9 @@ def __calculateRange(ratioMatrices=None):
         while j < nCols:
             while k < nMatrixs:
                 temp = ratioMatrices[k][i][j]
-                if temp != None:
-                    #if this is the first cell set the max and min to what is found in the ration matrix
-                    if globalMin == None:
+                if temp is not None:
+                    # if this is the first cell set the max and min to what is found in the ration matrix
+                    if globalMin is None:
                         globalMin = temp
                         globalMax = temp
                     else:
@@ -1221,19 +1140,16 @@ def __calculateRange(ratioMatrices=None):
         j = 0
         i += 1
         rangeMatrix.append(tempRow)
-    i = 0
     return rangeMatrix
 
 
 def __calculateStandardDeviation(ratioMatrices=None, meanMatrix=None):
-    if ratioMatrices == None or ratioMatrices[0] == None or ratioMatrices[0][0] == None or meanMatrix == None:
+    if ratioMatrices is None or ratioMatrices[0] is None or ratioMatrices[0][0] is None or meanMatrix is None:
         return None
 
     nMatrixs = len(ratioMatrices)
     nCols = len(ratioMatrices[0][0])
     nRows = len(ratioMatrices[0])
-    temp = None
-    tempMean = 0
     stdMatrix = []
     nAvailableAnswers = 0
     total = 0
@@ -1246,7 +1162,7 @@ def __calculateStandardDeviation(ratioMatrices=None, meanMatrix=None):
             tempMean = meanMatrix[i][j]
             while k < nMatrixs:
                 temp = ratioMatrices[k][i][j]
-                if temp != None:
+                if temp is not None:
                     temp -= tempMean
                     temp **= 2
                     total += temp
@@ -1255,26 +1171,23 @@ def __calculateStandardDeviation(ratioMatrices=None, meanMatrix=None):
             k = 0
             j += 1
             tempRow.append(float("{0:.2f}".format(sqrt(total / nAvailableAnswers))))
-            temp = None
             total = 0
             nAvailableAnswers = 0
         j = 0
         i += 1
         stdMatrix.append(tempRow)
-    i = 0
 
     return stdMatrix
 
 
 def __findMinMaxInMatrix(matrix=None):
-    if matrix == None or matrix[0] == None:
+    if matrix is None or matrix[0] is None:
         return None
 
     nRows = len(matrix)
     nCols = len(matrix[0])
     minValue = None
     maxValue = None
-    temp = None
 
     i = 0
     j = 0
@@ -1282,7 +1195,7 @@ def __findMinMaxInMatrix(matrix=None):
     while i < nRows:
         while j < nCols:
             temp = matrix[i][j]
-            if minValue == None:
+            if minValue is None:
                 minValue = temp
                 maxValue = temp
             else:
@@ -1293,40 +1206,37 @@ def __findMinMaxInMatrix(matrix=None):
             j += 1
         j = 0
         i += 1
-    i = 0
 
-    return (minValue, maxValue)
+    return minValue, maxValue
 
 
 def __createJSforRatioWeightSessionResultsChart(ratioMatrices=None, weightMatrices=None, participantNames=None):
-    if ratioMatrices == None or weightMatrices == None:
+    if ratioMatrices is None or weightMatrices is None:
         return None
-        #create the data for the javascript. format should be a string --> [[name,value], [name,value], ....., [name,value]].
-    javascriptRatioData = []  #format should be [[cell with js string data], [cell with js string data], ...]
-    javascriptWeightData = []  #format should be [[cell with js string data], [cell with js string data], ...]
+        # create the data for the javascript. format should be a string --> [[name,value], [name,value], ....., [name,value]].
+    javascriptRatioData = []  # format should be [[cell with js string data], [cell with js string data], ...]
+    javascriptWeightData = []  # format should be [[cell with js string data], [cell with js string data], ...]
     i = 0
-    j = 0
     k = 0
-    temp = None
     nConcerns = len(ratioMatrices[0])
     nResponseGrids = len(ratioMatrices) - 1
     nAlternatives = len(ratioMatrices[0][0])
 
-    #first create the table for the weights
+    # first create the table for the weights
     while i < nConcerns:
         temp = '['
         temp += '[\'session\','
         tempWeight = weightMatrices[0][0][i]
-        #first element is always what is in the session grid
-        if tempWeight != None and tempWeight >= 1:
+        # first element is always what is in the session grid
+        if tempWeight is not None and tempWeight >= 1:
             temp += str(tempWeight) + ']'
         else:
             temp += '0]'
-            #now add all other elements
+            # now add all other elements
         j = 0
         while j < nResponseGrids:
-            tempWeight = weightMatrices[j + 1][0][i]  #j+1 because the session grid weights are in position 0
-            if tempWeight != None and tempWeight >= 1:
+            tempWeight = weightMatrices[j + 1][0][i]  # j+1 because the session grid weights are in position 0
+            if tempWeight is not None and tempWeight >= 1:
                 temp += ',[\'' + participantNames[j] + '\',' + str(tempWeight) + ']'
             else:
                 temp += ',[\'' + participantNames[j] + '\',0]'
@@ -1335,23 +1245,23 @@ def __createJSforRatioWeightSessionResultsChart(ratioMatrices=None, weightMatric
         javascriptWeightData.append(temp)
         i += 1
     i = 0
-    #now create the table for the ratios
+    # now create the table for the ratios
     while i < nConcerns:
         row = []
         while k < nAlternatives:
             temp = '['
             j = 0
-            #first element is always what is in the session grid
+            # first element is always what is in the session grid
             temp += '[\'session\','
             tempRating = ratioMatrices[0][i][k]
-            if tempRating != None and tempRating >= 1:
+            if tempRating is not None and tempRating >= 1:
                 temp += str(tempRating) + ']'
             else:
                 temp += '0]'
-                #now add all other elements
+                # now add all other elements
             while j < nResponseGrids:
-                tempRating = ratioMatrices[j + 1][i][k]  #j+1 because the session grid ratios are in position 0
-                if tempRating != None and tempRating >= 1:
+                tempRating = ratioMatrices[j + 1][i][k]  # j+1 because the session grid ratios are in position 0
+                if tempRating is not None and tempRating >= 1:
                     temp += ',[\'' + participantNames[j] + '\',' + str(tempRating) + ']'
                 else:
                     temp += ',[\'' + participantNames[j] + '\',0]'
@@ -1362,9 +1272,8 @@ def __createJSforRatioWeightSessionResultsChart(ratioMatrices=None, weightMatric
         k = 0
         javascriptRatioData.append(row)
         i += 1
-    i = 0
 
-    return (javascriptRatioData, javascriptWeightData)
+    return javascriptRatioData, javascriptWeightData
 
 
 def __generateAlternativeConcernResultTable(data=[], sessionGridObj=None):
@@ -1397,29 +1306,28 @@ def __generateAlternativeConcernResultTable(data=[], sessionGridObj=None):
                          position has a boolean indicating if the alternative was previously found in the session grid or not. The fourth
                          position has a string with the names of the users who suggested something.
     """
-    concernsResult = []  #obj that will be returned with the concerns as following: (leftconcern, right concern, nPair, nLeftConcern, nRightConcern, isNew)
-    alternativeResult = []  #obj that will be returned with the alternative as following: (alternative, nTime, isNew)
+    concernsResult = []  # obj that will be returned with the concerns as following: (leftconcern, right concern, nPair, nLeftConcern, nRightConcern, isNew)
+    alternativeResult = []  # obj that will be returned with the alternative as following: (alternative, nTime, isNew)
     oldConcernsPair = []
     oldAlternatives = []
     concerns = {}
-    concernPairs = {}  #key is a tulp value is the number the pair is present together
+    concernPairs = {}  # key is a tulp value is the number the pair is present together
     concernUsers = {}  # this tuple is for the list of participants who suggested the concerns in the responseGrid
     alternatives = {}
-    alternativeUsers = {}  #this tuple is for the list of participants who suggested the alternative in the responseGrid
-    temp = None
+    alternativeUsers = {}  # this tuple is for the list of participants who suggested the alternative in the responseGrid
     i = 0
 
-    #first find all the existing pairs of concerns
-    if sessionGridObj != None:
+    # first find all the existing pairs of concerns
+    if sessionGridObj is not None:
         for concern in sessionGridObj.concerns_set.all():
             lConcern = concern.leftPole
             rConcern = concern.rightPole
-            if lConcern == None and rConcern == None:
+            if lConcern is None and rConcern is None:
                 pass
             else:
-                if lConcern == None:
+                if lConcern is None:
                     lConcern = ""
-                if rConcern == None:
+                if rConcern is None:
                     rConcern = ""
                 oldConcernsPair.append((lConcern.lower(), rConcern.lower()))
 
@@ -1437,21 +1345,21 @@ def __generateAlternativeConcernResultTable(data=[], sessionGridObj=None):
         for concern in grid.concerns_set.all():
             if concern.leftPole:
                 temp = concern.leftPole.lower()
-                if not concerns.has_key(temp):
+                if not temp in concerns:
                     concerns[temp] = 1
                 else:
                     concerns[temp] += 1
             if concern.rightPole:
                 temp = concern.rightPole.lower()
-                if not concerns.has_key(temp):
+                if not temp in concerns:
                     concerns[temp] = 1
                 else:
                     concerns[temp] += 1
-            if concernPairs.has_key((concern.leftPole.lower(), concern.rightPole.lower())):
+            if (concern.leftPole.lower(), concern.rightPole.lower()) in concernPairs:
                 concernPairs[(concern.leftPole.lower(), concern.rightPole.lower())] += 1
             else:
                 concernPairs[(concern.leftPole.lower(), concern.rightPole.lower())] = 1
-            if concernUsers.has_key((concern.leftPole.lower(), concern.rightPole.lower())):
+            if (concern.leftPole.lower(), concern.rightPole.lower()) in concernUsers:
                 concernUsers[(concern.leftPole.lower(), concern.rightPole.lower())] += userID
             else:
                 concernUsers[(concern.leftPole.lower(), concern.rightPole.lower())] = userID
@@ -1459,40 +1367,40 @@ def __generateAlternativeConcernResultTable(data=[], sessionGridObj=None):
         for alternative in grid.alternatives_set.all():
             if alternative:
                 temp = alternative.name.lower()
-                if not alternatives.has_key(temp):
+                if temp not in alternatives:
                     alternatives[temp] = 1
                 else:
                     alternatives[temp] += 1
-                if not alternativeUsers.has_key(temp):
+                if temp not in alternativeUsers:
                     alternativeUsers[temp] = userID
                 else:
                     alternativeUsers[temp] = alternativeUsers[temp] + userID
-                    #create an array that contains the tulip (leftconcern, right concern, nPair, nLeftConcern, nRightConcern, isNew), where nPair is the number of times the pair is found, isNew determines if the pair was present in the session grid or not
+                    # create an array that contains the tulip (leftconcern, right concern, nPair, nLeftConcern, nRightConcern, isNew), where nPair is the number of times the pair is found, isNew determines if the pair was present in the session grid or not
     for key, value in concernPairs.items():
         leftC, rightC = key
-        #check if this pair already exist in the main session grid
+        # check if this pair already exist in the main session grid
         if (leftC, rightC) in oldConcernsPair:
             concernsResult.append((leftC, rightC, value, concerns[leftC], concerns[rightC], False, concernUsers[key]))
         else:
             concernsResult.append((leftC, rightC, value, concerns[leftC], concerns[rightC], True, concernUsers[key]))
-            #create an tulip: (anternative, nTimes, isNew) where nTimes is the amount of times each alternative is cited; isNew tells if the alternative was present in the session grid
+            # create an tulip: (anternative, nTimes, isNew) where nTimes is the amount of times each alternative is cited; isNew tells if the alternative was present in the session grid
     for key, value in alternatives.items():
         if key in oldAlternatives:
             alternativeResult.append((key, value, False, alternativeUsers[key]))
         else:
             alternativeResult.append((key, value, True, alternativeUsers[key]))
 
-    return (concernsResult, alternativeResult)
+    return concernsResult, alternativeResult
 
 
-def __createRangeTableColorMap(globalMax, globalMin, rangeTable):
+def __createRangeTableColorMap(globalMax, rangeTable):
     colorEnd = (255, 255, 255)
     colorStart = (240, 72, 74)
 
     return __createColorMap(100, globalMax, colorStart, colorEnd, rangeTable)
 
 
-def __createStdTableColorMap(globalMax, globalMin, stdTable):
+def __createStdTableColorMap(globalMax, stdTable):
     colorEnd = (255, 255, 255)
     colorStart = (240, 72, 74)
 
@@ -1500,13 +1408,12 @@ def __createStdTableColorMap(globalMax, globalMin, stdTable):
 
 
 def __createColorMap(colorStep, maxValue, startColor, endColor, table):
-    #code from http://www.designchemical.com/blog/index.php/jquery/jquery-tutorial-create-a-flexible-data-heat-map/
+    # code from http://www.designchemical.com/blog/index.php/jquery/jquery-tutorial-create-a-flexible-data-heat-map/
     yr, yg, yb = startColor
     xr, xg, xb = endColor
     colorMap = []
     for row in table:
         colorRow = []
-        pos = None
         if type(row) == type([]):
             for value in row:
                 if maxValue != 0:
@@ -1514,9 +1421,9 @@ def __createColorMap(colorStep, maxValue, startColor, endColor, table):
                         colorRow.append(startColor)
                     else:
                         pos = ceil((value / maxValue) * 100)
-                        red = ceil((xr + (( pos * (yr - xr)) / (colorStep - 1))))
-                        green = ceil((xg + (( pos * (yg - xg)) / (colorStep - 1))))
-                        blue = ceil((xb + (( pos * (yb - xb)) / (colorStep - 1))))
+                        red = ceil((xr + ((pos * (yr - xr)) / (colorStep - 1))))
+                        green = ceil((xg + ((pos * (yg - xg)) / (colorStep - 1))))
+                        blue = ceil((xb + ((pos * (yb - xb)) / (colorStep - 1))))
                         colorRow.append((int(red), int(green), int(blue)))
                 else:
                     colorRow.append(endColor)
@@ -1527,22 +1434,22 @@ def __createColorMap(colorStep, maxValue, startColor, endColor, table):
                     colorMap.append(startColor)
                 else:
                     pos = ceil((row / maxValue) * 100)
-                    red = ceil((xr + (( pos * (yr - xr)) / (colorStep - 1))))
-                    green = ceil((xg + (( pos * (yg - xg)) / (colorStep - 1))))
-                    blue = ceil((xb + (( pos * (yb - xb)) / (colorStep - 1))))
+                    red = ceil((xr + ((pos * (yr - xr)) / (colorStep - 1))))
+                    green = ceil((xg + ((pos * (yg - xg)) / (colorStep - 1))))
+                    blue = ceil((xb + ((pos * (yb - xb)) / (colorStep - 1))))
                     colorMap.append((int(red), int(green), int(blue)))
             else:
                 colorMap.append(endColor)
     return colorMap
 
 
-#this function is used to create the data tha is used in the participants.html page
+# this function is used to create the data tha is used in the participants.html page
 def __createParticipantPanelData(sessionObj):
     usersAndDateTimes = sessionObj.getUsersThatRespondedRequest()
     participantData = []
     for user in sessionObj.getParticipators():
-        #create the list with the user and the class of the css the should be coupled with the user in the html template
-        #but first check if the session is in a state where there is no data that can be requested or responded
+        # create the list with the user and the class of the css the should be coupled with the user in the html template
+        # but first check if the session is in a state where there is no data that can be requested or responded
         if sessionObj.state.name == SessionState.FINISH or sessionObj.state.name == SessionState.INITIAL or sessionObj.state.name == SessionState.CHECK:
             participantData.append((user, 'respondedRequest'))
         else:
@@ -1576,18 +1483,18 @@ def __createPendingResponseData(userObj=None):
     """
     table = None
 
-    if userObj != None:
-        #find out all the sessions that the user is part of
+    if userObj is not None:
+        # find out all the sessions that the user is part of
         userSessionRelation = UserParticipateSession.objects.filter(user=userObj)
         if len(userSessionRelation) >= 1:
             for relation in userSessionRelation:
-                #now lets check if the session is in a state where a response grid is required
+                # now lets check if the session is in a state where a response grid is required
                 sessionObj = relation.session
                 if sessionObj.state.name == State.objects.getWaitingForAltAndConState().name or sessionObj.state.name == State.objects.getWaitingForWeightsAndRatingsState().name:
-                    #now that we know the session is in the correct state lets check if the user has responded.
+                    # now that we know the session is in the correct state lets check if the user has responded.
                     if len(ResponseGrid.objects.filter(user=userObj, session=sessionObj,
                                                        iteration=sessionObj.iteration)) <= 0:
-                        if table == None:
+                        if table is None:
                             table = []
                         table.append(
                             (sessionObj.name + ' : ' + sessionObj.facilitator.user.first_name, sessionObj.usid))
@@ -1595,18 +1502,18 @@ def __createPendingResponseData(userObj=None):
 
 
 def __validateAltConResponse(request):
-    #general validation
-    if request.POST.has_key('nAlternatives') and request.POST.has_key('nConcerns'):
+    # general validation
+    if 'nAlternatives' in request.POST and 'nAlternatives' in request.POST:
         nAlternatives = int(request.POST['nAlternatives'])
         nConcerns = int(request.POST['nConcerns'])
 
         i = 0
-        #check the concern if they are empty or not
+        # check the concern if they are empty or not
         while i < nConcerns:
-            #check left pole
+            # check left pole
             keyName = 'concern_' + str((i + 1)) + '_left'
-            if request.POST.has_key(keyName):
-                if request.POST[keyName] == None or request.POST[keyName].strip() == '':
+            if keyName in request.POST:
+                if request.POST[keyName] is None or request.POST[keyName].strip() == '':
                     raise ValueError('One or more concerns are empty',
                                      'Error concern ' + keyName + ' has an invalid value: "' + request.POST[
                                          keyName] + '"')
@@ -1614,24 +1521,24 @@ def __validateAltConResponse(request):
                 raise KeyError('Invalid request, request is missing argument(s)',
                                'Error request is missing argument: ' + keyName)
 
-            #check right pole
+            # check right pole
             keyName = 'concern_' + str((i + 1)) + '_right'
-            if request.POST.has_key(keyName):
-                if request.POST[keyName] == None or request.POST[keyName].strip() == '':
+            if keyName in request.POST:
+                if request.POST[keyName] is None or request.POST[keyName].strip() == '':
                     raise ValueError('One or more concerns are empty',
                                      'Error concern ' + keyName + ' has an invalid value: "' + request.POST[
                                          keyName] + '"')
             else:
                 raise KeyError('Invalid request, request is missing argument(s)',
                                'Error request is missing argument: ' + keyName)
-            i += 1;
+            i += 1
 
-        i = 0;
-        #validate the alternatives
+        i = 0
+        # validate the alternatives
         while i < nAlternatives:
             keyName = 'alternative_' + str((i + 1)) + '_name'
-            if request.POST.has_key(keyName):
-                if request.POST[keyName] == None or request.POST[keyName].strip() == '':
+            if keyName in request.POST:
+                if request.POST[keyName] is None or request.POST[keyName].strip() == '':
                     raise ValueError('One or more alternatives are empty',
                                      'Error alternative ' + keyName + ' has an invalid value: "' + request.POST[
                                          keyName] + '"')
@@ -1643,8 +1550,8 @@ def __validateAltConResponse(request):
     else:
         raise KeyError('Invalid request, request is missing argument(s)',
                        'Error request is missing arguments: nAlternatives: ' + str(
-                           request.POST.has_key('nAlternatives')) + ' nConcerns: ' + str(
-                           request.POST.has_key('nConcerns')))
+                           'nAlternatives' in request.POST) + ' nConcerns: ' + str(
+                           'nConcerns' in request.POST))
 
 
 def __isGridStateEqualSessionState(sesssionState, gridObj):
@@ -1657,31 +1564,30 @@ def __isGridStateEqualSessionState(sesssionState, gridObj):
     return False
 
 
-#This function will generate the data that is needed for the participatingSessionsContentGrids.html template
-#returns a dictionary that MAY contain the following keys:  previousResponseGrid, sessionGridTable, currentResponseGridTable
+# This function will generate the data that is needed for the participatingSessionsContentGrids.html template
+# returns a dictionary that MAY contain the following keys:  previousResponseGrid, sessionGridTable, currentResponseGridTable
 def __generateParticipatingSessionsGridsData(sessionObj, iteration_, responseGridRelation):
     data = {}
     currentResponseGridRelation = responseGridRelation.filter(iteration=iteration_)
 
-    #a session grid must always be present, if something goes wrong here the calling function should deal with it
+    # a session grid must always be present, if something goes wrong here the calling function should deal with it
     data['sessionGridTable'] = generateGridTable(sessionObj.sessiongrid_set.all()[iteration_].grid)
 
-    #check to see if a previous response grid should be displayed or not
+    # check to see if a previous response grid should be displayed or not
     if iteration_ >= 2 and iteration_ - 1 > 0:
         previousResponseGridRelation = responseGridRelation.filter(iteration=iteration_ - 1)
-        previousResponseGrid = None
         if len(previousResponseGridRelation) >= 1:
             previousResponseGrid = previousResponseGridRelation[0].grid
-            if previousResponseGrid != None and __isGridStateEqualSessionState(sessionObj.state,
-                                                                               previousResponseGrid) and (
-                            previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT or previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN):
-                #generate the data for the previous response grid
+            if previousResponseGrid is not None and __isGridStateEqualSessionState(sessionObj.state,
+                                                                                   previousResponseGrid) and (
+                    previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT or previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN):
+                # generate the data for the previous response grid
                 data['previousResponseGrid'] = generateGridTable(previousResponseGridRelation[0].grid)
 
-    #generate response grid data
-    #check to see if the user has already send a response grid
+    # generate response grid data
+    # check to see if the user has already send a response grid
     if len(currentResponseGridRelation) >= 1:
-        #if he has sent an response generate the data for the grid
+        # if he has sent an response generate the data for the grid
         data['currentResponseGridTable'] = generateGridTable(currentResponseGridRelation[0].grid)
 
     return data
@@ -1691,17 +1597,16 @@ def __generateParticipatingSessionsGridsData(sessionObj, iteration_, responseGri
 # to make the creation of session possible from the session that previously completed
 def __saveSessionGridAsUserGrid(request):
     user1 = request.user
-    gridObj = None
+    gridObj = userObj = gridType = gridName = None
     isConcernAlternativeResponseGrid = False
 
-    #lets determine what type of grid we are dealing with here
-    if request.POST.has_key('gridType'):
+    # lets determine what type of grid we are dealing with here
+    if 'gridType' in request.POST:
         gridType = request.POST['gridType']
         if gridType == 'session':
             gridType = Grid.GridType.USER_GRID
             userObj = request.user
-            gridName = 'None'
-            if request.POST.has_key('sessionUSID') and request.POST.has_key('iteration'):
+            if 'sessionUSID' in request.POST and 'iteration' in request.POST:
                 facilitatorObj = Facilitator.objects.isFacilitator(request.user)
                 if facilitatorObj:
                     session = facilitatorObj.session_set.filter(usid=request.POST['sessionUSID'])
@@ -1729,24 +1634,23 @@ def __saveSessionGridAsUserGrid(request):
         except:
             pass
 
-    if request.POST.has_key('gridName'):
+    if 'gridName' in request.POST:
         gridCheckNameResult = validateName(request.POST['gridName'])
         if type(gridCheckNameResult) == StringType:
             gridObj.name = gridCheckNameResult
         else:
-            #if the grid name isn't a string than it is an error
+            # if the grid name isn't a string than it is an error
             return gridCheckNameResult
-            #because django will save stuff to the database even if .save() is not called, we need to validate everything before starting to create the objects that will be used to populate the db
-    obj = None
+            # because django will save stuff to the database even if .save() is not called, we need to validate everything before starting to create the objects that will be used to populate the db
     try:
-        obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
+        obj = __validateInputForGrid(request, isConcernAlternativeResponseGrid)
     except:
         __debug_print_stacktrace()
         return False
     nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues = obj
 
-    #update the grid
-    if gridObj != None:
+    # update the grid
+    if gridObj is not None:
         try:
             isGridCreated = createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernValues,
                                        alternativeValues, ratioValues, True)
@@ -1758,20 +1662,20 @@ def __saveSessionGridAsUserGrid(request):
         return False
 
 
-#this function will generate the data for the ResultRatingWeightTablesData or ResultAlternativeConcernTableData template data objects
-#this function also returns one of those objects depending on the type of requested the results will be based on.
-#if no results were found none is returned
+# this function will generate the data for the ResultRatingWeightTablesData or ResultAlternativeConcernTableData template data objects
+# this function also returns one of those objects depending on the type of requested the results will be based on.
+# if no results were found none is returned
 def __generateSessionIterationResult(request, sessionObj, iterationObj):
     if sessionObj.iteration < iterationObj:
         raise WrongSessionIteration('Session does not contain that iteration')
 
-    #let's find all the response grids
+    # let's find all the response grids
     responseGridRelation = sessionObj.responsegrid_set.filter(iteration=iterationObj)
     if len(responseGridRelation) >= 1:
         gridType = responseGridRelation[0].grid.grid_type
         if gridType == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
             try:
-                #check to see if we have a sesssion grid for the iteration
+                # check to see if we have a sesssion grid for the iteration
                 templateData = ResultAlternativeConcernTableData()
                 sessionGrid = SessionGrid.objects.filter(session=sessionObj, iteration=iterationObj)
                 if len(sessionGrid) >= 1:
@@ -1789,14 +1693,12 @@ def __generateSessionIterationResult(request, sessionObj, iterationObj):
                 __debug_print_stacktrace()
                 raise e
         elif gridType == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:
-            #create a list with a matrix of ratios in each position of the list.
+            # create a list with a matrix of ratios in each position of the list.
             ratioMatrices = []
             weightMatrices = []
             tempMatrix = []
-            tempRatioRow = None
-            tempWeightRow = None
 
-            #first lets add the rations that are in the session grid to the list
+            # first lets add the rations that are in the session grid to the list
             #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
             concerns = sessionObj.sessiongrid_set.filter(iteration=iterationObj)[0].grid.concerns_set.all()
             alternatives = sessionObj.sessiongrid_set.filter(iteration=iterationObj)[0].grid.alternatives_set.all()
@@ -1816,14 +1718,12 @@ def __generateSessionIterationResult(request, sessionObj, iterationObj):
                 tempMatrix.append(tempRatioRow)
                 j = 0
                 i += 1
-            i = 0
             ratioMatrices.append(tempMatrix)
             weightMatrices.append([tempWeightRow])
             tempMatrix = []
-            tempWeightRow = []
             #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
 
-            #now lets do the same for the response grids
+            # now lets do the same for the response grids
             #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
             i = 0
             j = 0
@@ -1855,7 +1755,7 @@ def __generateSessionIterationResult(request, sessionObj, iterationObj):
             i = 0
             #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
 
-            #calculate the rage, mean and std for the weight and ratio
+            # calculate the rage, mean and std for the weight and ratio
             #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
             meanRatioMatrix = __calculateMeans(ratioMatrices)
             rangeRatioMatrix = __calculateRange(ratioMatrices)
@@ -1865,14 +1765,14 @@ def __generateSessionIterationResult(request, sessionObj, iterationObj):
             stdWeightMatrix = __calculateStandardDeviation(weightMatrices, meanWeightMatrix)
             #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
 
-            #first lets create the header
+            # first lets create the header
             #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
             header = []
             for alternative in sessionObj.sessiongrid_set.filter(iteration=iterationObj)[0].grid.alternatives_set.all():
                 header.append(alternative.name)
                 #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
 
-            #generate color map
+            # generate color map
             #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
             #minMaxRangeRatio= __findMinMaxInMatrix__(rangeRatioMatrix)
             minMaxRangeWeight = __findMinMaxInMatrix(stdRatioMatrix)
@@ -1880,42 +1780,40 @@ def __generateSessionIterationResult(request, sessionObj, iterationObj):
             #minMaxStdRatio= __findMinMaxInMatrix__(rangeWeightMatrix)
             minMaxStdWeight = __findMinMaxInMatrix(stdWeightMatrix)
 
-            rangeRatioColorMap = __createRangeTableColorMap(4, 0,
+            rangeRatioColorMap = __createRangeTableColorMap(4,
                                                             rangeRatioMatrix)  # for as the max range is 1-5= 4 (as right now the user can only use the numbers between 1 and 5)
-            rangeWeightColorMap = __createRangeTableColorMap(minMaxRangeWeight[1], 0, rangeWeightMatrix[0])
-            stdRatioColorMap = __createStdTableColorMap(4, 0, stdRatioMatrix)
-            stdWeightColorMap = __createStdTableColorMap(minMaxStdWeight[1], 0, stdWeightMatrix[0])
+            rangeWeightColorMap = __createRangeTableColorMap(minMaxRangeWeight[1], rangeWeightMatrix[0])
+            stdRatioColorMap = __createStdTableColorMap(4, stdRatioMatrix)
+            stdWeightColorMap = __createStdTableColorMap(minMaxStdWeight[1], stdWeightMatrix[0])
             #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
 
-
-            #generate the js for the chart in the page
+            # generate the js for the chart in the page
             #>>>>>>>>>>>>>>>>>>>>>>start<<<<<<<<<<<<<<<<<<
             participantNames = []
-            #retrieve all the names
+            # retrieve all the names
             while i < len(responseGridRelation):
-                #the initial db didn't link a response grid to a user direcly, this has changed now, but the code needs to take care of this difference. (4/7/2012)
-                if responseGridRelation[i].grid.user != None:
+                # the initial db didn't link a response grid to a user direcly, this has changed now, but the code needs to take care of this difference. (4/7/2012)
+                if responseGridRelation[i].grid.user is not None:
                     participantNames.append(responseGridRelation[i].grid.user.first_name)
                 else:
                     participantNames.append(responseGridRelation[i].user.first_name)
                 i += 1
-            i = 0
             ratioJsChartData, weightJsChartData = __createJSforRatioWeightSessionResultsChart(ratioMatrices,
                                                                                               weightMatrices,
                                                                                               participantNames)
 
             #>>>>>>>>>>>>>>>>>>>>>>end<<<<<<<<<<<<<<<<<<
 
-            #clue everything together now and return the page
-            tableRatingRangeColor = []  #final table with the value to be displayed, the background color and js code
-            tableRatingStdColor = []  #final table with the value to be displayed, the background color and js code
-            tableRatingMean = []  #final table with the value to be displayed and js code
-            tableWeightMean = []  #final table with the weights and js code
-            tableWeightStd = []  #final table with the weights and js code
-            tableWeightRange = []  #final table with the weights and js code
+            # clue everything together now and return the page
+            tableRatingRangeColor = []  # final table with the value to be displayed, the background color and js code
+            tableRatingStdColor = []  # final table with the value to be displayed, the background color and js code
+            tableRatingMean = []  # final table with the value to be displayed and js code
+            tableWeightMean = []  # final table with the weights and js code
+            tableWeightStd = []  # final table with the weights and js code
+            tableWeightRange = []  # final table with the weights and js code
             i = 0
 
-            #reverse the weight color maps, this is done because we use pop in the template!!!
+            # reverse the weight color maps, this is done because we use pop in the template!!!
             rangeWeightColorMap.reverse()
             stdWeightColorMap.reverse()
 
@@ -1924,19 +1822,19 @@ def __generateSessionIterationResult(request, sessionObj, iterationObj):
                 rowStd = []
                 rowMean = []
                 tableWeightMean.append((meanWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[(
-                                                                                                        nConcerns - 1) - i]))  #meanWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                    nConcerns - 1) - i]))  # meanWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
                 tableWeightStd.append((stdWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[(
-                                                                                                      nConcerns - 1) - i]))  #stdWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                    nConcerns - 1) - i]))  # stdWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
                 tableWeightRange.append((rangeWeightMatrix[0][(nConcerns - 1) - i], weightJsChartData[(
-                                                                                                          nConcerns - 1) - i]))  #rangeWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
-                #create a tulip with the value that should be displayed in the td and the color of the background for each cell in the row
+                    nConcerns - 1) - i]))  # rangeWeightMatrix[0][], it is always [0] as in truth the matrix is not really a matrix but a 1d list, the list needs to be reserved because we use pop in the template
+                # create a tulip with the value that should be displayed in the td and the color of the background for each cell in the row
                 while k < nAlternatives:
                     rowRange.append((rangeRatioMatrix[i][k], rangeRatioColorMap[i][k], ratioJsChartData[i][k]))
                     rowStd.append((stdRatioMatrix[i][k], stdRatioColorMap[i][k], ratioJsChartData[i][k]))
                     rowMean.append((meanRatioMatrix[i][k], ratioJsChartData[i][k]))
                     k += 1
                 k = 0
-                #add the concerns to the range, mean and std tables
+                # add the concerns to the range, mean and std tables
                 rightPole = concerns[i].rightPole
                 leftPole = concerns[i].leftPole
                 rowStd.insert(0, (leftPole, None))
@@ -1948,12 +1846,9 @@ def __generateSessionIterationResult(request, sessionObj, iterationObj):
                 tableRatingRangeColor.append(rowRange)
                 tableRatingStdColor.append(rowStd)
                 tableRatingMean.append(rowMean)
-                rightPole = None
-                leftPole = None
                 i += 1
-            i = 0
 
-            #put all the data into objects for the template
+            # put all the data into objects for the template
             rangeData = ResultRatingWeightTableData()
             meanData = ResultRatingWeightTableData()
             stdData = ResultRatingWeightTableData()
@@ -1993,7 +1888,7 @@ def __debug_print_stacktrace():
     """
     TODO: Switch to the default logging system
     """
-    if DEBUG == True:
+    if DEBUG:
         print "Exception in user code:"
         print '-' * 60
         traceback.print_exc(file=sys.stdout)

@@ -114,7 +114,7 @@ def ajaxCreateGrid(request):
 
     #lets validate the data
     try:
-        obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
+        obj = __validateInputForGrid(request, isConcernAlternativeResponseGrid)
     except KeyError as error:
         if DEBUG:
             print "Exception in user code:"
@@ -420,7 +420,7 @@ def ajaxUpdateGrid(request):
             #because django will save stuff to the database even if .save() is not called, we need to validate everything before starting to create the objects that will be used to populate the db
     obj = None
     try:
-        obj = __validateInputForGrid__(request, isConcernAlternativeResponseGrid)
+        obj = __validateInputForGrid(request, isConcernAlternativeResponseGrid)
     except KeyError as error:
         if DEBUG:
             print "Exception in user code:"
@@ -997,7 +997,7 @@ def __convertSvgStringTo__(svgString=None, convertTo=None):
 """
 
 
-def __validateInputForGrid__(request, isConcernAlternativeResponseGrid):
+def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
     concernValues = [] #this will contain a tuple with 3 values, (leftPole, rightPole, weight)
     alternativeValues = []
     ratioValues = []
