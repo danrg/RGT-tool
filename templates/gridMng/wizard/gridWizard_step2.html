@@ -24,9 +24,9 @@
 	<div id="alt-list-data">
 	{% if wizard.form.fields|length == 0 %}
 		{% for i in 3|get_range %}
-		<div id="input{{ i|add:'1' }}" class="cloned">
-			<input type="text" name="1-alternative-{{ i|add:'1' }}" id="id_1-alternative-{{ i|add:'1' }}" tabindex="{{ i|add:'1' }}" size="30" />
-                        <input type="button" id="btn-del-{{ i|add:'1' }}" value="X" onclick="removeAlt({{ i|add:'1' }})" />
+		<div id="input{{ forloop.counter }}" class="cloned">
+			<input type="text" name="1-alternative-{{ forloop.counter }}" id="id_1-alternative-{{ forloop.counter }}" tabindex="{{ forloop.counter }}" size="30" />
+            <input type="button" id="btn-del-{{ forloop.counter }}" value="X" onclick="removeAlt({{ forloop.counter }})" />
 		</div>
 		{% endfor %}
 	{% else %}
@@ -35,13 +35,14 @@
 			<div class="field-wrapper">
 				<div class="field-input-wrapper">
 					{{ field }}
+                    <input type="button" id="btn-del-{{ forloop.counter }}" value="X" onclick="removeAlt({{ forloop.counter }})" />
 				</div>
 				{% if field.errors %}
-				<div class="error">
-				{% for error in field.errors %}
-					<p>{{ error }}</p>
-				{% endfor %}
-				</div>
+                    <div class="error">
+                    {% for error in field.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                    </div>
 				{% endif %}
 			</div>
 		</div>
