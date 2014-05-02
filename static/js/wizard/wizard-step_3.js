@@ -46,8 +46,10 @@ $(document).ready(function () {
 			var leftConc = "<div class='field-wrapper'><div class='field-input-wrapper'><input id='" + leftId + "' type='text' name='" + leftName + "' value='" + leftConcValue + "' size='50' /></div></div>";
 			var rightConc = "<div class='field-wrapper'><div class='field-input-wrapper'><input id='" + rightId + "' type='text' name='" + rightName + "' value='" + rightConcValue + "'  size='50' /></div></div>";
 			var sep = "<div class='sep'><span>--</span></div>";
+            var deleteButton = "<div class=\"del-conc-but-wrapper\"><input type=\"button\" class=\"del-conc-but\" value=\"Delete\" /></div>";
+
 			// append the new concern with the left and right pole on the concern list
-			$('#conc-list-data').append('<div id="input' + newNum + '" class="cloned">' + leftConc + sep + rightConc + '</div>');
+			$('#conc-list-data').append('<div id="input' + newNum + '" class="cloned">' + leftConc + sep + rightConc + deleteButton + '</div>');
 			// put the new number of concerns
 			$('#num-concerns').val(newNum);
 			// clear the values
@@ -63,19 +65,34 @@ $(document).ready(function () {
 			showMessageInDialogBox('Please first type the left and right pole of the concern and then press the "Add" button.');
 		}
 	});
-    $('#del-conc-but').click(function() {
+
+    $(document).on("click", ".del-conc-but", function () {
         // get the number of cloned inputs
         var numOfCloned = $('.cloned').length;
         // this is the new number
         var newNum = numOfCloned - 1;
-        if (numOfCloned > 1) {
-            $('#input' + numOfCloned).remove();
-            $('#id_2-concern'+numOfCloned+'-left').remove();
-            $('#id_2-concern'+numOfCloned+'-right').remove();
+        if (numOfCloned >= 2) {
+            var wrapper = $(this).closest($('.cloned'));
+            var removedIndex = parseInt(wrapper.attr('id').substring(5));
+            wrapper.remove();
+
+            // Rearrange indices
+            for(var i = removedIndex + 1; i <= numOfCloned; i++) {
+                $('#input' + i).attr('id', 'input' + (i - 1));
+                $('#id_2-concern' + i + '-left').attr({
+                    'id': 'id_2-concern' + (i - 1) + '-left',
+                    'name': '2-concern' + (i - 1) + '-left'
+                });
+                $('#id_2-concern' + i + '-right').attr({
+                    'id': 'id_2-concern' + (i - 1) + '-right',
+                    'name': '2-concern' + (i - 1) + '-right'
+                });
+            }
+
             $('.cloned').length = newNum;
-            $('#num-concerns').attr('value',newNum);
+            $('#num-concerns').attr('value', newNum);
         } else {
-            showMessageInDialogBox('Atleast 2 concern pairs should exist to perform delete.');
+            showMessageInDialogBox('At least 2 concern pairs should exist to perform delete.');
         }
     });
 	$('#form').submit(function(event) {
@@ -85,12 +102,12 @@ $(document).ready(function () {
 		// get the values of the right and left concern that the user inserted
 		var leftConcValue = lcField.val();
 		var rightConcValue = rcField.val();
-		// if one of the fields for the concerns have a value, show a dialog to the user to decide
+		// if one of the fields for the concerns have a value, show a dialog to the user to dec ide
 		// if he wants to keep the values or discard
 		if (leftConcValue != "" || rightConcValue != "") {
 			// get the dialog div and put the message
 			dialogDiv= getDialogDiv();
-			dialogDiv.html('<p>You have typed a concern but you have not added yet by pressing the "Add" button. If you got to next step this data will be lost. Do you still want to go to next step?</p>');
+			dialogDiv.html('<p>You have typed a concern which you have not added yet by pressing the "Add" button. If you go to the next step this data will be lost. Do you still want to go to the next step?</p>');
 			// show the dialog
 			dialogDiv.dialog({
 				title: 'Information',

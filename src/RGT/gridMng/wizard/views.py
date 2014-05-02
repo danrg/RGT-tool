@@ -37,6 +37,7 @@ class GridWizard(SessionWizardView):
             # The concerns data are also passed in the template as dictionary {'index':'concern_pair'}
             # because it is needed in order to generate the fields properly.
             dict_data = self.get_cleaned_data_for_step('2')
+
             concerns_data = {}
             # We only want to keep the visible fields and not the hidden. The visible fields MUST
             # contain the string "concern".

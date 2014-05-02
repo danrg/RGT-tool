@@ -30,7 +30,7 @@
 	margin-left: 1px;
 }
 .list-wrapper {
-	width: 426px;
+	width: 400px;
 	display: inline-block;
 	margin: 0px 0px 5px 1px;
 }
@@ -53,11 +53,29 @@
 	margin-bottom: 10px;
 }
 .field-wrapper {
-	width: 275px;
 	float: left;
+}
+.del-conc-but-wrapper {
+    margin-left: 10px;
+    float: left;
 }
 .sep {
 	float: left;
 	margin: 0px 5px;
 	padding-top: 2px;
+}
+.field-input-wrapper input,
+.list-input input {
+    width: 376px;
+}
+form {
+    width: 865px;
+}
+#add-conc-but-wrapper {
+    margin-top: 260px;
+    float: right;
+}
+
+#add-conc-but-wrapper input {
+    margin-left: -68px;
 }
