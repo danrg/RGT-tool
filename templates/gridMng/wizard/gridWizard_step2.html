@@ -12,18 +12,18 @@
 
 {% block step_info %}
 <div class="step-header">
-	<p>In this step you can type the alternatives. Press the 'Add' button in order to add more alternatives.</p>
+	<p>In this step you can type the alternatives. New input fields are added automatically.</p>
 </div>
 {% endblock step_info %}
 
 {% block wizard_form_content %}
 <div id="alt-list">
 	<div id="alt-list-header">
-		<h4>Alternatives List</h4>
+		<h4>Alternatives</h4>
 	</div>
 	<div id="alt-list-data">
 	{% if wizard.form.fields|length == 0 %}
-		{% for i in 3|get_range %}
+		{% for i in 2|get_range %}
 		<div id="input{{ forloop.counter }}" class="cloned">
 			<input type="text" name="1-alternative-{{ forloop.counter }}" id="id_1-alternative-{{ forloop.counter }}" tabindex="{{ forloop.counter }}" size="30" />
             <input type="button" id="btn-del-{{ forloop.counter }}" value="X" onclick="removeAlt({{ forloop.counter }})" />
@@ -59,14 +59,8 @@
 	</div>
 </div>
 {% endif %}
-<input type="hidden" name="num-alternatives" value="{% if wizard.form.fields|length == 0 %}3{% else %}{{ wizard.form.fields|length }}{% endif %}" id="num-alternatives" />
+<input type="hidden" name="num-alternatives" value="{% if wizard.form.fields|length == 0 %}2{% else %}{{ wizard.form.fields|length }}{% endif %}" id="num-alternatives" />
 {% endblock wizard_form_content %}
-
-{% block after_wizard_form_content %}
-<div id="btn-add-wrapper">
-   	<input type="button" id="btn-add" value="Add" tabindex="{% if alternatives_length %}{{ alternatives_length|add:'1' }}{% else %}4{% endif %}" />
-</div>
-{% endblock after_wizard_form_content %}
 
 {% block prev_step_but_tab %}{% if alternatives_length %}{{ alternatives_length|add:'3' }}{% else %}6{% endif %}{% endblock prev_step_but_tab %}
 

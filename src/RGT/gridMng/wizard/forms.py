@@ -20,8 +20,9 @@ class AlternativesForm(forms.Form):
                 # Every time, alternative fields are added with the name 'alternative..', and this because django
                 # always adds '1-' % (where 1 the number of the step with zero index) prefix in the name,
                 # with this the names are kept always the same.
-                self.fields[alternativeName] = forms.CharField(widget=forms.TextInput(attrs={'tabindex':'%d'%(x+1),'size':'30'}))
-    
+                widget_data = forms.TextInput(attrs={'tabindex':'%d'%(x+1),'size':'30'})
+                self.fields[alternativeName] = forms.CharField(widget=widget_data, required=False)
+
     def clean(self):
         cleaned_data = super(AlternativesForm, self).clean()
         alternatives = []
@@ -38,6 +39,8 @@ class AlternativesForm(forms.Form):
         # Check if there are duplicate names for the alternatives.
         if len(alternatives) != len(set(alternatives)):
             raise forms.ValidationError('It is not allowed to have the same name for alternatives.')
+        if len(alternatives) < 2:
+            raise forms.ValidationError('At least 2 alternatives are required.')
         return cleaned_data
     
 class ConcernsForm(forms.Form):
