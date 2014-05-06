@@ -15,13 +15,13 @@ RGT | Home
 {% if not user.is_superuser %}
 	{% if not user.is_active %}
 	<div id="verify-message">
-		<p>Please verify your email! Thank you!</p>
+		<p>Please verify your email.</p>
     <br/>
 	</div>
 	{% endif %}
 {% endif %}
 <div class="info" id="welcome-message">
-	<p>Welcome {{ firstName }}! Please use the menu above to navigate!</p>
+	<p>Welcome {{ firstName }}! Please use the menu above to navigate.</p>
 </div>
 <div class="info" id="gen-info">
 	<h3>About</h3>

@@ -7,7 +7,7 @@
 {% block content %}
 <h2>Contact RGT Team</h2>
 {% if not didContact %}
-	<div>Use the form below to contact with us!</div>
+	<div>Use the form below to contact with us.</div>
 	<form action="/contact/" method="post" id="form">
 		{% csrf_token %}
 		<div id="contactForm" class="formelms">
@@ -23,6 +23,6 @@
 		<input type="submit" value="Send"/>
 	</form>
 {% else %}
-	<div>Thank you for contacting with us! We will reply as soon as possible!</div>
+	<div>Thank you for contacting us. We will reply as soon as possible.</div>
 {% endif %}
 {% endblock %}

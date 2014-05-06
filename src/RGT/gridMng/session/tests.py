@@ -35,7 +35,7 @@ class CreateSessionTest(TestCase):
         self.__login()
         response = self.client.get(self.path, follow=True)
         self.assertEquals(200, response.status_code)
-        self.assertContains(response, "Create Session")
+        self.assertContains(response, "Create session")
 
     def test_post_minimal_params(self):
         self.__login()

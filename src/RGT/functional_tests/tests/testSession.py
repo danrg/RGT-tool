@@ -140,7 +140,7 @@ class SessionTests(BaseSessionLiveTest):
         show_results.click()
 
         # user creates session
-        create_button = self.browser.find_element_by_css_selector("input[value='Create Session']")
+        create_button = self.browser.find_element_by_css_selector("input[value='Create session']")
         create_button.click()
 
         # A dialog box appears with the message 'Session was created.' and user closes it
@@ -159,12 +159,12 @@ class SessionTests(BaseSessionLiveTest):
         self.assertEqual(participants_in_panel[1].text, "User2 Participant")
 
         # Facilitator admin clicks the start session button
-        start_session_button = self.browser.find_element_by_css_selector("input[value='Start Session']")
+        start_session_button = self.browser.find_element_by_css_selector("input[value='Start session']")
         start_session_button.click()
 
         # Wait until the menu of the buttons changes to the session handling menu
         WebDriverWait(self.browser, 10).until(
-            lambda x: self.browser.find_element_by_css_selector("input[value='Request Alt/Con']"))
+            lambda x: self.browser.find_element_by_css_selector("input[value='Request alternatives/concerns']"))
 
         # The iteration label show iteration 1
         iteration_label = self.browser.find_element_by_id("iteration")
@@ -178,12 +178,12 @@ class SessionTests(BaseSessionLiveTest):
 
         # Facilitator admin clicks the request alternatives and concerns button
         request_alternatives_concerns_button = self.browser.find_element_by_css_selector(
-            "input[value='Request Alt/Con']")
+            "input[value='Request alternatives/concerns']")
         request_alternatives_concerns_button.click()
 
         # Wait until the session menu changes, to include the finish session button
         WebDriverWait(self.browser, 10).until(
-            lambda x: self.browser.find_element_by_css_selector("input[value='Finish Request']"))
+            lambda x: self.browser.find_element_by_css_selector("input[value='Finish request']"))
 
         # The iteration status shows 'Alternatives / Concerns'
         current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
@@ -218,7 +218,7 @@ class SessionTests(BaseSessionLiveTest):
         alternative_3_name.send_keys('a3')
 
         # Participant user1 sends the response and logs out
-        send_response_button = self.browser.find_element_by_css_selector("input[value='Send Response']")
+        send_response_button = self.browser.find_element_by_css_selector("input[value='Send response']")
         send_response_button.click()
 
         self.wait_for_dialog_box_with_message("Response was sent.")
@@ -279,7 +279,7 @@ class SessionTests(BaseSessionLiveTest):
         concern_5_right.send_keys('r05')
 
         # Participant user2 sends the response
-        send_response_button = self.browser.find_element_by_css_selector("input[value='Send Response']")
+        send_response_button = self.browser.find_element_by_css_selector("input[value='Send response']")
         send_response_button.click()
 
         self.wait_for_dialog_box_with_message("Response was sent.")
@@ -306,12 +306,12 @@ class SessionTests(BaseSessionLiveTest):
         self.facilitator_can_select_session("admin@admin.com", "123", "session1")
 
         # Facilitator admin clicks the finish request button
-        finish_request_button = self.browser.find_element_by_css_selector("input[value='Finish Request']")
+        finish_request_button = self.browser.find_element_by_css_selector("input[value='Finish request']")
         finish_request_button.click()
 
         # Wait until the session menu changes, to include the request ratings button
         WebDriverWait(self.browser, 10).until(
-            lambda x: self.browser.find_element_by_css_selector("input[value='Request Ratings']"))
+            lambda x: self.browser.find_element_by_css_selector("input[value='Request ratings']"))
 
         # The iteration label shows iteration 2
         iteration_label = self.browser.find_element_by_id("iteration")
@@ -394,14 +394,14 @@ class SessionTests(BaseSessionLiveTest):
         self.fill_empty_ratings(False)
 
         # Facilitator admin saves the new grid
-        save_changes_button = self.browser.find_element_by_css_selector("input[value='Save Changes']")
+        save_changes_button = self.browser.find_element_by_css_selector("input[value='Save changes']")
         save_changes_button.click()
 
         # A dialog box appears with the message 'Grid was saved'
         self.wait_for_dialog_box_with_message("Grid was saved")
 
         # Facilitator admin clicks the clear results button to clear the results
-        clear_results_button = self.browser.find_element_by_css_selector("input[value='Clear Results']")
+        clear_results_button = self.browser.find_element_by_css_selector("input[value='Clear results']")
         clear_results_button.click()
 
         # Wait until the results are cleared
@@ -409,19 +409,19 @@ class SessionTests(BaseSessionLiveTest):
             lambda x: self.browser.find_element_by_id("mySessionsContentResultDiv").text == "")
 
         # Facilitator admin clicks the request ratings button
-        request_ratings_button = self.browser.find_element_by_css_selector("input[value='Request Ratings']")
+        request_ratings_button = self.browser.find_element_by_css_selector("input[value='Request ratings']")
         request_ratings_button.click()
 
         # Wait until the session menu changes, to include the finish session button
         WebDriverWait(self.browser, 10).until(
-            lambda x: self.browser.find_element_by_css_selector("input[value='Finish Request']"))
+            lambda x: self.browser.find_element_by_css_selector("input[value='Finish request']"))
 
         # The iteration status shows 'Ratings / Weights'
         current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
         self.assertIn("Ratings / Weights", current_iteration_status.text)
 
         # Facilitator clicks the show dendrogram button and gets the dendrogram
-        show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show Dendrogram']")
+        show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show dendrogram']")
         show_dendrogram_button.click()
 
         time.sleep(2)
@@ -443,7 +443,7 @@ class SessionTests(BaseSessionLiveTest):
         #self.fill_empty_ratings(True)
 
         # Participant user1 sends the response
-        send_response_button = self.browser.find_element_by_css_selector("input[value='Send Response']")
+        send_response_button = self.browser.find_element_by_css_selector("input[value='Send response']")
         send_response_button.click()
 
         self.wait_for_dialog_box_with_message("Response was sent.")
@@ -460,7 +460,7 @@ class SessionTests(BaseSessionLiveTest):
         #self.fill_empty_ratings(True)
 
         # Participant user2 sends the response
-        send_response_button = self.browser.find_element_by_css_selector("input[value='Send Response']")
+        send_response_button = self.browser.find_element_by_css_selector("input[value='Send response']")
         send_response_button.click()
 
         self.wait_for_dialog_box_with_message("Response was sent.")
@@ -475,12 +475,12 @@ class SessionTests(BaseSessionLiveTest):
         self.facilitator_can_select_session("admin@admin.com", "123", "session1")
 
         # Facilitator admin clicks the finish request button
-        finish_request_button = self.browser.find_element_by_css_selector("input[value='Finish Request']")
+        finish_request_button = self.browser.find_element_by_css_selector("input[value='Finish request']")
         finish_request_button.click()
 
         # Wait until the session menu changes, to include the end session button
         WebDriverWait(self.browser, 10).until(
-            lambda x: self.browser.find_element_by_css_selector("input[value='End Session']"))
+            lambda x: self.browser.find_element_by_css_selector("input[value='End session']"))
 
         # The iteration label shows iteration 2
         iteration_label = self.browser.find_element_by_id("iteration")
@@ -524,14 +524,14 @@ class SessionTests(BaseSessionLiveTest):
 
 
         # Facilitator admin saves the changes
-        save_changes_button = self.browser.find_element_by_css_selector("input[value='Save Changes']")
+        save_changes_button = self.browser.find_element_by_css_selector("input[value='Save changes']")
         save_changes_button.click()
 
         # A dialog box appears with the message 'Grid was saved'
         self.wait_for_dialog_box_with_message("Grid was saved")
 
         # Facilitator clicks the show dendrogram button and gets the dendrogram
-        show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show Dendrogram']")
+        show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show dendrogram']")
         show_dendrogram_button.click()
 
         # Wait until the dendrogram appears successfully
@@ -540,7 +540,7 @@ class SessionTests(BaseSessionLiveTest):
         time.sleep(1)
 
         # Facilitator admin clicks the end session button
-        end_session_button = self.browser.find_element_by_css_selector("input[value='End Session']")
+        end_session_button = self.browser.find_element_by_css_selector("input[value='End session']")
         end_session_button.click()
 
         # Wait until the status change to Closed
@@ -555,7 +555,7 @@ class SessionTests(BaseSessionLiveTest):
         self.facilitator_can_select_session("admin@admin.com", "123", "session1")
 
         # Facilitator clicks the show dendrogram button and gets the dendrogram
-        show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show Dendrogram']")
+        show_dendrogram_button = self.browser.find_element_by_css_selector("input[value='Show dendrogram']")
         show_dendrogram_button.click()
 
         # Wait until the dendrogram appears successfully
@@ -659,7 +659,7 @@ class FacilitatorSessionTests(BaseSessionLiveTest):
         create_session_link.click()
 
         body = self.browser.find_element_by_tag_name("body")
-        self.assertIn("Create Session", body.text)
+        self.assertIn("Create session", body.text)
 
         # The 'select' tag contains the created grid with name 'grid1'
         select_field = self.browser.find_element_by_css_selector("select")
@@ -683,7 +683,7 @@ class FacilitatorSessionTests(BaseSessionLiveTest):
         show_results.click()
 
         # User clicks the create session button
-        create_session_button = self.browser.find_element_by_css_selector("input[value='Create Session']")
+        create_session_button = self.browser.find_element_by_css_selector("input[value='Create session']")
         create_session_button.click()
 
         # A dialog box appears with the message 'Session was created.'

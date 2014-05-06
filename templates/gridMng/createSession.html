@@ -24,11 +24,11 @@
 {% block content%}
 {% if not user.is_active %}
 	<div id="verify-message">
-		<p>Please verify your email in order to use this part of the application! Thank you!</p>
+		<p>Please verify your email in order to use this part of the application.</p>
 	</div>
 {% else %}
 
-<h2>Create Session</h2>
+<h2>Create session</h2>
 <p>Follow these four easy steps to create a new session.</p>
 <div id="createSessionBody">
     <div class="formelms">
@@ -58,7 +58,7 @@
             <input type="radio" name="showResults" value="N" onclick="">No
         </div>
         <h3>Step 5: Confirm creation</h3>
-        <input type="button" value="Create Session" onclick="createSession()"/> or <a href="/sessions/">return to index.</a>
+        <input type="button" value="Create session" onclick="createSession()"/> or <a href="/sessions/">return to index.</a>
     </div>
 </div>
 {% endif %}

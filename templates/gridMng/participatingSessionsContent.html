@@ -64,8 +64,8 @@ if( typeof sendResponse != 'function')
 </div>
 <div id="responseOptionsDiv">
 	{% if not data.hideSaveResponseButton %}
-		<input type="button" id="sendResponseButton" onclick="rescale($('#participatingSessionResponseGridForm'));sendResponse()" value="Send Response" />
-		<input type="button" id="participatingSessionsContentUndoAllButton" onclick="getResponseFromIteration('current')" value="Undo All" />
+		<input type="button" id="sendResponseButton" onclick="rescale($('#participatingSessionResponseGridForm'));sendResponse()" value="Send response" />
+		<input type="button" id="participatingSessionsContentUndoAllButton" onclick="getResponseFromIteration('current')" value="Undo all" />
 	{% endif %}
 </div>
 <table class="grid" id="resultDetails">
@@ -93,6 +93,6 @@ if( typeof sendResponse != 'function')
     <div id="sessionsContentResultDiv">
     </div>
     <div id="sessionContentResultsOptions">
-        <input type="button" id="clearResultsButton" onclick="clearResults()" value="Clear Results" style="display: none;" />
+        <input type="button" id="clearResultsButton" onclick="clearResults()" value="Clear results" style="display: none;" />
     </div>
 </div>

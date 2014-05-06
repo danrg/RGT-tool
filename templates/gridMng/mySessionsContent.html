@@ -4,7 +4,7 @@
 		$.ajax({
 			url: '{{ STATIC_URL }}js/mySessionsContent.js',
 			dataType: 'script',
-			async: false,
+			async: false
 		});
 	}
 </script>
@@ -13,12 +13,12 @@
 		<table class="grid" id="sessionDetails">
 			<thead>
 				<tr>
-					<th colspan="2">Session Details</th>
+					<th colspan="2">Session details</th>
 		        </tr>
 		    </thead>
 		    <tbody>
 		    	<tr>
-		            <td>Session Name:</td>
+		            <td>Session name:</td>
 		            <td>{{data.sessionName}}</td>
 		        </tr>
 		        <tr>
@@ -58,27 +58,27 @@
         <table>
             <tr>
 				{% if not data.hasSessionStarted %}
-                    <td><input type="button" onclick="startSession()" value="Start Session"/></td>
+                    <td><input type="button" onclick="startSession()" value="Start session"/></td>
 				{% endif %}
 				{% if data.showRequestButtons %}
-                    <td><input type="button" onclick="requestAlternativeConcerns()" value="Request Alt/Con" /></td>
-                    <td><input type="button" onclick="requestRatings()" value="Request Ratings"/></td>
+                    <td><input type="button" onclick="requestAlternativeConcerns()" value="Request alternatives/concerns" /></td>
+                    <td><input type="button" onclick="requestRatings()" value="Request ratings"/></td>
 				{% endif %}
 				{% if data.showFinishButton %}
-                    <td><input type="button" onclick="finishCurrentRequest()" value="Finish Request" /></td>
+                    <td><input type="button" onclick="finishCurrentRequest()" value="Finish request" /></td>
 				{% endif %}
 				{% if data.hasSessionStarted and data.showCloseSessionButton %}
-                    <td><input type="button" onclick="finishSession()" value="End Session"/></td>
+                    <td><input type="button" onclick="finishSession()" value="End session"/></td>
 				{% endif %}
 				{% if data.hasSessionStarted %}
-					<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show Dendrogram"/></td>
+					<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show dendrogram"/></td>
 				{% endif %}
             </tr>
 		</table>
 	{% else %}
 		<table>
 			<tr>
-				<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show Dendrogram" /></td>
+				<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show dendrogram" /></td>
 			</tr>
 		</table>
 	{% endif %}
@@ -95,8 +95,8 @@
 			</div>
 			{% if data.savaGridSession %}
 				<div id="sessionGridOptions">
-					<input type="button" id="saveButton" onclick="rescale($('#form'));saveSessionGrid()" value="Save Changes" />
-					<input type= "button" id= "mySessionsContentUndoAllButton" value="undo all" onclick= "getSessionGrid()" />
+					<input type="button" id="saveButton" onclick="rescale($('#form'));saveSessionGrid()" value="Save changes" />
+					<input type="button" id= "mySessionsContentUndoAllButton" value="Undo all" onclick="getSessionGrid()" />
 				</div>
 			{% endif %}
 			<div id="mySessionDendrogram" style="display: none;">
@@ -117,8 +117,8 @@
 				<div id="mySessionsContentResultDiv">
 				</div>
 				<div id="sessionContentResultsOptions">
-					<input type="button" id="clearResultsButton" onclick="clearResults()" value="Clear Results" style="display: none;" />
-					<input type="button" id="downloadResultsButton" onclick="getResultsDownloadPage()" value="Download Results" style="display: none;" />
+					<input type="button" id="clearResultsButton" onclick="clearResults()" value="Clear results" style="display: none;" />
+					<input type="button" id="downloadResultsButton" onclick="getResultsDownloadPage()" value="Download results" style="display: none;" />
 				</div>
 			</div>
 		</div>

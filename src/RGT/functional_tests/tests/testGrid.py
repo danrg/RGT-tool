@@ -241,7 +241,7 @@ class GridTests(BaseGridLiveTest):
         self.can_select_grid('admin@admin.com', '123')
 
         # User clicks the cluster analysis link
-        show_dendrogram_button = self.browser.find_element_by_link_text("Cluster Analysis")
+        show_dendrogram_button = self.browser.find_element_by_link_text("Cluster analysis")
         show_dendrogram_button.click()
 
         # Wait until the dendrogram appears successfully
