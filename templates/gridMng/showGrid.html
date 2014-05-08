@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block title %}
-RGT | Grids
+RGT | Grid {{ grid.name }}
 {% endblock %}
 
 {% block stylesheet %}
@@ -22,50 +22,31 @@ RGT | Grids
 			async: false
 		});
 	}
+    $(document).ready(function() {
+        if ($('#tabs').is(':hidden'))
+        {
+            $('#tabs').show();
+        }
+        $('.resim').remove();
+        showGrid("{{ grid.usid }}", "{{ grid.name }}");
+        $('#weightSliders').show();
+        $('#wContainer').hide();
+        $('#weightSliders2').hide();
+    });
 </script>
 {% endblock javascript %}
 
 {% block content %}
-{% if not user.is_active %}
-	<div id="verify-message">
-		<p>Please verify your email in order to use this part of the application.</p>
-	</div>
-{% else %}
+<div style="display:none">
+    <input id="gridUSID" value="{{ grid.usid }}" />
+    <input id="gridName" value="{{ grid.name }}" />
+</div>
 
-<h2>Grid Management</h2>
-<div id="information">
-	{% if data.grids %}
-		<p>Select and display any of your current grids, or create a new one either <a href="{% url 'grid_in_place' %}">in place</a> or by using a <a href="{% url 'grid_wizard' %}">wizard</a> or you can create a
-            <a href="{% url 'grid_composite' %}">composite grid(alpha)</a><br>from your existing grids.</p>
-	{% else %}
-		<p>You do not have any grids yet. Please create one either <a href="{% url 'grid_in_place' %}">in place</a> or by using a <a href="{% url 'grid_wizard' %}">wizard</a>.</p>
-	{% endif %}
-</div>
-<div>
-	<table border= "0">
-		<tr>
-			<td>
-				<label for="showGridSelection">Select grid:</label><select id="showGridSelection" onchange="$('.resim').remove();showMyGrid(false);$('#weightSliders').show();$('#wContainer').hide();$('#weightSliders2').hide()">
-					{% if data.grids %}
-						<option value= "noGrids">&nbsp;</option>
-						{% for grid in data.grids %}
-							<option value= "{{ grid.usid }}">{{ grid.name }}</option>
-						{% endfor %}
-					{% else %}
-						<option value= "noGrids">no grids available</option>
-					{% endif %}
-					</select>
-			</td>
-		</tr>
-	</table>
-	<div id="gridNameDiv" style="display: none; ">
-		<label class="gridNameLabel" for="gridName">Name:</label>
-		<input type="text" id="gridName" name="gridName" size="45" onchange="isTextEmpty($(this));isTableSaved()" />
-		<input type="hidden" id="gridUSID" name="gridUSID" />
-	</div>
-</div>
-<form id="form">{% csrf_token %} 
+<h2>{{grid.name }}</h2>
+
+<form id="form">{% csrf_token %}
 	<div id="results">
+        {{ tableHTML }}
 	</div>
     <div id="wContainer" style="display: none;">
 	</div>
@@ -104,8 +85,4 @@ RGT | Grids
         </div>
     </div>
 </form>
-
-
-{% endif %}
 {% endblock %}
-

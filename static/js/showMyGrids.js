@@ -171,33 +171,28 @@ function adjustWeights()
         }
       });
     });
-
-
-
-//    var bisey = "#weight_concern";
-//
-//    for (var num = 1; num<=2; num++)
-//    {
-//        var dummy = bisey + num.toString();
-//        $(dummy).val(50.0);
-//    }
 }
 
 //function used to get a grid from the db and display it to the user
 function showMyGrid(reload)
 {
-	var gridUSID;
     if ($('#tabs').is(':hidden'))
     {
         $('#tabs').show();
     }
+	var gridUSID;
 	if (!reload) {
 		gridUSID = $("#showGridSelection option:selected").val();
 	} else {
 		gridUSID = $("#gridUSID").val();
 	}
 	var gridName= $("#showGridSelection option:selected").text();
-	if(gridUSID != "noGrids" && gridUSID != "" && gridUSID != null)
+    showGrid(gridUSID, gridName);
+}
+
+function showGrid(gridUSID, gridName)
+{
+    if(gridUSID != "noGrids" && gridUSID != "" && gridUSID != null)
 	{
 		showLoadingSpinner(loadingDiv, null);
 		try
@@ -208,7 +203,7 @@ function showMyGrid(reload)
 				{
 					//clear the information div
 					$("#information").html('Select another grid:');
-					
+
 					if($(data).find('error').length <= 0)
 					{
 						$('#results').show();
@@ -216,38 +211,33 @@ function showMyGrid(reload)
 						{
 							$('.tableOptions').show();
 						}
-						
+
 						$("#results").html($(data).find('htmlData').text());
 						prepareForNewGrid($('#results'));	//this function is from gridTableGeneralFunctions.js
-						
+
 						//calculate total weight
 						calculateTotalWeight($('#results'));
-									
-						//set table status as matching with the db 
+
+						//set table status as matching with the db
 						hasTableBeenSaved= true;
-									
+
 						//make the form string that represent the saved table in db
 						masterFormString= $("#form").serialize();
-						
+
 						isGridComplete();
-									
+
 						//set tipsy
 						initiateGridTableToolTip($('#results'));
-						
+
 						//clear the histogram
-//						if($('#dendogramDiv').find('img').is('#dendogramImage'))
-//						{
-//							$('#dendogramDiv').find('#dendogramImage').remove();
-//						}
 						clearSvgImg('dendogramDiv');
-						
+
 						// show the grid name in the box
 						$('#gridName').val(gridName);
 						$('#gridNameDiv').show();
 						$('#gridUSID').val(gridUSID);
-						
-						hideLoadingSpinner(loadingDiv);
 
+						hideLoadingSpinner(loadingDiv);
 					}
 					else
 					{
@@ -261,7 +251,7 @@ function showMyGrid(reload)
 					hideLoadingSpinner(loadingDiv);
 					console.log(err);
 				}
-							
+
 			});
 		}
 		catch(err)
@@ -302,12 +292,10 @@ function getPCA()
     {
         showMessageInDialogBox("Please add at least one more concern");
     }
-
 }
 
-function deleteMyGrid(){		
-	
-	//var str= 'grid='+$("#showGridSelection option:selected").val();
+function deleteMyGrid()
+{
 	var gridUSID = $("#gridUSID").val();
 	var str = 'gridUSID='+gridUSID;
 	// first display an confirmation dialog to the user asking if he is sure that he wants to delete the grid
@@ -342,10 +330,6 @@ function deleteMyGrid(){
 								$("#gridUSID").val('');
 								$("#gridNameDiv").hide();
 								//clear the histogram
-//								if($('#dendogramDiv').find('img').is('#dendogramImage'))
-//								{
-//									$('#dendogramDiv').find('#dendogramImage').remove();
-//								}
 								clearSvgImg('dendogramDiv');
 								$('#results').hide();
 								$('#dendrogram').hide();
