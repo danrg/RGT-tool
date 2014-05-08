@@ -23,26 +23,30 @@ RGT | Grid {{ grid.name }}
 		});
 	}
     $(document).ready(function() {
-        if ($('#tabs').is(':hidden'))
-        {
-            $('#tabs').show();
-        }
-        $('.resim').remove();
-        showGrid("{{ grid.usid }}", "{{ grid.name }}");
-        $('#weightSliders').show();
-        $('#wContainer').hide();
-        $('#weightSliders2').hide();
+        prepareForNewGrid($('#results'));	//this function is from gridTableGeneralFunctions.js
+        calculateTotalWeight($('#results'));
+
+        //set table status as matching with the db
+        hasTableBeenSaved = true;
+
+        //make the form string that represent the saved table in db
+        masterFormString= $("#form").serialize();
+
+        isGridComplete();
+
+        //set tipsy
+        initiateGridTableToolTip($('#results'));
     });
 </script>
 {% endblock javascript %}
 
 {% block content %}
-<div style="display:none">
-    <input id="gridUSID" value="{{ grid.usid }}" />
-    <input id="gridName" value="{{ grid.name }}" />
+<h2>Grid management</h2>
+<div id="gridNameDiv">
+    <label class="gridNameLabel" for="gridName">Name:</label>
+    <input type="text" id="gridName" name="gridName" size="45" onchange="isTextEmpty($(this));isTableSaved()" value="{{ grid.name }}" />
+    <input type="hidden" id="gridUSID" name="gridUSID" value="{{ grid.usid }}" />
 </div>
-
-<h2>{{grid.name }}</h2>
 
 <form id="form">{% csrf_token %}
 	<div id="results">
@@ -52,13 +56,13 @@ RGT | Grid {{ grid.name }}
 	</div>
 
     <p id="totalW"></p>
-    <input type="button" id="weightSliders" onclick="adjustWeights();$('#weightSliders').hide();$('#weightSliders2').show();" value="Prioritize concerns" hidden="hidden"/><p id="weightSliders2" hidden="hidden">&nbsp;Please click save in order to go back.</p>
+    <input type="button" id="weightSliders" onclick="adjustWeights();$('#weightSliders').hide();$('#weightSliders2').show();" value="Prioritize concerns"/><p id="weightSliders2" hidden="hidden">&nbsp;Please click save in order to go back.</p>
 	<div class="tableOptions" id="showMyGridsTableOptions">
         <input type="button" id="saveButton" onclick="$('#results').show();$('#weightSliders').show();$('#totalW').hide();$('#wContainer').hide();$('#weightSliders2').hide();rescale($('#form'));$('#similarityMatrix').hide();$('.resim').remove();clearSvgImg('dendogramDiv');saveGrid();" value="Save" />
         <input type="button" onclick="$('.resim').remove();deleteMyGrid()" value="Delete" />
         <input type="button" id="reloadSavedGridButton" onclick="showMyGrid(true)" value="Undo all" />
 	</div>
-    <div id="tabs" hidden="hidden">
+    <div id="tabs">
         <ul>
             <li><a href="#similarityMatrix" onclick="$('.resim').remove();$('#similarityMatrix').show();getMatrices()">Similarity analysis</a></li>
             <li><a href="#showDendrogram" onclick="$('.resim').remove();$('#showDendogram').show();getDendogram()" >Cluster analysis</a></li>

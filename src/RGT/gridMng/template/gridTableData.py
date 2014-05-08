@@ -1,3 +1,5 @@
+from RGT.gridMng.utility import generateGridTable
+
 class GridTableData(object):
     tableId = None #string
     tableHeader = None
@@ -17,4 +19,17 @@ class GridTableData(object):
                 self.table = tableData['table']
                 self.tableHeader = tableData['tableHeader']
                 self.weights = tableData['weights']
-        
+
+class WritableGridTableData(GridTableData):
+
+    def __init__(self, grid=None):
+        table_data = generateGridTable(grid)
+        super(WritableGridTableData, self).__init__(tableData=table_data)
+
+        if grid is not None:
+            self.usid = grid.usid
+
+        self.changeCornAlt = True
+        self.checkForTableIsSave = True
+        self.showRatingWhileFalseChangeRatingsWeights = True
+        self.changeRatingsWeights = True

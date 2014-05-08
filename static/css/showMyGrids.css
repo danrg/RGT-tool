@@ -3,7 +3,6 @@
 .tableOptions{
 	position: relative;
 	top: 5px;
-	display: none;
 }
 
 #results{
@@ -14,7 +13,6 @@
 	box-shadow: 0 0 5px #888;
 	padding-bottom: 15px;
 	margin-top: 7px;
-	display: none;
 }
 
 

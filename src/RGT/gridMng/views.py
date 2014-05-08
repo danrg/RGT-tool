@@ -27,7 +27,7 @@ from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, cr
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.session.state import State
 from RGT.gridMng.template.showGridsData import ShowGridsData
-from RGT.gridMng.template.gridTableData import GridTableData
+from RGT.gridMng.template.gridTableData import GridTableData, WritableGridTableData
 from RGT.gridMng.template.createMyGridBaseData import CreateMyGridBaseData
 from RGT.gridMng.template.createMyGridData import CreateMyGridData
 from RGT.gridMng.error.unableToCreateUSID import UnablaToCreateUSID
@@ -45,13 +45,12 @@ def getCreateMyGridPage(request):
     an in place grid (private grid).
     """
     try:
-        gridTableTemplate = GridTableData(generateGridTable(None))
+        gridTableTemplate = WritableGridTableData()
         gridTableTemplate.changeRatingsWeights = True
         gridTableTemplate.changeCornAlt = True
-        gridTableTemplate.tableId = randomStringGenerator()
+        gridTableTemplate.tableId = ()
 
         context = None
-        #RequestContext(request, {'data': gridTableTemplate })
         templateData = CreateMyGridData(CreateMyGridBaseData(gridTableTemplate))
         context = RequestContext(request, {'data': templateData})
         return render(request, 'gridMng/createMyGrid.html', context_instance=context)
@@ -83,7 +82,7 @@ def ajaxCreateGrid(request):
     isConcernAlternativeResponseGrid = False
     #check the if the inputs are correct
     if request.POST.has_key('nAlternatives') and request.POST.has_key(
-            'nConcerns'): #and request.POST.has_key('gridName')
+            'nConcerns'):
         if request.POST.has_key('gridType'):
             if request.POST['gridType'] == 'response':
                 return HttpResponse(createXmlErrorResponse("Invalid request, unsupported operation"),
@@ -201,7 +200,12 @@ def getShowGridPage(request):
 def show_grid(request, usid):
     grid = get_object_or_404(Grid, usid=usid, user=request.user)
 
-    return render(request, 'gridMng/showGrid.html', {'grid': grid})
+    template_data = WritableGridTableData(grid)
+    context = RequestContext(request, {'data': template_data})
+    template = loader.get_template('gridMng/gridTable.html')
+    html_data = template.render(context)
+
+    return render(request, 'gridMng/showGrid.html', {'grid': grid, 'tableHTML': html_data})
 
 @login_required
 def ajaxGetGrid(request):
@@ -294,7 +298,6 @@ def ajaxGetGrid(request):
             gridObj = gridObj[0]
             try:
                 templateData = GridTableData(generateGridTable(gridObj))
-                templateData.tableId = randomStringGenerator()
                 templateData.usid = gridObj.usid
                 templateData.changeRatingsWeights = changeRatingsWeights
                 templateData.changeCornAlt = changeCornAlt
@@ -577,26 +580,6 @@ def ajaxGenerateSimilarity(request):
                 htmlData = template.render(context)
                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
 
-                # if grid1.dendogram != None and grid1.dendogram != '':
-                #     imgData= createDendogram(grid1)
-                #     responseData= createSvgResponse(imgData, None)
-                #     return HttpResponse(responseData, content_type='application/xml')
-                # else:
-                #     try:
-                #         imgData= createDendogram(grid1)
-                #         responseData= createSvgResponse(imgData, None)
-                #         return HttpResponse(responseData, content_type='application/xml')
-                #     except UnicodeEncodeError as error:
-                #         errorString= 'Invalid character found in the grid. The "' + error.object[error.start:error.end] + '" character can not be convert or used safely.\nDendogram can not be created.'
-                #         return HttpResponse(createXmlErrorResponse(errorString), content_type='application/xml')
-                #     except:
-                #         if DEBUG:
-                #             print "Exception in user code:"
-                #             print '-'*60
-                #             traceback.print_exc(file=sys.stdout)
-                #             print '-'*60
-                #         logger.exception('Unknown error')
-                #         return HttpResponse(createXmlErrorResponse('Unknown dendrogram error'), content_type='application/xml')
             except:
                 if DEBUG:
                     print "Exception in user code:"
@@ -890,26 +873,9 @@ def __convertSvgStringTo(svgString=None, convertTo=None):
 
                 imgData.data = fpInMemory.getvalue()
                 imgData.length = fpInMemory.tell()
-                # send the file
-                #response = HttpResponse(fpInMemory.getvalue(), content_type= mimeType)
-                #response['Content-Length'] = fpInMemory.tell()
-                #fileName= request.POST['fileName']
-                #if fileName != None and fileName != '':
-                #    response['Content-Disposition'] = 'attachment; filename=' + fileName + fileExtention
-                #else:
-                #    response['Content-Disposition'] = 'attachment; filename=' + randomStringGenerator() + fileExtention
-                #return response
                 return imgData
             else:
                 raise Exception('Error image file name was None')
-                #                    imgData.ContentType= 'image/jpg'
-                #
-                #                    errorImageData= getImageError()
-                #                    # send the file
-                #                    response = HttpResponse(errorImageData, content_type= 'image/jpg')
-                #                    response['Content-Length'] = fpInMemory.tell()
-                #                    response['Content-Disposition'] = 'attachment; filename=error.jpg'
-                #                    return response
     else:
         raise ValueError('svgString or convertTo was None')
 
