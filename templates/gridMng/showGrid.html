@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'gridMng/showMyGrids.html' %}
 
 {% block title %}
 RGT | Grid {{ grid.name }}
@@ -40,8 +40,7 @@ RGT | Grid {{ grid.name }}
 </script>
 {% endblock javascript %}
 
-{% block content %}
-<h2>Grid management</h2>
+{% block grid %}
 <div id="gridNameDiv">
     <label class="gridNameLabel" for="gridName">Name:</label>
     <input type="text" id="gridName" name="gridName" size="45" onchange="isTextEmpty($(this));isTableSaved()" value="{{ grid.name }}" />
@@ -50,7 +49,7 @@ RGT | Grid {{ grid.name }}
 
 <form id="form">{% csrf_token %}
 	<div id="results">
-        {{ tableHTML }}
+        {{ grid_html }}
 	</div>
     <div id="wContainer" style="display: none;">
 	</div>

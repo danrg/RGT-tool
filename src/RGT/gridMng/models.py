@@ -8,9 +8,10 @@ from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
 from RGT.gridMng.session.state import State as SessionState
 from sets import Set
 from RGT.settings import SESSION_USID_KEY_LENGTH
-from utility import randomStringGenerator
+from utility import generateRandomString
 from datetime import datetime
 from django.utils.timezone import utc
+from django.core.urlresolvers import reverse
 
 #grid manager
 class GridManager(models.Manager):
@@ -19,20 +20,20 @@ class GridManager(models.Manager):
         if userObj:
             if gridName != None:
                 newGrid = Grid(user=userObj, description=gridObj.description, name=gridName,
-                               dendogram=gridObj.dendogram, grid_type=gridObj.grid_type, usid=randomStringGenerator(20),
+                               dendogram=gridObj.dendogram, grid_type=gridObj.grid_type, usid=generateRandomString(20),
                                dateTime=datetime.utcnow().replace(tzinfo=utc))
             else:
                 newGrid = Grid(user=userObj, description=gridObj.description, name=gridObj.name,
-                               dendogram=gridObj.dendogram, grid_type=gridObj.grid_type, usid=randomStringGenerator(20),
+                               dendogram=gridObj.dendogram, grid_type=gridObj.grid_type, usid=generateRandomString(20),
                                dateTime=datetime.utcnow().replace(tzinfo=utc))
         else:
             if gridName != None:
                 newGrid = Grid(description=gridObj.description, name=gridName, dendogram=gridObj.dendogram,
-                               grid_type=gridObj.grid_type, usid=randomStringGenerator(20),
+                               grid_type=gridObj.grid_type, usid=generateRandomString(20),
                                dateTime=datetime.utcnow().replace(tzinfo=utc))
             else:
                 newGrid = Grid(description=gridObj.description, name=gridObj.name, dendogram=gridObj.dendogram,
-                               grid_type=gridObj.grid_type, usid=randomStringGenerator(20),
+                               grid_type=gridObj.grid_type, usid=generateRandomString(20),
                                dateTime=datetime.utcnow().replace(tzinfo=utc))
         if gridType != None:
             newGrid.grid_type = gridType
@@ -83,6 +84,9 @@ class Grid(models.Model):
                   ('rw', 'Response grid, Ratings/Weight'), ('cg', 'Composite Grid') )
     grid_type = models.CharField(max_length=2, choices=grid_types, default='u')
     objects = GridManager()
+
+    def get_absolute_url(self):
+        return reverse('RGT.gridMng.views.show_grid', args=[self.usid])
 
     class Meta:
         ordering = ['id']
@@ -188,7 +192,7 @@ class SessionManager(models.Manager):
             show_results = False
 
         facilitator, created = Facilitator.objects.get_or_create(user=facilitating_user)
-        usid = randomStringGenerator(SESSION_USID_KEY_LENGTH)
+        usid = generateRandomString(SESSION_USID_KEY_LENGTH)
         state = State.objects.getInitialState()
         invitation_key = str(uuid.uuid4())
 

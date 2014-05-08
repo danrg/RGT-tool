@@ -36,7 +36,7 @@ class RegistrationView(CaptchaSecuredFormView):
         user = authenticate(email=email, password=password)
         login(self.request, user);
 
-        verificationCode = utility.randomStringGenerator(14)
+        verificationCode = utility.generateRandomString(14)
 
         profile = user.get_profile()
         profile.verifyEmailCode = verificationCode

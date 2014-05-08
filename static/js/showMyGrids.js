@@ -401,6 +401,9 @@ function saveGrid()
 		var table = getGridTable($('#results'));
 		var gridUSID = $("#gridUSID").val();
 		var gridName = $("#gridName").val();
+
+        console.log(gridName);
+
 		var str = 'gridUSID=' + gridUSID + '&gridName=' + gridName + '&nAlternatives=' + getNumberOfAlternatives(table) + '&nConcerns=' + getNumberOfConcerns(table) + '&' + formString;
 		$.post('/grids/update/', str, function(data)
 		{

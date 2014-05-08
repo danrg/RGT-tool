@@ -31,81 +31,36 @@ RGT | Grids
 		<p>Please verify your email in order to use this part of the application.</p>
 	</div>
 {% else %}
-
-<h2>Grid Management</h2>
-<div id="information">
-	{% if data.grids %}
-		<p>Select and display any of your current grids, or create a new one either <a href="{% url 'grid_in_place' %}">in place</a> or by using a <a href="{% url 'grid_wizard' %}">wizard</a> or you can create a
-            <a href="{% url 'grid_composite' %}">composite grid(alpha)</a><br>from your existing grids.</p>
-	{% else %}
-		<p>You do not have any grids yet. Please create one either <a href="{% url 'grid_in_place' %}">in place</a> or by using a <a href="{% url 'grid_wizard' %}">wizard</a>.</p>
-	{% endif %}
-</div>
-<div>
-	<table border= "0">
-		<tr>
-			<td>
-				<label for="showGridSelection">Select grid:</label><select id="showGridSelection" onchange="$('.resim').remove();showMyGrid(false);$('#weightSliders').show();$('#wContainer').hide();$('#weightSliders2').hide()">
-					{% if data.grids %}
-						<option value= "noGrids">&nbsp;</option>
-						{% for grid in data.grids %}
-							<option value= "{{ grid.usid }}">{{ grid.name }}</option>
-						{% endfor %}
-					{% else %}
-						<option value= "noGrids">no grids available</option>
-					{% endif %}
-					</select>
-			</td>
-		</tr>
-	</table>
-	<div id="gridNameDiv" style="display: none; ">
-		<label class="gridNameLabel" for="gridName">Name:</label>
-		<input type="text" id="gridName" name="gridName" size="45" onchange="isTextEmpty($(this));isTableSaved()" />
-		<input type="hidden" id="gridUSID" name="gridUSID" />
-	</div>
-</div>
-<form id="form">{% csrf_token %} 
-	<div id="results">
-	</div>
-    <div id="wContainer" style="display: none;">
-	</div>
-
-    <p id="totalW"></p>
-    <input type="button" id="weightSliders" onclick="adjustWeights();$('#weightSliders').hide();$('#weightSliders2').show();" value="Prioritize concerns" hidden="hidden"/><p id="weightSliders2" hidden="hidden">&nbsp;Please click save in order to go back.</p>
-	<div class="tableOptions" id="showMyGridsTableOptions">
-        <input type="button" id="saveButton" onclick="$('#results').show();$('#weightSliders').show();$('#totalW').hide();$('#wContainer').hide();$('#weightSliders2').hide();rescale($('#form'));$('#similarityMatrix').hide();$('.resim').remove();clearSvgImg('dendogramDiv');saveGrid();" value="Save" />
-        <input type="button" onclick="$('.resim').remove();deleteMyGrid()" value="Delete" />
-        <input type="button" id="reloadSavedGridButton" onclick="showMyGrid(true)" value="Undo all" />
-	</div>
-    <div id="tabs" hidden="hidden">
-        <ul>
-            <li><a href="#similarityMatrix" onclick="$('.resim').remove();$('#similarityMatrix').show();getMatrices()">Similarity analysis</a></li>
-            <li><a href="#showDendrogram" onclick="$('.resim').remove();$('#showDendogram').show();getDendogram()" >Cluster analysis</a></li>
-            <li><a href="#pca" onclick="getPCA()">Principal component analysis (alpha)</a></li>
-        </ul>
-        <div id="similarityMatrix">
-            <div id="similarity" style="display: none;">
-	            <div id="similarityDiv" class="similarityDiv">
-	            </div>
-            </div>
-        </div>
-        <div id="showDendrogram">
-             <div id="dendrogram" style="display: none;">
-	                <div id="dendrogramHead" class="dendrogramHead">
-                    <span id="dendrogramTitle" class="dendrogramTitle"></span>
-	                </div>
-	                <div id="dendogramDiv" class="dendrogramDiv">
-	                </div>
-            </div>
-        </div>
-        <div id="pca">
-            <div id="pcaResult" align="center">
-            </div>
-        </div>
+    <h2>Grid Management</h2>
+    <div id="information">
+        {% if grids %}
+            <p>Select and display any of your current grids, or create a new one either <a href="{% url 'grid_in_place' %}">in place</a> or by using a <a href="{% url 'grid_wizard' %}">wizard</a> or you can create a
+                <a href="{% url 'grid_composite' %}">composite grid(alpha)</a><br>from your existing grids.</p>
+        {% else %}
+            <p>You do not have any grids yet. Please create one either <a href="{% url 'grid_in_place' %}">in place</a> or by using a <a href="{% url 'grid_wizard' %}">wizard</a>.</p>
+        {% endif %}
     </div>
-</form>
-
-
+    <div>
+        <table border= "0">
+            <tr>
+                <td>
+                    <label for="showGridSelection">Select grid:</label>
+                    <select id="showGridSelection" onchange="window.location.href='/grids/show/' + this.options[this.selectedIndex].value">
+                        {% if grids %}
+                            <option value= "noGrids">&nbsp;</option>
+                            {% for grid in grids %}
+                                <option value= "{{ grid.usid }}">{{ grid.name }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value= "noGrids">No grids available</option>
+                        {% endif %}
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </div>
 {% endif %}
+
+{%  block grid %}{%  endblock %}
 {% endblock %}
 

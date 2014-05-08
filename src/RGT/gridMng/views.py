@@ -22,7 +22,7 @@ from RGT.gridMng.models import Ratings
 from RGT.gridMng.models import Facilitator
 from RGT.gridMng.models import Composite
 from RGT.gridMng.prototypes.compositeParse import CompositeParse
-from RGT.gridMng.utility import randomStringGenerator, validateName, convertSvgTo, getImageError, convertGridTableToSvg, returnMatrix
+from RGT.gridMng.utility import generateRandomString, validateName, convertSvgTo, getImageError, convertGridTableToSvg, returnMatrix
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.session.state import State
@@ -30,7 +30,7 @@ from RGT.gridMng.template.showGridsData import ShowGridsData
 from RGT.gridMng.template.gridTableData import GridTableData, WritableGridTableData
 from RGT.gridMng.template.createMyGridBaseData import CreateMyGridBaseData
 from RGT.gridMng.template.createMyGridData import CreateMyGridData
-from RGT.gridMng.error.unableToCreateUSID import UnablaToCreateUSID
+from RGT.gridMng.error.unableToCreateUSID import UnableToCreateUSID
 from RGT.gridMng.utility import generateGridTable, createDendogram, createFileResponse
 from RGT.gridMng.hierarchical import transpose
 from RGT.settings import GRID_USID_KEY_LENGTH, DEBUG
@@ -171,7 +171,7 @@ def ajaxCreateGrid(request):
     gridTableTemplate = GridTableData(generateGridTable(None))
     gridTableTemplate.changeRatingsWeights = True
     gridTableTemplate.changeCornAlt = True
-    gridTableTemplate.tableId = randomStringGenerator()
+    gridTableTemplate.tableId = generateRandomString()
     template = loader.get_template('gridMng/createMyGridBase.html')
     templateData = CreateMyGridBaseData(gridTableTemplate)
     context = RequestContext(request, {'data': templateData})
@@ -184,28 +184,25 @@ def getShowGridPage(request):
     This function is used to display the initial page the user sees when he
     clicks the button 'grids'.
     """
-
-    user1 = request.user
-    templateData = ShowGridsData()
-    templateData.grids = Grid.objects.filter(user=user1)
-
-    if len(templateData.grids) <= 0:
-        templateData.grids = None
-
-    context = RequestContext(request, {'data': templateData})
+    grids = Grid.objects.filter(user=request.user)
+    context = RequestContext(request, {'grids': grids})
 
     return render(request, 'gridMng/showMyGrids.html', context_instance=context)
 
 @login_required
 def show_grid(request, usid):
+    """
+     This function is used to display a detailed page of a grid with the given usid
+    """
     grid = get_object_or_404(Grid, usid=usid, user=request.user)
+    other_grids = Grid.objects.filter(user=request.user).exclude(id=grid.id)
 
     template_data = WritableGridTableData(grid)
     context = RequestContext(request, {'data': template_data})
     template = loader.get_template('gridMng/gridTable.html')
-    html_data = template.render(context)
+    grid_html = template.render(context)
 
-    return render(request, 'gridMng/showGrid.html', {'grid': grid, 'tableHTML': html_data})
+    return render(request, 'gridMng/showGrid.html', {'grid': grid, 'grids': other_grids, 'grid_html': grid_html})
 
 @login_required
 def ajaxGetGrid(request):
@@ -607,14 +604,14 @@ def addRules(request):
         if(request.POST.has_key('gridid')):
             gridID = request.POST['gridid']
         else:
-            gridID = randomStringGenerator(GRID_USID_KEY_LENGTH) #Grid ID must be same for GRID, so we are creating it in here before the 'createCompositeGrid' function
+            gridID = generateRandomString(GRID_USID_KEY_LENGTH) #Grid ID must be same for GRID, so we are creating it in here before the 'createCompositeGrid' function
             results = Grid.objects.filter(usid=gridID)
             if len(results) >= 1:
                 #in this case the key was duplicated, so lets try to create a new key
                 maxAttempts = 50
                 while maxAttempts >= 0:
                     maxAttempts -= 1
-                    key = randomStringGenerator(GRID_USID_KEY_LENGTH)
+                    key = generateRandomString(GRID_USID_KEY_LENGTH)
                     #check to see if this key is unique
                     results = Grid.objects.filter(usid=key)
                     if len(results) <= 0:
@@ -672,7 +669,7 @@ def ajaxConvertSvgTo(request):
             if request.POST['data'] and request.POST['convertTo']:
                 imgData = __convertSvgStringTo(request.POST['data'], request.POST['convertTo'])
                 if not request.POST['fileName']:
-                    imgData.fileName = randomStringGenerator()
+                    imgData.fileName = generateRandomString()
                 else:
                     imgData.fileName = request.POST['fileName']
                 return createFileResponse(imgData)
@@ -729,7 +726,7 @@ def ajaxConvertGridTo(request):
                             imgData.fileName = request.POST['fileName']
 
                             if not imgData.fileName:
-                                imgData.fileName = randomStringGenerator()
+                                imgData.fileName = generateRandomString()
 
                             return createFileResponse(imgData)
                     else:
@@ -792,7 +789,7 @@ def dendrogramTo(request):
                     if request.POST.has_key('fileName'):
                         data.fileName = request.POST['fileName']
                     else:
-                        data.fileName = randomStringGenerator()
+                        data.fileName = generateRandomString()
 
                     #return the file
                     return createFileResponse(data)
@@ -1243,9 +1240,8 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
             gridObj = Grid.objects.create(user=userObj, grid_type=gridType)
             if gridName != None:
                 gridObj.name = gridName
-            gridObj.usid = randomStringGenerator(GRID_USID_KEY_LENGTH)
+            gridObj.usid = generateRandomString(GRID_USID_KEY_LENGTH)
             gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
-            #gridObj.dateTime = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
             try:
                 gridObj.save()
             except IntegrityError as error:
@@ -1257,7 +1253,7 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
                     wasGridSaved = False
                     while maxAttempts >= 0:
                         maxAttempts -= 1
-                        key = randomStringGenerator(GRID_USID_KEY_LENGTH)
+                        key = generateRandomString(GRID_USID_KEY_LENGTH)
                         #check to see if this key is unique
                         results = Grid.objects.filter(usid=key)
                         if len(results) <= 0:
@@ -1267,12 +1263,10 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
                             break
                     if wasGridSaved == False:
                         #in case we can not create a unique key, raise an error
-                        raise UnablaToCreateUSID('Unable to create unique suid for the grid ' + gridName)
+                        raise UnableToCreateUSID('Unable to create unique suid for the grid ' + gridName)
                     else:
-                        #the integratyError was not caused by a duplicated suid so, raise it again
+                        #the integratyError was not caused by a duplicated usid so, raise it again
                         raise error
-                        #gridObj= Grid.objects.create(user= userObj, name= gridName)
-                        #print 'nAlternatives: ' + str(nAlternatives)
 
             alternatives = []
             concerns = []

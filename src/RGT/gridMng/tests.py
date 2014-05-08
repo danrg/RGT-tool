@@ -14,6 +14,15 @@ class SessionTest(TestCase):
     def test_get_descriptive_name(self):
         self.assertEqual("Frank Facilitator: Session1", self.session.get_descriptive_name())
 
+class GridTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='george', email='george@gridmaker.com', password='123')
+        self.grid = Grid.objects.create(usid='a1b2c3', name='TestGrid', user=self.user)
+
+    def test_get_absolute_url(self):
+        self.assertEquals('/grids/show/a1b2c3', self.grid.get_absolute_url())
+
 class ShowGridTest(TestCase):
 
     path = '/grids/show/'

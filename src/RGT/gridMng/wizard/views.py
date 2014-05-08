@@ -146,6 +146,6 @@ class GridWizard(SessionWizardView):
             # We want to create ratings.
         create_ratings = True
         # Create the grid.
-        createGrid(user_obj, grid_type, grid_name, num_concerns, num_alternatives, concern_values, alternative_values,
+        grid = createGrid(user_obj, grid_type, grid_name, num_concerns, num_alternatives, concern_values, alternative_values,
                    rating_values, create_ratings)
-        return HttpResponseRedirect('/grids/')
+        return HttpResponseRedirect(grid.get_absolute_url())

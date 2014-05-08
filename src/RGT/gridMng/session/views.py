@@ -104,7 +104,7 @@ def ajaxGetMySessionContentPage(request):
                     iteration = sessionObj.iteration
                     sessionGrid = sessionObj.sessiongrid_set.all()[iteration].grid
                     gridTemplateData = GridTableData(generateGridTable(sessionGrid))
-                    gridTemplateData.tableId = randomStringGenerator()
+                    gridTemplateData.tableId = generateRandomString()
                     gridTemplateData.usid = sessionGrid.usid
                     templateData.tableData = gridTemplateData
                     iterationValueType = {}
@@ -351,7 +351,7 @@ def ajaxGetParticipatingSessionContentPage(request):
                     # there always is a session table being displayed to the user, so add this table in here
                     templateParticipatingSessions.displaySessionGrid = True
                     templateParticipatingSessions.sessionGridData = GridTableData(gridTablesData['sessionGridTable'])
-                    templateParticipatingSessions.sessionGridData.tableId = randomStringGenerator()
+                    templateParticipatingSessions.sessionGridData.tableId = generateRandomString()
                     templateParticipatingSessions.sessionGridData.doesNotShowLegend = True
                     # check to see if there is a response table, if so add it
                     if 'currentResponseGridTable' in gridTablesData:
@@ -364,13 +364,13 @@ def ajaxGetParticipatingSessionContentPage(request):
                         # the weights need to be duplicated in a new object as  the list will be poped later on
                         templateParticipatingSessions.responseGridData.weights = templateParticipatingSessions.sessionGridData.weights[
                             :]
-                    templateParticipatingSessions.responseGridData.tableId = randomStringGenerator()
+                    templateParticipatingSessions.responseGridData.tableId = generateRandomString()
                     templateParticipatingSessions.displayResponseGrid = True
                     # if the gridTablesData contains a previous response table add it
                     if 'previousResponseGrid' in gridTablesData:
                         templateParticipatingSessions.previousResponseGridData = GridTableData(
                             gridTablesData['previousResponseGrid'])
-                        templateParticipatingSessions.previousResponseGridData.tableId = randomStringGenerator()
+                        templateParticipatingSessions.previousResponseGridData.tableId = generateRandomString()
                         templateParticipatingSessions.previousResponseGridData.doesNotShowLegend = True
                         hasPreviousResponseRelationGrid = True
                         templateParticipatingSessions.displayPreviousResponseGrid = True
@@ -602,7 +602,7 @@ def ajaxGetParticipatingSessionsContentGrids(request):
 
                 # there is always a session grid, so add it
                 templateData.sessionGridData = GridTableData(gridTablesData['sessionGridTable'])
-                templateData.sessionGridData.tableId = randomStringGenerator()
+                templateData.sessionGridData.tableId = generateRandomString()
                 templateData.sessionGridData.doesNotShowLegend = True
                 templateData.displaySessionGrid = True
                 # if the user sent a response display that grid
@@ -613,12 +613,12 @@ def ajaxGetParticipatingSessionsContentGrids(request):
                     templateData.responseGridData = GridTableData(gridTablesData['sessionGridTable'])
                     # the weights need to be in a new object as we will pop it later (in the template)
                     templateData.responseGridData.weights = templateData.responseGridData.weights[:]
-                templateData.responseGridData.tableId = randomStringGenerator()
+                templateData.responseGridData.tableId = generateRandomString()
                 templateData.displayResponseGrid = True
                 # if the gridTablesData contains a previous response table add it
                 if 'previousResponseGrid' in gridTablesData:
                     templateData.previousResponseGridData = GridTableData(gridTablesData['previousResponseGrid'])
-                    templateData.previousResponseGridData.tableId = randomStringGenerator()
+                    templateData.previousResponseGridData.tableId = generateRandomString()
                     templateData.previousResponseGridData.doesNotShowLegend = True
                     hasPreviousResponseRelationGrid = True
                     templateData.displayPreviousResponseGrid = True
@@ -827,7 +827,7 @@ def ajaxDownloadSessionResults(request):
                                     imgData.fileName = request.POST['fileName']
 
                                     if not imgData.fileName:
-                                        imgData.fileName = randomStringGenerator()
+                                        imgData.fileName = generateRandomString()
 
                                 return createFileResponse(imgData)
                             else:
@@ -939,7 +939,7 @@ def ajaxDownloadSessionResults(request):
                                     imgData.fileName = request.POST['fileName']
 
                                     if not imgData.fileName:
-                                        imgData.fileName = randomStringGenerator()
+                                        imgData.fileName = generateRandomString()
 
                                 return createFileResponse(imgData)
     except:
@@ -1046,7 +1046,7 @@ def ajaxGetSessionGrid(request):
                 if len(gridObj) >= 1:
                     gridObj = gridObj[0].grid
                     templateData = GridTableData(generateGridTable(gridObj))
-                    templateData.tableId = randomStringGenerator()
+                    templateData.tableId = generateRandomString()
                     templateData.usid = gridObj.usid
                     # if the state is not check then return a table where nothing can be changed, else return a table that can be changed
                     if sessionObj.state.name == State.objects.getCheckState().name:

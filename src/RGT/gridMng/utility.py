@@ -24,7 +24,7 @@ CONVERT_SVG_TO_PDF = 'pdf'
 imageErrorData = None
 
 
-def randomStringGenerator(size=14):
+def generateRandomString(size=14):
     return ''.join(random.choice(string.ascii_letters + string.digits) for letter in xrange(size))
 
 
@@ -37,8 +37,8 @@ def validateName(name):
 #this is a prototype function, do not use or change it 
 def convertSvgTo(svgData, fileType):
     if fileType != None and svgData != None:
-        tempSvgFileName = randomStringGenerator(24)
-        tempImageFileName = randomStringGenerator(24)
+        tempSvgFileName = generateRandomString(24)
+        tempImageFileName = generateRandomString(24)
         tempDirPath = tempfile.gettempdir()
         mimeType = None
         fileExtention = None

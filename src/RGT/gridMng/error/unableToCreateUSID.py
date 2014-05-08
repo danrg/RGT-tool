@@ -1,4 +1,4 @@
-class UnablaToCreateUSID(Exception):
+class UnableToCreateUSID(Exception):
     def __init__(self, msg):
         Exception.__init__(self, msg)
         
