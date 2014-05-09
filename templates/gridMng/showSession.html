@@ -1,5 +1,11 @@
 {%  extends 'gridMng/mySessions.html' %}
 
 {%  block session %}
+    <script type="text/javascript">
+    $(document).ready(function() {
+        prepareForNewGrid($('#contentDiv'));
+        initializeMySessionsContent();
+    });
+    </script>
     {{ session_html }}
 {%  endblock %}

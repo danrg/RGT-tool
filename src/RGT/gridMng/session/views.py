@@ -154,7 +154,7 @@ def show_session(request, usid):
     context = RequestContext(request, {'data': template_data})
     template = loader.get_template('gridMng/mySessionsContent.html')
     session_html = template.render(context)
-    sessions = Session.objects.filter(facilitator=facilitator)#.exclude(id=grid.id)
+    sessions = Session.objects.filter(facilitator=facilitator)
 
     return render(request, 'gridMng/showSession.html', {'session': session, 'sessions': sessions, 'session_html': session_html })
 

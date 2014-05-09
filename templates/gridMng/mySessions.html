@@ -32,35 +32,31 @@ RGT | Sessions - Administration
 		<p>Please verify your email in order to use this part of the application.</p>
 	</div>
 {% else %}
+    <div>
+        <h2>Session administration</h2>
+        On this page you can create or manage decision making sessions. <br/>
+        Click <a href="/sessions/participate/">here</a> to review the sessions you are participating in.
 
-{#        {% if sessions %}#}
-{#        {% for s in sessions  %}#}
-{#            <option value="{{ s.usid }}"#}
-{#               {% if s == session %}selected="selected"{% endif %}#}
-{#            >#}
-{#            {{ s.name }}#}
-{#            </option>#}
-{#        {% endfor %}#}
-
-<div>
-	<h2>Session administration</h2>
-	On this page you can create or manage decision making sessions. <br/>
-	Click <a href="/sessions/participate/">here</a> to review the sessions you are participating in.
-
-	<!-- header just after the menu (create session, my session, etc) -->
-	<label for= "mySessionsSelect">Select session:</label><select id="mySessionsSelect" onchange= "showMySession()">
-	{% if sessions %}
-		<option value="noSessions">&nbsp;</option>
-		{% for session_option in sessions  %}
-			<option value="{{ session_option.usid }}">{{ session_option.name }}</option>
-		{% endfor %}
-	{% else %}
-		<option value="noSessions">no sessions available</option>
-	{% endif %}
-	</select>
-	or <a href="/sessions/create/">create</a> a new session.
-</div>
-<div id="concentDiv">
-</div>
+        <!-- header just after the menu (create session, my session, etc) -->
+        <label for= "mySessionsSelect">Select session:</label>
+        <select id="mySessionsSelect" onchange="window.location.href='/sessions/show/' + this.options[this.selectedIndex].value">
+        {% if not session %}
+            <option value="">&nbsp;</option>
+        {% endif %}
+        {% if sessions %}
+            {% for session_option in sessions  %}
+                <option value="{{ session_option.usid }}"
+                    {% if session_option == session %} selected="selected"{% endif %}
+                >{{ session_option.name }}</option>
+            {% endfor %}
+        {% else %}
+            <option value="noSessions">No sessions available</option>
+        {% endif %}
+        </select>
+        or <a href="/sessions/create/">create</a> a new session.
+    </div>
+    <div id="concentDiv">
+    {% block session %}{% endblock %}
+    </div>
 {% endif %}
 {% endblock content %}
