@@ -36,7 +36,7 @@ RGT | Grids
         {% if grids %}
             <p>Select and display any of your current grids, or create a new one either <a href="{% url 'grid_in_place' %}">in place</a> or by using a <a href="{% url 'grid_wizard' %}">wizard</a> or you can create a
                 <a href="{% url 'grid_composite' %}">composite grid(alpha)</a><br>from your existing grids.</p>
-        {% else %}
+        {% elif not grid %}
             <p>You do not have any grids yet. Please create one either <a href="{% url 'grid_in_place' %}">in place</a> or by using a <a href="{% url 'grid_wizard' %}">wizard</a>.</p>
         {% endif %}
     </div>

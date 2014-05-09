@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
 
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.template import RequestContext
 from django.template import loader
 from django.contrib.auth.decorators import login_required
@@ -76,13 +76,7 @@ def getMySessionsPage(request):
         if facilitator:
             sessions = Session.objects.filter(facilitator=facilitator)
             if sessions and len(sessions) > 0:
-                sessionList = []
-                for session in sessions:
-                    sessionList.append((session.name, session.usid))
-
-                templateData = MySessionsData(sessionList)
-                context = RequestContext(request, {'data': templateData})
-
+                context = RequestContext(request, {'sessions': sessions})
                 return render(request, 'gridMng/mySessions.html', context_instance=context)
     except:
         __debug_print_stacktrace()
@@ -90,6 +84,81 @@ def getMySessionsPage(request):
     context = RequestContext(request, {})
     return render(request, 'gridMng/mySessions.html', context_instance=context)
 
+@login_required
+def show_session(request, usid):
+    """
+     This function is used to display a detailed page of a session with the given usid
+    """
+
+    facilitator, created = Facilitator.objects.get_or_create(user=request.user)
+    session = get_object_or_404(Session, usid=usid, facilitator=facilitator)
+
+    template_data = MySessionsContentData()
+    template_data.participantTableData = ParticipantsData(__createParticipantPanelData(session))
+    iteration = session.iteration
+    sessionGrid = session.sessiongrid_set.all()[iteration].grid
+    grid_template_data = GridTableData(generateGridTable(sessionGrid))
+    grid_template_data.tableId = generateRandomString()
+    grid_template_data.usid = sessionGrid.usid
+    template_data.tableData = grid_template_data
+    iterationValueType = {}
+    iterationTypes = SessionIterationState.objects.filter(session=session)
+
+    for i in range(0, iteration):  # Last iteration not included, because it doesn't produce results
+        if i == 0:
+            iterationValueType[i] = {'': ''}
+        else:
+            if iterationTypes[i - 1].state.name == SessionState.AC:
+                iterationValueType[i] = {'stateNameKey': SessionState.AC,
+                                         'stateName': 'Alternatives and Concerns'}
+            elif iterationTypes[i - 1].state.name == SessionState.RW:
+                iterationValueType[i] = {'stateNameKey': SessionState.RW,
+                                         'stateName': 'Ratings and Weights'}
+
+    template_data.iterationValueType = iterationValueType
+    template_data.sessionName = session.name
+    template_data.iteration = iteration
+    template_data.session = session
+
+    # now lets see what we have to return
+    if session.state.name == SessionState.INITIAL:
+        template_data.state = 'Invitation'
+        grid_template_data.showRatingWhileFalseChangeRatingsWeights = True
+
+    elif session.state.name == SessionState.AC:
+        template_data.state = 'Alternatives / Concerns'
+        template_data.hasSessionStarted = True
+        template_data.showFinishButton = True
+        grid_template_data.showRatingWhileFalseChangeRatingsWeights = True
+
+    elif session.state.name == SessionState.RW:
+        template_data.state = 'Ratings / Weights'
+        template_data.hasSessionStarted = True
+        template_data.showFinishButton = True
+        grid_template_data.showRatingWhileFalseChangeRatingsWeights = True
+
+    elif session.state.name == SessionState.FINISH:
+        template_data.state = 'Closed'
+        template_data.isSessionClose = True
+        template_data.hasSessionStarted = True
+        grid_template_data.showRatingWhileFalseChangeRatingsWeights = True
+
+    elif session.state.name == SessionState.CHECK:
+        template_data.state = 'Check Values'
+        template_data.hasSessionStarted = True
+        template_data.showRequestButtons = True
+        template_data.showCloseSessionButton = True
+        template_data.savaGridSession = True
+        grid_template_data.changeRatingsWeights = True
+        grid_template_data.changeCornAlt = True
+        grid_template_data.checkForTableIsSave = True
+
+    context = RequestContext(request, {'data': template_data})
+    template = loader.get_template('gridMng/mySessionsContent.html')
+    session_html = template.render(context)
+    sessions = Session.objects.filter(facilitator=facilitator)#.exclude(id=grid.id)
+
+    return render(request, 'gridMng/showSession.html', {'session': session, 'sessions': sessions, 'session_html': session_html })
 
 @login_required
 def ajaxGetMySessionContentPage(request):
@@ -100,6 +169,7 @@ def ajaxGetMySessionContentPage(request):
                 if facilitator:
                     sessionObj = Session.objects.get(usid=request.POST['sessionUSID'], facilitator=facilitator)
                     templateData = MySessionsContentData()
+                    templateData.session = sessionObj
                     templateData.participantTableData = ParticipantsData(__createParticipantPanelData(sessionObj))
                     iteration = sessionObj.iteration
                     sessionGrid = sessionObj.sessiongrid_set.all()[iteration].grid
@@ -162,7 +232,7 @@ def ajaxGetMySessionContentPage(request):
 
                     context = RequestContext(request, {'data': templateData})
                     htmlData = template.render(context)
-                    return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
+                    return HttpSuccessResponse(htmlData)
                 else:
                     return HttpErrorResponse('You are not the facilitator for this session')
             except:

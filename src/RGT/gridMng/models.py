@@ -171,7 +171,13 @@ class FacilitatorManager(models.Manager):
         if facilitator1:
             return facilitator1
         else:
-            return False;
+            return False
+
+        # facilitator, created = Facilitator.objects.get_or_create(user=userObj)
+        # numSessions = Session.objects.filter(facilitator=facilitator).count()
+        #
+        # if numSessions > 0:
+        #     return facilitator
 
 #model for facilitator
 class Facilitator(models.Model):
@@ -286,6 +292,9 @@ class Session(models.Model):
                 raise WrongState('Session if closed, can\'t change states')
         else:
             raise ValueError('state is None')
+
+    def get_absolute_url(self):
+        return reverse('RGT.gridMng.session.views.show_session', args=[self.usid])
 
     def getUsersThatDidNotRespondedRequest(self):
         repondedUsers = set(self.getUsersThatRespondedRequest())

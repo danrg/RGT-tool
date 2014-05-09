@@ -12,7 +12,11 @@ class SessionTest(TestCase):
         self.session = Session.objects.create(facilitator=facilitator, state=state, name="Session1")
 
     def test_get_descriptive_name(self):
-        self.assertEqual("Frank Facilitator: Session1", self.session.get_descriptive_name())
+        self.assertEquals("Frank Facilitator: Session1", self.session.get_descriptive_name())
+
+    def test_get_absolute_url(self):
+        self.session.usid = "abcdef"
+        self.assertEquals("/sessions/show/abcdef", self.session.get_absolute_url())
 
 class GridTest(TestCase):
 
@@ -50,6 +54,7 @@ class ShowGridTest(TestCase):
         self.__login()
         response = self.client.get(self.path + 'a1b2c3')
         self.assertContains(response, "TestGrid")
+        self.assertContains(response, "class=\"gridTable\"")
 
     def test_get_invalid_usid(self):
         self.__login()

@@ -83,3 +83,42 @@ class CreateSessionTest(TestCase):
         response = self.client.post(self.path)
         self.assertContains(response, "gridUSID can not be empty")
         self.assertEquals(0, Session.objects.count())
+
+class ShowSessionTest(TestCase):
+    """ Tests show_session from views.py """
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='fred', email='fred@facilitator.com', password='123')
+        self.grid = Grid.objects.create(usid='a1b2c3', name='TestGrid', user=self.user)
+        self.session = Session.objects.create_session(facilitating_user=self.user, original_grid=self.grid)
+        self.session.usid = "a1b2c3"
+
+    def __login(self):
+        self.client.post('/accounts/login/', {'email': 'fred@facilitator.com', 'password': '123'})
+
+    def test_get_not_logged_in(self):
+        response = self.client.get(self.session.get_absolute_url())
+        self.assertRedirects(response, 'accounts/login/?next=/sessions/show/a1b2c3')
+
+    def test_get_unauthorized(self):
+        other_user = User.objects.create_user(username='john', email='john@gridmaker.com', password='123')
+        other_grid = Grid.objects.create(usid='j0hN5gRiD', name='John\'s grid', user=other_user)
+        session = Session.objects.create_session(facilitating_user=other_user, original_grid=other_grid)
+
+        self.__login()
+        response = self.client.get(session.get_absolute_url())
+        self.assertEquals(404, response.status_code)
+
+    def test_get_authorized(self):
+        self.__login()
+        response = self.client.get(self.session.get_absolute_url())
+        # self.assertContains(response, "Session administration")
+        # self.assertContains(response, "untitled")
+        # self.assertContains(response, "<div id=\"sessionDetails\">")
+
+    def test_get_invalid_usid(self):
+        self.__login()
+        invalid_url = self.session.get_absolute_url()
+        self.session.usid = "abcdef"
+        response = self.client.get(invalid_url)
+        self.assertEquals(404, response.status_code)

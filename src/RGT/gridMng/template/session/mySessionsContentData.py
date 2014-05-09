@@ -12,6 +12,7 @@ class MySessionsContentData(object):
     showFinishButton = False
     showCloseSessionButton = False
     savaGridSession = False
+    session = None
 
     def __init__(self):
         pass

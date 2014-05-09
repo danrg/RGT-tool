@@ -32,17 +32,27 @@ RGT | Sessions - Administration
 		<p>Please verify your email in order to use this part of the application.</p>
 	</div>
 {% else %}
+
+{#        {% if sessions %}#}
+{#        {% for s in sessions  %}#}
+{#            <option value="{{ s.usid }}"#}
+{#               {% if s == session %}selected="selected"{% endif %}#}
+{#            >#}
+{#            {{ s.name }}#}
+{#            </option>#}
+{#        {% endfor %}#}
+
 <div>
 	<h2>Session administration</h2>
 	On this page you can create or manage decision making sessions. <br/>
 	Click <a href="/sessions/participate/">here</a> to review the sessions you are participating in.
-	
+
 	<!-- header just after the menu (create session, my session, etc) -->
 	<label for= "mySessionsSelect">Select session:</label><select id="mySessionsSelect" onchange= "showMySession()">
-	{% if data.sessions %}
+	{% if sessions %}
 		<option value="noSessions">&nbsp;</option>
-		{% for name,usid in data.sessions  %}
-			<option value="{{ usid }}">{{ name }}</option>
+		{% for session_option in sessions  %}
+			<option value="{{ session_option.usid }}">{{ session_option.name }}</option>
 		{% endfor %}
 	{% else %}
 		<option value="noSessions">no sessions available</option>
