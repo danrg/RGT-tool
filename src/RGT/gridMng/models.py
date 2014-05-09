@@ -6,7 +6,6 @@ from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
 from RGT.gridMng.error.wrongState import WrongState
 from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
 from RGT.gridMng.session.state import State as SessionState
-from sets import Set
 from RGT.settings import SESSION_USID_KEY_LENGTH
 from utility import generateRandomString
 from datetime import datetime
@@ -289,8 +288,8 @@ class Session(models.Model):
             raise ValueError('state is None')
 
     def getUsersThatDidNotRespondedRequest(self):
-        repondedUsers = Set(self.getUsersThatRespondedRequest())
-        users = Set(self.getParticipators())
+        repondedUsers = set(self.getUsersThatRespondedRequest())
+        users = set(self.getParticipators())
         return users - repondedUsers
 
     def getUsersThatRespondedRequest(self):
