@@ -163,21 +163,8 @@ class State(models.Model):
 #manager for facilitator
 class FacilitatorManager(models.Manager):
     def isFacilitator(self, userObj):
-        facilitator1 = None
-        try:
-            facilitator1 = Facilitator.objects.get(user=userObj)
-        except:
-            pass
-        if facilitator1:
-            return facilitator1
-        else:
-            return False
-
-        # facilitator, created = Facilitator.objects.get_or_create(user=userObj)
-        # numSessions = Session.objects.filter(facilitator=facilitator).count()
-        #
-        # if numSessions > 0:
-        #     return facilitator
+        facilitator, created = self.get_or_create(user=userObj)
+        return not created and facilitator.session_set.count() > 0
 
 #model for facilitator
 class Facilitator(models.Model):

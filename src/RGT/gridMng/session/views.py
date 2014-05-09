@@ -72,17 +72,15 @@ def ajaxGetCreateSessionPage(request):
 @login_required
 def getMySessionsPage(request):
     try:
-        facilitator = Facilitator.objects.isFacilitator(request.user)
-        if facilitator:
-            sessions = Session.objects.filter(facilitator=facilitator)
-            if sessions and len(sessions) > 0:
-                context = RequestContext(request, {'sessions': sessions})
-                return render(request, 'gridMng/mySessions.html', context_instance=context)
+        is_facilitator = Facilitator.objects.isFacilitator(request.user)
+        if is_facilitator:
+            facilitator = Facilitator.objects.get(user=request.user)
+            sessions = facilitator.session_set.all()
+            return render(request, 'gridMng/mySessions.html', {'sessions': sessions})
     except:
         __debug_print_stacktrace()
 
-    context = RequestContext(request, {})
-    return render(request, 'gridMng/mySessions.html', context_instance=context)
+    return render(request, 'gridMng/mySessions.html')
 
 @login_required
 def show_session(request, usid):
@@ -165,8 +163,9 @@ def ajaxGetMySessionContentPage(request):
     try:
         if 'sessionUSID' in request.POST:
             try:
-                facilitator = Facilitator.objects.isFacilitator(request.user)
-                if facilitator:
+                is_facilitator = Facilitator.objects.isFacilitator(request.user)
+                if is_facilitator:
+                    facilitator = Facilitator.objects.get(user=request.user)
                     sessionObj = Session.objects.get(usid=request.POST['sessionUSID'], facilitator=facilitator)
                     templateData = MySessionsContentData()
                     templateData.session = sessionObj
@@ -1677,8 +1676,9 @@ def __saveSessionGridAsUserGrid(request):
             gridType = Grid.GridType.USER_GRID
             userObj = request.user
             if 'sessionUSID' in request.POST and 'iteration' in request.POST:
-                facilitatorObj = Facilitator.objects.isFacilitator(request.user)
-                if facilitatorObj:
+                isFacilitator = Facilitator.objects.isFacilitator(request.user)
+                if isFacilitator:
+                    facilitatorObj = Facilitator.objects.get(user=request.user)
                     session = facilitatorObj.session_set.filter(usid=request.POST['sessionUSID'])
                     if len(session) >= 1:
                         session = session[0]

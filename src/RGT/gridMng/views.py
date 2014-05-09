@@ -347,8 +347,9 @@ def ajaxUpdateGrid(request):
         gridType = request.POST['gridType']
         if gridType == 'session':
             if request.POST.has_key('sessionUSID') and request.POST.has_key('iteration'):
-                facilitatorObj = Facilitator.objects.isFacilitator(request.user)
-                if facilitatorObj:
+                isFacilitator = Facilitator.objects.isFacilitator(request.user)
+                if isFacilitator:
+                    facilitatorObj = Facilitator.objects.get(user=request.user)
                     session = facilitatorObj.session_set.filter(usid=request.POST['sessionUSID'])
                     if len(session) >= 1:
                         session = session[0]
