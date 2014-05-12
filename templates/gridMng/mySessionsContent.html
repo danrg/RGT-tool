@@ -19,29 +19,29 @@
 		    <tbody>
 		    	<tr>
 		            <td>Session name:</td>
-		            <td>{{data.session.name}}</td>
+		            <td>{{session.name}}</td>
 		        </tr>
 		        <tr>
 		            <td>Invitation key</td>
-		            <td>{{data.invitationKey}}</td>
+		            <td>{{session.invitationKey}}</td>
 		        </tr>
 		        <tr>
 		            <td>Current iteration</td>
-		            <td id="iteration">{{data.iteration}}</td>
+		            <td id="iteration">{{session.iteration}}</td>
 		        </tr>
 		        <tr>
 		            <td>Current iteration status</td>
-		            <td id="currentIterationStatus">{{data.state}}</td>
+		            <td id="currentIterationStatus">{{session.state}}</td>
 		        </tr>
 		        <tr>
 		            <td>Show results from iteration</td>
-		            <td>		<select id="mySessionsContentSessionIterationSelect" onchange="mySessionsShowResults()" style="width:230px">
-		                {%for key,value in data.iterationValueType.items %}
-		                	{% if key == 0 %}
-		                		<option value="{{key}}"></option>
-		                	{% else %}
-		                		<option class="{{value.stateNameKey}}" value="{{key}}">#{{key}} - type: {{value.stateName}}</option>
-		                	{% endif %}
+		            <td>
+                        <select id="mySessionsContentSessionIterationSelect" onchange="mySessionsShowResults()" style="width:230px">
+                        <option value="0"></option>
+		                {% for iteration_state in session.get_iteration_states %}
+                            <option class="{{iteration_state.state.name}}" value="{{iteration_state.iteration}}">
+                                #{{iteration_state.iteration}} - type: {{iteration_state.state}}
+                            </option>
 		                {% endfor %}
 		            </select></td>
 		        </tr>
@@ -54,24 +54,24 @@
 </div>
 <!-- navigation menus -->
 <div id="mainNavigationDiv">
-	{% if not data.isSessionClose %}
+	{% if not session.is_closed %}
         <table>
             <tr>
-				{% if not data.hasSessionStarted %}
+				{% if not session.has_started %}
                     <td><input type="button" onclick="startSession()" value="Start session"/></td>
 				{% endif %}
 				{% if data.showRequestButtons %}
                     <td><input type="button" onclick="requestAlternativeConcerns()" value="Request alternatives/concerns" /></td>
                     <td><input type="button" onclick="requestRatings()" value="Request ratings"/></td>
 				{% endif %}
-				{% if data.showFinishButton %}
+				{% if session.state.is_finishable %}
                     <td><input type="button" onclick="finishCurrentRequest()" value="Finish request" /></td>
 				{% endif %}
-				{% if data.hasSessionStarted and data.showCloseSessionButton %}
-                    <td><input type="button" onclick="finishSession()" value="End session"/></td>
-				{% endif %}
-				{% if data.hasSessionStarted %}
+				{% if session.has_started %}
 					<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show dendrogram"/></td>
+				{% endif %}
+                {% if session.has_started and data.showCloseSessionButton %}
+                    <td><input type="button" onclick="finishSession()" value="End session"/></td>
 				{% endif %}
             </tr>
 		</table>
@@ -93,7 +93,7 @@
 					{% include "gridMng/gridTable.html" with data=data.tableData STATIC_URL=STATIC_URL %}
 				</form>
 			</div>
-			{% if data.savaGridSession %}
+			{% if data.saveGridSession %}
 				<div id="sessionGridOptions">
 					<input type="button" id="saveButton" onclick="rescale($('#form'));saveSessionGrid()" value="Save changes" />
 					<input type="button" id= "mySessionsContentUndoAllButton" value="Undo all" onclick="getSessionGrid()" />

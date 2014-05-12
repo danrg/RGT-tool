@@ -156,9 +156,18 @@ class StateManager(models.Manager):
 class State(models.Model):
     name = models.CharField(max_length=30)
     objects = StateManager()
+    verbose_names = { SessionState.INITIAL: 'Invitation', SessionState.AC: 'Alternatives / Concerns',
+                      SessionState.RW: 'Ratings / Weights', SessionState.FINISH: 'Closed',
+                      SessionState.CHECK: 'Check values'}
 
     class Meta:
         ordering = ['id']
+
+    def is_finishable(self):
+        return self.name in (SessionState.AC, SessionState.RW)
+
+    def __unicode__(self):
+        return self.verbose_names.get(self.name)
 
 #manager for facilitator
 class FacilitatorManager(models.Manager):
@@ -297,6 +306,18 @@ class Session(models.Model):
 
     def get_descriptive_name(self):
         return '%s: %s' % (self.facilitator.user.get_full_name(), self.name)
+
+    def has_started(self):
+        return self.state != State.objects.getInitialState()
+
+    def is_closed(self):
+        return self.state == State.objects.getFinishState()
+
+    def get_iteration_states(self):
+        return self.sessioniterationstate_set.all().order_by('iteration')
+
+    def get_session_grid(self):
+        return self.sessiongrid_set.get(iteration=self.iteration).grid
 
     def __changeIteration(self):
         sessionGrid1 = SessionGrid.objects.filter(session=self, iteration=self.iteration)

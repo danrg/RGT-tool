@@ -172,7 +172,7 @@ class SessionTests(BaseSessionLiveTest):
 
         # The iteration status shows 'Check Values'
         current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
-        self.assertIn("Check Values", current_iteration_status.text)
+        self.assertIn("Check values", current_iteration_status.text)
 
         ### REQUEST ALTERNATIVES / CONCERNS STEP ###
 
@@ -317,9 +317,9 @@ class SessionTests(BaseSessionLiveTest):
         iteration_label = self.browser.find_element_by_id("iteration")
         self.assertIn("2", iteration_label.text)
 
-        # The iteration status shows 'Check Values'
+        # The iteration status shows 'Check values'
         current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
-        self.assertIn("Check Values", current_iteration_status.text)
+        self.assertIn("Check values", current_iteration_status.text)
 
         # Facilitator admin selects from the select field the results from iteration 1
         show_respond_from_iterations_options = self.browser.find_elements_by_xpath(
@@ -486,9 +486,9 @@ class SessionTests(BaseSessionLiveTest):
         iteration_label = self.browser.find_element_by_id("iteration")
         self.assertIn("3", iteration_label.text)
 
-        # The iteration status shows 'Check Values'
+        # The iteration status shows 'Check values'
         current_iteration_status = self.browser.find_element_by_id("currentIterationStatus")
-        self.assertIn("Check Values", current_iteration_status.text)
+        self.assertIn("Check values", current_iteration_status.text)
 
         # Facilitator admin selects from the select field the results from iteration 2
         show_respond_from_iterations_options = self.browser.find_elements_by_xpath(
