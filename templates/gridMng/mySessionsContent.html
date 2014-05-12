@@ -36,13 +36,17 @@
 		        <tr>
 		            <td>Show results from iteration</td>
 		            <td>
-                        <select id="mySessionsContentSessionIterationSelect" onchange="mySessionsShowResults()" style="width:230px">
-                        <option value="0"></option>
-		                {% for iteration_state in session.get_iteration_states %}
-                            <option class="{{iteration_state.state.name}}" value="{{iteration_state.iteration}}">
-                                #{{iteration_state.iteration}} - type: {{iteration_state.state}}
-                            </option>
-		                {% endfor %}
+                        {% if session.iteration == 0 %}
+                            <em>Start the session to gather results</em>
+                        {% else %}
+                            <select id="mySessionsContentSessionIterationSelect" onchange="mySessionsShowResults()" style="width:230px">
+                            <option value="0"></option>
+                            {% for iteration_state in session.get_iteration_states %}
+                                <option class="{{iteration_state.state.name}}" value="{{iteration_state.iteration}}">
+                                    #{{iteration_state.iteration}} - type: {{iteration_state.state}}
+                                </option>
+                            {% endfor %}
+                        {% endif %}
 		            </select></td>
 		        </tr>
 			</tbody>
