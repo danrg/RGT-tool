@@ -919,8 +919,7 @@ def ajaxGetParticipatingPage(request):
                 facilitatorObj = request.user.facilitator_set.all()
                 if len(facilitatorObj) >= 1 and sessionObj.facilitator == facilitatorObj[0]:
                     # get all the users that reponded to the request
-                    templateData = ParticipantsData()
-                    templateData.participants = __createParticipantPanelData(sessionObj)
+                    templateData = ParticipantsData(session=sessionObj)
                     template = loader.get_template('gridMng/participants.html')
                     context = RequestContext(request, {'data': templateData})
                     htmlData = template.render(context)

@@ -1,6 +1,6 @@
 var urlStaticFiles = '/static/';
 var intervalId = null;
-var participantTableRefreshTime = 900000; //15 min refresh time
+var participantTableRefreshTimeMillis = 10000;
 
 if (typeof createDendogram != 'function')
 {
@@ -59,7 +59,7 @@ function initializeMySessionsContent()
 	{
 		clearInterval(intervalId);
 	}
-	intervalId= setInterval(function(){refreshParticipantTable()}, participantTableRefreshTime);
+	intervalId= setInterval(function(){refreshParticipantTable()}, participantTableRefreshTimeMillis);
 }
 
 /**

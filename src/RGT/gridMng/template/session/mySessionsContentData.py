@@ -20,7 +20,7 @@ class MySessionsContentData(object):
             grid_template_data.tableId = generateRandomString()
             grid_template_data.usid = sessionGrid.usid
             self.tableData = grid_template_data
-            self.participantTableData = ParticipantsData(self.__createParticipantPanelData(session))
+            self.participantTableData = ParticipantsData(session=session)
 
             if session.state.name == SessionState.CHECK:
                 self.showRequestButtons = True
@@ -29,24 +29,3 @@ class MySessionsContentData(object):
                 grid_template_data.changeRatingsWeights = True
                 grid_template_data.changeCornAlt = True
                 grid_template_data.checkForTableIsSave = True
-
-    def __createParticipantPanelData(self, sessionObj):
-        usersAndDateTimes = sessionObj.getUsersThatRespondedRequest()
-        participantData = []
-        for user in sessionObj.getParticipators():
-            # create the list with the user and the class of the css the should be coupled with the user in the html template
-            # but first check if the session is in a state where there is no data that can be requested or responded
-            if sessionObj.state.name == SessionState.FINISH or sessionObj.state.name == SessionState.INITIAL or sessionObj.state.name == SessionState.CHECK:
-                participantData.append((user, 'respondedRequest'))
-            else:
-                users = []
-                dateTimes = []
-                for i in range(len(usersAndDateTimes)):
-                    users.append(usersAndDateTimes[i]['user'])
-                    dateTimes.append(usersAndDateTimes[i]['dateTime'])
-                if user in users:
-                    j = users.index(user)
-                    participantData.append((user, 'respondedRequest', dateTimes[j]))
-                else:
-                    participantData.append((user, 'didNotRespondedRequest'))
-        return participantData
