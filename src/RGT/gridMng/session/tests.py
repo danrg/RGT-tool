@@ -85,7 +85,7 @@ class CreateSessionTest(TestCase):
         self.assertEquals(0, Session.objects.count())
 
 class ShowSessionTest(TestCase):
-    """ Tests show_session from views.py """
+    """ Tests show_detailed from views.py """
 
     def setUp(self):
         self.user = User.objects.create_user(username='fred', email='fred@facilitator.com', password='123')

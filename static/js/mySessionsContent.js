@@ -68,7 +68,7 @@ function initializeMySessionsContent()
 function refreshParticipantTable()
 {
 	var sessionStatus= $('#currentIterationStatus').html();
-	if(sessionStatus == 'Invitation' || sessionStatus == 'A/C' || sessionStatus == 'R/W')
+	if(sessionStatus == 'Invitation' || sessionStatus == 'Alternatives / Concerns' || sessionStatus == 'Ratings / Weights')
 	{
 		getParticipantPage();
 	}

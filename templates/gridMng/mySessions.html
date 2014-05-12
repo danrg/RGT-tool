@@ -40,10 +40,10 @@ RGT | Sessions - Administration
         <!-- header just after the menu (create session, my session, etc) -->
         <label for= "mySessionsSelect">Select session:</label>
         <select id="mySessionsSelect" onchange="window.location.href='/sessions/show/' + this.options[this.selectedIndex].value">
-        {% if not session %}
-            <option value="">&nbsp;</option>
-        {% endif %}
         {% if sessions %}
+            {% if not session %}
+                <option value="">&nbsp;</option>
+            {% endif %}
             {% for session_option in sessions  %}
                 <option value="{{ session_option.usid }}"
                     {% if session_option == session %} selected="selected"{% endif %}

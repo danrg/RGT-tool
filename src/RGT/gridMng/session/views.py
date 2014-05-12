@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
 
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template import loader
 from django.contrib.auth.decorators import login_required
@@ -63,7 +63,6 @@ def ajaxGetCreateSessionPage(request):
         grids = None
 
     templateData = CreateSessionData(grids)
-
     context = RequestContext(request, {'data': templateData})
 
     return render(request, 'gridMng/createSession.html', context_instance=context)
@@ -83,7 +82,7 @@ def getMySessionsPage(request):
     return render(request, 'gridMng/mySessions.html')
 
 @login_required
-def show_session(request, usid):
+def show_detailed(request, usid):
     """
      This function is used to display a detailed page of a session with the given usid
     """
@@ -96,6 +95,17 @@ def show_session(request, usid):
     sessions = Session.objects.filter(facilitator=facilitator)
 
     return render(request, 'gridMng/showSession.html', {'session': session, 'sessions': sessions, 'session_html': session_html })
+
+
+@login_required
+def show_latest(request):
+    if Facilitator.objects.isFacilitator(request.user):
+        facilitator, created = Facilitator.objects.get_or_create(user=request.user)
+        latest_session = Session.objects.filter(facilitator=facilitator).last()
+        return redirect(latest_session)
+    else:
+        return redirect('/sessions')
+
 
 @login_required
 def ajaxGetMySessionContentPage(request):

@@ -82,7 +82,7 @@ function createSession()
 					$("#gridSessionSelection").val('0');
 					showMessageInDialogBox($(data).find('htmlData').text(), function(){
 						//redirect to the session page
-						window.location.href= "/sessions/";
+						window.location.href= "/sessions/latest";
 					}); //function from dialogbox.js
 					
 				}

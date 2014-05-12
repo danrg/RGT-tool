@@ -290,7 +290,7 @@ class Session(models.Model):
             raise ValueError('state is None')
 
     def get_absolute_url(self):
-        return reverse('RGT.gridMng.session.views.show_session', args=[self.usid])
+        return reverse('RGT.gridMng.session.views.show_detailed', args=[self.usid])
 
     def getUsersThatDidNotRespondedRequest(self):
         repondedUsers = set(self.getUsersThatRespondedRequest())
