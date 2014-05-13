@@ -22,8 +22,8 @@
 		            <td>{{session.name}}</td>
 		        </tr>
 		        <tr>
-		            <td>Invitation key</td>
-		            <td>{{session.invitationKey}}</td>
+		            <td>Invitation link</td>
+		            <td><a href="/sessions/join/{{session.invitationKey}}">Share this link</a></td>
 		        </tr>
 		        <tr>
 		            <td>Current iteration</td>
@@ -38,6 +38,8 @@
 		            <td>
                         {% if session.iteration == 0 %}
                             <em>Start the session to gather results</em>
+                        {%  elif session.iteration == 1 %}
+                            <em>No results yet</em>
                         {% else %}
                             <select id="mySessionsContentSessionIterationSelect" onchange="mySessionsShowResults()" style="width:230px">
                             <option value="0"></option>
@@ -46,8 +48,9 @@
                                     #{{iteration_state.iteration}} - type: {{iteration_state.state}}
                                 </option>
                             {% endfor %}
+                            </select>
                         {% endif %}
-		            </select></td>
+		            </td>
 		        </tr>
 			</tbody>
 		</table>

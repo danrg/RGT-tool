@@ -1,15 +1,23 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from models import Session, Facilitator, State, Grid
+from models import Session, Facilitator, State, Grid, SessionGrid
 
 
-class SessionTest(TestCase):
+class BaseSessionTest(TestCase):
 
     def setUp(self):
-        user = User.objects.create_user(username="Facilitator", first_name="Frank", last_name="Facilitator")
-        facilitator = Facilitator.objects.create(user=user)
-        state = State.objects.create(name='initial')
-        self.session = Session.objects.create(facilitator=facilitator, state=state, name="Session1")
+        self.facilitator = User.objects.create_user('Facilitator', 'frank@facilitator.com', 'password', first_name='Frank',
+                                        last_name='Facilitator')
+        grid = Grid.objects.create(usid='a1b2c3', name='TestGrid', user=self.facilitator)
+        self.session = Session.objects.create_session(facilitating_user=self.facilitator, original_grid=grid, name='Session1')
+        self.key = self.session.invitationKey
+        self.participant = User.objects.create_user('Participant', 'peter@participant.com', 'password')
+
+    def login(self, user):
+        self.client.post('/accounts/login/', {'email': user.email, 'password': 'password'})
+
+
+class SessionTest(BaseSessionTest):
 
     def test_get_descriptive_name(self):
         self.assertEquals("Frank Facilitator: Session1", self.session.get_descriptive_name())
@@ -17,6 +25,49 @@ class SessionTest(TestCase):
     def test_get_absolute_url(self):
         self.session.usid = "abcdef"
         self.assertEquals("/sessions/show/abcdef", self.session.get_absolute_url())
+
+
+class JoinSessionTest(BaseSessionTest):
+
+    path = '/sessions/join/'
+
+    def test_get_not_logged_in(self):
+        response = self.client.get(self.path + self.key)
+        self.assertRedirects(response, 'accounts/login/?next=' + self.path +  self.key)
+
+    def test_valid(self):
+        self.login(self.participant)
+        response = self.client.get(self.path + self.key, follow=True)
+        self.assertIn(self.participant, self.session.getParticipators())
+        self.assertEquals(1, len(self.session.getParticipators()))
+        self.assertRedirects(response, '/sessions/participate/')
+        self.assertInHTML('<li class="success">Successfully joined session</li>', response.content)
+
+    def test_invalid_invitation_key(self):
+        self.login(self.participant)
+        response = self.client.get(self.path + "abcdef")
+        self.assertEquals(404, response.status_code)
+
+    def test_join_twice(self):
+        self.login(self.participant)
+        self.client.get(self.path + self.key)
+        response = self.client.get(self.path + self.key, follow=True)
+        self.assertRedirects(response, '/sessions/participate/')
+        self.assertEquals(1, len(self.session.getParticipators()))
+
+    def test_join_as_facilitator(self):
+        self.login(self.facilitator)
+        response = self.client.get(self.path + self.key, follow=True)
+        self.assertRedirects(response, self.session.get_absolute_url())
+        self.assertInHTML('<li class="error">You are already the facilitator of this session</li>', response.content)
+        self.assertEquals(0, len(self.session.getParticipators()))
+
+    def test_join_wrong_state(self):
+        self.session.state.name = 'finish'
+        self.session.state.save()
+        self.login(self.participant)
+        response = self.client.get(self.path + self.key, follow=True)
+        self.assertInHTML('<li class="error">Could not join session, as it is in state &quot;Closed&quot;</li>', response.content)
 
 class GridTest(TestCase):
 
@@ -26,6 +77,7 @@ class GridTest(TestCase):
 
     def test_get_absolute_url(self):
         self.assertEquals('/grids/show/a1b2c3', self.grid.get_absolute_url())
+
 
 class ShowGridTest(TestCase):
 

@@ -8,6 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template import loader
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from RGT.gridMng.models import Grid
 from RGT.gridMng.models import Ratings
@@ -70,16 +71,10 @@ def ajaxGetCreateSessionPage(request):
 
 @login_required
 def getMySessionsPage(request):
-    try:
-        is_facilitator = Facilitator.objects.isFacilitator(request.user)
-        if is_facilitator:
-            facilitator = Facilitator.objects.get(user=request.user)
-            sessions = facilitator.session_set.all()
-            return render(request, 'gridMng/mySessions.html', {'sessions': sessions})
-    except:
-        __debug_print_stacktrace()
+    facilitator, created = Facilitator.objects.get_or_create(user=request.user)
+    sessions = facilitator.session_set.all()
+    return render(request, 'gridMng/mySessions.html', {'sessions': sessions})
 
-    return render(request, 'gridMng/mySessions.html')
 
 @login_required
 def show_detailed(request, usid):
@@ -105,6 +100,23 @@ def show_latest(request):
         return redirect(latest_session)
     else:
         return redirect('/sessions')
+
+@login_required
+def join_session(request, key):
+    session = get_object_or_404(Session, invitationKey=key)
+    try:
+        session.addParticipant(request.user)
+    except UserAlreadyParticipating:
+        pass # don't join, but redirect anyway
+    except UserIsFacilitator:
+        messages.error(request, 'You are already the facilitator of this session')
+        return redirect(session)
+    except WrongState as e:
+        messages.error(request, 'Could not join session, as it is in state "%s"' % str(session.state))
+        return redirect('/sessions/')
+
+    messages.success(request, "Successfully joined session")
+    return redirect('/sessions/participate')
 
 
 @login_required
@@ -187,7 +199,7 @@ def ajaxJoinSession(request):
     if 'invitationKey' in request.POST:
         invitationKey1 = request.POST['invitationKey'].strip()
     else:
-        error = 'no invitation key was received'
+        error = 'No invitation key was received'
     if not error:
         try:
             session = Session.objects.filter(invitationKey=invitationKey1)
