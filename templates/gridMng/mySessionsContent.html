@@ -23,7 +23,13 @@
 		        </tr>
 		        <tr>
 		            <td>Invitation link</td>
-		            <td><a href="/sessions/join/{{session.invitationKey}}">Share this link</a></td>
+		            <td>
+                        {% if session.has_started %}
+                           <em>Session has already started</em>
+                        {% else %}
+                            <a href="/sessions/join/{{session.invitationKey}}">Share this link</a>
+                        {% endif %}
+                    </td>
 		        </tr>
 		        <tr>
 		            <td>Current iteration</td>
@@ -38,14 +44,21 @@
 		            <td>
                         {% if session.iteration == 0 %}
                             <em>Start the session to gather results</em>
-                        {%  elif session.iteration == 1 %}
+                        {%  elif not session.get_iteration_states %}
                             <em>No results yet</em>
                         {% else %}
                             <select id="mySessionsContentSessionIterationSelect" onchange="mySessionsShowResults()" style="width:230px">
                             <option value="0"></option>
                             {% for iteration_state in session.get_iteration_states %}
-                                <option class="{{iteration_state.state.name}}" value="{{iteration_state.iteration}}">
-                                    #{{iteration_state.iteration}} - type: {{iteration_state.state}}
+                                <option class="{{iteration_state.state.name}}" value="{{iteration_state.iteration}}"
+                                    {% if not iteration_state.iteration in data.iterations_with_results %}
+                                        disabled="disabled"
+                                    {% endif %}
+                                >
+                                    {{iteration_state.iteration}}: {{iteration_state.state}}
+                                    {% if not iteration_state.iteration in data.iterations_with_results %}
+                                        (No results)
+                                    {% endif %}
                                 </option>
                             {% endfor %}
                             </select>

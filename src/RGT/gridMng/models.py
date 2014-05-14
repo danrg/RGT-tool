@@ -305,19 +305,28 @@ class Session(models.Model):
         return respondedUsers
 
     def get_descriptive_name(self):
+        """ Returns a user friendly descriptive name of this session """
         return '%s: %s' % (self.facilitator.user.get_full_name(), self.name)
 
     def has_started(self):
+        """ Returns True if this session has started (i.e. not in invitation state) """
         return self.state != State.objects.getInitialState()
 
     def is_closed(self):
+        """ Returns True if this session is in the finish state """
         return self.state == State.objects.getFinishState()
 
     def get_iteration_states(self):
+        """ Returns all iteration states for this session """
         return self.sessioniterationstate_set.all().order_by('iteration')
 
     def get_session_grid(self):
+        """ Returns the session grid of the current iteration """
         return self.sessiongrid_set.get(iteration=self.iteration).grid
+
+    def get_iterations_with_results(self):
+        """ Returns a list of all the iterations for which this session has results """
+        return [x.iteration for x in self.responsegrid_set.all()]
 
     def __changeIteration(self):
         sessionGrid1 = SessionGrid.objects.filter(session=self, iteration=self.iteration)
@@ -368,4 +377,3 @@ class ResponseGrid(models.Model):
         unique_together = ('iteration', 'user',
                            'session') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         ordering = ['id']
-    

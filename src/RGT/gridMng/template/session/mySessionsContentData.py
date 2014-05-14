@@ -21,6 +21,7 @@ class MySessionsContentData(object):
             grid_template_data.usid = sessionGrid.usid
             self.tableData = grid_template_data
             self.participantTableData = ParticipantsData(session=session)
+            self.iterations_with_results = session.get_iterations_with_results()
 
             if session.state.name == SessionState.CHECK:
                 self.showRequestButtons = True
