@@ -2,13 +2,12 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
 from HelpMessages import HELP_MESSAGES
-#import logging
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlSuccessResponse, createXmlErrorResponse
 
 
 @login_required
 def home(request):
-    profile = request.user.get_profile()
+    profile = request.user.profile
     return render(request, 'home.html', {'firstName': request.user.first_name, 'verifiedEmail': profile.verifiedEmail})
 
 

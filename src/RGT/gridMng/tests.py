@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from models import Session, Facilitator, State, Grid, SessionGrid
+from models import Session, Grid
 
 
 class BaseSessionTest(TestCase):

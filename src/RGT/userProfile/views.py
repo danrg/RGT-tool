@@ -1,4 +1,3 @@
-#from django.views.generic.simple import redirect_to
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
@@ -11,7 +10,7 @@ def ajaxGetDisplayHelpState(request):
         return HttpResponse(createXmlErrorResponse('You are not logged in, please log in.'),
                             content_type='application/xml')
 
-    profile = request.user.get_profile()
+    profile = request.user.profile
     return HttpResponse(createXmlSuccessResponse(`profile.displayHelp`), content_type='application/xml')
 
 
@@ -24,7 +23,7 @@ def displayUserProfile(request):
     if request.method == 'POST':
         form = UserProfileForm(request.POST)
         if form.is_valid():
-            profile = user.get_profile()
+            profile = user.profile
             profile.address = form.cleaned_data['address']
             profile.phone = form.cleaned_data['phone']
             profile.displayHelp = form.cleaned_data['displayHelp']
@@ -43,7 +42,7 @@ def displayUserProfile(request):
         profileUpdated = request.session.get('profileUpdated')
         if 'profileUpdated' in request.session:
             del request.session['profileUpdated']
-        profile = user.get_profile()
+        profile = user.profile
         form = UserProfileForm(initial={'firstName': user.first_name,
                                         'lastName': user.last_name,
                                         'address': profile.address,

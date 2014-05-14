@@ -6,7 +6,6 @@ Created on Feb 17, 2012
 from math import sqrt, floor
 import sys
 
-#from xml.dom.minidom import getDOMImplementation
 from RGT.XML.SVG.svgDOMImplementation import SvgDOMImplementation
 from PIL import Image, ImageDraw, ImageFont #@UnresolvedImport
 from RGT.settings import DENDROGRAM_FONT_LOCATION
@@ -44,7 +43,7 @@ class EuclideanDistanceAlgorithm:
         distanceMatrix = [[[]]];
         nRow = len(matrix);
 
-        #create the distance matrix, format is: 
+        #create the distance matrix, format is:
         """
             [    [[], [name1], [name2], [name3], ...]
                  [[name1], value1, value2, value3, ....]

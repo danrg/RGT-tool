@@ -43,7 +43,6 @@ class CompositeWizard(SessionWizardView):
                 for x in templateData.grids:
                     alternatives = x.alternatives_set.all()
                     dummyList = []
-                    dummyList2 = []
                     for y in alternatives:
                         if (str(y.name) != 'ideal') and (str(y.name) != 'Ideal'):
                             dummyList.append((y.name, y.id))

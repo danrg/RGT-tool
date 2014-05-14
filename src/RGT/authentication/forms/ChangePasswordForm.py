@@ -2,9 +2,9 @@ from django import forms
 
 
 class ChangePasswordForm(forms.Form):
-    oldPassword = forms.CharField(label=('Old Password'), widget=forms.PasswordInput(render_value=False))
-    newPassword = forms.CharField(label=('New Password'), widget=forms.PasswordInput(render_value=False))
-    retyped = forms.CharField(label=('Retype Password'), widget=forms.PasswordInput(render_value=False))
+    oldPassword = forms.CharField(label=('Old password'), widget=forms.PasswordInput(render_value=False))
+    newPassword = forms.CharField(label=('New password'), widget=forms.PasswordInput(render_value=False))
+    retyped = forms.CharField(label=('Retype password'), widget=forms.PasswordInput(render_value=False))
 
     # We override the __init__ of the form so we can use the request as parameter
     # so we can check it in its 'clean' method

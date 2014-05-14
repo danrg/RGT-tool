@@ -1,4 +1,3 @@
-from django.views.generic.edit import FormView
 from RGT.authentication.forms import ChangePasswordForm
 from RGT import AuthorizedView
 from RGT.authentication.views.CaptchaSecuredFormView import CaptchaSecuredFormView

@@ -2,7 +2,6 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext, Context
 from django.template.loader import get_template
-#from django.views.generic.simple import redirect_to
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, BadHeaderError
 from RGT.contact.contactForm import ContactForm

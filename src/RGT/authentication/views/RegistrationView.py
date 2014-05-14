@@ -25,29 +25,24 @@ class RegistrationView(CaptchaSecuredFormView):
         firstName = form.cleaned_data['firstName']
         lastName = form.cleaned_data['lastName']
 
-        user = User.objects.create_user(email, email, password);
+        user = User.objects.create_user(email, email, password)
         user.first_name = firstName
         user.last_name = lastName
         if settings.EMAIL_VERIFICATION:
             user.is_active = False
-        user.save();
+        user.save()
 
         #login the user after creation
         user = authenticate(email=email, password=password)
-        login(self.request, user);
+        login(self.request, user)
 
         verificationCode = utility.generateRandomString(14)
-
-        profile = user.get_profile()
-        profile.verifyEmailCode = verificationCode
+        user.profile.verifyEmailCode = verificationCode
 
         emailService = EmailService()
         if emailService.sendRegistrationEmail(user, verificationCode):
-            profile.save();
-            return HttpResponseRedirect('/home/');
-        else:
-            # problem with email sending
-            pass
+            user.profile.save()
+            return HttpResponseRedirect('/home/')
 
         return super(RegistrationView, self).form_valid(form)
 

@@ -218,7 +218,6 @@ def ajaxJoinSession(request):
         except UserIsFacilitator:
             return HttpErrorResponse('You are already the facilitator of this session.'),
         except:
-            __debug_print_stacktrace()
             logger.exception('Unknown error')
             return HttpErrorResponse('Unknown error')
     else:
@@ -1608,7 +1607,7 @@ def __saveSessionGridAsUserGrid(request):
 # if no results were found none is returned
 def __generateSessionIterationResult(request, sessionObj, iterationObj):
     if sessionObj.iteration < iterationObj:
-        raise WrongSessionIteration('Session does not contain that iteration')
+        raise WrongSessionIteration()
 
     # let's find all the response grids
     responseGridRelation = sessionObj.responsegrid_set.filter(iteration=iterationObj)
@@ -1820,7 +1819,7 @@ def __generateSessionIterationResult(request, sessionObj, iterationObj):
 
             return templateData
         else:
-            raise WrongGridType('Unexpected type grid found')
+            raise WrongGridType()
     else:
         return None
 

@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from RGT.gridMng.template.showGridsData import ShowGridsData
 
 class FirstStepForm(forms.Form):
-    # CC = (('deneme11', 'deneme11'), ('Cars', 'Cars'), ('asd', 'asd'), ('grid11', 'grid11'))
     composite_name = forms.CharField(widget=forms.TextInput(attrs={'size':'45'}))
     description = forms.CharField(widget=forms.Textarea(), required=False) #No field in database yet
 
@@ -23,7 +22,6 @@ class WhichGridsForm(forms.Form):
             templateData.grids = Grid.objects.filter(user=user1, grid_type=gridtype)
             i=1
             for grid in templateData.grids:
-                dummy1 = ()
                 gridUsid = grid.usid
                 gridName = grid.name
                 dummy1 = (str(gridUsid), str(gridName))
@@ -38,8 +36,6 @@ class WhichGridsForm(forms.Form):
         if len(choices) < 2:
              raise forms.ValidationError('You need to select at least two grids from the list.')
 
-        # if len(alternatives) != len(set(alternatives)):
-        #     raise forms.ValidationError('It is not allowed to have the same name for alternatives.')
         return cleaned_data
 
 class RulesForm(forms.Form):

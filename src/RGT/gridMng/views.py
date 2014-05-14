@@ -622,14 +622,7 @@ def addRules(request):
         parser = CompositeParse(request.POST['rule'])
         rules_list = parser.getCompositions()
 
-        print "Rule:"
-        print request.POST['rule']
-        print "List:"
-        print rules_list
-
         for r in rules_list:
-            print "One Rule:"
-            print r
             Composite.objects.create(compid=gridID, user=user1, rule=str(r), status=request.POST['status'])
 
         return HttpResponse(gridID, mimetype="text/plain")
@@ -917,9 +910,7 @@ def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
     while i < nAlternatives:
         keyName = 'alternative_' + str((i + 1)) + '_name'
         if not request.POST.has_key(keyName):
-            #print 'Error key not found: ' + keyName
             raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
-            #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
         else:
             #alternative names should be unique in a grid, so lets check for that
             temp = request.POST[keyName].strip()
@@ -942,7 +933,6 @@ def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
         #check the left pole first
         keyName = 'concern_' + str((i + 1)) + '_left'
         if not request.POST.has_key(keyName):
-            #print 'Error key not found: ' + keyName
             raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
             #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
         else:
@@ -959,7 +949,6 @@ def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
                 #check the right pole
         keyName = 'concern_' + str((i + 1)) + '_right'
         if not request.POST.has_key(keyName):
-            #print 'Error key not found: ' + keyName
             raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
             #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
         else:
@@ -972,15 +961,12 @@ def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
                 usedConcernNames.append(rightPole)
             else:
                 raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
-                #return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
                 #if it is a response grid of the alternative.concern we don't need to check for the weights as they will not be there
         if not isConcernAlternativeResponseGrid:
             #lets check if the weight key is present
             keyName = 'weight_concern' + str((i + 1))
             if not request.POST.has_key(keyName):
-                #print 'Error key not found: ' + keyName
                 raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
-                #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
             else:
                 #allowed values for the values are None, '', ' ' and numbers
                 keyValue = request.POST[keyName]
@@ -1013,9 +999,7 @@ def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
             while j < nAlternatives:
                 keyName = 'ratio_concer' + str((i + 1)) + '_alternative' + str(( j + 1))
                 if not request.POST.has_key(keyName):
-                    #print 'Error key not found: ' + keyName
                     raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
-                    #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
                 else:
                     keyValue = request.POST[keyName].strip()
                     #valid values for the they are None, ' ', '' and numbers, anything else is not allowed
@@ -1176,7 +1160,6 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
             j = totalAlternatives
             #lets create the new alternatives
             while i < (nAlternatives - totalAlternatives):
-                #print request.REQUEST['alternative_' + str((totalAlternatives + i + 1)) + '_name']
                 alternative = Alternatives.objects.create(grid=gridObj, name=alternativeValues[i + totalAlternatives])
                 objToCommit.append(alternative)
                 alternatives.append(alternative)
@@ -1264,7 +1247,7 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
                             break
                     if wasGridSaved == False:
                         #in case we can not create a unique key, raise an error
-                        raise UnableToCreateUSID('Unable to create unique suid for the grid ' + gridName)
+                        raise UnableToCreateUSID('Unable to create unique usid for the grid ' + gridName)
                     else:
                         #the integratyError was not caused by a duplicated usid so, raise it again
                         raise error
@@ -1280,7 +1263,6 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
                 concern = Concerns.objects.create(grid=gridObj, leftPole=concernValues[i][0],
                                                   rightPole=concernValues[i][1], weight=concernValues[i][2])
                 concerns.append(concern)
-            print ratioValues
             if createRatios:
                 for i in range(int(nConcerns)):
                     for j in range(int(nAlternatives)):
@@ -1435,22 +1417,6 @@ def pca(request):
                 #Create the PCA node and train it
                 pcan = mdp.nodes.PCANode(output_dim=2, svd=True)
                 pcar = pcan.execute(var_grid)
-
-                if DEBUG:
-                    print "var_grid:"
-                    print var_grid
-
-                    print "\npcar"
-                    print pcar
-
-                    print "\neigenvalues:"
-                    print pcan.d
-
-                    print "\nexplained variance:"
-                    print pcan.explained_variance
-
-                    print "\neigenvectors:"
-                    print pcan.v
 
                 #Graph results
                 #pcar[3,0],pcar[3,1] has the projections of alternative3 on the

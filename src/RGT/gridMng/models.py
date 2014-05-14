@@ -235,11 +235,9 @@ class Session(models.Model):
                     raise WrongState('Can\'t add user in current session state, state:' + self.state.name,
                                      sessionState=self.state)
             else:
-                raise UserAlreadyParticipating('User already in session' + self.name)
+                raise UserAlreadyParticipating(user1, self)
         else:
-            raise UserIsFacilitator(
-                'User ' + user1.username + 'is already the facilitator in session ' + self.name + ' with session id: ' + str(
-                    self.id))
+            raise UserIsFacilitator(user1, self)
 
     def changeState(self, state=None):
         if state != None:
@@ -327,6 +325,9 @@ class Session(models.Model):
     def get_iterations_with_results(self):
         """ Returns a list of all the iterations for which this session has results """
         return [x.iteration for x in self.responsegrid_set.all()]
+
+    def __unicode__(self):
+        return self.name
 
     def __changeIteration(self):
         sessionGrid1 = SessionGrid.objects.filter(session=self, iteration=self.iteration)
