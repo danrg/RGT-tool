@@ -88,9 +88,15 @@ class ConcernsForm(forms.Form):
             except:
                 # The key does not exist (key=concern right pole name).
                 pass
+
+        # Check if there are any concerns at all
+        if len(concerns) == 0:
+            raise forms.ValidationError('No concern pairs entered.')
+
         # Check if there are duplicate names for the concerns names.
         if len(concerns) != len(set(concerns)):
             raise forms.ValidationError('It is not allowed to have the same name for concerns.')
+
         return cleaned_data
     
 class WeightsForm(forms.Form):
