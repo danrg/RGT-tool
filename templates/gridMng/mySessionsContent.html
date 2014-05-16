@@ -88,7 +88,7 @@
                 <td><input type="button" onclick="finishCurrentRequest()" value="Finish request" /></td>
             {% endif %}
             {% if session.has_started and data.showCloseSessionButton %}
-                <td><input type="button" onclick="finishSession()" value="End session"/></td>
+                <td><input type="button" onclick="showMessageInConfirmBox('Are you sure you want to end this session?', finishSession);" value="End session"/></td>
             {% endif %}
         </tr>
     </table>

@@ -543,6 +543,10 @@ class SessionTests(BaseSessionLiveTest):
         end_session_button = self.browser.find_element_by_css_selector("input[value='End session']")
         end_session_button.click()
 
+        # And confirms ending the session
+        confirm_button = self.browser.find_element_by_css_selector(".ui-dialog-buttonset button")
+        confirm_button.click()
+
         # Wait until the status change to Closed
         WebDriverWait(self.browser, 10).until(
             lambda x: self.browser.find_element_by_id("currentIterationStatus").text == "Closed")

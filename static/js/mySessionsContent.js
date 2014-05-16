@@ -182,7 +182,6 @@ function requestRatings()
 }
 
 function finishSession() {
-	
 	showLoadingSpinner($('#wrap'), 'Please wait...');
 	try
 	{
@@ -276,7 +275,6 @@ function finishCurrentRequest()
 				else
 				{
 					hideLoadingSpinner($('#wrap'));
-					//alert($(data).find('error').text());
 					showMessageInDialogBox($(data).find('error').text());
 				}
 			}

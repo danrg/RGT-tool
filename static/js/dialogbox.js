@@ -21,6 +21,29 @@ function showMessageInDialogBox(text, closeFunction) {
 	});
 }
 
+function showMessageInConfirmBox(text, confirmFunction) {
+    $('#modalDialogBox').html('<p>' + text + '</p>');
+	$('#modalDialogBox').dialog({
+		title: 'Information',
+		resizable: false,
+		height: 160,
+		width: 400,
+		modal: true,
+		buttons: {
+                'Ok': function () {
+                    $(this).dialog("close");
+                    if (confirmFunction != null)
+                    {
+                        confirmFunction();
+                    }
+			    },
+                'Cancel': function() {
+                    $(this).dialog("close");
+                }
+		}
+	});
+}
+
 function getDialogDiv()
 {
 	return $('#modalDialogBox');
