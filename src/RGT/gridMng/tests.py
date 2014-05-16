@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from models import Session, Grid
+from django.utils.timezone import utc
+from models import Session, Grid, Ratings
 
 
 class BaseSessionTest(TestCase):
@@ -75,9 +76,40 @@ class GridTest(TestCase):
         self.user = User.objects.create_user(username='george', email='george@gridmaker.com', password='123')
         self.grid = Grid.objects.create(usid='a1b2c3', name='TestGrid', user=self.user)
 
+    def test_create_minimal_values(self):
+        grid = Grid.objects.create_grid(self.user, Grid.GridType.USER_GRID, name=None)
+        self.assertEquals(20, len(grid.usid))
+        self.assertEquals('untitled', grid.name)
+
+    def test_create_with_name(self):
+        grid = Grid.objects.create_grid(user=self.user, type=Grid.GridType.USER_GRID, name='TestGrid')
+        self.assertEquals('TestGrid', grid.name)
+
+    def test_create_with_all_args(self):
+        type = Grid.GridType.USER_GRID
+        altValues = ['Alt1', 'Alt2']
+        concValues = (['Left1', 'Right1', 25], ['Left2', 'Right2', 75])
+        ratingValues =  [[1.0, 5.0], [4.0, 2.0]]
+        name = "FullGrid"
+        grid = Grid.objects.create_grid(self.user, type, concValues, altValues, True, ratingValues, name=name)
+
+        alt1 = grid.alternatives_set.first()
+        alt2 = grid.alternatives_set.last()
+        self.assertEquals('Alt1', str(alt1))
+        self.assertEquals('Alt2', str(alt2))
+
+        conc1 = grid.concerns_set.first()
+        conc2 = grid.concerns_set.last()
+        self.assertEquals('Left1 -- Right1 (25.000000)', str(conc1))
+        self.assertEquals('Left2 -- Right2 (75.000000)', str(conc2))
+
+        self.assertEquals(1, Ratings.objects.get(alternative=alt1, concern=conc1).rating)
+        self.assertEquals(5, Ratings.objects.get(alternative=alt2, concern=conc1).rating)
+        self.assertEquals(4, Ratings.objects.get(alternative=alt1, concern=conc2).rating)
+        self.assertEquals(2, Ratings.objects.get(alternative=alt2, concern=conc2).rating)
+
     def test_get_absolute_url(self):
         self.assertEquals('/grids/show/a1b2c3', self.grid.get_absolute_url())
-
 
 class ShowGridTest(TestCase):
 

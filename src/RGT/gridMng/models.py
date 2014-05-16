@@ -1,12 +1,12 @@
 import uuid
 from django.db import models
 from django.contrib.auth.models import User
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
 from RGT.gridMng.error.wrongState import WrongState
 from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
 from RGT.gridMng.session.state import State as SessionState
-from RGT.settings import SESSION_USID_KEY_LENGTH
+from RGT.settings import SESSION_USID_KEY_LENGTH, GRID_USID_KEY_LENGTH
 from utility import generateRandomString
 from datetime import datetime
 from django.utils.timezone import utc
@@ -14,6 +14,32 @@ from django.core.urlresolvers import reverse
 
 #grid manager
 class GridManager(models.Manager):
+
+    @transaction.atomic
+    def create_grid(self, user, type, concernValues=None, alternativeValues=None, createRatings=False, ratioValues=None, **kwargs):
+        if kwargs['name'] is None:
+            del kwargs['name']
+        grid = self.create(user=user, grid_type=type, **kwargs)
+
+        # Create related objects
+        if alternativeValues is not None:
+            alternatives = [Alternatives(grid=grid, name=alt) for alt in alternativeValues]
+            Alternatives.objects.bulk_create(alternatives)
+        if concernValues is not None:
+            concerns = [Concerns(grid=grid, leftPole=c[0],rightPole=c[1], weight=c[2]) for c in concernValues]
+            Concerns.objects.bulk_create(concerns)
+        if createRatings and ratioValues is not None:
+            # Retrieve them again to populate primary keys (still better than saving each object seperately above)
+            concerns = Concerns.objects.filter(grid=grid).all()
+            alternatives = Alternatives.objects.filter(grid=grid).all()
+            ratings = []
+            for i, concern in enumerate(concerns):
+                 for j, alternative in enumerate(alternatives):
+                     ratings.append(Ratings(concern=concern, alternative=alternative, rating=ratioValues[i][j]))
+            Ratings.objects.bulk_create(ratings)
+
+        return grid
+
     def duplicateGrid(self, gridObj, userObj=None, gridName=None, gridType=None):
         #create new grid
         if userObj:
@@ -73,9 +99,9 @@ class GridManager(models.Manager):
 
 #grid model
 class Grid(models.Model):
-    usid = models.CharField(max_length=20, unique=True)
+    usid = models.CharField(max_length=20, unique=True, default=lambda: generateRandomString(GRID_USID_KEY_LENGTH))
     user = models.ForeignKey(User, null=True)
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, default='untitled')
     description = models.TextField(null=True)
     dendogram = models.TextField(null=True)
     dateTime = models.DateTimeField(default=datetime.utcnow().replace(tzinfo=utc), null=True)
@@ -103,6 +129,9 @@ class Alternatives(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(null=True)
 
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         ordering = ['id']
 
@@ -121,6 +150,9 @@ class Concerns(models.Model):
     leftPole = models.CharField(max_length=150, null=True)
     rightPole = models.CharField(max_length=150, null=True)
     weight = models.FloatField(null=True)
+
+    def __unicode__(self):
+        return '%s -- %s (%f)' % (self.leftPole, self.rightPole, self.weight)
 
     class Meta:
         ordering = ['id']

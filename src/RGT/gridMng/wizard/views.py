@@ -2,7 +2,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.formtools.wizard.views import SessionWizardView
 from RGT.gridMng.views import createGrid
 from RGT.gridMng.models import Grid
-
+from RGT.settings import GRID_USID_KEY_LENGTH
 
 class GridWizard(SessionWizardView):
     def get_template_names(self):
@@ -143,9 +143,10 @@ class GridWizard(SessionWizardView):
                 rating = float(step_four_data['%s-rating-concern%d-alternative%d' % (step_four_prefix, i + 1, j + 1)])
                 ratings.append(rating)
             rating_values.append(ratings)
-            # We want to create ratings.
+
+        # We want to create ratings.
         create_ratings = True
         # Create the grid.
-        grid = createGrid(user_obj, grid_type, grid_name, num_concerns, num_alternatives, concern_values, alternative_values,
+        grid = createGrid(user_obj, grid_type, grid_name, concern_values, alternative_values,
                    rating_values, create_ratings)
         return HttpResponseRedirect(grid.get_absolute_url())

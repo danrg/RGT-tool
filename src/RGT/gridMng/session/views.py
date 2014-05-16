@@ -506,7 +506,7 @@ def ajaxRespond(request):
                         nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues = obj
                         try:
                             # set the relation ship of the response grid with the session
-                            gridObj = createGrid(userObj, gridType, None, nConcerns, nAlternatives, concernValues,
+                            gridObj = createGrid(userObj, gridType, None, concernValues,
                                                  alternativeValues, ratioValues, showRatings)
                             gridResponseRelation = ResponseGrid(grid=gridObj, session=sessionObj,
                                                                 iteration=sessionIteration, user=userObj)
@@ -1592,7 +1592,7 @@ def __saveSessionGridAsUserGrid(request):
     # update the grid
     if gridObj is not None:
         try:
-            isGridCreated = createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernValues,
+            isGridCreated = createGrid(userObj, gridType, gridName, concernValues,
                                        alternativeValues, ratioValues, True)
             if isGridCreated:
                 return True

@@ -161,7 +161,7 @@ def ajaxCreateGrid(request):
             return HttpResponse(createXmlErrorResponse("Invalid right concern name : " + concernValues[i][1]),
                                 content_type='application/xml')
     try:
-        createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues,
+        createGrid(userObj, gridType, gridName, concernValues, alternativeValues, ratioValues,
                    True)
     except:
         #return render_to_response('gridMng/createGrid.html', {'existingProjectName': request.REQUEST['grid']}, context_instance=RequestContext(request))
@@ -1189,8 +1189,8 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
         raise ValueError('GridObj was None')
 
 
-def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues,
-               createRatios):
+def createGrid(userObj, gridType, gridName, concernValues, alternativeValues, ratioValues,
+               createRatings):
     """
     this function will create and save a grid. After successful creation the grid is returned
 
@@ -1206,8 +1206,8 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
         gridName: string
         nConcerns: int
         nAlternatives: int
-        concernValues: array of tulips
-            information: the tulips must have 3 positions. The 1st position should have the concern
+        concernValues: array of tuples
+            information: the tuples must have 3 positions. The 1st position should have the concern
                         left pole name, the 2nd position should have the right pole name and the
                         3rd position should have the weight (double) of the concern.
         alternativeValues: array of strings
@@ -1219,68 +1219,9 @@ def createGrid(userObj, gridType, gridName, nConcerns, nAlternatives, concernVal
     Return:
         rgt/gridMng/models.Grid
     """
-    if userObj != None and gridType != None and nConcerns != None and nAlternatives != None and concernValues != None and alternativeValues != None and ratioValues != None and createRatios != None:
-        try:
-            gridObj = Grid.objects.create(user=userObj, grid_type=gridType)
-            if gridName != None:
-                gridObj.name = gridName
-            gridObj.usid = generateRandomString(GRID_USID_KEY_LENGTH)
-            gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
-            try:
-                gridObj.save()
-            except IntegrityError as error:
-                # check to see if the usid is duplicated or not
-                results = Grid.objects.filter(usid=gridObj.usid)
-                if len(results) >= 1:
-                    #in this case the key was duplicated, so lets try to create a new key
-                    maxAttempts = 5
-                    wasGridSaved = False
-                    while maxAttempts >= 0:
-                        maxAttempts -= 1
-                        key = generateRandomString(GRID_USID_KEY_LENGTH)
-                        #check to see if this key is unique
-                        results = Grid.objects.filter(usid=key)
-                        if len(results) <= 0:
-                            gridObj.usid = key
-                            gridObj.save()
-                            wasGridSaved = True
-                            break
-                    if wasGridSaved == False:
-                        #in case we can not create a unique key, raise an error
-                        raise UnableToCreateUSID('Unable to create unique usid for the grid ' + gridName)
-                    else:
-                        #the integratyError was not caused by a duplicated usid so, raise it again
-                        raise error
-
-            alternatives = []
-            concerns = []
-
-            for i in range(int(nAlternatives)):
-                alternative = Alternatives.objects.create(grid=gridObj, name=alternativeValues[i])
-                alternatives.append(alternative)
-
-            for i in range(int(nConcerns)):
-                concern = Concerns.objects.create(grid=gridObj, leftPole=concernValues[i][0],
-                                                  rightPole=concernValues[i][1], weight=concernValues[i][2])
-                concerns.append(concern)
-            if createRatios:
-                for i in range(int(nConcerns)):
-                    for j in range(int(nAlternatives)):
-                        Ratings.objects.create(concern=concerns[i], alternative=alternatives[j],
-                                               rating=ratioValues[i][j])
-
-            return gridObj
-        except:
-            try:
-                gridObj.delete()
-            except:
-                if DEBUG:
-                    print 'Could not delete the grid'
-                    print "Exception in user code:"
-                    print '-' * 60
-                    traceback.print_exc(file=sys.stdout)
-                    print '-' * 60
-            raise
+    args = (userObj,gridType, concernValues, alternativeValues, ratioValues, createRatings)
+    if not None in args:
+        return Grid.objects.create_grid(userObj, gridType, concernValues, alternativeValues, createRatings, ratioValues, name=gridName)
     else:
         raise ValueError('One or more variables were None')
 
