@@ -325,7 +325,10 @@ function mySessionsShowResults()
 				showMessageInDialogBox($(data).find('error').text());
 			}
 		});
-	}
+	} else {
+        clearResults();
+        hideLoadingSpinner($('#wrap'));
+    }
 }
 
 /**
