@@ -332,13 +332,15 @@ function mySessionsShowResults()
 }
 
 /**
- * 
- * @param iteration if not present, the iteration selected in the mySessionsContentSessionIterationSelect combo box will be used. Iteration of -1 represents the current iteration
+ * Togles the session dendrogram. If it is currently not visible, let showSessionDendrogram do it work, otherwise hide
+ * the corresponding DOM element.
+ *
+ * @param iteration, passed to showSessionDendrogram
  * @param divId if not present, the mySessionDendrogramDiv div will be used
  */
-function showSessionDendrogram(iteration, divId)
+function toggleSessionDendrogram(caller, iteration, divId)
 {
-	var dendrogramDiv = null;
+    var dendrogramDiv = null;
 	if (divId != null && divId != '')
 	{
 		dendrogramDiv = divId;
@@ -347,6 +349,23 @@ function showSessionDendrogram(iteration, divId)
 	{
 		dendrogramDiv = 'mySessionDendrogramDiv';
 	}
+    isVisible = $('#'+dendrogramDiv).parent('div').is(":visible");
+    if(isVisible) {
+        $('#'+dendrogramDiv).parent('div').hide();
+        $(caller).val("Show dendrogram");
+    } else {
+        showSessionDendrogram(iteration, dendrogramDiv)
+        $(caller).val("Hide dendrogram");
+    }
+}
+
+/**
+ * 
+ * @param iteration if not present, the iteration selected in the mySessionsContentSessionIterationSelect combo box will be used. Iteration of -1 represents the current iteration
+ * @param dendrogramDiv A string representation of the div element containing the dendrogram
+ */
+function showSessionDendrogram(iteration, dendrogramDiv)
+{
 	showLoadingSpinner($('#' + dendrogramDiv));
 	try
 	{
@@ -355,7 +374,7 @@ function showSessionDendrogram(iteration, divId)
 			iteration = $('#mySessionsContentSessionIterationSelect option:selected').val();
 		}
 		//in case the iteration is not specified display the current session
-		if(iteration <=  0)
+		if(iteration <= 0)
 		{
 			iteration = -1;
 		}

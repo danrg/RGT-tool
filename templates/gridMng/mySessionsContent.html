@@ -73,36 +73,28 @@
 	</div>
 </div>
 <!-- navigation menus -->
+{% if not session.is_closed %}
 <div id="mainNavigationDiv">
-	{% if not session.is_closed %}
-        <table>
-            <tr>
-				{% if not session.has_started %}
-                    <td><input type="button" onclick="startSession()" value="Start session"/></td>
-				{% endif %}
-				{% if data.showRequestButtons %}
-                    <td><input type="button" onclick="requestAlternativeConcerns()" value="Request alternatives/concerns" /></td>
-                    <td><input type="button" onclick="requestRatings()" value="Request ratings"/></td>
-				{% endif %}
-				{% if session.state.is_finishable %}
-                    <td><input type="button" onclick="finishCurrentRequest()" value="Finish request" /></td>
-				{% endif %}
-				{% if session.has_started %}
-					<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show dendrogram"/></td>
-				{% endif %}
-                {% if session.has_started and data.showCloseSessionButton %}
-                    <td><input type="button" onclick="finishSession()" value="End session"/></td>
-				{% endif %}
-            </tr>
-		</table>
-	{% else %}
-		<table>
-			<tr>
-				<td><input type="button" onclick="showSessionDendrogram(-1, null)" value="Show dendrogram" /></td>
-			</tr>
-		</table>
-	{% endif %}
+    <table>
+        <tr>
+            {% if not session.has_started %}
+                <td><input type="button" onclick="startSession()" value="Start session"/></td>
+            {% endif %}
+            {% if data.showRequestButtons %}
+                <td><input type="button" onclick="requestAlternativeConcerns()" value="Request alternatives/concerns" /></td>
+                <td><input type="button" onclick="requestRatings()" value="Request ratings"/></td>
+            {% endif %}
+            {% if session.state.is_finishable %}
+                <td><input type="button" onclick="finishCurrentRequest()" value="Finish request" /></td>
+            {% endif %}
+            {% if session.has_started and data.showCloseSessionButton %}
+                <td><input type="button" onclick="finishSession()" value="End session"/></td>
+            {% endif %}
+        </tr>
+    </table>
 </div>
+{% endif %}
+
 <!-- main content div -->
 <div id="mySessionsDiv">
 	<div id="mySessionMainContentDiv">
@@ -113,12 +105,13 @@
 					{% include "gridMng/gridTable.html" with data=data.tableData STATIC_URL=STATIC_URL %}
 				</form>
 			</div>
-			{% if data.saveGridSession %}
-				<div id="sessionGridOptions">
-					<input type="button" id="saveButton" onclick="rescale($('#form'));saveSessionGrid()" value="Save changes" />
-					<input type="button" id= "mySessionsContentUndoAllButton" value="Undo all" onclick="getSessionGrid()" />
-				</div>
-			{% endif %}
+            <div id="sessionGridOptions">
+                {% if data.saveGridSession %}
+                <input type="button" id="saveButton" onclick="rescale($('#form'));saveSessionGrid()" value="Save changes" />
+                <input type="button" id= "mySessionsContentUndoAllButton" value="Undo all" onclick="getSessionGrid()" />
+                {% endif %}
+                <input type="button" onclick="toggleSessionDendrogram(this, -1, null)" value="Show dendrogram" />
+            </div>
 			<div id="mySessionDendrogram" style="display: none;">
 				<div id="mySessionDendrogramHead" class="dendrogramHead">
 					<span id="mySessionDendrogramTitle" class="dendrogramTitle">Dendrogram of current iteration</span>
