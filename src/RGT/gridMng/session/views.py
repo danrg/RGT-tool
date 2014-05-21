@@ -38,7 +38,6 @@ from RGT.gridMng.template.session.resultRatingWeightTableData import ResultRatin
 from RGT.gridMng.template.session.resultRatingWeightTablesData import ResultRatingWeightTablesData
 from RGT.gridMng.template.session.participantsData import ParticipantsData
 from RGT.gridMng.template.gridTableData import GridTableData
-from RGT.gridMng.template.session.pendingResponsesData import PendingResponsesData
 from RGT.gridMng.fileData import FileData
 from RGT.gridMng.utility import generateGridTable, createDendogram, getImageError
 from RGT.settings import DEBUG
