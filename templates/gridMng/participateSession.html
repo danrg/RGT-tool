@@ -1,0 +1,11 @@
+{%  extends 'gridMng/participatingSessions.html' %}
+
+{% block session %}
+    <script type="text/javascript">
+    $(document).ready(function() {
+        prepareForNewGrid($('#participatingSessionGridDiv'));
+        prepareForNewGrid($('#participatingSessionGridAnswerDiv'));
+    });
+    </script>
+    {{ session_html }}
+{% endblock %}

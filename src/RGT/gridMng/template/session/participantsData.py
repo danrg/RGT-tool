@@ -8,7 +8,7 @@ class ParticipantsData(object):
             self.participants = self.__createParticipantPanelData(session)
 
     def __createParticipantPanelData(self, sessionObj):
-        usersAndDateTimes = sessionObj.getUsersThatRespondedRequest()
+        usersAndDateTimes = sessionObj.getRespondents()
         participantData = []
         for user in sessionObj.getParticipators():
             # create the list with the user and the class of the css the should be coupled with the user in the html template

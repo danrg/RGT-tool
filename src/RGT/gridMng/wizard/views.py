@@ -2,7 +2,6 @@ from django.http import HttpResponseRedirect
 from django.contrib.formtools.wizard.views import SessionWizardView
 from RGT.gridMng.views import createGrid
 from RGT.gridMng.models import Grid
-from RGT.settings import GRID_USID_KEY_LENGTH
 
 class GridWizard(SessionWizardView):
     def get_template_names(self):

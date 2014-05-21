@@ -38,14 +38,20 @@ RGT | Sessions - Participating
 		On this page you can review the sessions you are participating in. <br/>
 		Click <a href="/sessions/">here</a> to administrate your sessions.
 		
-		<label for="participatingSessionSelect">Select session:</label><select id="participatingSessionSelect" onchange= "showParticipatingSessionDetails()">
-			{%if not data.hasSessions%}
+		<label for="participatingSessionSelect">Select session:</label>
+        <select id="participatingSessionSelect" onchange="window.location.href='/sessions/participate/' + this.options[this.selectedIndex].value">
+			{% if not data.sessions %}
 				<option id= "noSessionOption" value= "noSession">No session available</option>
 			{% else %}
 				<option value="noSession"> </option>
 			{% endif %}
-			{% for usid, name in data.sessions %}
-				<option value="{{ usid }}">{{ name }}</option>
+                {% for s in data.sessions %}
+                    <option value="{{ s.usid }}"
+                        {% if session and session.usid == s.usid %}
+                            selected="selected"
+                        {% endif %}
+                    >{{ s.get_descriptive_name }}
+                    </option>
 			{% endfor %}
 		</select>
 		<img id= "participatingSessionsRefreshImage" src="/static/icons/refresh.png" onclick= "showParticipatingSessionDetails()"/>
@@ -60,12 +66,13 @@ RGT | Sessions - Participating
 		The table contains the name of the session that is waiting for an answer of the participant.
 	{% endcomment %}
 	<div id="participatingSessionsPendingResponsesDiv">
-		{% if data.pendingResponses.pedingResponsesTable %}
-			{%include "gridMng/pendingResponses.html" with data=data.pendingResponses STATIC_URL=STATIC_URL%}
+		{% if data.pendingResponses %}
+			{%include "gridMng/pendingResponses.html" with data=data STATIC_URL=STATIC_URL%}
 		{% endif %}
 	</div>
 </div>
 <div id="participatingSessionContentDiv">
+{%  block session %}{% endblock %}
 </div>
 {% endif %}
 {% endblock content %}

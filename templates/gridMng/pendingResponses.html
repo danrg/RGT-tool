@@ -1,14 +1,17 @@
-<table border= "1" class= "grid" id= "pendingREsponsesTable">
+<table border= "1" class= "grid" id= "pendingResponsesTable">
 	<thead>
 		<tr>
 			<th>Pending responses</th>
 		</tr>
 	</thead>
 	<tbody>
-		<!-- The function openSession should be implemented in the javascript of the parent page!! -->
-		{% for sessionName, sessionUSID in data.pedingResponsesTable %}
+		{% for session in data.pendingResponses %}
 			<tr class= "pendingSessionTr">
-				<td class="pendingSessionTd" onclick= "openSession('{{sessionUSID}}')" id="tdPendingResponses{{sessionUSID}}" >{{sessionName}}</td>
+				<td class="pendingSessionTd"  id="tdPendingResponses{{session.usid}}" >
+                    <a href="/sessions/participate/{{ session.usid }}">
+                        {{session.get_descriptive_name}}
+                    </a>
+                </td>
 			</tr>
 		{% endfor %}
 	</tbody>

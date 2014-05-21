@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from django.utils.timezone import utc
+from RGT.gridMng.models import UserParticipateSession, State
 from models import Session, Grid, Ratings
 
 
@@ -27,7 +27,6 @@ class SessionTest(BaseSessionTest):
         self.session.usid = "abcdef"
         self.assertEquals("/sessions/show/abcdef", self.session.get_absolute_url())
 
-
 class JoinSessionTest(BaseSessionTest):
 
     path = '/sessions/join/'
@@ -41,7 +40,7 @@ class JoinSessionTest(BaseSessionTest):
         response = self.client.get(self.path + self.key, follow=True)
         self.assertIn(self.participant, self.session.getParticipators())
         self.assertEquals(1, len(self.session.getParticipators()))
-        self.assertRedirects(response, '/sessions/participate/')
+        self.assertRedirects(response, '/sessions/participate/' + self.session.usid)
         self.assertInHTML('<li class="success">Successfully joined session</li>', response.content)
 
     def test_invalid_invitation_key(self):
@@ -53,7 +52,7 @@ class JoinSessionTest(BaseSessionTest):
         self.login(self.participant)
         self.client.get(self.path + self.key)
         response = self.client.get(self.path + self.key, follow=True)
-        self.assertRedirects(response, '/sessions/participate/')
+        self.assertRedirects(response, '/sessions/participate/' + self.session.usid)
         self.assertEquals(1, len(self.session.getParticipators()))
 
     def test_join_as_facilitator(self):
@@ -69,6 +68,24 @@ class JoinSessionTest(BaseSessionTest):
         self.login(self.participant)
         response = self.client.get(self.path + self.key, follow=True)
         self.assertInHTML('<li class="error">Could not join session, as it is in state &quot;Closed&quot;</li>', response.content)
+
+class ParticipateSessionTest(BaseSessionTest):
+    path = '/sessions/participate/'
+
+    def test_get_not_logged_in(self):
+        response = self.client.get(self.path + self.session.usid)
+        self.assertRedirects(response, 'accounts/login/?next=' + self.path +  self.session.usid)
+
+    def test_not_joined(self):
+        self.login(self.participant)
+        response = self.client.get(self.path + self.session.usid)
+        self.assertEquals(404, response.status_code)
+
+    def test_joined(self):
+        self.login(self.participant)
+        UserParticipateSession.objects.create(session=self.session, user=self.participant)
+        response = self.client.get(self.path + self.session.usid)
+        self.assertContains(response, 'Session details')
 
 class GridTest(TestCase):
 

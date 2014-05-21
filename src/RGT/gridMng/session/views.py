@@ -1,9 +1,8 @@
 from math import sqrt, ceil
-import uuid
 import logging
 from datetime import datetime
-from django.core.exceptions import ObjectDoesNotExist
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template import loader
@@ -17,7 +16,6 @@ from RGT.gridMng.models import Session
 from RGT.gridMng.models import State
 from RGT.gridMng.models import SessionGrid
 from RGT.gridMng.models import ResponseGrid
-from RGT.gridMng.models import SessionIterationState
 from RGT.gridMng.models import UserParticipateSession
 from RGT.gridMng.session.state import State as SessionState
 from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
@@ -31,7 +29,6 @@ from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode, createXmlNumberOfResponseNode
 from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid
 from RGT.gridMng.template.session.createSessionData import CreateSessionData
-from RGT.gridMng.template.session.mySessionsData import MySessionsData
 from RGT.gridMng.template.session.mySessionsContentData import MySessionsContentData
 from RGT.gridMng.template.session.participatingSessionsData import ParticipatingSessionsData
 from RGT.gridMng.template.session.participatingSessionsContentData import ParticipatingSessionsContentData
@@ -44,7 +41,7 @@ from RGT.gridMng.template.gridTableData import GridTableData
 from RGT.gridMng.template.session.pendingResponsesData import PendingResponsesData
 from RGT.gridMng.fileData import FileData
 from RGT.gridMng.utility import generateGridTable, createDendogram, getImageError
-from RGT.settings import SESSION_USID_KEY_LENGTH, DEBUG
+from RGT.settings import DEBUG
 
 
 logger = logging.getLogger('django.request')
@@ -116,7 +113,7 @@ def join_session(request, key):
         return redirect('/sessions/')
 
     messages.success(request, "Successfully joined session")
-    return redirect('/sessions/participate')
+    return redirect('/sessions/participate/' + session.usid)
 
 
 @login_required
@@ -175,17 +172,7 @@ def ajaxCreateSession(request):
 @login_required
 def getParticipatingSessionsPage(request):
     sessions = []
-    templateData = ParticipatingSessionsData()
-    for participation in request.user.userparticipatesession_set.all():
-        session = participation.session
-        sessions.append((session.usid, session.get_descriptive_name()))
-    if len(sessions) > 0:
-        templateData.hasSessions = True
-
-    templateData.sessions = sessions
-    pendingResponses = PendingResponsesData()
-    pendingResponses.pedingResponsesTable = __createPendingResponseData(request.user)
-    templateData.pendingResponses = pendingResponses
+    templateData = ParticipatingSessionsData(request.user)
 
     context = RequestContext(request, {'data': templateData})
     return render(request, 'gridMng/participatingSessions.html', context)
@@ -264,143 +251,36 @@ def ajaxChangeSessionState(request):
 
 
 @login_required
+def participate_detailed(request, usid):
+    """
+    This function is used to display the participation page of the session with the given usid
+    """
+    if not usid:
+        return ajaxGetParticipatingSessionContentPage(request)
+
+    session = get_object_or_404(Session, usid=usid)
+    participation = get_object_or_404(UserParticipateSession, user=request.user, session=session)
+    session_template_data = ParticipatingSessionsContentData(participation)
+    template = loader.get_template('gridMng/participatingSessionsContent.html')
+    session_html = template.render(RequestContext(request, {'data': session_template_data}))
+    template_data = ParticipatingSessionsData(request.user)
+    context = RequestContext(request, {'data': template_data, 'session_html': session_html, 'session': session})
+    return render(request, 'gridMng/participateSession.html', context)
+
+
+@login_required
 def ajaxGetParticipatingSessionContentPage(request):
     if request.method == 'POST':
         if 'sessionUSID' in request.POST:
-            sessionID = Session.objects.get(usid=request.POST['sessionUSID'])
-            sessionObj = request.user.userparticipatesession_set.filter(session=sessionID)
-            if len(sessionObj) >= 1:
-                sessionObj = sessionObj[0].session
-                state = sessionObj.state
-                iteration = sessionObj.iteration
-                iterations = []
-                hasPreviousResponseRelationGrid = False
-                templateData = ParticipatingSessionsContentData()
-                templateData.iteration = iteration
-                templateData.responseStatus = '-----'
+            session = Session.objects.get(usid=request.POST['sessionUSID'])
+            participation = UserParticipateSession.objects.get(user=request.user, session=session)
+            templateData = ParticipatingSessionsContentData(participation)
 
-                # lets create a list of iteration that i have responded
-                responseGridRelations = ResponseGrid.objects.filter(session=sessionObj, user=request.user)
-                gridTablesData = __generateParticipatingSessionsGridsData(sessionObj, iteration,
-                                                                          responseGridRelations)
-                if len(responseGridRelations) >= 1:
-                    for responseGridRelation in responseGridRelations:
-                        iterations.append(responseGridRelation.iteration)
-                templateData.iterations = iterations
-                if state.name == SessionState.CHECK:
-                    templateData.hideSaveResponseButton = True
-                    templateData.sessionStatus = 'Checking previous results'
-                    template = loader.get_template('gridMng/participatingSessionsContent.html')
-                    context = RequestContext(request, {'data': templateData})
-                    htmlData = template.render(context)
-                    return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-                elif state.name == SessionState.INITIAL:
-                    templateData.hideSaveResponseButton = True
-                    templateData.sessionStatus = 'Waiting for users to join'
-                    template = loader.get_template('gridMng/participatingSessionsContent.html')
-                    context = RequestContext(request, {'data': templateData})
-                    htmlData = template.render(context)
-                    return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-                elif state.name == SessionState.FINISH:
-                    templateData.hideSaveResponseButton = True
-                    templateData.sessionStatus = 'Closed'
-                    template = loader.get_template('gridMng/participatingSessionsContent.html')
-                    context = RequestContext(request, {'data': templateData})
-                    htmlData = template.render(context)
-                    return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-                else:
+            context = RequestContext(request, {'data': templateData})
+            template = loader.get_template('gridMng/participatingSessionsContent.html')
+            htmlData = template.render(context)
+            return HttpSuccessResponse(htmlData)
 
-                    templateParticipatingSessions = ParticipatingSessionsContentGridsData()
-                    templateData.participatingSessionsContentGridsData = templateParticipatingSessions
-                    # there always is a session table being displayed to the user, so add this table in here
-                    templateParticipatingSessions.displaySessionGrid = True
-                    templateParticipatingSessions.sessionGridData = GridTableData(gridTablesData['sessionGridTable'])
-                    templateParticipatingSessions.sessionGridData.tableId = generateRandomString()
-                    templateParticipatingSessions.sessionGridData.doesNotShowLegend = True
-                    # check to see if there is a response table, if so add it
-                    if 'currentResponseGridTable' in gridTablesData:
-                        templateParticipatingSessions.responseGridData = GridTableData(
-                            gridTablesData['currentResponseGridTable'])
-                    else:
-                        # if there is no response display a table with the data as seem in the session grid
-                        templateParticipatingSessions.responseGridData = GridTableData(
-                            gridTablesData['sessionGridTable'])
-                        # the weights need to be duplicated in a new object as  the list will be poped later on
-                        templateParticipatingSessions.responseGridData.weights = templateParticipatingSessions.sessionGridData.weights[
-                            :]
-                    templateParticipatingSessions.responseGridData.tableId = generateRandomString()
-                    templateParticipatingSessions.displayResponseGrid = True
-                    # if the gridTablesData contains a previous response table add it
-                    if 'previousResponseGrid' in gridTablesData:
-                        templateParticipatingSessions.previousResponseGridData = GridTableData(
-                            gridTablesData['previousResponseGrid'])
-                        templateParticipatingSessions.previousResponseGridData.tableId = generateRandomString()
-                        templateParticipatingSessions.previousResponseGridData.doesNotShowLegend = True
-                        hasPreviousResponseRelationGrid = True
-                        templateParticipatingSessions.displayPreviousResponseGrid = True
-
-                    # calculate how many participants there are in this session and how many have sent a response
-                    templateData.nReceivedResponses = 0
-                    templateData.nParticipants = 0
-                    templateData.showNParticipantsAndResponces = True
-                    try:
-                        templateData.nReceivedResponses = len(sessionObj.getUsersThatRespondedRequest())
-                        templateData.nParticipants = len(sessionObj.getParticipators())
-                    except:
-                        __debug_print_stacktrace()
-                    # check if i have sent a response grid
-                    responseGrid = request.user.responsegrid_set.filter(user=request.user, iteration=iteration,
-                                                                        session=sessionObj)
-                    if len(responseGrid) <= 0:
-                        # i didn't respond, so display a page with the correct settings to answer it
-                        templateData.responseStatus = 'No response was sent'
-                        if state.name == SessionState.AC:
-                            # first get the current session grid to display to the user
-                            templateParticipatingSessions.responseGridData.changeCornAlt = True
-                            templateParticipatingSessions.responseGridData.doesNotShowLegend = True
-                            templateData.sessionStatus = 'Waiting for Alternative and concerns'
-                            template = loader.get_template('gridMng/participatingSessionsContent.html')
-                            context = RequestContext(request, {'data': templateData})
-                            htmlData = template.render(context)
-                            return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-                        elif state.name == SessionState.RW:
-                            templateData.sessionStatus = 'Waiting for Ratings and Weights'
-                            templateParticipatingSessions.sessionGridData.showRatingWhileFalseChangeRatingsWeights = True
-                            templateParticipatingSessions.responseGridData.changeRatingsWeights = True
-                            template = loader.get_template('gridMng/participatingSessionsContent.html')
-                            if hasPreviousResponseRelationGrid:
-                                templateParticipatingSessions.previousResponseGridData.showRatingWhileFalseChangeRatingsWeights = True
-
-                            context = RequestContext(request, {'data': templateData})
-                            htmlData = template.render(context)
-                            return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-                    else:
-                        # if i did respond show me my response and the current session grid so if i changed my mind i still can change the response
-                        templateData.responseStatus = 'Response was sent at: '
-                        templateData.dateTime = responseGrid[0].grid.dateTime
-                        if state.name == SessionState.AC:
-                            templateParticipatingSessions.responseGridData.changeCornAlt = True
-                            templateData.sessionStatus = 'Waiting for Alternative and concerns'
-                            template = loader.get_template('gridMng/participatingSessionsContent.html')
-                            context = RequestContext(request, {'data': templateData})
-                            htmlData = template.render(context)
-                            return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-                        elif state.name == SessionState.RW:
-                            templateParticipatingSessions.sessionGridData.showRatingWhileFalseChangeRatingsWeights = True
-                            templateParticipatingSessions.responseGridData.changeRatingsWeights = True
-                            templateData.sessionStatus = 'Waiting for Ratings and Weights'
-                            template = loader.get_template('gridMng/participatingSessionsContent.html')
-                            if hasPreviousResponseRelationGrid:
-                                templateParticipatingSessions.previousResponseGridData.showRatingWhileFalseChangeRatingsWeights = True
-
-                            context = RequestContext(request, {'data': templateData})
-                            htmlData = template.render(context)
-                            return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-                    return HttpErrorResponse('Unable to identify current session state')
-            else:
-                return HttpErrorResponse('You are not participating in the given session')
-        else:
-            return HttpErrorResponse('Invalid request, request is missing arguments')
     return getParticipatingSessionsPage(request)
 
 
@@ -513,7 +393,7 @@ def ajaxRespond(request):
                             gridResponseRelation.save()
 
                             extraXmlData = createXmlNumberOfResponseNode(
-                                len(sessionObj.getUsersThatRespondedRequest()) + 1)
+                                len(sessionObj.getRespondents()) + 1)
                             if extraXmlData is None:
                                 return HttpResponse(createXmlSuccessResponse('Grid created successfully.',
                                                                              createDateTimeTag(datetime.now().strftime(
@@ -562,7 +442,7 @@ def ajaxGetParticipatingSessionsContentGrids(request):
                 if iteration_ > sessionObj.iteration or iteration_ < 0:
                     return HttpErrorResponse('Invalid iteration value')
                 response_grids = ResponseGrid.objects.filter(session=sessionObj, user=request.user)
-                gridTablesData = __generateParticipatingSessionsGridsData(sessionObj, iteration_, response_grids)
+                gridTablesData = ParticipatingSessionsContentData().generateParticipatingSessionsGridsData(sessionObj, iteration_, response_grids)
 
                 # there is always a session grid, so add it
                 templateData.sessionGridData = GridTableData(gridTablesData['sessionGridTable'])
@@ -1405,41 +1285,6 @@ def __createColorMap(colorStep, maxValue, startColor, endColor, table):
                 colorMap.append(endColor)
     return colorMap
 
-def __createPendingResponseData(userObj=None):
-    """
-    This function is used to create the data required to be used in the pendingResponses.html
-    template.
-
-    Arguments:
-        userObj: django.contrib.auth.models.User
-
-    Return
-        Array
-        information: The returned array contains a tulip in each position. Each tulip represents a row.
-                     The tulips have two positions. The first position contains a string , this string is a
-                     composite of the session name and the facilitator name. The second position contains a
-                     string representing the session USID.
-    """
-    table = None
-
-    if userObj is not None:
-        # find out all the sessions that the user is part of
-        userSessionRelation = UserParticipateSession.objects.filter(user=userObj)
-        if len(userSessionRelation) >= 1:
-            for relation in userSessionRelation:
-                # now lets check if the session is in a state where a response grid is required
-                sessionObj = relation.session
-                if sessionObj.state.name == State.objects.getWaitingForAltAndConState().name or sessionObj.state.name == State.objects.getWaitingForWeightsAndRatingsState().name:
-                    # now that we know the session is in the correct state lets check if the user has responded.
-                    if len(ResponseGrid.objects.filter(user=userObj, session=sessionObj,
-                                                       iteration=sessionObj.iteration)) <= 0:
-                        if table is None:
-                            table = []
-                        table.append(
-                            (sessionObj.name + ' : ' + sessionObj.facilitator.user.first_name, sessionObj.usid))
-    return table
-
-
 def __validateAltConResponse(request):
     # general validation
     if 'nAlternatives' in request.POST and 'nAlternatives' in request.POST:
@@ -1493,7 +1338,7 @@ def __validateAltConResponse(request):
                            'nConcerns' in request.POST))
 
 
-def __isGridStateEqualSessionState(sesssionState, gridObj):
+def isGridStateEqualSessionState(sesssionState, gridObj):
     if sesssionState.name == SessionState.AC:
         if gridObj.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
             return True
@@ -1501,36 +1346,6 @@ def __isGridStateEqualSessionState(sesssionState, gridObj):
         if gridObj.grid_type == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT:
             return True
     return False
-
-
-# This function will generate the data that is needed for the participatingSessionsContentGrids.html template
-# returns a dictionary that MAY contain the following keys:  previousResponseGrid, sessionGridTable, currentResponseGridTable
-def __generateParticipatingSessionsGridsData(sessionObj, iteration_, responseGridRelation):
-    data = {}
-    currentResponseGridRelation = responseGridRelation.filter(iteration=iteration_)
-
-    # a session grid must always be present, if something goes wrong here the calling function should deal with it
-    data['sessionGridTable'] = generateGridTable(sessionObj.sessiongrid_set.all()[iteration_].grid)
-
-    # check to see if a previous response grid should be displayed or not
-    if iteration_ >= 2 and iteration_ - 1 > 0:
-        previousResponseGridRelation = responseGridRelation.filter(iteration=iteration_ - 1)
-        if len(previousResponseGridRelation) >= 1:
-            previousResponseGrid = previousResponseGridRelation[0].grid
-            if previousResponseGrid is not None and __isGridStateEqualSessionState(sessionObj.state,
-                                                                                   previousResponseGrid) and (
-                    previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT or previousResponseGrid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN):
-                # generate the data for the previous response grid
-                data['previousResponseGrid'] = generateGridTable(previousResponseGridRelation[0].grid)
-
-    # generate response grid data
-    # check to see if the user has already send a response grid
-    if len(currentResponseGridRelation) >= 1:
-        # if he has sent an response generate the data for the grid
-        data['currentResponseGridTable'] = generateGridTable(currentResponseGridRelation[0].grid)
-
-    return data
-
 
 # function saves session grid as user grid. This happens only when the facilitator click "end session" button
 # to make the creation of session possible from the session that previously completed

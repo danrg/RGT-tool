@@ -18,26 +18,35 @@ if( typeof sendResponse != 'function')
     <tbody>
     <tr>
         <td>Current iteration</td>
-        <td id="participantSessionIteration">{{data.iteration}}</td>
+        <td id="participantSessionIteration">{{data.session.iteration}}</td>
     </tr>
     <tr>
         <td>Session status</td>
-        <td>{{data.sessionStatus}}</td>
+        <td>{{data.session.state.get_participation_status}}</td>
     </tr>
+    {% if data.showNParticipantsAndResponses %}
     <tr>
     	<td>Number of participants that responded</td>
     	<td>
-    		{% if data.showNParticipantsAndResponces %}
-    			<span id= "nReceivedResponses">{{data.nReceivedResponses}}</span>/{{data.nParticipants}}
-    		{% else %}
-    			-----
-    		{% endif %}
+            <span id= "nReceivedResponses">{{ data.session.getRespondents|length  }}</span>/{{data.session.getParticipators|length}}
     	</td>
     </tr>
+    {% endif %}
+    {% if data.session.state.can_be_responded_to %}
     <tr>
         <td class= "participatingSessionsResponseHighlight">Response status</td>
-        <td id="responseStatusSpan" class= 'participatingSessionsResponseHighlight'>{{ data.responseStatus }}{% if data.dateTime %}{% localtime on %}{{ data.dateTime|date:"Y-m-d H:i:s" }}{% endlocaltime %}{% endif %}</td>
+        <td id="responseStatusSpan" class= 'participatingSessionsResponseHighlight'>
+            {% if data.responseGrid %}
+                Response was sent at:
+                {% localtime on %}
+                    {{ data.responseGrid.grid.dateTime|date:"Y-m-d H:i:s" }}
+                {% endlocaltime %}
+            {% else %}
+               No response was sent
+            {% endif %}
+        </td>
     </tr>
+    {% endif %}
     <tr>
         <td>Show your response from iteration</td>
         <td>
@@ -63,7 +72,7 @@ if( typeof sendResponse != 'function')
 	{% include "gridMng/participatingSessionsContentGrids.html" with data=data.participatingSessionsContentGridsData STATIC_URL=STATIC_URL only %}
 </div>
 <div id="responseOptionsDiv">
-	{% if not data.hideSaveResponseButton %}
+	{% if data.session.state.can_be_responded_to %}
 		<input type="button" id="sendResponseButton" onclick="rescale($('#participatingSessionResponseGridForm'));sendResponse()" value="Send response" />
 		<input type="button" id="participatingSessionsContentUndoAllButton" onclick="getResponseFromIteration('current')" value="Undo all" />
 	{% endif %}

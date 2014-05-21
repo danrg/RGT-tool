@@ -191,15 +191,52 @@ class State(models.Model):
     verbose_names = { SessionState.INITIAL: 'Invitation', SessionState.AC: 'Alternatives / Concerns',
                       SessionState.RW: 'Ratings / Weights', SessionState.FINISH: 'Closed',
                       SessionState.CHECK: 'Check values'}
+    participation_statuses = {SessionState.INITIAL: 'Waiting for users to join',
+                              SessionState.AC: 'Waiting for Alternative and concerns',
+                              SessionState.RW: 'Waiting for Ratings and Weights', SessionState.FINISH: 'Closed',
+                              SessionState.CHECK: 'Checking previous results'}
 
     class Meta:
         ordering = ['id']
 
-    def is_finishable(self):
-        return self.name in (SessionState.AC, SessionState.RW)
-
     def __unicode__(self):
         return self.verbose_names.get(self.name)
+
+    def is_finishable(self):
+        """ Returns true if this session is in a state which the facilitator can finish, i.e. (A/C or R/W) """
+        return self.name in (SessionState.AC, SessionState.RW)
+
+    def can_be_responded_to(self):
+        """ Returns true if this session is in a state where participants can respond, i.e. (A/C or R/W) """
+        return self.is_finishable()
+
+    def get_participation_status(self):
+        """ Return a user-friendly description of the current state for participators """
+        return self.participation_statuses.get(self.name)
+
+    def is_alt_and_con_state(self):
+        return self.name == SessionState.AC
+
+    def is_ratings_weights_state(self):
+        return self.name == SessionState.RW
+
+    def is_check_values_state(self):
+        return self.name == SessionState.CHECK
+
+    def is_equal_to_grid_state(self, grid):
+        if self.is_alt_and_con_state():
+            return grid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN
+        elif self.is_ratings_weights_state():
+            return grid.grid_type == Grid.GridType.RESPONSE_GRID_RATING_WEIGHT
+        return False
+
+    def get_possible_next_states(self):
+        if self.name in (SessionState.INITIAL, SessionState.AC, SessionState.RW):
+            return (SessionState.CHECK)
+        elif self.name == SessionState.CHECK:
+            return (SessionState.AC, SessionState.RW, SessionState.FINISH)
+        else:
+            return ()
 
 #manager for facilitator
 class FacilitatorManager(models.Manager):
@@ -250,89 +287,40 @@ class Session(models.Model):
         ordering = ['id']
 
     def getParticipators(self):
-        participators = self.userparticipatesession_set.all()
-        users = []
-        for participator in participators:
-            users.append(participator.user)
-        return users
+        return [participator.user for participator in self.userparticipatesession_set.all()]
 
-    def addParticipant(self, user1):
-        userParticipateSession = self.userparticipatesession_set.filter(user=user1)
-        if self.facilitator.user != user1:
-            if len(userParticipateSession) <= 0:
-                if str(self.state.name) == 'initial':
-                    userParticipating = UserParticipateSession(session=self, user=user1)
-                    userParticipating.save()
-                else:
-                    raise WrongState('Can\'t add user in current session state, state:' + self.state.name,
-                                     sessionState=self.state)
-            else:
-                raise UserAlreadyParticipating(user1, self)
-        else:
-            raise UserIsFacilitator(user1, self)
+    def addParticipant(self, user):
+        if(self.facilitator.user == user):
+            raise UserIsFacilitator(user, self)
+        if self.userparticipatesession_set.filter(user=user).exists():
+            raise UserAlreadyParticipating(user, self)
+        if self.has_started():
+            raise WrongState('Can\'t add user in session with state:' + self.state.name, sessionState=self.state)
 
-    def changeState(self, state=None):
-        if state != None:
-            if self.state.name == SessionState.INITIAL:
-                # if we are in the initial state the only next state that we can go is the check state
-                if state.name == SessionState.CHECK:
-                    self.state = state
-                    #now lets change the iteration
-                    self.__changeIteration()
-                    self.save()
-                else:
-                    raise WrongState(
-                        'Current sessions state is ' + self.state.name + ', can\'t go from that state to ' + state.name)
-            elif self.state.name == SessionState.CHECK:
-                if state.name == SessionState.AC or state.name == SessionState.RW or state.name == SessionState.FINISH:
-                    self.state = state
-                    self.save()
-                else:
-                    raise WrongState(
-                        'Current sessions state is ' + self.state.name + ', can\'t go from that state to ' + state.name)
-            elif self.state.name == SessionState.AC:
-                sessionIterationStateRelation = SessionIterationState(iteration=self.iteration, session=self,
-                                                                      state=self.state)
-                sessionIterationStateRelation.save()
-                if state.name == SessionState.CHECK:
-                    self.state = state
-                    #now lets change the iteration
-                    self.__changeIteration()
-                    self.save()
-                else:
-                    raise WrongState(
-                        'Current sessions state is ' + self.state.name + ', can\'t go from that state to ' + state.name)
-            elif self.state.name == SessionState.RW:
-                sessionIterationStateRelation = SessionIterationState(iteration=self.iteration, session=self,
-                                                                      state=self.state)
-                sessionIterationStateRelation.save()
-                if state.name == SessionState.CHECK:
-                    self.state = state
-                    #now lets change the iteration
-                    self.__changeIteration()
-                    self.save()
-                else:
-                    raise WrongState(
-                        'Current sessions state is ' + self.state.name + ', can\'t go from that state to ' + state.name)
-            elif self.state.name == SessionState.FINISH:
-                raise WrongState('Session if closed, can\'t change states')
+        UserParticipateSession.objects.create(session=self, user=user)
+
+    def changeState(self, new_state):
+        if new_state.name in self.state.get_possible_next_states():
+            if self.state.can_be_responded_to():
+                SessionIterationState.objects.create_from_session(self)
+            self.state = new_state
+            if new_state.is_check_values_state():
+                self.__goToNextIteration()
+            self.save()
         else:
-            raise ValueError('state is None')
+            raise WrongState('Current sessions state is %s, can\'t go from that state to %s' % (self.state, new_state))
 
     def get_absolute_url(self):
         return reverse('RGT.gridMng.session.views.show_detailed', args=[self.usid])
 
     def getUsersThatDidNotRespondedRequest(self):
-        repondedUsers = set(self.getUsersThatRespondedRequest())
+        repondedUsers = set(self.getRespondents())
         users = set(self.getParticipators())
         return users - repondedUsers
 
-    def getUsersThatRespondedRequest(self):
+    def getRespondents(self):
         responseGridRelations = ResponseGrid.objects.filter(session=self, iteration=self.iteration)
-        respondedUsers = []
-        for relation in responseGridRelations:
-            respondedUsers.append({'user': relation.user, 'dateTime': relation.grid.dateTime})
-        return respondedUsers
+        return [{'user': relation.user, 'dateTime': relation.grid.dateTime} for relation in responseGridRelations]
 
     def get_descriptive_name(self):
         """ Returns a user friendly descriptive name of this session """
@@ -340,11 +328,11 @@ class Session(models.Model):
 
     def has_started(self):
         """ Returns True if this session has started (i.e. not in invitation state) """
-        return self.state != State.objects.getInitialState()
+        return self.state.name != SessionState.INITIAL
 
     def is_closed(self):
         """ Returns True if this session is in the finish state """
-        return self.state == State.objects.getFinishState()
+        return self.state.name == SessionState.FINISH
 
     def get_iteration_states(self):
         """ Returns all iteration states for this session """
@@ -361,19 +349,23 @@ class Session(models.Model):
     def __unicode__(self):
         return self.name
 
-    def __changeIteration(self):
-        sessionGrid1 = SessionGrid.objects.filter(session=self, iteration=self.iteration)
-        sessionGrid1 = sessionGrid1[0].grid
-        newSessionGrid = Grid.objects.duplicateGrid(sessionGrid1)
+    def __goToNextIteration(self):
+        sessionGrid = SessionGrid.objects.get(session=self, iteration=self.iteration).grid
+        newSessionGrid = Grid.objects.duplicateGrid(sessionGrid)
         self.iteration += 1
-        sessionGridRelation = SessionGrid(iteration=self.iteration, session=self, grid=newSessionGrid)
-        sessionGridRelation.save()
+        SessionGrid.objects.create(iteration=self.iteration, session=self, grid=newSessionGrid)
+
+
+class SessionIterationStateManager(models.Manager):
+    def create_from_session(self, session):
+        SessionIterationState.objects.create(iteration=session.iteration, session=session,state=session.state)
+
 
 class SessionIterationState(models.Model):
     iteration = models.IntegerField()
     session = models.ForeignKey(Session)
     state = models.ForeignKey(State)
-
+    objects = SessionIterationStateManager()
     class Meta:
         unique_together = ('iteration', 'session')
         ordering = ['id']
@@ -388,6 +380,15 @@ class UserParticipateSession(models.Model):
                            'user') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         ordering = ['id']
 
+    def has_pending_response(self, user):
+        if self.session.state.can_be_responded_to():
+            try:
+                ResponseGrid.objects.get_current(self.session, self.user)
+                return False
+            except ResponseGrid.DoesNotExist:
+                return True
+
+
 #the name of this class in the orm is: iterationHasGridInSession
 class SessionGrid(models.Model):
     iteration = models.IntegerField()
@@ -399,14 +400,25 @@ class SessionGrid(models.Model):
                            'session') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         ordering = ['id']
 
+class ResponseGridManager(models.Manager):
+    def get_iterations_with_grids(self, session, user):
+        """ Returns a list of all the iterations in the given session for which the given user has responded """
+        return [grid.iteration for grid in self.filter(session=session, user=user)]
+
+    def get_current(self, session, user):
+        """ Returns the response grid from the given user of the latest iteration of the given session """
+        return user.responsegrid_set.get(session=session, iteration=session.iteration)
+
 #the name of this class in the orm is: UserHasGridInIteration
 class ResponseGrid(models.Model):
     iteration = models.IntegerField()
     session = models.ForeignKey(Session)
     grid = models.ForeignKey(Grid)
     user = models.ForeignKey(User)
+    objects = ResponseGridManager()
 
     class Meta:
         unique_together = ('iteration', 'user',
                            'session') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         ordering = ['id']
+
