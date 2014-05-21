@@ -55,21 +55,16 @@ RGT | Sessions - Participating
 			{% endfor %}
 		</select>
 		<img id= "participatingSessionsRefreshImage" src="/static/icons/refresh.png" onclick= "showParticipatingSessionDetails()"/>
-		<div id="joinSessionMenuDiv">
-			<label for="invitationKeyInput">Invitation key:</label>
-		    <input type="text" id="invitationKeyInput"/>
-		    <input type="button" onclick="joinSession()" value="Join Session" />
-		</div>
 	</div>
 	{% comment %} 
 		Table that is displayed only if there is a request in a session that the user is participating.
 		The table contains the name of the session that is waiting for an answer of the participant.
 	{% endcomment %}
-	<div id="participatingSessionsPendingResponsesDiv">
-		{% if data.pendingResponses %}
+    {% if data.pendingResponses %}
+        <div id="participatingSessionsPendingResponsesDiv">
 			{%include "gridMng/pendingResponses.html" with data=data STATIC_URL=STATIC_URL%}
-		{% endif %}
-	</div>
+	    </div>
+    {% endif %}
 </div>
 <div id="participatingSessionContentDiv">
 {%  block session %}{% endblock %}

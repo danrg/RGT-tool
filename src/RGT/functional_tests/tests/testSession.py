@@ -704,22 +704,11 @@ class ParticipantSessionTests(BaseSessionLiveTest):
     """
 
     def test_join_session(self):
-        # Participator logs in successfully, goes to participating session page
-        self.can_goto_session_page("user1@example.com", "123")
+        self.can_login("user1@example.com", "123")
+        self.browser.get(self.live_server_url + '/sessions/join/447d3e47-9706-4239-85fc-614d702bcc3b')
 
-        # Participant clicks the link to go the the participants page
-        participant_page_link = self.browser.find_element_by_link_text("here")
-        participant_page_link.click()
-
-        # Participant types the invitation key on the field and clicks the join button
-        invitation_key_field = self.browser.find_element_by_id("invitationKeyInput")
-        invitation_key_field.send_keys("447d3e47-9706-4239-85fc-614d702bcc3b")
-
-        join_session_button = self.browser.find_element_by_css_selector("input[value='Join Session']")
-        join_session_button.click()
-
-        # Wait for a success message to appear in dialog box
-        self.wait_for_dialog_box_with_message('You have been added as participant in session: "session2".')
+        WebDriverWait(self.browser, 10).until(
+            lambda x: self.browser.find_element_by_id("participatingSessionContentDiv"))
 
         # The participating session with name Admin Istrator: session2 appears in the select tag
         select_field = self.browser.find_element_by_css_selector("select")
