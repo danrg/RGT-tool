@@ -44,26 +44,11 @@ def getCreateMyGridPage(request):
     This function is used to display the initial page the is seem when the user wants to create
     an in place grid (private grid).
     """
-    try:
-        gridTableTemplate = WritableGridTableData()
-        gridTableTemplate.changeRatingsWeights = True
-        gridTableTemplate.changeCornAlt = True
-        gridTableTemplate.tableId = ()
+    gridTableTemplate = WritableGridTableData()
+    gridTableTemplate.tableId = ()
+    templateData = CreateMyGridData(CreateMyGridBaseData(gridTableTemplate))
+    return render(request, 'gridMng/grid/createMyGrid.html', {'data': templateData})
 
-        context = None
-        templateData = CreateMyGridData(CreateMyGridBaseData(gridTableTemplate))
-        context = RequestContext(request, {'data': templateData})
-        return render(request, 'gridMng/createMyGrid.html', context_instance=context)
-
-    except:
-        #do nothing
-        if DEBUG:
-            print "Exception in user code:"
-            print '-' * 60
-            traceback.print_exc(file=sys.stdout)
-            print '-' * 60
-        logger.exception('Unknown error')
-        return HttpResponse(createXmlErrorResponse('unknown error'), content_type='application/xml')
 
 @login_required()
 def ajaxCreateGrid(request):
@@ -172,7 +157,7 @@ def ajaxCreateGrid(request):
     gridTableTemplate.changeRatingsWeights = True
     gridTableTemplate.changeCornAlt = True
     gridTableTemplate.tableId = generateRandomString()
-    template = loader.get_template('gridMng/createMyGridBase.html')
+    template = loader.get_template('gridMng/grid/createMyGridBase.html')
     templateData = CreateMyGridBaseData(gridTableTemplate)
     context = RequestContext(request, {'data': templateData})
     htmlData = template.render(context)
@@ -185,9 +170,7 @@ def getShowGridPage(request):
     clicks the button 'grids'.
     """
     grids = Grid.objects.filter(user=request.user)
-    context = RequestContext(request, {'grids': grids})
-
-    return render(request, 'gridMng/showMyGrids.html', context_instance=context)
+    return render(request, 'gridMng/grid/showMyGrids.html', {'grids': grids})
 
 @login_required
 def show_grid(request, usid):
@@ -199,10 +182,10 @@ def show_grid(request, usid):
 
     template_data = WritableGridTableData(grid)
     context = RequestContext(request, {'data': template_data})
-    template = loader.get_template('gridMng/gridTable.html')
+    template = loader.get_template('gridMng/grid/gridTable.html')
     grid_html = template.render(context)
 
-    return render(request, 'gridMng/showGrid.html', {'grid': grid, 'grids': other_grids, 'grid_html': grid_html})
+    return render(request, 'gridMng/grid/showGrid.html', {'grid': grid, 'grids': other_grids, 'grid_html': grid_html})
 
 @login_required
 def ajaxGetGrid(request):
@@ -300,7 +283,7 @@ def ajaxGetGrid(request):
                 templateData.changeCornAlt = changeCornAlt
                 templateData.showRatingWhileFalseChangeRatingsWeights = showRatingWhileFalseChangeRatingsWeights
                 templateData.checkForTableIsSave = checkForTableIsSave
-                template = loader.get_template('gridMng/gridTable.html')
+                template = loader.get_template('gridMng/grid/gridTable.html')
                 context = RequestContext(request, {'data': templateData})
                 htmlData = template.render(context)
                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
@@ -571,7 +554,7 @@ def ajaxGenerateSimilarity(request):
                 altsRangeX = len(matrixAlternatives[0])
                 altsRangeY = len(matrixAlternatives) - 1
 
-                template = loader.get_template('gridMng/similaritymatrix.html')
+                template = loader.get_template('gridMng/grid/similaritymatrix.html')
                 context = RequestContext(request,
                                          {'cons': matrixConcern, 'alts': matrixAlternatives, 'consRangeX': consRangeX,
                                           'consRangeY': consRangeY, 'altsRangeX': altsRangeX, 'altsRangeY': altsRangeY})
@@ -639,7 +622,7 @@ def ajaxGetSaveSvgPage(request):
     that is used to ask to user to which format should a svg image be saved
     """
 
-    template = loader.get_template('gridMng/saveSvg.html')
+    template = loader.get_template('gridMng/grid/saveSvg.html')
     context = RequestContext(request, {})
     htmlData = template.render(context)
     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')

@@ -1,0 +1,4 @@
+<div id= "gridDiv">
+		{% csrf_token %}
+		{% include "gridMng/grid/gridTable.html" with data=data.gridTableData STATIC_URL=STATIC_URL %}
+</div>

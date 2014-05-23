@@ -28,9 +28,7 @@ from RGT.gridMng.response.xml.htmlResponseUtil import *
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode, createXmlNumberOfResponseNode
 from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid
-from RGT.gridMng.template.session.createSessionData import CreateSessionData
-from RGT.gridMng.template.session.mySessionsContentData import MySessionsContentData
-from RGT.gridMng.template.session.participatingSessionsData import ParticipatingSessionsData
+from RGT.gridMng.template.session.sessionsData import SessionsData, ParticipatingSessionsData, MySessionsContentData
 from RGT.gridMng.template.session.participatingSessionsContentData import ParticipatingSessionsContentData
 from RGT.gridMng.template.session.resultAlternativeConcernTableData import ResultAlternativeConcernTableData
 from RGT.gridMng.template.session.participatingSessionsContentGridsData import ParticipatingSessionsContentGridsData
@@ -52,24 +50,15 @@ def ajaxGetCreateSessionPage(request):
     This function is used to send back the page that the user sees when he
     press the button to create a new session.
     """
-    user1 = request.user
     gridtype = Grid.GridType.USER_GRID
-    grids = Grid.objects.filter(user=user1, grid_type=gridtype)
-
-    if len(grids) <= 0:
-        grids = None
-
-    templateData = CreateSessionData(grids)
-    context = RequestContext(request, {'data': templateData})
-
-    return render(request, 'gridMng/createSession.html', context_instance=context)
+    grids = Grid.objects.filter(user=request.user, grid_type=gridtype).all()
+    return render(request, 'gridMng/session/createSession.html', {'grids': grids})
 
 
 @login_required
 def getMySessionsPage(request):
-    facilitator, created = Facilitator.objects.get_or_create(user=request.user)
-    sessions = facilitator.session_set.all()
-    return render(request, 'gridMng/mySessions.html', {'sessions': sessions})
+    template_data = SessionsData(request.user)
+    return render(request, 'gridMng/session/sessions.html', {'data': template_data})
 
 
 @login_required
@@ -77,25 +66,22 @@ def show_detailed(request, usid):
     """
      This function is used to display a detailed page of a session with the given usid
     """
-    facilitator, created = Facilitator.objects.get_or_create(user=request.user)
-    session = get_object_or_404(Session, usid=usid, facilitator=facilitator)
-    template_data = MySessionsContentData(session=session)
-    context = RequestContext(request, {'session': session, 'data': template_data})
-    template = loader.get_template('gridMng/mySessionsContent.html')
+    session = get_object_or_404(Session, usid=usid, facilitator__user=request.user)
+    context = RequestContext(request, {'session': session, 'data': MySessionsContentData(session=session)})
+    template = loader.get_template('gridMng/session/mySessionsContent.html')
     session_html = template.render(context)
-    sessions = Session.objects.filter(facilitator=facilitator)
+    template_data = SessionsData(request.user, session)
 
-    return render(request, 'gridMng/showSession.html', {'session': session, 'sessions': sessions, 'session_html': session_html })
+    return render(request, 'gridMng/session/showSession.html', {'data': template_data, 'session_html': session_html})
 
 
 @login_required
 def show_latest(request):
     if Facilitator.objects.isFacilitator(request.user):
-        facilitator, created = Facilitator.objects.get_or_create(user=request.user)
-        latest_session = Session.objects.filter(facilitator=facilitator).last()
-        return redirect(latest_session)
+        return redirect(Session.objects.with_facilitator(request.user).last())
     else:
         return redirect('/sessions')
+
 
 @login_required
 def join_session(request, key):
@@ -128,7 +114,7 @@ def ajaxGetMySessionContentPage(request):
         facilitator = Facilitator.objects.get(user=request.user)
         session = Session.objects.get(usid=request.POST['sessionUSID'], facilitator=facilitator)
         template_data = MySessionsContentData(session)
-        template = loader.get_template('gridMng/mySessionsContent.html')
+        template = loader.get_template('gridMng/session/mySessionsContent.html')
         context = RequestContext(request, {'data': template_data, 'session': session})
         htmlData = template.render(context)
         return HttpSuccessResponse(htmlData)
@@ -166,15 +152,6 @@ def ajaxCreateSession(request):
 
         session = Session.objects.create_session(request.user, grid, name, show_results)
         return HttpSuccessResponse('Session was created.')
-
-
-@login_required
-def getParticipatingSessionsPage(request):
-    sessions = []
-    templateData = ParticipatingSessionsData(request.user)
-
-    context = RequestContext(request, {'data': templateData})
-    return render(request, 'gridMng/participatingSessions.html', context)
 
 
 @login_required
@@ -255,16 +232,15 @@ def participate_detailed(request, usid):
     This function is used to display the participation page of the session with the given usid
     """
     if not usid:
-        return ajaxGetParticipatingSessionContentPage(request)
+        return redirect('/sessions/')
 
-    session = get_object_or_404(Session, usid=usid)
-    participation = get_object_or_404(UserParticipateSession, user=request.user, session=session)
+    participating_session = get_object_or_404(Session, usid=usid)
+    participation = get_object_or_404(UserParticipateSession, user=request.user, session=participating_session)
     session_template_data = ParticipatingSessionsContentData(participation)
-    template = loader.get_template('gridMng/participatingSessionsContent.html')
+    template = loader.get_template('gridMng/session/participatingSessionsContent.html')
     session_html = template.render(RequestContext(request, {'data': session_template_data}))
-    template_data = ParticipatingSessionsData(request.user)
-    context = RequestContext(request, {'data': template_data, 'session_html': session_html, 'session': session})
-    return render(request, 'gridMng/participateSession.html', context)
+    template_data = ParticipatingSessionsData(request.user, participating_session)
+    return render(request, 'gridMng/session/participateSession.html', {'data': template_data, 'session_html': session_html})
 
 
 @login_required
@@ -276,11 +252,11 @@ def ajaxGetParticipatingSessionContentPage(request):
             templateData = ParticipatingSessionsContentData(participation)
 
             context = RequestContext(request, {'data': templateData})
-            template = loader.get_template('gridMng/participatingSessionsContent.html')
+            template = loader.get_template('gridMng/session/participatingSessionsContent.html')
             htmlData = template.render(context)
             return HttpSuccessResponse(htmlData)
 
-    return getParticipatingSessionsPage(request)
+    return redirect('/sessions/')
 
 
 @login_required
@@ -474,7 +450,7 @@ def ajaxGetParticipatingSessionsContentGrids(request):
                         # if he has sent an response grid display it again and let him edit it
 
                         responseGridRelation = responseGridRelation[0]
-                        template = loader.get_template('gridMng/participatingSessionsContentGrids.html')
+                        template = loader.get_template('gridMng/session/participatingSessionsContentGrids.html')
                         if responseGridRelation.grid.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
                             templateData.responseGridData.doesNotShowLegend = True
                             # check to see if the user should be allowed to change the response
@@ -501,7 +477,7 @@ def ajaxGetParticipatingSessionsContentGrids(request):
                         # if he hasn't send a response grid check to see if he still can send it and if so display it
                         if iteration_ == sessionObj.iteration:
                             if sessionObj.state.name == SessionState.AC:
-                                template = loader.get_template('gridMng/participatingSessionsContentGrids.html')
+                                template = loader.get_template('gridMng/session/participatingSessionsContentGrids.html')
                                 templateData.responseGridData.changeCornAlt = True
                                 templateData.responseGridData.doesNotShowLegend = True
 
@@ -510,7 +486,7 @@ def ajaxGetParticipatingSessionsContentGrids(request):
                                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
 
                             elif sessionObj.state.name == SessionState.RW:
-                                template = loader.get_template('gridMng/participatingSessionsContentGrids.html')
+                                template = loader.get_template('gridMng/session/participatingSessionsContentGrids.html')
                                 templateData.sessionGridData.showRatingWhileFalseChangeRatingsWeights = True
                                 templateData.responseGridData.changeRatingsWeights = True
                                 if hasPreviousResponseRelationGrid:
@@ -565,9 +541,9 @@ def ajaxGetResults(request):
                             if templateData is not None:
                                 template = None
                                 if type(templateData) == ResultRatingWeightTablesData:
-                                    template = loader.get_template('gridMng/resultRatingWeightTables.html')
+                                    template = loader.get_template('gridMng/session/resultRatingWeightTables.html')
                                 elif type(templateData) == ResultAlternativeConcernTableData:
-                                    template = loader.get_template('gridMng/resultAlternativeConcernTable.html')
+                                    template = loader.get_template('gridMng/session/resultAlternativeConcernTable.html')
                                 context = RequestContext(request, {'data': templateData})
                                 htmlData = template.render(context)
                                 return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
@@ -609,9 +585,9 @@ def ajaxGetResponseResults(request):
                         if templateData is not None:
                             template = None
                             if type(templateData) == ResultRatingWeightTablesData:
-                                template = loader.get_template('gridMng/resultRatingWeightTables.html')
+                                template = loader.get_template('gridMng/session/resultRatingWeightTables.html')
                             elif type(templateData) == ResultAlternativeConcernTableData:
-                                template = loader.get_template('gridMng/resultAlternativeConcernTable.html')
+                                template = loader.get_template('gridMng/session/resultAlternativeConcernTable.html')
                             context = RequestContext(request, {'data': templateData})
                             htmlData = template.render(context)
                             return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
@@ -810,7 +786,7 @@ def ajaxGetParticipatingPage(request):
                 if len(facilitatorObj) >= 1 and sessionObj.facilitator == facilitatorObj[0]:
                     # get all the users that reponded to the request
                     templateData = ParticipantsData(session=sessionObj)
-                    template = loader.get_template('gridMng/participants.html')
+                    template = loader.get_template('gridMng/session/participants.html')
                     context = RequestContext(request, {'data': templateData})
                     htmlData = template.render(context)
                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
@@ -895,7 +871,7 @@ def ajaxGetSessionGrid(request):
                         templateData.changeRatingsWeights = True
                         templateData.changeCornAlt = True
                         templateData.checkForTableIsSave = True
-                    template = loader.get_template('gridMng/gridTable.html')
+                    template = loader.get_template('gridMng/grid/gridTable.html')
                     context = RequestContext(request, {'data': templateData})
                     htmlData = template.render(context)
                     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')

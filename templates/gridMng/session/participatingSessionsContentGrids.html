@@ -2,21 +2,21 @@
     {% if data.displaySessionGrid %}
         <div id="participatingSessionGridDiv">
             <h4 id= "participatingSessionCurrentSessionGridHeader"></h4>
-            {% include "gridMng/gridTable.html" with data=data.sessionGridData STATIC_URL=STATIC_URL only%}
+            {% include "gridMng/grid/gridTable.html" with data=data.sessionGridData STATIC_URL=STATIC_URL only%}
             
     </div>
     {% endif %}
     {% if data.displayPreviousResponseGrid %}
         <div id="participatingPreviousIterationGridDiv">
-            <h4 id= "participatingSessionPreviousIterationGridHeader">Your response Grid from previous iteration</h4>
-                {% include "gridMng/gridTable.html" with data=data.previousResponseGridData STATIC_URL=STATIC_URL only %}
+            <h4 id= "participatingSessionPreviousIterationGridHeader">Your response grid from previous iteration</h4>
+                {% include "gridMng/grid/gridTable.html" with data=data.previousResponseGridData STATIC_URL=STATIC_URL only %}
         </div>
     {% endif %}
     {% if data.displayResponseGrid %}
         <div id= "participatingSessionGridAnswerDiv">
-            <h4 id= "participatingSessionSuggestionGridHeader">Your Suggestion Grid</h4>
+            <h4 id= "participatingSessionSuggestionGridHeader">Your suggestion grid</h4>
             <form id="participatingSessionResponseGridForm">
-                    {% include "gridMng/gridTable.html" with data=data.responseGridData STATIC_URL=STATIC_URL only %}
+                    {% include "gridMng/grid/gridTable.html" with data=data.responseGridData STATIC_URL=STATIC_URL only %}
             </form>
         </div>
     {% endif %}

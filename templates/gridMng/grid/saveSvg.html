@@ -1,0 +1,17 @@
+<link rel="stylesheet" href="{{ STATIC_URL }}css/downloadSvg.css" type="text/css">
+<div>
+	<form method="post" id='formSaveSvg' action="/grids/download/image/">{% csrf_token %} 
+        <label>Please select the file type you want to download:</label>
+        <select name='convertTo' class="downloadSvgLeftMargin" id= "selectFileType">
+            <option value="svg">svg</option>
+        </select>
+        <label class="downloadSvgTopMargin">Please specify the name of the file:</label>
+        <input type="text" id="downloadSvgFileNameInput" name="fileName" class="downloadSvgTopMargin downloadSvgLeftMargin"/>
+	</form>
+	<script type="text/javascript">	
+		function sendDownloadSvgForm()
+		{
+			$('#formSaveSvg').submit();
+		}
+	</script>
+</div>

@@ -2,13 +2,13 @@
 <script src= "{{ STATIC_URL }}js/resultRatingWeightTables.js" type="text/javascript"></script>
 <div id="resultsRatingsWeightsTables">
 	<div style= "overflow: auto">
-		{% include "gridMng/resultRatingWeightTable.html" with data=data.rangeData STATIC_URL=STATIC_URL %}
+		{% include "gridMng/session/resultRatingWeightTable.html" with data=data.rangeData STATIC_URL=STATIC_URL %}
 	</div>
 	<div style= "overflow: auto">
-		{% include "gridMng/resultRatingWeightTable.html" with data=data.meanData STATIC_URL=STATIC_URL %}
+		{% include "gridMng/session/resultRatingWeightTable.html" with data=data.meanData STATIC_URL=STATIC_URL %}
 	</div>
 	<div style= "overflow: auto">
-		{% include "gridMng/resultRatingWeightTable.html" with data=data.stdData STATIC_URL=STATIC_URL %}
+		{% include "gridMng/session/resultRatingWeightTable.html" with data=data.stdData STATIC_URL=STATIC_URL %}
 	</div>
 </div>
 <div id= "chartDisplay">

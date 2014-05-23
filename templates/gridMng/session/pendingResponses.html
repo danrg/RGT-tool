@@ -5,8 +5,8 @@
 		</tr>
 	</thead>
 	<tbody>
-		{% for session in data.pendingResponses %}
-			<tr class= "pendingSessionTr">
+    {% for session in data.pending_responses %}
+        <tr class= "pendingSessionTr">
 				<td class="pendingSessionTd"  id="tdPendingResponses{{session.usid}}" >
                     <a href="/sessions/participate/{{ session.usid }}">
                         {{session.get_descriptive_name}}

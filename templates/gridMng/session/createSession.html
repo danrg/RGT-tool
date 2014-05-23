@@ -29,20 +29,20 @@
 {% else %}
 
 <h2>Create session</h2>
-<p>Follow these four easy steps to create a new session.</p>
+<p>Follow these five steps to create a new session.</p>
 <div id="createSessionBody">
     <div class="formelms">
         <h3>Step 1: Create or select a grid</h3>
         <p>Create a new grid <a href="{% url 'grid_in_place' %}">in place</a> or via the <a href="{% url 'grid_wizard' %}">wizard</a>.</p><br />
         <label for="gridSessionSelection">Select grid name:</label>
         <select id="gridSessionSelection" onchange="showGridSessionSelection()">
-            {% if data.grids %}
+            {% if grids %}
             	<option value="noGrids">&nbsp;</option>
-            	{% for grid in data.grids %}
+            	{% for grid in grids %}
             		<option value="{{ grid.usid }}">{{ grid.name }}</option>
             	{% endfor %}
             {% else %}
-            	<option value="noGrids">no grids available</option>
+            	<option value="noGrids">No grids available</option>
             {% endif %}
         </select>
         <h3>Step 2: Name the session</h3>

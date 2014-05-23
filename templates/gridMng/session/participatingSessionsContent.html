@@ -60,7 +60,7 @@ if( typeof sendResponse != 'function')
 	                	<option value="{{i}}">{{i}}</option>
 	                {% endif %}
                 {% endfor %}
-                <option value="current">Cur</option>
+                <option value="current">Current</option>
                 {% endif %}
             </select>
         </td>
@@ -69,7 +69,7 @@ if( typeof sendResponse != 'function')
 </table>
 <!-- div with all the content -->
 <div id="participationSessionsContentDiv">
-	{% include "gridMng/participatingSessionsContentGrids.html" with data=data.participatingSessionsContentGridsData STATIC_URL=STATIC_URL only %}
+	{% include "gridMng/session/participatingSessionsContentGrids.html" with data=data.participatingSessionsContentGridsData STATIC_URL=STATIC_URL only %}
 </div>
 <div id="responseOptionsDiv">
 	{% if data.session.state.can_be_responded_to %}

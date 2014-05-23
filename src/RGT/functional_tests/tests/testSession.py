@@ -63,17 +63,13 @@ class BaseSessionLiveTest(BaseLiveTest):
         # Participant logs in successfully and goes to sessions page
         self.can_goto_session_page(email, password, login_first_time)
 
-        # Participant clicks the link to go the the participants page
-        participant_page_link = self.browser.find_element_by_link_text("here")
-        participant_page_link.click()
-
         # The 'select' tag contains the joined session with name session_name
-        select_field = self.browser.find_element_by_css_selector("select")
+        select_field = self.browser.find_element_by_id('participatingSessionSelect')
         self.assertIn(session_name, select_field.text)
 
         # Participant selects the option with joined session name session_name and sees the session
         # with its details in the sessions details table
-        option_fields = self.browser.find_elements_by_css_selector('option')
+        option_fields = self.browser.find_elements_by_css_selector('#participatingSessionSelect option')
         option_fields[1].click()
 
         # Wait until the the session and its details appear successfully
@@ -223,10 +219,7 @@ class SessionTests(BaseSessionLiveTest):
 
         self.wait_for_dialog_box_with_message("Response was sent.")
 
-        # Refresh the page after response was sent
-        refresh_button = self.browser.find_element_by_id("participatingSessionsRefreshImage")
-        refresh_button.click()
-
+        self.browser.refresh()
         time.sleep(2)
 
         # The number of participants shows 1/2 which means that one out of 2 participants responded
@@ -285,8 +278,7 @@ class SessionTests(BaseSessionLiveTest):
         self.wait_for_dialog_box_with_message("Response was sent.")
 
         # Refresh the page after response was sent
-        refresh_button = self.browser.find_element_by_id("participatingSessionsRefreshImage")
-        refresh_button.click()
+        self.browser.refresh()
 
         time.sleep(1)
 
@@ -340,10 +332,6 @@ class SessionTests(BaseSessionLiveTest):
         # User types value for filename
         grid_file_name = self.browser.find_element_by_name("fileName")
         grid_file_name.send_keys('resultsIteration1')
-
-        #for future use
-        #download_button = self.browser.find_element_by_css_selector("button[class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only']")
-        #download_button.click()
 
         close_button = self.browser.find_element_by_css_selector("a[class='ui-dialog-titlebar-close ui-corner-all']")
         close_button.click()
@@ -499,12 +487,15 @@ class SessionTests(BaseSessionLiveTest):
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("clearResultsButton"))
 
         # User mouse over dendrogram
-        results_image = self.browser.find_element_by_id("downloadResultsButton")
-        ActionChains(self.browser).move_to_element(results_image).perform()
-
-        time.sleep(2)
+        # results_image = self.browser.find_element_by_id("downloadResultsButton")
+        # ActionChains(self.browser).move_to_element(results_image).perform()
+        #
+        # time.sleep(2)
 
         # Facilitator admin clicks the button to download results
+
+        time.sleep(10)
+
         download_result2_button = self.browser.find_element_by_css_selector("input[id='downloadResultsButton']")
         download_result2_button.click()
 
@@ -514,10 +505,6 @@ class SessionTests(BaseSessionLiveTest):
         # User types value for filename
         grid_file_name = self.browser.find_element_by_name("fileName")
         grid_file_name.send_keys('resultsIteration2')
-
-        #for future use
-        #download_button = self.browser.find_element_by_css_selector("button[class='ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only']")
-        #download_button.click()
 
         close_button = self.browser.find_element_by_css_selector("a[class='ui-dialog-titlebar-close ui-corner-all']")
         close_button.click()
@@ -708,10 +695,10 @@ class ParticipantSessionTests(BaseSessionLiveTest):
         self.browser.get(self.live_server_url + '/sessions/join/447d3e47-9706-4239-85fc-614d702bcc3b')
 
         WebDriverWait(self.browser, 10).until(
-            lambda x: self.browser.find_element_by_id("participatingSessionContentDiv"))
+            lambda x: self.browser.find_element_by_id("participationSessionsContentDiv"))
 
         # The participating session with name Admin Istrator: session2 appears in the select tag
-        select_field = self.browser.find_element_by_css_selector("select")
+        select_field = self.browser.find_element_by_id('participatingSessionSelect')
         self.assertIn('Admin Istrator: session2', select_field.text)
 
         time.sleep(1)

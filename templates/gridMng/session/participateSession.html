@@ -1,0 +1,31 @@
+{%  extends 'gridMng/session/sessions.html' %}
+
+{% block stylesheet %}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/participatingSessions.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/participatingSessionsContent.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/gridTableGeneralFunctions.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/pendingResponses.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/resultAlternativeConcernTable.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/resultRatingWeightTable.css" />
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script type="text/javascript">
+if( typeof participateInSession != 'function')
+{
+    $.ajax({
+        url: '{{ STATIC_URL }}js/participatingSessions.js',
+        dataType: 'script',
+        async:   false
+    });
+}
+$(document).ready(function() {
+    prepareForNewGrid($('#participatingSessionGridDiv'));
+    prepareForNewGrid($('#participatingSessionGridAnswerDiv'));
+});
+</script>
+{% endblock javascript %}
+
+{% block session %}
+    {{ session_html }}
+{% endblock %}

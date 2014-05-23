@@ -40,19 +40,41 @@ RGT | Sessions - Administration
         <!-- header just after the menu (create session, my session, etc) -->
         <label for= "mySessionsSelect">Select session:</label>
         <select id="mySessionsSelect" onchange="window.location.href='/sessions/show/' + this.options[this.selectedIndex].value">
-        {% if sessions %}
-            {% if not session %}
-                <option value="">&nbsp;</option>
+            {% if data.facilitating_sessions %}
+                {% if not facilitating_session %}
+                    <option value="">&nbsp;</option>
+                {% endif %}
+                {% for session in data.facilitating_sessions  %}
+                    <option value="{{ session.usid }}"
+                        {% if session == data.session %} selected="selected"{% endif %}
+                    >{{ session.name }}</option>
+                {% endfor %}
+            {% else %}
+                <option value="noSessions">No sessions available</option>
             {% endif %}
-            {% for session_option in sessions  %}
-                <option value="{{ session_option.usid }}"
-                    {% if session_option == session %} selected="selected"{% endif %}
-                >{{ session_option.name }}</option>
-            {% endfor %}
-        {% else %}
-            <option value="noSessions">No sessions available</option>
-        {% endif %}
         </select>
+
+        <label for="participatingSessionSelect">Select session:</label>
+        <select id="participatingSessionSelect" onchange="window.location.href='/sessions/participate/' + this.options[this.selectedIndex].value">
+            {% if data.participating_sessions %}
+                <option value="noSession"> </option>
+            {% else %}
+                <option id= "noSessionOption" value= "noSession">No sessions available</option>
+			{% endif %}
+            {% for session in data.participating_sessions %}
+                <option value="{{ session.usid }}"
+                    {% if session == data.session %}
+                        selected="selected"
+                    {% endif %}
+                >{{ session.get_descriptive_name }}
+                </option>
+			{% endfor %}
+		</select>
+        {% if data.pending_responses %}
+            <div id="participatingSessionsPendingResponsesDiv">
+                {%include "gridMng/session/pendingResponses.html" with data=data STATIC_URL=STATIC_URL%}
+            </div>
+        {% endif %}
         or <a href="/sessions/create/">create</a> a new session.
     </div>
     <div id="concentDiv">

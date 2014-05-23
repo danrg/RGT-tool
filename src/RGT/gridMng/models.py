@@ -184,6 +184,9 @@ class StateManager(models.Manager):
     def getFinishState(self):
         return self.get(name='finish')
 
+    def respondable(self):
+        return self.filter(name__in=(SessionState.AC, SessionState.RW))
+
 #model for state
 class State(models.Model):
     name = models.CharField(max_length=30)
@@ -271,6 +274,18 @@ class SessionManager(models.Manager):
         SessionGrid.objects.create(session=session, grid=duplicateGrid, iteration=0)
 
         return session
+
+    def with_participation(self, user):
+        participations = user.userparticipatesession_set
+        return self.filter(id__in=participations.values('session_id'))
+
+    def with_facilitator(self, user):
+        facilitator, created = Facilitator.objects.get_or_create(user=user)
+        return self.filter(facilitator=facilitator)
+
+    def with_pending_responses(self, user):
+        respondable_states = State.objects.respondable()
+        return self.with_participation(user).filter(state__in=respondable_states)
 
 class Session(models.Model):
     usid = models.CharField(max_length=20, unique=True)
@@ -387,6 +402,9 @@ class UserParticipateSession(models.Model):
                 return False
             except ResponseGrid.DoesNotExist:
                 return True
+
+    def __unicode__(self):
+        return "%s participating in %s" % (self.user, self.session)
 
 
 #the name of this class in the orm is: iterationHasGridInSession

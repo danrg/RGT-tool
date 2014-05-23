@@ -69,7 +69,7 @@
 		</table>
 	</div>
 	<div id="sessionParticipants">
-		{% include "gridMng/participants.html" with data=data.participantTableData STATIC_URL=STATIC_URL%}
+		{% include "gridMng/session/participants.html" with data=data.participantTableData STATIC_URL=STATIC_URL%}
 	</div>
 </div>
 <!-- navigation menus -->
@@ -102,7 +102,7 @@
 			<div id="sessionGridDiv">
 				<form id="form">
                     {% csrf_token %}
-					{% include "gridMng/gridTable.html" with data=data.tableData STATIC_URL=STATIC_URL %}
+					{% include "gridMng/grid/gridTable.html" with data=data.tableData STATIC_URL=STATIC_URL %}
 				</form>
 			</div>
             <div id="sessionGridOptions">
