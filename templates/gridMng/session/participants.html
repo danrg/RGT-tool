@@ -1,12 +1,20 @@
 {% load tz %}
 <table class="grid">
 	<thead>
-		<!-- The function getParticipantPage should be implemented in the javascript of the parent page!! -->
+        {# The function getParticipantPage should be implemented in the javascript of the parent page! #}
 		<th colspan="4">Participating users <span id=paticipatingRefreshSpan><img id="paticipatingRefreshImage" src="/static/icons/refresh.png" onclick="getParticipantPage()"/></span></th>
 	</thead>
 	{% for participant, class, dateTime in data.participants %}
-	<tr>
-		<td class="{{class}}">{{ participant.get_full_name }}{% if dateTime %} responded at: {% localtime on %}{{ dateTime|date:"Y-m-d H:i:s" }}{% endlocaltime %}{% endif %}</td>
-    </tr>
+        <tr>
+            <td class="{{class}}">
+                {{ participant.get_full_name }}{% if dateTime %} responded at: {% localtime on %}{{ dateTime|date:"Y-m-d H:i:s" }}{% endlocaltime %}{% endif %}
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td>
+                <em>Nobody has opened the invitation link yet</em>
+            </td>
+        </tr>
     {% endfor %}
 </table>
