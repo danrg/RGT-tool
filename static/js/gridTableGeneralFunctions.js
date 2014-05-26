@@ -483,6 +483,7 @@ function addCol2(altObj)
  */
 function addRow2(conObj)
 {
+    console.log(conObj);
     var editable = $('#ratio_concer1_alternative1').attr('disabled');
     if(editable!="disabled")
     {

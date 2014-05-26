@@ -11,29 +11,25 @@
 	           </tr>
 	           </thead>
 			<tbody>
-				{% for leftC, rightC, nPair, nLeftC, nRightC, isNew, users in data.concerns %}
+                {% for leftC, rightC, nPair, nLeftC, nRightC, isNew, users in data.concerns %}
 					{%	comment %} header for the tr {% endcomment %}
+                    <tr class= "resultAlternativeConcernRow">
 					{% if forloop.first %}
-					<tr class= "resultAlternativeConcernRow">
-						<td class= "{% cycle 'resultAlternativeConcernAmountCellBg1' 'resultAlternativeConcernAmountCellBg2' as bgColor%}" title="Times cited individually {{nLeftC}}">{{leftC}}</td>
-						<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="Times cited individually {{nRightC}}">{{rightC}}</td>
-						{% if isNew %}
-							<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="{{users}}">{{nPair}}<div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png" onclick="addConcern($(this).parents('tr'))"/></div></td>
-						{% else %}
-							<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="{{users}}">{{nPair}}</td>
-						{% endif %}
-					</tr>
-					{% else %}
-					<tr class= "resultAlternativeConcernRow">
-						<td class= "{% cycle bgColor%}" title="Times cited individually {{nLeftC}}">{{leftC}}</td>
-						<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="Times cited individually {{nRightC}}">{{rightC}}</td>
-						{% if isNew %}
-							<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="{{users}}">{{nPair}}<div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png" onclick="addConcern($(this).parents('tr'))"/></div></td>
-						{% else %}
-							<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="{{users}}">{{nPair}}</td>
-						{% endif %}
-					</tr>
-					{% endif %}
+						<td class="{% cycle 'resultAlternativeConcernAmountCellBg1' 'resultAlternativeConcernAmountCellBg2' as bgColor%}" title="Times cited individually {{nLeftC}}">{{leftC}}</td>
+                    {% else %}
+                        <td class="{% cycle bgColor%}" title="Times cited individually {{nLeftC}}">{{leftC}}</td>
+                    {% endif %}
+                    <td class="resultAlternativeConcernAmountCell {{bgColor}}" title="Times cited individually {{nRightC}}">{{rightC}}</td>
+                        <td class="resultAlternativeConcernAmountCell {{bgColor}}" title="{{users}}">
+                            {{nPair}}
+                            {% if isNew %}
+                                <div class= "resultAlternativeConcernNewDiv">
+                                    <img src="/static/icons/new.png" />
+                                    <a href="javascript:void(0)" onclick="addConcern($(this).parents('tr'));" class="addNewConcern" />
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
 				{% endfor %}
 			</tbody>
 		</table>
@@ -50,25 +46,22 @@
 			<tbody>
 				{% for alternaive, nTime, isNew, users in data.alternatives %}
 					{%	comment %} header for the tr {% endcomment %}
-					{% if forloop.first %}
-					<tr class= "resultAlternativeConcernRow">
-						<td class= "{% cycle 'resultAlternativeConcernAmountCellBg1' 'resultAlternativeConcernAmountCellBg2' as bgColor%}">{{alternaive}}</td>
-						{% if isNew %}
-							<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="{{users}}">{{nTime}}<div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png" onclick="addAlt($(this).parents('tr'))"/></div></td>
-						{% else %}
-							<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="{{users}}">{{nTime}}</td>
-						{% endif %}
+                    <tr class= "resultAlternativeConcernRow">
+                        {% if forloop.first %}
+                            <td class= "{% cycle 'resultAlternativeConcernAmountCellBg1' 'resultAlternativeConcernAmountCellBg2' as bgColor%}">{{alternaive}}</td>
+                        {% else %}
+                            <td class="{% cycle bgColor%}">{{alternaive}}</td>
+                        {% endif %}
+                        <td class="resultAlternativeConcernAmountCell {{bgColor}}" title="{{users}}">
+                            {{nTime}}
+						    {% if isNew %}
+                                <div class= "resultAlternativeConcernNewDiv">
+                                    <img src="/static/icons/new.png" />
+                                    <a href="javascript:void(0)" onclick="addAlt($(this).parents('tr'));" class="addNewConcern" />
+                                </div>
+						    {% endif %}
+                        </td>
 					</tr>
-					{% else %}
-					<tr class= "resultAlternativeConcernRow">
-						<td class="{% cycle bgColor%}">{{alternaive}}</td>
-						{% if isNew %}
-							<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="{{users}}">{{nTime}}<div class= "resultAlternativeConcernNewDiv"><img src= "/static/icons/new.png" onclick="addAlt($(this).parents('tr'))"/></div></td>
-						{% else %}
-							<td class="resultAlternativeConcernAmountCell {{bgColor}}" title="{{users}}">{{nTime}}</td>
-						{% endif %}
-					</tr>
-					{% endif %}
 				{% endfor %}
 			</tbody>
 		</table>

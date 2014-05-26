@@ -34,12 +34,23 @@
 
 .resultAlternativeConcernNewDiv{
 	position: absolute; 
-	margin-left: 85px; 
-	margin-top: -15px
+	margin-left: 75px;
+	margin-top: -15px;
+    overflow: auto;
+    width: 32px;
 }
 
-.resultAlternativeConcernNewDiv:hover{
-    cursor:pointer;
-    background-color: #ffff00;
+.resultAlternativeConcernNewDiv img {
+	float: left;
 }
 
+.addNewConcern {
+    float: left;
+    width: 16px;
+    height: 16px;
+    background-image: url('/static/icons/plus.png');
+}
+
+.addNewConcern:hover {
+    background-image: url('/static/icons/plus_hover.png');
+}
