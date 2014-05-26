@@ -256,12 +256,7 @@ function addRow(cell)
 	
 	//left part
 	var obj = table.find("tbody>tr:last");
-	//obj.find('#leftRowMenuDiv').hide();
-	
-	
-	//right part
-	//obj.find('#rightRowMenuDiv').hide();
-	
+
 	//right and left
 	obj.find('.ratioCell').each(function(){
 		$(this).mouseleave(function(){
@@ -366,7 +361,6 @@ function removeRow(cell)
 		
 		//remove add -1 to the total concerns
 		nConcerns--;
-		//$("#nConcerns").val(nConcerns);
 		calculateTotalWeight(containerDiv);
 		
 		if(typeof isTableSaved == 'function')
@@ -421,9 +415,6 @@ function addCol(cell)
 			function(){
 				$(this).attr("src", urlStaticFiles + "icons/plus.png");
 	});//end hover
-	
-	//hide the menu
-	//temp.find('.colMenuDiv').hide();
 	
 	//add the 'header'
 	tbody.find('tr:eq(1)').find('td:eq(' + nAlternatives + ')').after('<td class= "alternativeCell" onmouseover="showColMenu($(this))" >\n' +
@@ -561,8 +552,7 @@ function removeCol(cell)
 		
 		//save the new total number of alternatives
 		nAlternatives--;
-		//$("#nAlternatives").val(nAlternatives);
-		
+
 		//remove -1 position to the colMenuTimers
 		colMenuTimers.get(tableId).pop();
 
@@ -582,7 +572,7 @@ function rescale(containerDiv)
 	var nConcerns = getNumberOfConcerns(containerDiv.find('.mainGridDiv table'));//parseInt($("#nConcerns").val())
 	var weightTotal = 0.0;
 	var id = null;
-	var tbody = $(containerDiv).find('.mainGridDiv table>tbody');//$('#Grid>tbody');
+	var tbody = $(containerDiv).find('.mainGridDiv table>tbody');
 
 	for (var i = 0; i < nConcerns; i++)
 	{

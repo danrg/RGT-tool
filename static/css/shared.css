@@ -25,6 +25,7 @@ input[type="button"][disabled]
 {
 	background-color: lightgray;
 	color: gray;
+    border: 1px solid darkgray;
 }
 
 button[type="submit"] {
@@ -59,7 +60,6 @@ a.button
 
 a.less-important
 {
-    /*background: url('../Images/button-bg2.png') repeat-x left 45%;*/
     border: 1px solid #6598ca;
 }
 
@@ -74,7 +74,6 @@ img
     line-height: 20px;
     font-weight: bold;
 }
-
 
 /* Related to dendrogram divs. Dendrograms appear in Grids and Sessions */
 .dendrogram {

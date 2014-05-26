@@ -107,8 +107,8 @@
 			</div>
             <div id="sessionGridOptions">
                 {% if data.saveGridSession %}
-                <input type="button" id="saveButton" onclick="rescale($('#form'));saveSessionGrid()" value="Save changes" />
-                <input type="button" id= "mySessionsContentUndoAllButton" value="Undo all" onclick="getSessionGrid()" />
+                <input type="button" id="saveButton" onclick="rescale($('#form'));saveSessionGrid()" value="Save changes" disabled="disabled" />
+                <input type="button" id= "mySessionsContentUndoAllButton" value="Undo all" onclick="getSessionGrid()" disabled="disabled" />
                 {% endif %}
                 <input type="button" onclick="toggleSessionDendrogram(this, -1, null)" value="Show dendrogram" />
             </div>

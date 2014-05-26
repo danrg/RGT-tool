@@ -76,7 +76,6 @@ function adjustWeights()
         max: 100-(numConcerns-1),
         animate: true,
         step: 1,
-        //orientation: "vertical",
         slide: function(event, ui) {
 
             var clicked = "#" + $(this).attr('id');
@@ -84,90 +83,84 @@ function adjustWeights()
             pClicked = pClicked.replace("span", "pConcern");
             pClicked = pClicked.replace("_concern", "");
 
-//            $('#pipi').text(pClicked);
             $(pClicked).text("\xa0\xa0"+ui.value.toString());
-
         },
         stop: function( event, ui ) {
             for(var k=1; k<=numConcerns; k++)
+            {
+                var pDummy = "#pConcern" + k.toString();
+                var spanDummy = "#span_concern" + k.toString();
+                var wDummy = "#weight_concern" + k.toString();
+                var clicked = "#" + $(this).attr('id');
+                clicked = clicked.replace("span", "weight");
+                if($(this).attr('id') != $(spanDummy).attr('id'))
                 {
-                    var pDummy = "#pConcern" + k.toString();
-                    var spanDummy = "#span_concern" + k.toString();
-                    var wDummy = "#weight_concern" + k.toString();
+                    var val = $(spanDummy).slider("value");
+                    $(spanDummy).slider("value", val-((ui.value-$(clicked).val())*($(spanDummy).slider("value")/(100-$(clicked).val()))));
+
+                }
+                $(pDummy).text($(spanDummy).slider("value").toString());
+            }
+
+            var total = 0;
+            for(var i=1; i<=numConcerns; i++)
+            {
                     var clicked = "#" + $(this).attr('id');
-                    clicked = clicked.replace("span", "weight");
-//                    $("#pipi").text(clicked);
+                    var spanDummy = "#span_concern" + i.toString();
                     if($(this).attr('id') != $(spanDummy).attr('id'))
-                    {
-                        var val = $(spanDummy).slider("value");
-                        $(spanDummy).slider("value", val-((ui.value-$(clicked).val())*($(spanDummy).slider("value")/(100-$(clicked).val()))));
-
-                    }
-                    $(pDummy).text($(spanDummy).slider("value").toString());
-                }
-
-                var total = 0;
-                for(var i=1; i<=numConcerns; i++)
-                {
-                        var clicked = "#" + $(this).attr('id');
-                        var spanDummy = "#span_concern" + i.toString();
-                        if($(this).attr('id') != $(spanDummy).attr('id'))
-                            total += $(spanDummy).slider("value");
-                        else
-                            total += ui.value;
-                }
-
-                if(total != 100)
-                {
-                    if(total>100)
-                    {
-                        var dif = total - 100;
-                        for(var a=1; a<=numConcerns && dif>0; a++)
-                        {
-                            var spanDummy = "#span_concern" + a.toString();
-                            if($(this).attr('id') != $(spanDummy).attr('id'))
-                            {
-                                if($(spanDummy).slider("value")>dif)
-                                {
-                                    $(spanDummy).slider("value", $(spanDummy).slider("value")-dif);
-                                    dif = 0;
-                                }
-                            }
-
-                        }
-                    }
+                        total += $(spanDummy).slider("value");
                     else
+                        total += ui.value;
+            }
+
+            if(total != 100)
+            {
+                if(total>100)
+                {
+                    var dif = total - 100;
+                    for(var a=1; a<=numConcerns && dif>0; a++)
                     {
-                        var dif = 100 - total;
-                        for(var b=1; b<=numConcerns && dif>0; b++)
+                        var spanDummy = "#span_concern" + a.toString();
+                        if($(this).attr('id') != $(spanDummy).attr('id'))
                         {
-
-                            var spanDummy = "#span_concern" + b.toString();
-                            if($(this).attr('id') != $(spanDummy).attr('id'))
+                            if($(spanDummy).slider("value")>dif)
                             {
-                                if($(spanDummy).slider("value")+dif<100)
-                                {   $(spanDummy).slider("value", $(spanDummy).slider("value")+dif);
-                                    dif = 0;
-                                }
+                                $(spanDummy).slider("value", $(spanDummy).slider("value")-dif);
+                                dif = 0;
                             }
-
                         }
+
                     }
                 }
-               //$('#pipi').text(total.toString());
-                    for(var j=1; j<=numConcerns; j++)
+                else
+                {
+                    var dif = 100 - total;
+                    for(var b=1; b<=numConcerns && dif>0; b++)
                     {
-                            var pDummy = "#pConcern" + j.toString();
-                            var spanDummy = "#span_concern" + j.toString();
-                            var wDummy = "#weight_concern" + j.toString();
 
-                        $(pDummy).text("\xa0\xa0"+$(spanDummy).slider("value").toString());
-                        $(wDummy).val($(spanDummy).slider("value"));
+                        var spanDummy = "#span_concern" + b.toString();
+                        if($(this).attr('id') != $(spanDummy).attr('id'))
+                        {
+                            if($(spanDummy).slider("value")+dif<100)
+                            {   $(spanDummy).slider("value", $(spanDummy).slider("value")+dif);
+                                dif = 0;
+                            }
+                        }
 
                     }
+                }
+            }
+            for(var j=1; j<=numConcerns; j++)
+            {
+                    var pDummy = "#pConcern" + j.toString();
+                    var spanDummy = "#span_concern" + j.toString();
+                    var wDummy = "#weight_concern" + j.toString();
 
+                $(pDummy).text("\xa0\xa0"+$(spanDummy).slider("value").toString());
+                $(wDummy).val($(spanDummy).slider("value"));
 
-
+            }
+            isTableSaved();
         }
       });
     });
@@ -391,6 +384,8 @@ function isTableSaved()
 			isGridComplete();
 		}
 	}
+    $('#reloadSavedGridButton').prop('disabled', hasTableBeenSaved);
+    $('#saveButton').prop('disabled', hasTableBeenSaved);
 }
 
 function saveGrid()

@@ -24,7 +24,7 @@
 				</tr>
 				{% comment %} second row is the "header" of the table {% endcomment %}
 				<tr>
-						<td><!-- skip --></td> 
+						<td><!-- skip --></td>
 						{% comment %} grid table menu, max of 5 to 6 buttons {% endcomment %}
 						<td>
 							{% if not data.doesNotShowLegend %}
@@ -56,7 +56,7 @@
 						<td>
 							<div>
 								{% if data.checkForTableIsSave %}
-									<img title="Current showing table has not been modified since retrieving its values." class="tableStatus" alt="" src="{{ STATIC_URL }}icons/table_saved.png">
+									<img title="Grid has not been modified since retrieving its values." class="tableStatus" alt="" src="{{ STATIC_URL }}icons/table_saved.png">
 								{% endif %}
 							</div>
 						</td>

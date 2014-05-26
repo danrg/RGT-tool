@@ -210,7 +210,7 @@ class GridTests(BaseGridLiveTest):
         delete_column_button.click()
 
         # User clicks the save button
-        save_button = self.browser.find_element_by_css_selector("input[value='Save']")
+        save_button = self.browser.find_element_by_css_selector("input[value='Save changes']")
         save_button.click()
 
         # A dialog box appears with the message 'Grid was saved'

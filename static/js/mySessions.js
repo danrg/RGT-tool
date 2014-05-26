@@ -70,8 +70,8 @@ function isTableSaved()
 		if(hasTableBeenSaved)
 		{
 			changeTableSaveStatusIcon($('#concentDiv'), false);
-			setGridTableSaveStatusToolTip($('#concentDiv'), 'Current showing table has been modified since retrieving it from the server.');
-			hasTableBeenSaved= false;
+			setGridTableSaveStatusToolTip($('#concentDiv'), 'Grid has been modified since retrieving it from the server.');
+			hasTableBeenSaved = false;
 		}
 	}
 	else
@@ -79,8 +79,10 @@ function isTableSaved()
 		if(!hasTableBeenSaved)
 		{
 			changeTableSaveStatusIcon($('#concentDiv'), true);
-			setGridTableSaveStatusToolTip($('#concentDiv'), 'Current showing table has not been modified since retrieving it from the server.');
-			hasTableBeenSaved= true;
+			setGridTableSaveStatusToolTip($('#concentDiv'), 'Grid has not been modified since retrieving it from the server.');
+			hasTableBeenSaved = true;
 		}
-	}
+    }
+    $('#mySessionsContentUndoAllButton').prop('disabled', hasTableBeenSaved);
+    $('#saveButton').prop('disabled', hasTableBeenSaved);
 }

@@ -486,15 +486,7 @@ class SessionTests(BaseSessionLiveTest):
         # Wait until the results from the selected iteration appear
         WebDriverWait(self.browser, 10).until(lambda x: self.browser.find_element_by_id("clearResultsButton"))
 
-        # User mouse over dendrogram
-        # results_image = self.browser.find_element_by_id("downloadResultsButton")
-        # ActionChains(self.browser).move_to_element(results_image).perform()
-        #
-        # time.sleep(2)
-
-        # Facilitator admin clicks the button to download results
-
-        time.sleep(10)
+        time.sleep(2)
 
         download_result2_button = self.browser.find_element_by_css_selector("input[id='downloadResultsButton']")
         download_result2_button.click()
@@ -509,6 +501,8 @@ class SessionTests(BaseSessionLiveTest):
         close_button = self.browser.find_element_by_css_selector("a[class='ui-dialog-titlebar-close ui-corner-all']")
         close_button.click()
 
+        field = self.browser.find_element_by_id('ratio_concer1_alternative1')
+        field.send_keys('1')
 
         # Facilitator admin saves the changes
         save_changes_button = self.browser.find_element_by_css_selector("input[value='Save changes']")
