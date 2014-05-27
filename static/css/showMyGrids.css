@@ -64,3 +64,9 @@
 #gridNameDiv {
 	margin-top:20px;
 }
+
+#tabs p {
+    color: #444;
+    font-family: Verdana;
+    font-size: 12px;
+}

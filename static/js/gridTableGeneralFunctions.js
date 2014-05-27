@@ -476,6 +476,7 @@ function addCol2(altObj)
         var inputAlt = $("input[id^='alternative']:last");
         inputAlt.val(altHtml);
     }
+    isGridComplete();
 }
 
 /* This function is to add Row and passing the concern values by clicking the New image in the results page
@@ -498,6 +499,7 @@ function addRow2(conObj)
         inputConLeft.val(conLeftHtml);
         inputConRight.val(conRightHtml);
     }
+    isGridComplete();
 }
 
 /**
@@ -828,19 +830,24 @@ function rationRangeValidation(inputRating)
 
 function isGridComplete() {
 	var fields = $('#form').serializeArray();
+    enoughAlternatives = false;
+    enoughConcerns = false;
 	$.each(fields, function(i, field) {
 		if (field.value == "") {
-			isGridCompleteFlag = false;
 			return false;
-		} else {
-			isGridCompleteFlag = true;
 		}
+        enoughConcerns = enoughConcerns || field.name == "concern_2_left";
+        enoughAlternatives = enoughAlternatives || field.name == "alternative_2_name";
 	});
-	
-	if (isGridCompleteFlag && hasTableBeenSaved) {
-		$('#showDendogramButton').removeAttr('disabled');
+
+	if (enoughConcerns && enoughAlternatives && hasTableBeenSaved) {
+		$('#tabs li').addClass('ui-state-default');
+        $('#tabs li').removeClass('ui-state-disabled');
+        $('#tabs p').hide();
 	} else {
-		$('#showDendogramButton').attr('disabled', 'disabled');
+        $('#tabs li').removeClass('ui-state-default');
+        $('#tabs li').addClass('ui-state-disabled');
+        $('#tabs p').show();
 	}
 }
 

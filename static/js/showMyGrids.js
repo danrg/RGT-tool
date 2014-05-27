@@ -410,6 +410,7 @@ function isTableSaved()
 	}
     $('#reloadSavedGridButton').prop('disabled', hasTableBeenSaved);
     $('#saveButton').prop('disabled', hasTableBeenSaved);
+    isGridComplete();
 }
 
 function saveGrid()
@@ -420,8 +421,6 @@ function saveGrid()
 		var table = getGridTable($('#results'));
 		var gridUSID = $("#gridUSID").val();
 		var gridName = $("#gridName").val();
-
-        console.log(gridName);
 
 		var str = 'gridUSID=' + gridUSID + '&gridName=' + gridName + '&nAlternatives=' + getNumberOfAlternatives(table) + '&nConcerns=' + getNumberOfConcerns(table) + '&' + formString;
 		$.post('/grids/update/', str, function(data)
@@ -554,11 +553,7 @@ function getMatrices()
 function isGridValid()
 {
    var rowCount = $('.gridRow').length;
-
-   if(rowCount > 1)
-        return true;
-   else
-        return false;
+   return (rowCount > 1);
 }
 
 $(function() {
