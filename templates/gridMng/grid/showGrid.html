@@ -41,13 +41,14 @@ RGT | Grid {{ grid.name }}
 {% endblock javascript %}
 
 {% block grid %}
-<div id="gridNameDiv">
-    <label class="gridNameLabel" for="gridName">Name:</label>
-    <input type="text" id="gridName" name="gridName" size="45" onchange="isTextEmpty($(this));isTableSaved()" value="{{ grid.name }}" />
-    <input type="hidden" id="gridUSID" name="gridUSID" value="{{ grid.usid }}" />
-</div>
+    <form id="form">{% csrf_token %}
 
-<form id="form">{% csrf_token %}
+    <div id="gridNameDiv">
+        <label class="gridNameLabel" for="gridName">Name:</label>
+        <input type="text" id="gridName" name="gridName" size="45" onchange="isTextEmpty($(this));isTableSaved()" value="{{ grid.name }}" />
+        <input type="hidden" id="gridUSID" name="gridUSID" value="{{ grid.usid }}" />
+    </div>
+
 	<div id="results">
         {{ grid_html }}
 	</div>
@@ -55,11 +56,14 @@ RGT | Grid {{ grid.name }}
 	</div>
 
     <p id="totalW"></p>
-    <input type="button" id="weightSliders" onclick="adjustWeights();$('#weightSliders').hide();$('#weightSliders2').show();" value="Prioritize concerns"/><p id="weightSliders2" hidden="hidden">&nbsp;Please click save in order to go back.</p>
+    <p id="weightSliders2" hidden="hidden">Save or cancel your changes to go back to your grid.</p>
+
 	<div class="tableOptions" id="showMyGridsTableOptions">
-        <input type="button" id="saveButton" onclick="$('#results').show();$('#weightSliders').show();$('#totalW').hide();$('#wContainer').hide();$('#weightSliders2').hide();rescale($('#form'));$('#similarityMatrix').hide();$('.resim').remove();clearSvgImg('dendogramDiv');saveGrid();" value="Save changes" disabled="disabled"/>
+        <input type="button" id="saveButton" onclick="resetVisibilities(); rescale($('#form')); saveGrid();" value="Save changes" disabled="disabled"/>
         <input type="button" id="reloadSavedGridButton" onclick="showMyGrid(true)" value="Undo all" disabled="disabled"/>
-        <input type="button" onclick="$('.resim').remove();deleteMyGrid()" value="Delete" />
+        <input type="button" id="weightSlidersButton" onclick="adjustWeights();" value="Prioritize concerns"/>
+        <input type="button" id="cancelWeightSliders" onclick="toggleAdjustWeights();" value="Cancel" hidden="hidden"/>
+        <input type="button" id="deleteGrid" onclick="$('.resim').remove();deleteMyGrid()" value="Delete" />
 	</div>
     <div id="tabs">
         <ul>

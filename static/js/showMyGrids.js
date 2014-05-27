@@ -39,9 +39,6 @@ function hideImage()
 
 function adjustWeights()
 {
-    $('#results').hide();
-    $('#wContainer').show();
-    $('#totalW').show();
     $('#wContainer').html("");
     var table = getGridTable($('#results'));
     var numConcerns = getNumberOfConcerns(table);
@@ -164,6 +161,33 @@ function adjustWeights()
         }
       });
     });
+
+    toggleAdjustWeights();
+}
+
+function toggleAdjustWeights() {
+    $('#weightSlidersButton').toggle();
+    $('#cancelWeightSliders').toggle();
+    $('#weightSliders2').toggle();
+    $('#reloadSavedGridButton').toggle();
+    $('#deleteGrid').toggle();
+    $('#results').toggle();
+    $('#wContainer').toggle();
+    $('#totalW').toggle();
+}
+
+function resetVisibilities() {
+    $('#results').show();
+    $('#weightSlidersButton').show();
+    $('#totalW').hide();
+    $('#wContainer').hide();
+    $('#weightSliders2').hide();
+    $('#similarityMatrix').hide();
+    $('.resim').remove();
+    clearSvgImg('dendogramDiv');
+    $('#reloadSavedGridButton').show();
+    $('#deleteGrid').show();
+    $('#cancelWeightSliders').hide();
 }
 
 //function used to get a grid from the db and display it to the user
