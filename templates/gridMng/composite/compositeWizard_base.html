@@ -15,7 +15,7 @@
 	</div>
 {% else %}
 	<div id="wizard-header">
-		<h2>Create Composite Grid</h2>
+		<h2>Create composite grid</h2>
 	</div>
 	<div id="wizard-step-header">
 		<h3>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</h3>
@@ -35,10 +35,10 @@
 		{% endif %}
 		<div id="form-menu">
 			{% if wizard.steps.prev %}
-			    <button name="wizard_goto_step" type="submit" id="btn-prev-step" value="{{ wizard.steps.prev }}" tabindex="{% block prev_step_but_tab %}{% endblock %}">Prev Step</button>
+			    <button name="wizard_goto_step" type="submit" id="btn-prev-step" value="{{ wizard.steps.prev }}" tabindex="{% block prev_step_but_tab %}{% endblock %}">Previous step</button>
 			{% endif %}
             {% if wizard.steps.next %}
-			    <input type="submit" value="Next Step" id="btn-submit" tabindex="{% block next_step_but_tab %}{% endblock %}" />
+			    <input type="submit" value="Next step" id="btn-submit" tabindex="{% block next_step_but_tab %}{% endblock %}" />
             {% else %}
                 <input type="submit" value="Finish" id="btn-submit"/>
             {% endif %}

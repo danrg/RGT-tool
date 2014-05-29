@@ -17,25 +17,38 @@
 {% endblock step_info %}
 
 {% block wizard_form_content %}
-<div id="alt-list">
-	<div id="alt-list-header">
-		<h4>Alternates Lists</h4>
-	</div>
-    {% for alternate_list in data.alternates %}
-	    <div id="alt-list-data-{{ forloop.counter }}" class="container">
-        {% for alternate in alternate_list %}
-            <input id="alternate_grid-{{forloop.parentloop.counter}}-{{ forloop.counter}}" name="1-gridChoices" type="checkbox" value="{{ alternate.0 }}">&nbsp;{{ alternate.0 }}<br>
+<div id="alt-list-wrapper">
+    <div id="alt-list">
+        <div id="alt-list-header">
+            <h4>Alternatives lists</h4>
+        </div>
+        {% for alternate_list in data.alternates %}
+            <div id="alt-list-data-{{ forloop.counter }}" class="container">
+            {% for alternate in alternate_list %}
+                <input id="alternate_grid-{{forloop.parentloop.counter}}-{{ forloop.counter}}" name="1-gridChoices" type="checkbox" value="{{ alternate.0 }}">
+                <label for="alternate_grid-{{forloop.parentloop.counter}}-{{ forloop.counter}}">{{ alternate.0 }}</label>
+                <br />
+            {% endfor %}
+            </div><br>
         {% endfor %}
-	    </div><br>
-    {% endfor %}
 
-<h5>Status: </h5>
-<div id="alt-list-data-{{ forloop.counter }}" class="container">
-    <input id="valid" name="status" type="radio" value="valid">Valid<br>
-    <input id="invalid" name="status" type="radio" value="invalid">Invalid<br>
-    <input id="unknown" name="status" type="radio" value="unknown" checked>Unknown<br>
-</div><br>
-
+        <h5>Status: </h5>
+        <div id="alt-list-data-{{ forloop.counter }}" class="container">
+            <input id="valid" name="status" type="radio" value="valid">
+            <label for="valid">Valid</label>
+            <br />
+            <input id="invalid" name="status" type="radio" value="invalid">
+            <label for="invalid">Invalid</label>
+            <br />
+            <input id="unknown" name="status" type="radio" value="unknown" checked>
+            <label for="unknown">Unknown</label>
+            <br />
+        </div>
+    </div>
+    <div id="rules">
+        <h4>Created rules</h4>
+        <p id="explanation">Select a combination of alternatives to create new rules</p>
+    </div>
 </div>
 {% if wizard.form.errors %}
 <div class="form-errors-wrapper">
@@ -46,12 +59,12 @@
 	</div>
 </div>
 {% endif %}
-<input type="hidden" name="gridUSid" value="" id="gridUSid" />
+<input type="hidden" name="gridUsid" value="" id="gridUsid" />
 {% endblock wizard_form_content %}
 
 {% block after_wizard_form_content %}
 <div id="btn-add-wrapper">
-   	<input type="button" id="btn-add" value="Add Rule" />
+   	<input type="button" id="btn-add" value="Add rule" />
 </div>
 {% endblock after_wizard_form_content %}
 

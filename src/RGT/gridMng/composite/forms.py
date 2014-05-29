@@ -9,7 +9,7 @@ class FirstStepForm(forms.Form):
 
 class WhichGridsForm(forms.Form):
 #     Override the initialize in order to dynamically add fields to the form in order to be saved,
-#     the fields are saved only when the user selects 'Next Step'.
+#     the fields are saved only when the user selects 'Next step'.
     def __init__(self, *args, **kwargs):
         super(WhichGridsForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
@@ -20,13 +20,11 @@ class WhichGridsForm(forms.Form):
             gridtype = Grid.GridType.USER_GRID
             templateData = ShowGridsData()
             templateData.grids = Grid.objects.filter(user=user1, grid_type=gridtype)
-            i=1
             for grid in templateData.grids:
                 gridUsid = grid.usid
                 gridName = grid.name
                 dummy1 = (str(gridUsid), str(gridName))
                 choices2 = (dummy1,) + choices2
-                i += 1
             self.fields['gridChoices'] = forms.MultipleChoiceField(required=False, choices=choices2, widget=forms.CheckboxSelectMultiple)
 
     def clean(self):
@@ -39,7 +37,15 @@ class WhichGridsForm(forms.Form):
         return cleaned_data
 
 class RulesForm(forms.Form):
-     def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(RulesForm, self).__init__(*args, **kwargs)
         if len(self.data) > 0:
-            self.gridUSid = self.data['gridUSid']
+            self.gridUsid = self.data['gridUsid']
+
+    def clean(self):
+        cleaned_data = super(RulesForm, self).clean()
+
+        if not self.gridUsid:
+            raise forms.ValidationError('No rules added')
+
+        return cleaned_data

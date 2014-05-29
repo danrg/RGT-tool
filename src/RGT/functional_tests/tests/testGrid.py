@@ -233,8 +233,8 @@ class GridTests(BaseGridLiveTest):
         delete_grid_button = self.browser.find_element_by_class_name("ui-button-text")
         delete_grid_button.click()
 
-        # A dialog box appears with the message 'Grid was deleted'
-        self.wait_for_dialog_box_with_message("Grid was deleted")
+        time.sleep(2)
+        self.assertEquals("RGT | Grids", self.browser.title)
 
     def test_can_show_dendrogram(self):
         # User logs in successfully, goes to grid page and selects a saved grid

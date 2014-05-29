@@ -23,7 +23,7 @@ from RGT.gridMng.models import Facilitator
 from RGT.gridMng.models import Composite
 from RGT.gridMng.prototypes.compositeParse import CompositeParse
 from RGT.gridMng.utility import generateRandomString, validateName, convertSvgTo, getImageError, convertGridTableToSvg, returnMatrix
-from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag
+from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag, HttpErrorResponse
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.session.state import State
 from RGT.gridMng.template.showGridsData import ShowGridsData
@@ -163,6 +163,7 @@ def ajaxCreateGrid(request):
     htmlData = template.render(context)
     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
 
+
 @login_required
 def getShowGridPage(request):
     """
@@ -171,6 +172,7 @@ def getShowGridPage(request):
     """
     grids = Grid.objects.filter(user=request.user)
     return render(request, 'gridMng/grid/showMyGrids.html', {'grids': grids})
+
 
 @login_required
 def show_grid(request, usid):
@@ -186,6 +188,7 @@ def show_grid(request, usid):
     grid_html = template.render(context)
 
     return render(request, 'gridMng/grid/showGrid.html', {'grid': grid, 'grids': other_grids, 'grid_html': grid_html})
+
 
 @login_required
 def ajaxGetGrid(request):
@@ -299,6 +302,7 @@ def ajaxGetGrid(request):
             return HttpResponse(createXmlErrorResponse('Grid was not found'), content_type='application/xml')
     else:
         return HttpResponse(createXmlErrorResponse(error), content_type='application/xml')
+
 
 @login_required
 def ajaxUpdateGrid(request):
@@ -451,7 +455,6 @@ def ajaxUpdateGrid(request):
         return HttpResponse(createXmlErrorResponse("No grid found"), content_type='application/xml')
 
 
-
 @login_required
 def ajaxDeleteGrid(request):
     """
@@ -529,7 +532,6 @@ def ajaxGenerateDendogram(request):
                             content_type='application/xml')
 
 
-
 @login_required
 def ajaxGenerateSimilarity(request):
     """
@@ -583,7 +585,6 @@ def addRules(request):
     """
 
     if (request.POST.has_key('rule') and request.POST.has_key('status')):
-
         user1 = request.user
         if(request.POST.has_key('gridid')):
             gridID = request.POST['gridid']
@@ -608,11 +609,10 @@ def addRules(request):
         for r in rules_list:
             Composite.objects.create(compid=gridID, user=user1, rule=str(r), status=request.POST['status'])
 
-        return HttpResponse(gridID, mimetype="text/plain")
+        else:
+            return HttpResponse(gridID, mimetype="text/plain")
     else:
         return HttpResponse("Error!")
-
-
 
 
 @login_required
@@ -626,7 +626,6 @@ def ajaxGetSaveSvgPage(request):
     context = RequestContext(request, {})
     htmlData = template.render(context)
     return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
-
 
 
 @login_required
@@ -667,7 +666,6 @@ def ajaxConvertSvgTo(request):
     response = HttpResponse(errorImageData, content_type='image/jpg')
     response['Content-Disposition'] = 'attachment; filename=error.jpg'
     return response
-
 
 
 @login_required
@@ -794,8 +792,6 @@ def dendrogramTo(request):
     return response
 
 
-
-
 def __convertSvgStringTo(svgString=None, convertTo=None):
     """
     This function is used to convert a string that contains svg data into
@@ -852,8 +848,6 @@ def __convertSvgStringTo(svgString=None, convertTo=None):
                 raise Exception('Error image file name was None')
     else:
         raise ValueError('svgString or convertTo was None')
-
-
 
 
 def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
@@ -1005,8 +999,6 @@ def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
             j = 0
             i += 1
     return (nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues)
-
-
 
 
 def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues,
@@ -1208,60 +1200,6 @@ def createGrid(userObj, gridType, gridName, concernValues, alternativeValues, ra
     else:
         raise ValueError('One or more variables were None')
 
-def createCompositeGrid(userObj, gridName, gridId):
-    """
-    This function is a modificated version of 'createGrid' function. What is different is we don't have any numeric values here, just alternative names(combinations of valid rules),
-    and also we are providing grid.usid beforehand
-    """
-    if userObj != None and gridId != None:
-        try:
-            gridObj = Grid.objects.create(user=userObj, grid_type='cg')
-            if gridName != None:
-                gridObj.name = gridName
-            gridObj.usid = gridId
-            gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
-            #gridObj.dateTime = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
-            try:
-                gridObj.save()
-            except IntegrityError as error:
-                pass
-
-            rules = Composite.objects.filter(compid=gridId, status="valid")
-            concernValues = [['lc1', 'rc1'],['lc2', 'rc2'],['lc3', 'rc3']]
-            concerns = []
-            alternatives = []
-
-            for r in rules:
-                a = r.rule
-                a = a.replace("u'", "")
-                alternative = Alternatives.objects.create(grid=gridObj, name=str(a.replace("'", "")))
-                alternatives.append(alternative)
-
-            for i in range(int(len(concernValues))):
-                concern = Concerns.objects.create(grid=gridObj, leftPole=concernValues[i][0],
-                                                  rightPole=concernValues[i][1])
-                concerns.append(concern)
-
-            # for i in range(len(concernValues)):
-            #     for j in range(rules.count()):
-            #         Ratings.objects.create(concern=concerns[i], alternative=alternatives[j], rating=3)
-
-
-            return gridObj
-        except:
-            try:
-                gridObj.delete()
-            except:
-                if DEBUG:
-                    print 'Could not delete the grid'
-                    print "Exception in user code:"
-                    print '-' * 60
-                    traceback.print_exc(file=sys.stdout)
-                    print '-' * 60
-            raise
-    else:
-        raise ValueError('One or more variables were None')
-
 
 def pca(request):
     #this is a setting for matplotlib
@@ -1392,5 +1330,3 @@ def pca(request):
                     print '-' * 60
                 logger.exception('Unknown error')
                 return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
-
-

@@ -1,7 +1,9 @@
-from django.http import HttpResponseRedirect
+from datetime import datetime
+from django.db import transaction
 from django.contrib.formtools.wizard.views import SessionWizardView
-from RGT.gridMng.views import createCompositeGrid
-from RGT.gridMng.models import Grid
+from django.shortcuts import redirect
+from django.utils.timezone import utc
+from RGT.gridMng.models import Grid, Composite, Alternatives, Concerns, Ratings
 from RGT.gridMng.template.showGridsData import ShowGridsData
 
 class CompositeWizard(SessionWizardView):
@@ -37,7 +39,6 @@ class CompositeWizard(SessionWizardView):
                 templateData = ShowGridsData()
                 # Get the alternatives of grids which user chosed one step before
                 templateData.grids = Grid.objects.filter(user=user1, grid_type=gridtype, usid__in=grids_data['gridChoices'])
-
                 alternativesListForRules = []
 
                 for x in templateData.grids:
@@ -47,17 +48,14 @@ class CompositeWizard(SessionWizardView):
                         if (str(y.name) != 'ideal') and (str(y.name) != 'Ideal'):
                             dummyList.append((y.name, y.id))
                     alternativesListForRules.append(dummyList)
-                print alternativesListForRules
                 templateData.alternates = alternativesListForRules
                 context.update({'data': templateData})
-
             except:
                 pass
 
         return context
 
     def done(self, form_list, **kwargs):
-
         step_zero_data = self.get_form_step_data(form_list[0])
         step_zero_prefix = self.get_form_prefix(step='0', form=form_list[0])
         # step 1 - alternatives
@@ -73,10 +71,45 @@ class CompositeWizard(SessionWizardView):
         # Get the grid name of the form data of step 0 (zero index).
         grid_name = step_zero_data['%s-composite_name' % (step_zero_prefix)]
 
-        gridUSid = step_two_data['gridUSid']
+        gridUsid = step_two_data['gridUsid']
 
         # This is a modified version of 'createGrid' which we are providing the gridUsID beforehand.
-        createCompositeGrid(user_obj, grid_name, gridUSid)
+        grid = self.createCompositeGrid(user_obj, grid_name, gridUsid)
 
+        return redirect(grid)
 
-        return HttpResponseRedirect('/grids/')
+    @transaction.atomic
+    def createCompositeGrid(self, userObj, gridName, gridId):
+        """
+        This function is a modificated version of 'createGrid' function. What is different is we don't have any numeric values here, just alternative names(combinations of valid rules),
+        and also we are providing grid.usid beforehand
+        """
+        if userObj is not None and gridId is not None:
+            gridObj = Grid.objects.create(user=userObj, grid_type=Grid.GridType.COMPOSITE_GRID)
+            if gridName != None:
+                gridObj.name = gridName
+            gridObj.usid = gridId
+            gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
+            gridObj.save()
+
+            alternatives = []
+            rules = Composite.objects.filter(compid=gridId, status="valid")
+            for r in rules:
+                a = r.rule
+                a = a.replace("u'", "")
+                alternative = Alternatives.objects.create(grid=gridObj, name=str(a.replace("'", "")))
+                alternatives.append(alternative)
+
+            concernValues = [['lc1', 'rc1'],['lc2', 'rc2'],['lc3', 'rc3']]
+            concerns = []
+            for [left, right] in concernValues:
+                concern = Concerns.objects.create(grid=gridObj, leftPole=left, rightPole=right)
+                concerns.append(concern)
+
+            for concern in concerns:
+                for alternative in alternatives:
+                    Ratings.objects.create(concern=concern, alternative=alternative)
+
+            return gridObj
+        else:
+            raise ValueError('One or more variables were None')

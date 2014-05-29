@@ -352,11 +352,10 @@ function deleteMyGrid()
 								$('#dendrogram').hide();
 								hideLoadingSpinner(loadingDiv);
 								showMessageInDialogBox('Grid was deleted.');
+                                window.location.href="/grids/"
 							}
 							else
 							{
-								//$('#myGridsDialog').html('<p>' + $(data).find('error').text() + '</p>');
-								//$('#myGridsDialog').dialog('open');
 								hideLoadingSpinner(loadingDiv);
 								showMessageInDialogBox($(data).find('error').text()); //function from gridNavigation
 							}

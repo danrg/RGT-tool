@@ -19,11 +19,13 @@
 {% block wizard_form_content %}
 <div id="alt-list">
 	<div id="alt-list-header">
-		<h4>Grids List</h4>
+		<h4>Grids list</h4>
 	</div>
 	<div id="alt-list-data" class="container">
         {% for grid in data.grids %}
-            <input id="id_1-gridChoices_{{ forloop.counter}}" name="1-gridChoices" type="checkbox" value="{{ grid.usid }}">&nbsp;{{ grid.name }}<br>
+            <input id="id_1-gridChoices_{{ forloop.counter}}" name="1-gridChoices" type="checkbox" value="{{ grid.usid }}">
+            <label for="id_1-gridChoices_{{ forloop.counter}}">{{ grid.name }}</label>
+            <br />
         {% endfor %}
 	</div>
 </div>

@@ -23,5 +23,21 @@ div.form-errors-wrapper .error {
 #btn-add-wrapper {
 	margin-top: 5px;
 }
+#alt-list-data label,
+#content .container label {
+    display: inline-block;
+}
+
+#alt-list-wrapper {
+    overflow: auto;
+}
+#rules {
+    float: left;
+    margin-top: 10px;
+    margin-left:100px;
+}
+#alt-list-wrapper #alt-list {
+    float: left;
+}
 
 .container { border:2px solid #ccc; width:300px; height: 100px; overflow-y: scroll; }

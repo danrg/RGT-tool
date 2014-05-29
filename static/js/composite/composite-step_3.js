@@ -1,7 +1,6 @@
 $(document).ready(function () {
 	$('#btn-add').click(function () {
         var i = 1;
-        var numFields = 0;
         var finished = false;
         var fieldStr = "#alt-list-data-";
         var alternateStr = "#alternate_grid-";
@@ -19,7 +18,7 @@ $(document).ready(function () {
             }
         }
 
-        numFields = i-1;
+        var numFields = i-1;
         var rule = "";
         for(var j=1; j<=numFields; j++)
         {
@@ -51,7 +50,6 @@ $(document).ready(function () {
                             rule += $(dummyStr2).val() + '|';
                         }
                     }
-
                 }
                 else
                 {
@@ -67,7 +65,6 @@ $(document).ready(function () {
                     }
                     finishedAlternates = true;
                 }
-
             }
 
             if(!oneChecked)
@@ -87,8 +84,8 @@ $(document).ready(function () {
             else
                 stat = $('#unknown').val();
 
-            if($('#gridUSid').val().length != 0)
-                var str = 'rule=' + rule + '&status=' + stat + '&gridid=' + $('#gridUSid').val();
+            if($('#gridUsid').val().length != 0)
+                var str = 'rule=' + rule + '&status=' + stat + '&gridid=' + $('#gridUsid').val();
             else
                 var str = 'rule=' + rule + '&status=' + stat;
 
@@ -98,7 +95,9 @@ $(document).ready(function () {
                 {
                     if ($(data).find('error').length <= 0)
                     {
-                        $('#gridUSid').val(data);
+                        $('#gridUsid').val(data);
+                        $('#rules #explanation').hide();
+                        $('#rules').append('<p>' + rule + '</p>');
                     }
                     else
                     {
@@ -111,12 +110,7 @@ $(document).ready(function () {
                     console.log(err);
                 }
             });
-
-
             showMessageInDialogBox(rule);
         }
-
-
 	});
-
 });
