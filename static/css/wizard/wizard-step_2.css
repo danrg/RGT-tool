@@ -1,6 +1,6 @@
-#alt-list {
-	margin-top: 10px;
-}
+/*#alt-list {*/
+	/*margin-top: 10px;*/
+/*}*/
 #alt-list-data > .cloned {
 	padding-bottom: 5px;
 }
@@ -34,10 +34,57 @@ div.form-errors-wrapper .error {
 #rules {
     float: left;
     margin-top: 10px;
-    margin-left:100px;
+    width: 300px;
 }
-#alt-list-wrapper #alt-list {
+#alt-list-wrapper #alt-list,
+#possible-rules {
     float: left;
+    margin-right: 50px;
 }
-
-.container { border:2px solid #ccc; width:300px; height: 100px; overflow-y: scroll; }
+table {
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+td:nth-child(2) {
+    text-align: center;
+}
+tr {
+    height: 2em;
+}
+thead, tr:nth-child(even) {
+    background: #ccc;
+}
+th, td {
+    padding: 5px;
+}
+#explanation {
+    font-style: italic;
+}
+.container {
+    border: 2px solid #ccc;
+}
+fieldset {
+    margin-top: 7px;
+    width: 200px;
+}
+fieldset.container div {
+    max-height: 200px;
+    overflow-y: auto;
+    border: none;
+    padding-left: 5px;
+}
+legend {
+    margin-left: 5px;
+}
+.select-all-wrapper {
+    background-color: #ccc;
+    margin-top: 5px;
+    margin-left: -5px;
+    padding-left: 5px;
+}
+.select-all-wrapper label {
+    font-style: italic;
+}
+a {
+    color: #444;
+}

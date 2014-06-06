@@ -1,9 +1,11 @@
+import itertools
+
 from datetime import datetime
 from django.db import transaction
 from django.contrib.formtools.wizard.views import SessionWizardView
 from django.shortcuts import redirect
 from django.utils.timezone import utc
-from RGT.gridMng.models import Grid, Composite, Alternatives, Concerns, Ratings
+from RGT.gridMng.models import Grid, Composite, Alternatives, Concerns, Ratings, Rule
 from RGT.gridMng.template.showGridsData import ShowGridsData
 
 class CompositeWizard(SessionWizardView):
@@ -32,51 +34,46 @@ class CompositeWizard(SessionWizardView):
                 pass
 
         elif self.steps.step1 == 3:
-            try:
-                grids_data = self.get_cleaned_data_for_step('1')
-                user1 = self.request.user
-                gridtype = Grid.GridType.USER_GRID
-                templateData = ShowGridsData()
-                # Get the alternatives of grids which user chosed one step before
-                templateData.grids = Grid.objects.filter(user=user1, grid_type=gridtype, usid__in=grids_data['gridChoices'])
-                alternativesListForRules = []
+            grids_data = self.get_cleaned_data_for_step('1')
+            type = Grid.GridType.USER_GRID
+            grids = Grid.objects.filter(user=self.request.user, grid_type=type, usid__in=grids_data['gridChoices'])
+            rules = self.create_rules(grids)
 
-                for x in templateData.grids:
-                    alternatives = x.alternatives_set.all()
-                    dummyList = []
-                    for y in alternatives:
-                        if (str(y.name) != 'ideal') and (str(y.name) != 'Ideal'):
-                            dummyList.append((y.name, y.id))
-                    alternativesListForRules.append(dummyList)
-                templateData.alternates = alternativesListForRules
-                context.update({'data': templateData})
-            except:
-                pass
+            context.update({'grids': grids, 'rules': rules })
 
         return context
 
     def done(self, form_list, **kwargs):
         step_zero_data = self.get_form_step_data(form_list[0])
         step_zero_prefix = self.get_form_prefix(step='0', form=form_list[0])
-        # step 1 - alternatives
-        step_one_data = self.get_form_step_data(form_list[1])
-        step_one_prefix = self.get_form_prefix(step='1', form=form_list[1])
+
         # step 2 - concerns
         step_two_data = self.get_form_step_data(form_list[2])
-        step_two_prefix = self.get_form_prefix(step='2', form=form_list[2])
-        # Get the user of the request.
-        user_obj = self.request.user
-        # The grid type is 'User', because the grid is created through the wizard.
-        grid_type = Grid.GridType.COMPOSITE_GRID
         # Get the grid name of the form data of step 0 (zero index).
         grid_name = step_zero_data['%s-composite_name' % (step_zero_prefix)]
-
         gridUsid = step_two_data['gridUsid']
 
         # This is a modified version of 'createGrid' which we are providing the gridUsID beforehand.
-        grid = self.createCompositeGrid(user_obj, grid_name, gridUsid)
+        grid = self.createCompositeGrid(self.request.user, grid_name, gridUsid)
 
         return redirect(grid)
+
+    def create_rules(self, grids):
+        """
+        Return a list containing all possible combinations of alternatives from the given grids and the corresponding
+        total rating of that combination of alternatives.
+        @type grids list of Grid
+        """
+        alts = [grid.get_alternative_total_rating_tuples() for grid in grids]
+        combinations = itertools.product(*alts)
+        rules = []
+        for combi in combinations:
+            alts, ratings = zip(*combi)
+            rules.append(Rule(alts, sum(ratings)))
+
+        rules.sort()
+
+        return rules
 
     @transaction.atomic
     def createCompositeGrid(self, userObj, gridName, gridId):

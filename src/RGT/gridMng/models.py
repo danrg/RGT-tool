@@ -113,6 +113,21 @@ class Grid(models.Model):
     def get_absolute_url(self):
         return reverse('RGT.gridMng.views.show_grid', args=[self.usid])
 
+    def get_alternative_total_rating_tuples(self):
+        """ Return a collection containing a tuple for each alternative containing that alternative and the total
+         weighted rating of that alternative. E.g. in a grid for programming languages, it returns a collection as
+         (['Python', 1], ['Java', 2], ['PHP', 5])
+        """
+        alts_and_ratings = []
+        for alternative in self.alternatives_set.all():
+            total_rating = alternative.get_total_rating()
+            alts_and_ratings.append((alternative.name, total_rating))
+
+        return alts_and_ratings
+
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         ordering = ['id']
 
@@ -132,6 +147,15 @@ class Alternatives(models.Model):
     def __unicode__(self):
         return self.name
 
+    def get_total_rating(self):
+        total_rating = 0
+        concerns = self.grid.concerns_set.all()
+        for concern in concerns:
+            rating = Ratings.objects.get(concern=concern, alternative=self).rating
+            total_rating += rating * concern.weight / 100.0
+
+        return total_rating
+
     class Meta:
         ordering = ['id']
 
@@ -144,6 +168,19 @@ class Composite(models.Model):
 
     class Meta:
         ordering = ['id']
+
+
+class Rule:
+    """ A rule used in the composite grid wizard. It provides functionality for creation based on a list of alternatives
+     and ordering based on the total rating of the alternatives.
+    """
+
+    def __init__(self, alternatives, total_rating):
+        self.name = '(' + ', '.join(alternatives) + ')'
+        self.total_rating = total_rating
+
+    def __lt__(self, other):
+        return self.total_rating < other.total_rating
 
 class Concerns(models.Model):
     grid = models.ForeignKey(Grid)
