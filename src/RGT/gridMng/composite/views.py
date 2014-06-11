@@ -7,6 +7,9 @@ from django.shortcuts import redirect
 from django.utils.timezone import utc
 from RGT.gridMng.models import Grid, Composite, Alternatives, Concerns, Ratings, Rule
 from RGT.gridMng.template.showGridsData import ShowGridsData
+from RGT.gridMng.utility import generateRandomString
+from RGT.settings import GRID_USID_KEY_LENGTH
+
 
 class CompositeWizard(SessionWizardView):
 
@@ -35,6 +38,9 @@ class CompositeWizard(SessionWizardView):
 
         elif self.steps.step1 == 3:
             grids_data = self.get_cleaned_data_for_step('1')
+
+            print grids_data
+
             type = Grid.GridType.USER_GRID
             grids = Grid.objects.filter(user=self.request.user, grid_type=type, usid__in=grids_data['gridChoices'])
             rules = self.create_rules(grids)
@@ -51,10 +57,10 @@ class CompositeWizard(SessionWizardView):
         step_two_data = self.get_form_step_data(form_list[2])
         # Get the grid name of the form data of step 0 (zero index).
         grid_name = step_zero_data['%s-composite_name' % (step_zero_prefix)]
-        gridUsid = step_two_data['gridUsid']
+        rules = step_two_data.getlist('rules')
 
         # This is a modified version of 'createGrid' which we are providing the gridUsID beforehand.
-        grid = self.createCompositeGrid(self.request.user, grid_name, gridUsid)
+        grid = self.createCompositeGrid(self.request.user, grid_name, rules)
 
         return redirect(grid)
 
@@ -76,21 +82,26 @@ class CompositeWizard(SessionWizardView):
         return rules
 
     @transaction.atomic
-    def createCompositeGrid(self, userObj, gridName, gridId):
+    def createCompositeGrid(self, userObj, gridName, rules):
         """
         This function is a modificated version of 'createGrid' function. What is different is we don't have any numeric values here, just alternative names(combinations of valid rules),
         and also we are providing grid.usid beforehand
         """
-        if userObj is not None and gridId is not None:
+        if userObj is not None and rules is not None:
             gridObj = Grid.objects.create(user=userObj, grid_type=Grid.GridType.COMPOSITE_GRID)
             if gridName != None:
                 gridObj.name = gridName
-            gridObj.usid = gridId
+            gridObj.usid = generateRandomString(GRID_USID_KEY_LENGTH)
             gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
             gridObj.save()
 
+            print rules
+
+            for rule in rules:
+                Composite.objects.create(compid=gridObj.usid, user=userObj, rule=rule, status="valid") #TODO
+
             alternatives = []
-            rules = Composite.objects.filter(compid=gridId, status="valid")
+            rules = Composite.objects.filter(compid=gridObj.usid, status="valid")
             for r in rules:
                 a = r.rule
                 a = a.replace("u'", "")

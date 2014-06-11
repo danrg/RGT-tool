@@ -37,15 +37,20 @@ class WhichGridsForm(forms.Form):
         return cleaned_data
 
 class RulesForm(forms.Form):
+
     def __init__(self, *args, **kwargs):
         super(RulesForm, self).__init__(*args, **kwargs)
+
+        # print self.data
+
         if len(self.data) > 0:
             self.gridUsid = self.data['gridUsid']
 
     def clean(self):
         cleaned_data = super(RulesForm, self).clean()
 
-        if not self.gridUsid:
+        rules = self.data.getlist('rules')
+        if not rules:
             raise forms.ValidationError('No rules added')
 
         return cleaned_data

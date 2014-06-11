@@ -176,7 +176,7 @@ class Rule:
     """
 
     def __init__(self, alternatives, total_rating):
-        self.name = '(' + ', '.join(alternatives) + ')'
+        self.name = '(' + ')*('.join(alternatives) + ')'
         self.total_rating = total_rating
 
     def __lt__(self, other):

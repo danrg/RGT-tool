@@ -34,7 +34,6 @@ div.form-errors-wrapper .error {
 #rules {
     float: left;
     margin-top: 10px;
-    width: 300px;
 }
 #alt-list-wrapper #alt-list,
 #possible-rules {
@@ -59,6 +58,7 @@ th, td {
 }
 #explanation {
     font-style: italic;
+    width: 300px;
 }
 .container {
     border: 2px solid #ccc;

@@ -27,7 +27,7 @@
                 <tr>
                     <td>{{ rule.name }}</td>
                     <td>{{ rule.total_rating|floatformat }}</td>
-                    <td><a href="javascript:void(0);">Mark as valid</a></td>
+                    <td><a href="javascript:void(0);" class="btn-mark-valid">Mark as valid</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -37,7 +37,7 @@
     <div id="alt-list">
         <p>create custom rules</p>
         {% for grid in grids %}
-            <fieldset id="alt-list-data-{{ forloop.counter }}" class="container">
+            <fieldset id="alt-list-data-{{ forloop.counter }}" class="container grid-alternatives">
                 <legend>{{ grid }}</legend>
                 <div class="container">
                     <div class="select-all-wrapper">
@@ -56,20 +56,20 @@
 
         <fieldset class="container">
             <legend>Status</legend>
-        <div id="alt-list-data-{{ forloop.counter }}" class="container">
-            <div>
-                <input id="valid" name="status" type="radio" value="valid" checked="checked">
-                <label for="valid">Valid</label>
+            <div id="status-wrapper" class="container">
+                <div>
+                    <input id="valid" name="status" type="radio" value="Valid" checked="checked">
+                    <label for="valid">Valid</label>
+                </div>
+                <div>
+                    <input id="invalid" name="status" type="radio" value="Invalid">
+                    <label for="invalid">Invalid</label>
+                </div>
+                <div>
+                    <input id="unknown" name="status" type="radio" value="Unknown">
+                    <label for="unknown">Unknown</label>
+                </div>
             </div>
-            <div>
-                <input id="invalid" name="status" type="radio" value="invalid">
-                <label for="invalid">Invalid</label>
-            </div>
-            <div>
-                <input id="unknown" name="status" type="radio" value="unknown">
-                <label for="unknown">Unknown</label>
-            </div>
-        </div>
         </fieldset>
         <div id="btn-add-wrapper">
             <input type="button" id="btn-add" value="Add rule" />
@@ -78,14 +78,24 @@
     <div id="rules">
         <h4>Created rules</h4>
         <p id="explanation">No rules have been created yet. Mark rules as valid in the table on the far left or create custom rules.</p>
+        <table id="added-rules" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Rule</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
 </div>
 {% if wizard.form.errors %}
 <div class="form-errors-wrapper">
 	<div class="error">
-	{% for error in wizard.form.non_field_errors %}
-		<p>{{ error }}</p>
-	{% endfor %}
+        {% for error in wizard.form.non_field_errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
 	</div>
 </div>
 {% endif %}
