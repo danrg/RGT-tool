@@ -29,7 +29,6 @@ class WhichGridsForm(forms.Form):
 
     def clean(self):
         cleaned_data = super(WhichGridsForm, self).clean()
-
         choices = cleaned_data['gridChoices']
         if len(choices) < 2:
              raise forms.ValidationError('You need to select at least two grids from the list.')
@@ -41,8 +40,6 @@ class RulesForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(RulesForm, self).__init__(*args, **kwargs)
 
-        # print self.data
-
         if len(self.data) > 0:
             self.gridUsid = self.data['gridUsid']
 
@@ -50,7 +47,8 @@ class RulesForm(forms.Form):
         cleaned_data = super(RulesForm, self).clean()
 
         rules = self.data.getlist('rules')
-        if not rules:
+        statuses = self.data.getlist('statuses')
+        if not rules and not statuses:
             raise forms.ValidationError('No rules added')
 
         return cleaned_data

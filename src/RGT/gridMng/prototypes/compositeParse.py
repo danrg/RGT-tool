@@ -15,8 +15,6 @@ class CompositeParse():
         if len(self.initialString) < 2:
             raise Exception("Invalid composite string")
 
-        n = self.getCountItems()
-
         words = self.initialString.split("*")
         listOfLists = []
 
@@ -29,10 +27,5 @@ class CompositeParse():
         self.listOfCompositions = list(itertools.product(*listOfLists))
         return self.listOfCompositions
 
-
     def getNumberOfCompositions(self):
         return len(self.getCompositions())
-
-
-
-

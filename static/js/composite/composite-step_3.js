@@ -5,6 +5,14 @@ $(document).ready(function () {
     $('#added-rules').on('click', 'a.remove-rule', removeRuleHandler);
 });
 
+var addedRules = [];
+
+function Rule(ruleStr, status) {
+    this.ruleStr = ruleStr;
+    this.status = status;
+    this.compositions = [];
+}
+
 function predefinedRuleAddButtonHandler() {
     rule = $(this).parent().siblings(':first').html();
     addRule(rule, "Valid");
@@ -48,20 +56,91 @@ function selectAllHandler() {
 }
 
 function removeRuleHandler() {
-    $(this).parents('tr').remove();
+    removeRule($(this));
+}
+
+function removeRule(ruleElement) {
+    ruleElement.parents('tr').remove();
     if($('#added-rules > tbody').children().length === 0) {
         $('#added-rules').hide();
         $('#explanation').show();
     }
 }
 
+function createNewRule(ruleStr, status) {
+    rule = new Rule(ruleStr, status);
+    if(ruleStr.indexOf('|') < 0) {
+        rule.compositions.push(ruleStr);
+    } else {
+        listOfLists = []
+        words = ruleStr.split('*');
+        for (var i = 0; i < words.length; i++) {
+            var word = words[i].substring(1, words[i].length - 1);
+            listOfLists.push(word.split("|"));
+        }
+        cartesianProducts = cartesianProductOf.apply(this, listOfLists);
+        for (var i = 0; i < cartesianProducts.length; i++) {
+            product = cartesianProducts[i];
+            ruleComposition = '(' + product.join(')*(') + ')';
+            rule.compositions.push(ruleComposition)
+        }
+    }
+    return rule;
+}
+
+function findConflictingRule(rule) {
+    for (var ruleIndex = 0; ruleIndex < addedRules.length; ruleIndex++) {
+        existingRule = addedRules[ruleIndex];
+        for (var i = 0; i < rule.compositions.length; i++) {
+            composition = rule.compositions[i];
+            for (var j = 0; j < existingRule.compositions.length; j++) {
+                existingComposition = existingRule.compositions[j];
+                if (composition == existingComposition) {
+                    return existingRule;
+                }
+            }
+        }
+    }
+    return null;
+}
+
 function addRule(ruleStr, status) {
+    rule = createNewRule(ruleStr, status);
+    conflict = findConflictingRule(rule);
+    if(conflict == null) {
+        doAddRule(rule);
+    } else {
+        buttons = {
+            'Add anyway': function() {
+                doAddRule(rule);
+                $(this).dialog("close");
+            },
+            'Overwrite existing rule': function() {
+                ruleElement = $('tr').find('td:contains('+ conflict.ruleStr+')');
+                removeRule(ruleElement);
+                doAddRule(rule);
+                $(this).dialog("close");
+            },
+            'Cancel': function() {
+                $(this).dialog("close");
+            }
+        };
+        overlapsOrConflicts = status == "Valid" ? "overlaps" : "conflicts";
+        text = 'You are trying to add rule ' + ruleStr + '. This ' + overlapsOrConflicts + ' with rule '
+            + conflict.ruleStr + '. What would you like to do?';
+        showMessageInBox(text, buttons)
+    }
+}
+
+function doAddRule(rule) {
+    addedRules.push(rule);
     $('#rules #explanation').hide();
-    ruleCell = '<td>' + ruleStr + '</td>';
-    statusCell = '<td>' + status + '</td>';
+    ruleCell = '<td>' + rule.ruleStr + '</td>';
+    statusCell = '<td>' + rule.status + '</td>';
     removeCell = '<td><a href="javascript:void(0);" class="remove-rule">Remove</a></td>';
-    inputCell = '<input type="hidden" name="rules" value="' + ruleStr + '" />';
-    $('#added-rules tbody').append('<tr>' + ruleCell + statusCell + removeCell + inputCell + '</tr>');
+    inputs = '<input type="hidden" name="rules" value="' + rule.ruleStr + '" />' +
+        '<input type="hidden" name="statuses" value="' + rule.status + '" />"';
+    $('#added-rules tbody').append('<tr>' + ruleCell + statusCell + removeCell + inputs + '</tr>');
     $('#added-rules').show();
 }
 
@@ -79,4 +158,17 @@ function createRule(alternatives) {
        }
     });
     return "(" + andRules.join(")*(") + ")";
+}
+
+// http://stackoverflow.com/a/5860190/509671
+function cartesianProductOf() {
+  return Array.prototype.reduce.call(arguments, function(a, b) {
+    var ret = [];
+    a.forEach(function(a) {
+      b.forEach(function(b) {
+        ret.push(a.concat([b]));
+      });
+    });
+    return ret;
+  }, [[]]);
 }

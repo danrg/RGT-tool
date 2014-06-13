@@ -6,6 +6,7 @@ from django.contrib.formtools.wizard.views import SessionWizardView
 from django.shortcuts import redirect
 from django.utils.timezone import utc
 from RGT.gridMng.models import Grid, Composite, Alternatives, Concerns, Ratings, Rule
+from RGT.gridMng.prototypes.compositeParse import CompositeParse
 from RGT.gridMng.template.showGridsData import ShowGridsData
 from RGT.gridMng.utility import generateRandomString
 from RGT.settings import GRID_USID_KEY_LENGTH
@@ -58,9 +59,10 @@ class CompositeWizard(SessionWizardView):
         # Get the grid name of the form data of step 0 (zero index).
         grid_name = step_zero_data['%s-composite_name' % (step_zero_prefix)]
         rules = step_two_data.getlist('rules')
+        statuses = step_two_data.getlist('statuses')
 
         # This is a modified version of 'createGrid' which we are providing the gridUsID beforehand.
-        grid = self.createCompositeGrid(self.request.user, grid_name, rules)
+        grid = self.createCompositeGrid(self.request.user, grid_name, rules, statuses)
 
         return redirect(grid)
 
@@ -82,12 +84,12 @@ class CompositeWizard(SessionWizardView):
         return rules
 
     @transaction.atomic
-    def createCompositeGrid(self, userObj, gridName, rules):
+    def createCompositeGrid(self, userObj, gridName, rules, statuses):
         """
         This function is a modificated version of 'createGrid' function. What is different is we don't have any numeric values here, just alternative names(combinations of valid rules),
         and also we are providing grid.usid beforehand
         """
-        if userObj is not None and rules is not None:
+        if not None in (userObj, rules, statuses):
             gridObj = Grid.objects.create(user=userObj, grid_type=Grid.GridType.COMPOSITE_GRID)
             if gridName != None:
                 gridObj.name = gridName
@@ -95,10 +97,12 @@ class CompositeWizard(SessionWizardView):
             gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
             gridObj.save()
 
-            print rules
-
-            for rule in rules:
-                Composite.objects.create(compid=gridObj.usid, user=userObj, rule=rule, status="valid") #TODO
+            for idx, rule in enumerate(rules):
+                parser = CompositeParse(rule)
+                compositions = parser.getCompositions()
+                status = statuses[idx].lower()
+                for composition in compositions:
+                    Composite.objects.create(compid=gridObj.usid, user=userObj, rule=composition, status=status)
 
             alternatives = []
             rules = Composite.objects.filter(compid=gridObj.usid, status="valid")
