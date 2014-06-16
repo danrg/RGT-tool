@@ -3,6 +3,8 @@ $(document).ready(function () {
     $('#btn-add').click(customRuleAddButtonHandler);
     $('input[type=checkbox]').click(selectAllHandler);
     $('#added-rules').on('click', 'a.remove-rule', removeRuleHandler);
+    $('#possible-rules').height($('#alt-list').height());
+    $('#possible-rules').width( $('#possible-rules').width() + 13);
 });
 
 var addedRules = [];
@@ -56,15 +58,7 @@ function selectAllHandler() {
 }
 
 function removeRuleHandler() {
-    removeRule($(this));
-}
-
-function removeRule(ruleElement) {
-    ruleElement.parents('tr').remove();
-    if($('#added-rules > tbody').children().length === 0) {
-        $('#added-rules').hide();
-        $('#explanation').show();
-    }
+    removeRule($(this), $(this).parent().siblings().first().html());
 }
 
 function createNewRule(ruleStr, status) {
@@ -88,7 +82,9 @@ function createNewRule(ruleStr, status) {
     return rule;
 }
 
-function findConflictingRule(rule) {
+function findConflictingRules(rule) {
+    conflicts = [];
+    ruleLoop:
     for (var ruleIndex = 0; ruleIndex < addedRules.length; ruleIndex++) {
         existingRule = addedRules[ruleIndex];
         for (var i = 0; i < rule.compositions.length; i++) {
@@ -96,18 +92,19 @@ function findConflictingRule(rule) {
             for (var j = 0; j < existingRule.compositions.length; j++) {
                 existingComposition = existingRule.compositions[j];
                 if (composition == existingComposition) {
-                    return existingRule;
+                    conflicts.push(existingRule);
+                    continue ruleLoop;
                 }
             }
         }
     }
-    return null;
+    return conflicts;
 }
 
 function addRule(ruleStr, status) {
     rule = createNewRule(ruleStr, status);
-    conflict = findConflictingRule(rule);
-    if(conflict == null) {
+    conflicts = findConflictingRules(rule);
+    if(conflicts.length == 0) {
         doAddRule(rule);
     } else {
         buttons = {
@@ -115,9 +112,12 @@ function addRule(ruleStr, status) {
                 doAddRule(rule);
                 $(this).dialog("close");
             },
-            'Overwrite existing rule': function() {
-                ruleElement = $('tr').find('td:contains('+ conflict.ruleStr+')');
-                removeRule(ruleElement);
+            'Overwrite existing rule(s)': function() {
+                for (var i = 0; i < conflicts.length; i++) {
+                    conflict = conflicts[i];
+                    ruleElement = $('tr').find('td:contains('+ conflict.ruleStr +')');
+                    removeRule(ruleElement, conflict.ruleStr);
+                }
                 doAddRule(rule);
                 $(this).dialog("close");
             },
@@ -126,9 +126,18 @@ function addRule(ruleStr, status) {
             }
         };
         overlapsOrConflicts = status == "Valid" ? "overlaps" : "conflicts";
-        text = 'You are trying to add rule ' + ruleStr + '. This ' + overlapsOrConflicts + ' with rule '
-            + conflict.ruleStr + '. What would you like to do?';
-        showMessageInBox(text, buttons)
+        conflictsStr = "";
+        for (var i = 0; i < conflicts.length; i++) {
+            conflictsStr += conflicts[i].ruleStr;
+            if(i < conflicts.length - 2) {
+                conflictsStr += ", ";
+            } else if(i < conflicts.length - 1) {
+                conflictsStr += " and ";
+            }
+        }
+        text = 'You are trying to add rule ' + ruleStr + '. This ' + overlapsOrConflicts + ' with rule'
+            + (conflicts.length > 1 ? 's ' : ' ') + conflictsStr + '. What would you like to do?';
+        showMessageInBox(text, buttons, 160, 600);
     }
 }
 
@@ -142,6 +151,21 @@ function doAddRule(rule) {
         '<input type="hidden" name="statuses" value="' + rule.status + '" />"';
     $('#added-rules tbody').append('<tr>' + ruleCell + statusCell + removeCell + inputs + '</tr>');
     $('#added-rules').show();
+}
+
+function removeRule(ruleElement, ruleStr) {
+    var i = addedRules.length;
+    while (i--) {
+        if(addedRules[i].ruleStr == ruleStr) {
+            addedRules.splice(i, 1);
+        }
+    }
+
+    ruleElement.parents('tr').remove();
+    if($('#added-rules > tbody').children().length === 0) {
+        $('#added-rules').hide();
+        $('#explanation').show();
+    }
 }
 
 function createRule(alternatives) {

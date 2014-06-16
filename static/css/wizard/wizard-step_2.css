@@ -1,6 +1,3 @@
-/*#alt-list {*/
-	/*margin-top: 10px;*/
-/*}*/
 #alt-list-data > .cloned {
 	padding-bottom: 5px;
 }
@@ -27,13 +24,15 @@ div.form-errors-wrapper .error {
 #content .container label {
     display: inline-block;
 }
-
 #alt-list-wrapper {
     overflow: auto;
 }
 #rules {
     float: left;
     margin-top: 10px;
+}
+#possible-rules {
+    overflow-y: auto;
 }
 #alt-list-wrapper #alt-list,
 #possible-rules {
@@ -44,7 +43,8 @@ table {
     border-collapse: collapse;
     margin-top: 15px;
 }
-td:nth-child(2) {
+#possible-rules td:nth-child(2),
+#possible-rules th:nth-child(2) {
     text-align: center;
 }
 tr {
