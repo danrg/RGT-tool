@@ -579,43 +579,6 @@ def ajaxGenerateSimilarity(request):
 
 
 @login_required
-def addRules(request):
-    """
-    This function will add rules to the newly constructed composite grid
-    """
-
-    if (request.POST.has_key('rule') and request.POST.has_key('status')):
-        user1 = request.user
-        if(request.POST.has_key('gridid')):
-            gridID = request.POST['gridid']
-        else:
-            gridID = generateRandomString(GRID_USID_KEY_LENGTH) #Grid ID must be same for GRID, so we are creating it in here before the 'createCompositeGrid' function
-            results = Grid.objects.filter(usid=gridID)
-            if len(results) >= 1:
-                #in this case the key was duplicated, so lets try to create a new key
-                maxAttempts = 50
-                while maxAttempts >= 0:
-                    maxAttempts -= 1
-                    key = generateRandomString(GRID_USID_KEY_LENGTH)
-                    #check to see if this key is unique
-                    results = Grid.objects.filter(usid=key)
-                    if len(results) <= 0:
-                        gridID = key
-                        maxAttempts = 0
-
-        parser = CompositeParse(request.POST['rule'])
-        rules_list = parser.getCompositions()
-
-        for r in rules_list:
-            Composite.objects.create(compid=gridID, user=user1, rule=str(r), status=request.POST['status'])
-
-        else:
-            return HttpResponse(gridID, mimetype="text/plain")
-    else:
-        return HttpResponse("Error!")
-
-
-@login_required
 def ajaxGetSaveSvgPage(request):
     """
     This function will return the html code that is needed to generate the dialog box
