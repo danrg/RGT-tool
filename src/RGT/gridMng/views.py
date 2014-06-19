@@ -4,6 +4,7 @@ import os
 import tempfile
 import traceback
 import logging
+import json
 from io import BytesIO
 from types import StringType
 
@@ -21,6 +22,7 @@ from RGT.gridMng.models import Concerns
 from RGT.gridMng.models import Ratings
 from RGT.gridMng.models import Facilitator
 from RGT.gridMng.models import Composite
+from RGT.gridMng.models import GridDiff, DiffType
 from RGT.gridMng.prototypes.compositeParse import CompositeParse
 from RGT.gridMng.utility import generateRandomString, validateName, convertSvgTo, getImageError, convertGridTableToSvg, returnMatrix
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag, HttpErrorResponse
@@ -189,6 +191,29 @@ def show_grid(request, usid):
 
     return render(request, 'gridMng/grid/showGrid.html', {'grid': grid, 'grids': other_grids, 'grid_html': grid_html})
 
+@login_required
+def timeline(request, usid):
+    grid = get_object_or_404(Grid, usid=usid, user=request.user)
+    return render(request, 'gridMng/grid/timeline.html', {'grid': grid})
+
+def timeline_json(request, usid):
+    grid = get_object_or_404(Grid, usid=usid, user=request.user)
+    GridDiff.objects.ensure_initial_diff_exists(grid)
+
+    date = []
+    diffs = grid.griddiff_set.all()
+    for diff in diffs:
+        date.append({
+            "startDate": diff.timestamp.strftime("%Y,%m,%d"),
+            "headline": unicode(diff)
+        })
+
+    timeline = {}
+    timeline["type"] = "default"
+    timeline["date"] = date
+    response_data = {}
+    response_data['timeline'] = timeline
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 @login_required
 def ajaxGetGrid(request):

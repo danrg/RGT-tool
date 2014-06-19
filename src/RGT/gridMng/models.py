@@ -204,6 +204,51 @@ class Ratings(models.Model):
         unique_together = ('concern',
                            'alternative') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
 
+class GridDiffManager(models.Manager):
+    def ensure_initial_diff_exists(self, grid):
+        exists = self.filter(grid=grid).exists()
+        if not exists:
+            diff = self.create(grid=grid, user=grid.user, count=0, type=DiffType.INITIAL)
+            diff.timestamp = grid.dateTime
+            diff.save()
+
+class DiffType(object):
+    INITIAL = 'i'
+    RATINGS = 'r'
+    CONCERNS = 'c'
+    ALTERNATIVES = 'a'
+
+class GridDiff(models.Model):
+    grid = models.ForeignKey(Grid)
+    user = models.ForeignKey(User)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    count = models.IntegerField()
+    types = ((DiffType.INITIAL, 'initial'), (DiffType.RATINGS, 'ratings'), (DiffType.CONCERNS, 'concerns'), (DiffType.ALTERNATIVES, 'alternatives'))
+    type = models.CharField(max_length=1, choices=types)
+    objects = GridDiffManager()
+
+    def __unicode__(self):
+        if self.type == DiffType.INITIAL:
+            return "%s created a grid to select a %s" % (self.user.get_full_name(), self.grid.name)
+
+        return "%s %s %i %s" % (self.user.get_full_name(), self.__operation_str(), abs(self.count), self.__type_str())
+
+    def __operation_str(self):
+        if self.count < 0:
+            return "deleted"
+        if self.count == 0:
+            return "added"
+        else:
+            return "changed"
+
+    def __type_str(self):
+        type = [t for t in self.types if t[0] == self.type]
+        type = type[0][1]
+        if abs(self.count) <= 1:
+            type = type[:-1]
+
+        return type
+
 #manager for state
 class StateManager(models.Manager):
     def getInitialState(self):

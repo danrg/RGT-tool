@@ -64,6 +64,7 @@ RGT | Grid {{ grid.name }}
         <input type="button" id="weightSlidersButton" onclick="adjustWeights();" value="Prioritize concerns"/>
         <input type="button" id="cancelWeightSliders" onclick="toggleAdjustWeights();" value="Cancel" hidden="hidden"/>
         <input type="button" id="deleteGrid" onclick="$('.resim').remove();deleteMyGrid()" value="Delete" />
+        <a href="/grids/timeline/{{ grid.usid }}">View timeline (alpha)</a>
 	</div>
     <div id="tabs">
         <p>Create a grid with at least two concern pairs and save changes to enable analysis.</p>
