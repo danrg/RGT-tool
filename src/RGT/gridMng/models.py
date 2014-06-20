@@ -208,8 +208,8 @@ class GridDiffManager(models.Manager):
     def ensure_initial_diff_exists(self, grid):
         exists = self.filter(grid=grid).exists()
         if not exists:
-            diff = self.create(grid=grid, user=grid.user, count=0, type=DiffType.INITIAL)
-            diff.timestamp = grid.dateTime
+            diff = self.create(grid=grid, user=grid.user, type=DiffType.INITIAL)
+            diff.date = grid.dateTime
             diff.save()
 
 class DiffType(object):
@@ -221,8 +221,10 @@ class DiffType(object):
 class GridDiff(models.Model):
     grid = models.ForeignKey(Grid)
     user = models.ForeignKey(User)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    count = models.IntegerField()
+    date = models.DateField(auto_now_add=True)
+    added = models.IntegerField(default=0)
+    deleted = models.IntegerField(default=0)
+    changed = models.IntegerField(default=0)
     types = ((DiffType.INITIAL, 'initial'), (DiffType.RATINGS, 'ratings'), (DiffType.CONCERNS, 'concerns'), (DiffType.ALTERNATIVES, 'alternatives'))
     type = models.CharField(max_length=1, choices=types)
     objects = GridDiffManager()
@@ -231,20 +233,28 @@ class GridDiff(models.Model):
         if self.type == DiffType.INITIAL:
             return "%s created a grid to select a %s" % (self.user.get_full_name(), self.grid.name)
 
-        return "%s %s %i %s" % (self.user.get_full_name(), self.__operation_str(), abs(self.count), self.__type_str())
+        return "%s %s %s" % (self.user.get_full_name(), self.__operation_str(), self.__type_str())
 
     def __operation_str(self):
-        if self.count < 0:
-            return "deleted"
-        if self.count == 0:
-            return "added"
+        operations = []
+        if self.added > 0:
+            operations.append("added %i" % self.added)
+        if self.deleted > 0:
+            operations.append("deleted %i" % self.deleted)
+        if self.changed > 0:
+            operations.append("changed %i" % self.changed)
+
+        if len(operations) == 3:
+            operation_str = operations[0] + ", " + operations[1] + " and " + operations[2]
         else:
-            return "changed"
+            operation_str = " and ".join(operations)
+
+        return operation_str
 
     def __type_str(self):
         type = [t for t in self.types if t[0] == self.type]
         type = type[0][1]
-        if abs(self.count) <= 1:
+        if not (self.added > 1 or self.deleted > 1 or self.changed > 1):
             type = type[:-1]
 
         return type

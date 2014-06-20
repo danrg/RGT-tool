@@ -204,7 +204,7 @@ def timeline_json(request, usid):
     diffs = grid.griddiff_set.all()
     for diff in diffs:
         date.append({
-            "startDate": diff.timestamp.strftime("%Y,%m,%d"),
+            "startDate": diff.date.strftime("%Y,%m,%d"),
             "headline": unicode(diff)
         })
 
