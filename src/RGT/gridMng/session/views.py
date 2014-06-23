@@ -639,8 +639,8 @@ def ajaxDownloadSessionResults(request):
                                 convertToData = request.POST['convertTo']
                                 if convertToData == 'svg':
                                     imgData.data = convertAlternativeConcernSessionResultToSvg(templateData)
-                                    imgData.fileExtention = 'svg'
-                                    imgData.ContentType = 'image/svg+xml'
+                                    imgData.fileExtension = 'svg'
+                                    imgData.contentType = 'image/svg+xml'
 
                                 if 'fileName' in request.POST:
                                     imgData.fileName = request.POST['fileName']
@@ -650,9 +650,9 @@ def ajaxDownloadSessionResults(request):
 
                                 return createFileResponse(imgData)
                             else:
-                                rangeData = SessionResultImageConvertionData()
-                                meanData = SessionResultImageConvertionData()
-                                stdData = SessionResultImageConvertionData()
+                                rangeData = SessionResultImageConversionData()
+                                meanData = SessionResultImageConversionData()
+                                stdData = SessionResultImageConversionData()
 
                                 # the header object is shared among all the 3 tables
                                 templateData.rangeData.headers.append('weight')
@@ -751,8 +751,8 @@ def ajaxDownloadSessionResults(request):
                                 convertToData = request.POST['convertTo']
                                 if convertToData == 'svg':
                                     imgData.data = convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData)
-                                    imgData.fileExtention = 'svg'
-                                    imgData.ContentType = 'image/svg+xml'
+                                    imgData.fileExtension = 'svg'
+                                    imgData.contentType = 'image/svg+xml'
 
                                 if 'fileName' in request.POST:
                                     imgData.fileName = request.POST['fileName']

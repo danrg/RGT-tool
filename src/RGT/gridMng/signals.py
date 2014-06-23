@@ -27,8 +27,6 @@ def alternative_delete_handler(sender, **kwargs):
 
 @receiver(post_save, sender=Concerns)
 def concern_save_handler(sender, **kwargs):
-    print kwargs
-
     if kwargs.get('created'):
         __update_diff(kwargs.get('instance'), DiffType.CONCERNS, 1)
     else:

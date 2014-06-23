@@ -27,4 +27,5 @@ urlpatterns = patterns('',
     url(r'^create/wizard/$', GridWizard.as_view(grid_wizard_forms), name='grid_wizard'),
     url(r'^create/composite/$', CompositeWizard.as_view(composite_wizard_forms), name='grid_composite'),
     url(r'^result.png$', 'RGT.gridMng.views.pca'),
+    url(r'^show/(?P<usid>[a-zA-Z0-9]{0,50}).png', 'RGT.gridMng.views.show_image')
 )

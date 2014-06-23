@@ -34,7 +34,7 @@ def validateName(name):
         return HttpResponse(createXmlErrorResponse("Name can not be empty"))
     return result
 
-#this is a prototype function, do not use or change it 
+#this is a prototype function, do not use or change it
 def convertSvgTo(svgData, fileType):
     if fileType != None and svgData != None:
         tempSvgFileName = generateRandomString(24)
@@ -83,6 +83,20 @@ def convertSvgTo(svgData, fileType):
             raise ValueError('fileType is None')
 
 
+def convertSvgToPng(svg_data):
+    """
+    Converts the given svg data to PNG. This one is preferred over convertSvgTo(), because it simply returns the result
+    instead of a file and does not have excessive white space.
+    """
+    import cairosvg
+    import StringIO
+    buffer = StringIO.StringIO()
+    cairosvg.svg2png(bytestring=svg_data,write_to=buffer)
+    out = buffer.getvalue()
+    buffer.close()
+    return out
+
+
 def getImageError():
     global imageErrorData
     if imageErrorData == None:
@@ -101,10 +115,10 @@ def getImageError():
 
 
 def createFileResponse(fileData):
-    response = HttpResponse(fileData.data, content_type=fileData.ContentType)
+    response = HttpResponse(fileData.data, content_type=fileData.contentType)
     if fileData.length != None:
         response['Content-Length'] = fileData.length
-    response['Content-Disposition'] = 'attachment; filename=' + fileData.fileName + '.' + fileData.fileExtention
+    response['Content-Disposition'] = 'attachment; filename=' + fileData.fileName + '.' + fileData.fileExtension
     return response
 
 #generate a table based on a grid    
@@ -445,7 +459,7 @@ def convertGridTableToSvg(gridObj=None):
             tableData.append(row)
             row = []
 
-        #add the weight to the alternative names and calculate its size       
+        #add the weight to the alternative names and calculate its size
         size = f.getsize('weight')
         if size[0] > colWidths[nAlternatives]:
             colWidths[nAlternatives] = size[0]
@@ -621,7 +635,13 @@ def convertGridTableToSvg(gridObj=None):
         ########## end add the total weight ##########
 
         root.appendChild(gNodeTable)
-        return xmlDoc.toxml('utf-8')
+        top_right = xmlDoc.getElementsByTagName('g')[0].getElementsByTagName('rect')[1]
+        width_in_px = int(top_right.getX()) + int(top_right.getWidth()) + 10
+        height_in_px = y + 3 * yTableOffset
+
+        xml = xmlDoc.toxml('utf-8')
+        xml = xml.replace('<svg', '<svg width="%ipx" height="%ipx"' % (width_in_px, height_in_px), 1)
+        return xml
 
 
 #data should be an object of the ResultAlternativeConcernTableData class
@@ -643,8 +663,6 @@ def convertAlternativeConcernSessionResultToSvg(data):
     fHeader = ImageFont.truetype(DENDROGRAM_FONT_LOCATION, headerFontSize)
 
     yHeaderOffset = 10;
-
-    fontSize
 
     fontName = 'arial'
 
@@ -1599,7 +1617,7 @@ class __TableData___(object):
     tableHeaderCellWordColor = None #tulip, value in rbg
 
 #class used as input to the functions that convert the result to a svg image
-class SessionResultImageConvertionData(object):
+class SessionResultImageConversionData(object):
     tableHeader = None #list with the table header (first col)
     tableData = None #matrix with the data of the table
     header = None #string that is used a header for the entire table

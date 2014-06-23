@@ -15,6 +15,7 @@ from django.template import loader
 from django.http import HttpResponse
 from django.utils.timezone import utc
 from django.db import IntegrityError
+from django.core.urlresolvers import reverse
 
 from RGT.gridMng.models import Grid
 from RGT.gridMng.models import Alternatives
@@ -24,7 +25,7 @@ from RGT.gridMng.models import Facilitator
 from RGT.gridMng.models import Composite
 from RGT.gridMng.models import GridDiff, DiffType
 from RGT.gridMng.prototypes.compositeParse import CompositeParse
-from RGT.gridMng.utility import generateRandomString, validateName, convertSvgTo, getImageError, convertGridTableToSvg, returnMatrix
+from RGT.gridMng.utility import generateRandomString, validateName, convertSvgToPng, convertSvgTo, getImageError, convertGridTableToSvg, returnMatrix
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag, HttpErrorResponse
 from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
 from RGT.gridMng.session.state import State
@@ -205,7 +206,10 @@ def timeline_json(request, usid):
     for diff in diffs:
         date.append({
             "startDate": diff.date.strftime("%Y,%m,%d"),
-            "headline": unicode(diff)
+            "headline": unicode(diff),
+            "asset": {
+                "media": reverse(show_image, args=[usid])
+            }
         })
 
     timeline = {}
@@ -213,7 +217,14 @@ def timeline_json(request, usid):
     timeline["date"] = date
     response_data = {}
     response_data['timeline'] = timeline
+
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+def show_image(request, usid):
+    grid = Grid.objects.get(usid=usid)
+    svg = convertGridTableToSvg(grid)
+    return HttpResponse(convertSvgToPng(svg), mimetype="image/png")
 
 @login_required
 def ajaxGetGrid(request):
@@ -682,8 +693,8 @@ def ajaxConvertGridTo(request):
                         imgData = FileData()
                         if convertToData == 'svg':
                             imgData.data = convertGridTableToSvg(gridObj)
-                            imgData.fileExtention = 'svg'
-                            imgData.ContentType = 'image/svg+xml'
+                            imgData.fileExtension = 'svg'
+                            imgData.contentType = 'image/svg+xml'
 
                         if request.POST.has_key('fileName'):
                             imgData.fileName = request.POST['fileName']
@@ -801,8 +812,8 @@ def __convertSvgStringTo(svgString=None, convertTo=None):
     if svgString and convertTo:
         if convertTo == 'svg':
             imgData.data = svgString
-            imgData.ContentType = 'image/svg+xml'
-            imgData.fileExtention = 'svg'
+            imgData.contentType = 'image/svg+xml'
+            imgData.fileExtension = 'svg'
             #response = HttpResponse(request.POST['data'], content_type='image/svg+xml')
             #response['Content-Disposition'] = 'attachment; filename=' + fileName + '.svg'
             #return response
@@ -813,8 +824,8 @@ def __convertSvgStringTo(svgString=None, convertTo=None):
         #################################################################
         else:
             (imageFileName, mimeType, fileExtention) = convertSvgTo(svgString, convertTo)
-            imgData.ContentType = mimeType
-            imgData.fileExtention = fileExtention
+            imgData.contentType = mimeType
+            imgData.fileExtension = fileExtention
             if imageFileName != None:
                 fpInMemory = BytesIO()
                 fp = open(imageFileName, "rb")
