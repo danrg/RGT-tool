@@ -3,6 +3,8 @@ import uuid
 from copy import deepcopy
 
 from django.db import models
+from django.db.models.query import QuerySet
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.db import transaction
 from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
@@ -166,38 +168,19 @@ class Alternatives(models.Model):
             old_name = Alternatives.objects.get(pk=self.pk).name
         super(Alternatives, self).save(*args, **kwargs)
         if old_name != self.name:
-            AlternativeDiff.objects.create(alternative_id=self.id, grid=self.grid, old_name=old_name, new_name=self.name)
+            AlternativeDiff.objects.create(related_id=self.id, grid=self.grid, old_name=old_name, new_name=self.name)
 
     def delete(self, *args, **kwargs):
         old_name = self.name
         old_id = self.id
         super(Alternatives, self).delete(*args, **kwargs)
-        AlternativeDiff.objects.create(alternative_id=old_id, grid=self.grid, old_name=old_name, new_name="")
+        AlternativeDiff.objects.create(related_id=old_id, grid=self.grid, old_name=old_name, new_name="")
 
     def __lt__(self, other):
         return self.id < other.id
 
     class Meta:
         ordering = ['id']
-
-class AlternativeDiffManager(models.Manager):
-    def daily_revisions(self, grid):
-        rev_grid = MockGrid()
-        rev_grid.id = grid.id
-        rev_grid.alternatives = list(grid.alternatives_set.all())
-
-        revisions = []
-        previous_date = None
-        diffs = grid.alternativediff_set.all().order_by('-datetime')
-        for diff in diffs:
-            if diff.datetime.date() != previous_date:
-                revisions.append(Revision(deepcopy(rev_grid), diff.datetime.date()))
-            previous_date = diff.datetime.date()
-            rev_grid = diff.revert(rev_grid)
-
-        revisions.append(Revision(rev_grid, grid.dateTime.date()))
-
-        return revisions
 
 class Revision:
     grid = None
@@ -207,16 +190,61 @@ class Revision:
         self.grid = grid
         self.date = date
 
-    def adfprint(self):
-        return "".join([a.name for a in self.grid.alternatives])
+class SubclassingQuerySet(QuerySet):
+    """ Needed for polymorphism, see http://stackoverflow.com/questions/5360995/polymorphism-in-django-models
+    """
+    def __getitem__(self, k):
+        result = super(SubclassingQuerySet, self).__getitem__(k)
+        if isinstance(result, models.Model):
+            return result.as_leaf_class()
+        return result
 
-class AlternativeDiff(models.Model):
-    alternative_id = models.IntegerField() # Not ForeignKey, because diffs should survive deletion of its alternative
+    def __iter__(self):
+        for item in super(SubclassingQuerySet, self).__iter__():
+            yield item.as_leaf_class()
+
+class DiffManager(models.Manager):
+    def daily_revisions(self, grid):
+        rev_grid = MockGrid(grid)
+        revisions = []
+        previous_date = None
+        diffs = grid.diff_set.all().order_by('-datetime')
+        for diff in diffs:
+            if diff.datetime.date() != previous_date:
+                revisions.append(Revision(deepcopy(rev_grid), diff.datetime.date()))
+            previous_date = diff.datetime.date()
+            rev_grid = diff.revert(rev_grid)
+
+        revisions.append(Revision(rev_grid, grid.dateTime.date()))
+        return revisions
+
+    def get_query_set(self):
+        return SubclassingQuerySet(self.model)
+
+class Diff(models.Model):
+    related_id = models.IntegerField()
     grid = models.ForeignKey(Grid)
+    datetime = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(max_length=100)
+    content_type = models.ForeignKey(ContentType, editable=False, null=True)
+    objects = DiffManager()
+
+    def save(self, *args, **kwargs):
+        if not self.content_type:
+            self.content_type = ContentType.objects.get_for_model(self.__class__)
+        super(Diff, self).save(*args, **kwargs)
+
+    def as_leaf_class(self):
+        content_type = self.content_type
+        model = content_type.model_class()
+        if model == Diff:
+            return self
+        return model.objects.get(id=self.id)
+
+class AlternativeDiff(Diff):
     old_name = models.CharField(max_length=100)
     new_name = models.CharField(max_length=100)
-    datetime = models.DateTimeField(auto_now_add=True)
-    objects = AlternativeDiffManager()
+    objects = DiffManager()
 
     def __unicode__(self):
         if self.old_name == "":
@@ -225,25 +253,23 @@ class AlternativeDiff(models.Model):
             change_str = "removed %s" % self.old_name
         else:
             change_str = "changed %s to %s" % (self.old_name, self.new_name)
-        return "%s (alt %i): %s" % (self.grid, self.alternative_id, change_str)
+        return "%s (alt %i): %s" % (self.grid, self.related_id, change_str)
 
     def revert(self, grid):
-        reverted = MockGrid()
-        reverted.id = grid.id
-        reverted.concerns = grid.concerns
+        reverted = MockGrid(grid)
 
         if self.old_name == "":
-            alternatives = [a for a in grid.alternatives if self.alternative_id != a.id]
+            alternatives = [a for a in grid.alternatives if self.related_id != a.id]
         elif self.new_name == "":
             alternatives = [a for a in grid.alternatives]
             a = Alternatives(grid_id=grid.id, name=self.old_name)
-            a.id = self.alternative_id
+            a.id = self.related_id
             alternatives.append(a)
             alternatives.sort()
         else:
             alternatives = [a for a in grid.alternatives]
             for a in alternatives:
-                if a.id == self.alternative_id:
+                if a.id == self.related_id:
                     a.name = self.old_name
 
         reverted.alternatives = alternatives
@@ -251,11 +277,7 @@ class AlternativeDiff(models.Model):
 
 class ConcernDiffManager(models.Manager):
     def daily_revisions(self, grid):
-        rev_grid = MockGrid()
-        rev_grid.id = grid.id
-        rev_grid.alternatives = list(grid.alternatives_set.all())
-        rev_grid.concerns = list(grid.concerns_set.all())
-
+        rev_grid = MockGrid(grid)
         revisions = []
         previous_date = None
         diffs = grid.concerndiff_set.all().order_by('-datetime')
@@ -268,17 +290,14 @@ class ConcernDiffManager(models.Manager):
         revisions.append(Revision(deepcopy(rev_grid), grid.dateTime.date()))
         return revisions
 
-class ConcernDiff(models.Model):
-    concern_id = models.IntegerField() # Not ForeignKey, because diffs should survive deletion of its alternative
-    grid = models.ForeignKey(Grid)
-    datetime = models.DateTimeField(auto_now_add=True)
+class ConcernDiff(Diff):
     old_leftPole = models.CharField(max_length=150)
     old_rightPole = models.CharField(max_length=150)
     old_weight = models.FloatField(null=True)
     new_leftPole = models.CharField(max_length=150)
     new_rightPole = models.CharField(max_length=150)
     new_weight = models.FloatField(null=True)
-    objects = ConcernDiffManager()
+    objects = DiffManager()
 
     def is_addition_diff(self):
         return not any(self.old_values()) and any(self.new_values())
@@ -296,22 +315,20 @@ class ConcernDiff(models.Model):
         return (self.new_leftPole, self.new_rightPole, self.new_weight)
 
     def revert(self, grid):
-        reverted = MockGrid()
-        reverted.id = grid.id
-        reverted.alternatives = grid.alternatives
+        reverted = MockGrid(grid)
 
         if self.is_addition_diff():
-            concerns = [c for c in grid.concerns if self.concern_id != c.id]
+            concerns = [c for c in grid.concerns if self.related_id != c.id]
         elif self.is_deletion_diff():
             concerns = [c for c in grid.concerns]
             c = Concerns(grid_id=grid.id, leftPole=self.old_leftPole, rightPole=self.old_rightPole, weight=self.old_weight)
-            c.id = self.concern_id
+            c.id = self.related_id
             concerns.append(c)
             concerns.sort()
         else:
             concerns = [c for c in grid.concerns]
             for c in concerns:
-                if c.id == self.concern_id:
+                if c.id == self.related_id:
                     c.leftPole = self.old_leftPole
                     c.rightPole = self.old_rightPole
                     c.weight = self.old_weight
@@ -325,8 +342,14 @@ class MockGrid:
     alternatives = None
     concerns = None
 
-    def __str__(self):
-        return "".join([a.name for a in self.alternatives])
+    def __init__(self, original_grid):
+        self.id = original_grid.id
+        if isinstance(original_grid, Grid):
+            self.alternatives = list(original_grid.alternatives_set.all())
+            self.concerns = list(original_grid.concerns_set.all())
+        else:
+            self.alternatives = original_grid.alternatives
+            self.concerns = original_grid.concerns
 
 class Composite(models.Model):
     compid= models.CharField(max_length=20, unique=False)
@@ -378,11 +401,11 @@ class Concerns(models.Model):
         }
         if sorted(old_values.values()) != sorted(new_values.values()):
             old_values.update(new_values)
-            ConcernDiff.objects.create(concern_id=self.id, grid=self.grid, **old_values)
+            ConcernDiff.objects.create(related_id=self.id, grid=self.grid, **old_values)
 
     def delete(self, *args, **kwargs):
         attributes = {
-            "concern_id": self.id,
+            "related_id": self.id,
             "old_leftPole": self.leftPole,
             "old_rightPole": self.rightPole,
             "old_weight": self.weight,

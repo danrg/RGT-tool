@@ -24,7 +24,7 @@ from RGT.gridMng.models import Concerns
 from RGT.gridMng.models import Ratings
 from RGT.gridMng.models import Facilitator
 from RGT.gridMng.models import Composite
-from RGT.gridMng.models import GridChangeset, DiffType, AlternativeDiff, ConcernDiff, MockGrid
+from RGT.gridMng.models import GridChangeset, DiffType, AlternativeDiff, Diff, ConcernDiff, MockGrid
 from RGT.gridMng.prototypes.compositeParse import CompositeParse
 from RGT.gridMng.utility import generateRandomString, validateName, convertSvgToPng, convertSvgTo, getImageError, convertGridTableToSvg, returnMatrix
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag, HttpErrorResponse
@@ -223,14 +223,11 @@ def timeline_json(request, usid):
 
 def show_image(request, usid, date):
     grid = Grid.objects.get(usid=usid)
-    concerns = [c for c in grid.concerns_set.all()]
     date = datetime.strptime(date, "%Y-%m-%d").date()
-    # revs = ConcernDiff.objects.daily_revisions(grid)
-    revs = AlternativeDiff.objects.daily_revisions(grid)
-    alternatives = next(r.grid.alternatives for r in revs if r.date == date)
-    # alternatives = [a for a in grid.alternatives_set.all()]
-    # concerns = next(r.grid.concerns for r in revs if r.date == date)
-    svg = convertGridTableToSvg(grid, concerns, alternatives)
+    revs = Diff.objects.daily_revisions(grid)
+    proxygrid = next(r.grid for r in revs if r.date == date)
+    # TODO Handle no diffs -WV
+    svg = convertGridTableToSvg(grid, proxygrid.concerns, proxygrid.alternatives)
     return HttpResponse(convertSvgToPng(svg), mimetype="image/png")
 
 
