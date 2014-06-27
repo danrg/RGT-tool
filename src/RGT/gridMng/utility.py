@@ -346,7 +346,7 @@ def returnMatrix(gridObj, which):
         return getSimilarities(concenrDistance, alternativeDistance, matrixFull, maxValueOfAlternative, which)
 
 
-def convertGridTableToSvg(gridObj=None):
+def convertGridTableToSvg(gridObj, concerns=None, alternatives=None):
     from RGT.gridMng.models import Ratings
 
     ###########settings###########
@@ -392,8 +392,8 @@ def convertGridTableToSvg(gridObj=None):
     fontName = 'arial'
 
     if gridObj != None:
-        concerns = gridObj.concerns_set.all()
-        alternatives = gridObj.alternatives_set.all()
+        concerns = concerns or gridObj.concerns_set.all()
+        alternatives = alternatives or gridObj.alternatives_set.all()
         nConcerns = len(concerns)
         nAlternatives = len(alternatives)
         tData = __TableData___()
@@ -430,7 +430,8 @@ def convertGridTableToSvg(gridObj=None):
                     if size[0] > colWidths[colN]:
                         colWidths[colN] = size[0]
                         #process the rating info
-                ratingObj = Ratings.objects.filter(concern=concernObj, alternative=alternativeObj)
+                # ratingObj = Ratings.objects.filter(concern=concernObj, alternative=alternativeObj)
+                ratingObj = [Ratings(concern=concernObj, alternative=alternativeObj, rating=42)]
                 if len(ratingObj) >= 1:
                     ratingObj = ratingObj[0]
                     row.append(ratingObj.rating)
