@@ -225,11 +225,11 @@ def show_image(request, usid, date):
     grid = Grid.objects.get(usid=usid)
     concerns = [c for c in grid.concerns_set.all()]
     date = datetime.strptime(date, "%Y-%m-%d").date()
-    # revs = AlternativeDiff.objects.daily_revisions(grid)
-    revs = ConcernDiff.objects.daily_revisions(grid)
-     # alternatives = next(r.grid.alternatives for r in revs if r.date == date)
-    alternatives = [a for a in grid.alternatives_set.all()]
-    concerns = next(r.grid.concerns for r in revs if r.date == date)
+    # revs = ConcernDiff.objects.daily_revisions(grid)
+    revs = AlternativeDiff.objects.daily_revisions(grid)
+    alternatives = next(r.grid.alternatives for r in revs if r.date == date)
+    # alternatives = [a for a in grid.alternatives_set.all()]
+    # concerns = next(r.grid.concerns for r in revs if r.date == date)
     svg = convertGridTableToSvg(grid, concerns, alternatives)
     return HttpResponse(convertSvgToPng(svg), mimetype="image/png")
 

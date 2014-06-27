@@ -193,31 +193,11 @@ class AlternativeDiffManager(models.Manager):
             if diff.datetime.date() != previous_date:
                 revisions.append(Revision(deepcopy(rev_grid), diff.datetime.date()))
             previous_date = diff.datetime.date()
-            rev_grid = self.__revert_diff(rev_grid, diff)
+            rev_grid = diff.revert(rev_grid)
 
         revisions.append(Revision(rev_grid, grid.dateTime.date()))
 
         return revisions
-
-    def __revert_diff(self, grid, diff):
-        reverted = MockGrid()
-        reverted.id = grid.id
-        if diff.old_name == "":
-            alternatives = [a for a in grid.alternatives if diff.alternative_id != a.id]
-        elif diff.new_name == "":
-            alternatives = [a for a in grid.alternatives]
-            a = Alternatives(grid_id=grid.id, name=diff.old_name)
-            a.id = diff.alternative_id
-            alternatives.append(a)
-            alternatives.sort()
-        else:
-            alternatives = [a for a in grid.alternatives]
-            for a in alternatives:
-                if a.id == diff.alternative_id:
-                    a.name = diff.old_name
-
-        reverted.alternatives = alternatives
-        return reverted
 
 class Revision:
     grid = None
@@ -247,6 +227,28 @@ class AlternativeDiff(models.Model):
             change_str = "changed %s to %s" % (self.old_name, self.new_name)
         return "%s (alt %i): %s" % (self.grid, self.alternative_id, change_str)
 
+    def revert(self, grid):
+        reverted = MockGrid()
+        reverted.id = grid.id
+        reverted.concerns = grid.concerns
+
+        if self.old_name == "":
+            alternatives = [a for a in grid.alternatives if self.alternative_id != a.id]
+        elif self.new_name == "":
+            alternatives = [a for a in grid.alternatives]
+            a = Alternatives(grid_id=grid.id, name=self.old_name)
+            a.id = self.alternative_id
+            alternatives.append(a)
+            alternatives.sort()
+        else:
+            alternatives = [a for a in grid.alternatives]
+            for a in alternatives:
+                if a.id == self.alternative_id:
+                    a.name = self.old_name
+
+        reverted.alternatives = alternatives
+        return reverted
+
 class ConcernDiffManager(models.Manager):
     def daily_revisions(self, grid):
         rev_grid = MockGrid()
@@ -261,34 +263,10 @@ class ConcernDiffManager(models.Manager):
             if diff.datetime.date() != previous_date:
                 revisions.append(Revision(deepcopy(rev_grid), diff.datetime.date()))
             previous_date = diff.datetime.date()
-            rev_grid = self.__revert_diff(rev_grid, diff)
+            rev_grid = diff.revert(rev_grid)
 
         revisions.append(Revision(deepcopy(rev_grid), grid.dateTime.date()))
         return revisions
-
-    def __revert_diff(self, grid, diff):
-        reverted = MockGrid()
-        reverted.id = grid.id
-
-        if diff.is_addition_diff():
-            concerns = [c for c in grid.concerns if diff.concern_id != c.id]
-        elif diff.is_deletion_diff():
-            concerns = [c for c in grid.concerns]
-            c = Concerns(grid_id=grid.id, leftPole=diff.old_leftPole, rightPole=diff.old_rightPole, weight=diff.old_weight)
-            c.id = diff.concern_id
-            concerns.append(c)
-            concerns.sort()
-        else:
-            concerns = [c for c in grid.concerns]
-            for c in concerns:
-                if c.id == diff.concern_id:
-                    c.leftPole = diff.old_leftPole
-                    c.rightPole = diff.old_rightPole
-                    c.weight = diff.old_weight
-
-        reverted.alternatives = grid.alternatives
-        reverted.concerns = concerns
-        return reverted
 
 class ConcernDiff(models.Model):
     concern_id = models.IntegerField() # Not ForeignKey, because diffs should survive deletion of its alternative
@@ -316,6 +294,31 @@ class ConcernDiff(models.Model):
 
     def new_values(self):
         return (self.new_leftPole, self.new_rightPole, self.new_weight)
+
+    def revert(self, grid):
+        reverted = MockGrid()
+        reverted.id = grid.id
+        reverted.alternatives = grid.alternatives
+
+        if self.is_addition_diff():
+            concerns = [c for c in grid.concerns if self.concern_id != c.id]
+        elif self.is_deletion_diff():
+            concerns = [c for c in grid.concerns]
+            c = Concerns(grid_id=grid.id, leftPole=self.old_leftPole, rightPole=self.old_rightPole, weight=self.old_weight)
+            c.id = self.concern_id
+            concerns.append(c)
+            concerns.sort()
+        else:
+            concerns = [c for c in grid.concerns]
+            for c in concerns:
+                if c.id == self.concern_id:
+                    c.leftPole = self.old_leftPole
+                    c.rightPole = self.old_rightPole
+                    c.weight = self.old_weight
+
+        reverted.concerns = concerns
+        return reverted
+
 
 class MockGrid:
     id = None
