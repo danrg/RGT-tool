@@ -150,7 +150,7 @@ class Alternatives(models.Model):
     description = models.TextField(null=True)
 
     def __unicode__(self):
-        return "%i: %s" % (self.id, self.name)
+        return unicode(self.name)
 
     def get_total_rating(self):
         total_rating = 0
@@ -188,10 +188,23 @@ class Alternatives(models.Model):
 class Revision:
     grid = None
     date = None
+    aggregations = None
 
     def __init__(self, grid, date):
         self.grid = grid
         self.date = date
+        self.aggregations = {}
+
+    def __unicode__(self):
+        items = []
+        for key in self.aggregations.keys():
+            operation = key.replace("Diff_", "s ")
+            items.append('%s: %i' % (operation, self.aggregations.get(key)))
+
+        if items:
+            return ", ".join(sorted(items))
+        else:
+            return "Grid created"
 
 class SubclassingQuerySet(QuerySet):
     """ Needed for polymorphism, see http://stackoverflow.com/questions/5360995/polymorphism-in-django-models
@@ -212,17 +225,36 @@ class DiffManager(models.Manager):
         revisions = []
         previous_date = None
         diffs = grid.diff_set.all().order_by('-datetime')
+        diff_aggregations = {}
         for diff in diffs:
+            key = self.__aggregations_key(diff)
+            current = diff_aggregations.get(key, 0)
+            diff_aggregations[key] = current + 1
             if diff.datetime.date() != previous_date:
                 revisions.append(Revision(deepcopy(rev_grid), diff.datetime.date()))
+                if len(revisions) > 1:
+                    revisions[-1].aggregations = deepcopy(diff_aggregations)
+                    diff_aggregations = {}
             previous_date = diff.datetime.date()
             rev_grid = diff.revert(rev_grid)
+        revisions[-1].aggregations = deepcopy(diff_aggregations)
 
         revisions.append(Revision(rev_grid, grid.dateTime.date()))
         return revisions
 
     def get_query_set(self):
         return SubclassingQuerySet(self.model)
+
+    def __aggregations_key(self, diff):
+        name = diff.__class__.__name__
+        if diff.is_addition_diff():
+            type = "added"
+        elif diff.is_deletion_diff():
+            type = "deleted"
+        else:
+            type = "changed"
+
+        return "%s_%s" % (name, type)
 
 class Diff(models.Model):
     related_id = models.IntegerField()
@@ -490,6 +522,8 @@ class Ratings(models.Model):
             RatingDiff.objects.create(related_id=self.alternative_id, concern_id=self.concern_id, grid=self.alternative.grid, old_rating=old_rating, new_rating=self.rating)
 
     def delete(self, grid, *args, **kwargs):
+        print "deleting rating"
+
         old_rating = self.rating
         old_alternative_id = self.alternative_id
         old_concern_id = self.concern_id

@@ -200,13 +200,12 @@ def timeline(request, usid):
 
 def timeline_json(request, usid):
     grid = get_object_or_404(Grid, usid=usid, user=request.user)
-
-    revs = AlternativeDiff.objects.daily_revisions(grid)
+    revs = Diff.objects.daily_revisions(grid)
     date = []
     for rev in revs:
         date.append({
             "startDate": rev.date.strftime("%Y,%m,%d"),
-            "headline": "HEADLINE", #unicode(diff),
+            "headline": unicode(rev),
             "asset": {
                 "media": reverse(show_image, args=[usid, rev.date.strftime("%Y-%m-%d")])
             }
@@ -225,6 +224,12 @@ def show_image(request, usid, date):
     grid = Grid.objects.get(usid=usid)
     date = datetime.strptime(date, "%Y-%m-%d").date()
     revs = Diff.objects.daily_revisions(grid)
+
+    for r in revs:
+        print r.grid.concerns
+        print r.grid.alternatives
+        print r.grid.ratings
+
     proxygrid = next(r.grid for r in revs if r.date == date)
     # TODO Handle no diffs -WV
     svg = convertGridTableToSvg(grid, proxygrid.concerns, proxygrid.alternatives, proxygrid.ratings)
@@ -1027,6 +1032,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
     Return:
         boolean
     """
+
     if gridObj != None:
         valuesChanged = None #use to check if we need to clear the dendogram field in the Grid model
         objToCommit = []
@@ -1093,6 +1099,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
             i += 1
         i = 0
         j = 0
+
         #the alternative/concern response grid has no ratios, so just ignore it
         if not isConcernAlternativeResponseGrid:
             while i < nConcerns and i < totalConcenrs:
@@ -1159,7 +1166,9 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
             if not (gridObj in objToCommit):
                 objToCommit.append(gridObj)
                 #now that all went ok commit the changes (except delete as that one is done when the function is called)
+        for obj in objToCommit:
             obj.save()
+
         gridObj.save()
         return True
     else:
