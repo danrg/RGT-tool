@@ -237,6 +237,15 @@ class Diff(models.Model):
             self.content_type = ContentType.objects.get_for_model(self.__class__)
         super(Diff, self).save(*args, **kwargs)
 
+    def is_addition_diff(self):
+        return not any(self.old_values()) and any(self.new_values())
+
+    def is_deletion_diff(self):
+        return any(self.old_values()) and not any(self.new_values())
+
+    def is_change_diff(self):
+        return any(self.old_values()) and any(self.new_values())
+
     def as_leaf_class(self):
         content_type = self.content_type
         model = content_type.model_class()
@@ -248,6 +257,12 @@ class AlternativeDiff(Diff):
     old_name = models.CharField(max_length=100)
     new_name = models.CharField(max_length=100)
     objects = DiffManager()
+
+    def old_values(self):
+        return (self.old_name,)
+
+    def new_values(self):
+        return (self.new_name,)
 
     def __unicode__(self):
         if self.old_name == "":
@@ -261,9 +276,9 @@ class AlternativeDiff(Diff):
     def revert(self, grid):
         reverted = MockGrid(grid)
 
-        if self.old_name == "":
+        if self.is_addition_diff():
             alternatives = [a for a in grid.alternatives if self.related_id != a.id]
-        elif self.new_name == "":
+        elif self.is_deletion_diff():
             alternatives = list(grid.alternatives)
             a = Alternatives(grid_id=grid.id, name=self.old_name)
             a.id = self.related_id
@@ -302,15 +317,6 @@ class ConcernDiff(Diff):
     new_weight = models.FloatField(null=True)
     objects = DiffManager()
 
-    def is_addition_diff(self):
-        return not any(self.old_values()) and any(self.new_values())
-
-    def is_deletion_diff(self):
-        return any(self.old_values()) and not any(self.new_values())
-
-    def is_change_diff(self):
-        return any(self.old_values()) and any(self.new_values())
-
     def old_values(self):
         return (self.old_leftPole, self.old_rightPole, self.old_weight)
 
@@ -346,14 +352,11 @@ class RatingDiff(Diff):
     new_rating = models.FloatField(null=True)
     objects = DiffManager()
 
-    def is_addition_diff(self):
-        return not self.old_rating and self.new_rating
+    def old_values(self):
+        return (self.old_rating,)
 
-    def is_deletion_diff(self):
-        return self.old_rating and not self.new_rating
-
-    def is_change_diff(self):
-        return self.old_rating and self.new_rating
+    def new_values(self):
+        return (self.new_rating,)
 
     def revert(self, grid):
         reverted = MockGrid(grid)
