@@ -227,7 +227,7 @@ def show_image(request, usid, date):
     revs = Diff.objects.daily_revisions(grid)
     proxygrid = next(r.grid for r in revs if r.date == date)
     # TODO Handle no diffs -WV
-    svg = convertGridTableToSvg(grid, proxygrid.concerns, proxygrid.alternatives)
+    svg = convertGridTableToSvg(grid, proxygrid.concerns, proxygrid.alternatives, proxygrid.ratings)
     return HttpResponse(convertSvgToPng(svg), mimetype="image/png")
 
 
@@ -1159,11 +1159,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
             if not (gridObj in objToCommit):
                 objToCommit.append(gridObj)
                 #now that all went ok commit the changes (except delete as that one is done when the function is called)
-        for obj in objToCommit:
-            print objToCommit
-
             obj.save()
-        gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)
         gridObj.save()
         return True
     else:

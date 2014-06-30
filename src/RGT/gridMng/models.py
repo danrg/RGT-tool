@@ -109,7 +109,7 @@ class Grid(models.Model):
     name = models.CharField(max_length=30, default='untitled')
     description = models.TextField(null=True)
     dendogram = models.TextField(null=True)
-    dateTime = models.DateTimeField(default=datetime.utcnow().replace(tzinfo=utc), null=True)
+    dateTime = models.DateTimeField(auto_now_add=True, null=True)
     grid_types = (('u', 'User grid'), ('s', 'Session grid'), ('ac', 'Response grid, Alternative/Concern'),
                   ('rw', 'Response grid, Ratings/Weight'), ('cg', 'Composite Grid') )
     grid_type = models.CharField(max_length=2, choices=grid_types, default='u')
@@ -171,6 +171,9 @@ class Alternatives(models.Model):
             AlternativeDiff.objects.create(related_id=self.id, grid=self.grid, old_name=old_name, new_name=self.name)
 
     def delete(self, *args, **kwargs):
+        for r in self.ratings_set.all():
+            r.delete(grid=self.grid)
+
         old_name = self.name
         old_id = self.id
         super(Alternatives, self).delete(*args, **kwargs)
@@ -261,13 +264,13 @@ class AlternativeDiff(Diff):
         if self.old_name == "":
             alternatives = [a for a in grid.alternatives if self.related_id != a.id]
         elif self.new_name == "":
-            alternatives = [a for a in grid.alternatives]
+            alternatives = list(grid.alternatives)
             a = Alternatives(grid_id=grid.id, name=self.old_name)
             a.id = self.related_id
             alternatives.append(a)
             alternatives.sort()
         else:
-            alternatives = [a for a in grid.alternatives]
+            alternatives = list(grid.alternatives)
             for a in alternatives:
                 if a.id == self.related_id:
                     a.name = self.old_name
@@ -320,13 +323,13 @@ class ConcernDiff(Diff):
         if self.is_addition_diff():
             concerns = [c for c in grid.concerns if self.related_id != c.id]
         elif self.is_deletion_diff():
-            concerns = [c for c in grid.concerns]
+            concerns = list(grid.concerns)
             c = Concerns(grid_id=grid.id, leftPole=self.old_leftPole, rightPole=self.old_rightPole, weight=self.old_weight)
             c.id = self.related_id
             concerns.append(c)
             concerns.sort()
         else:
-            concerns = [c for c in grid.concerns]
+            concerns = list(grid.concerns)
             for c in concerns:
                 if c.id == self.related_id:
                     c.leftPole = self.old_leftPole
@@ -336,20 +339,56 @@ class ConcernDiff(Diff):
         reverted.concerns = concerns
         return reverted
 
+class RatingDiff(Diff):
+    # related_id from Diff class acts as relation id to Alternative
+    concern_id = models.IntegerField()
+    old_rating = models.FloatField(null=True)
+    new_rating = models.FloatField(null=True)
+    objects = DiffManager()
+
+    def is_addition_diff(self):
+        return not self.old_rating and self.new_rating
+
+    def is_deletion_diff(self):
+        return self.old_rating and not self.new_rating
+
+    def is_change_diff(self):
+        return self.old_rating and self.new_rating
+
+    def revert(self, grid):
+        reverted = MockGrid(grid)
+
+        if self.is_addition_diff():
+            ratings = [r for r in grid.ratings if self.related_id != r.alternative_id or self.concern_id != r.concern_id]
+        elif self.is_deletion_diff():
+            ratings = list(grid.ratings)
+            r = Ratings(alternative_id=self.related_id, concern_id=self.concern_id, rating=self.old_rating)
+            ratings.append(r)
+        else:
+            ratings = list(grid.ratings)
+            for r in ratings:
+                if r.alternative_id == self.related_id and r.concern_id == self.concern_id:
+                    r.rating = self.old_rating
+
+        reverted.ratings = ratings
+        return reverted
 
 class MockGrid:
     id = None
     alternatives = None
     concerns = None
+    ratings = None
 
     def __init__(self, original_grid):
         self.id = original_grid.id
         if isinstance(original_grid, Grid):
             self.alternatives = list(original_grid.alternatives_set.all())
             self.concerns = list(original_grid.concerns_set.all())
+            self.ratings = list(Ratings.objects.filter(alternative__grid_id=original_grid.id))
         else:
             self.alternatives = original_grid.alternatives
             self.concerns = original_grid.concerns
+            self.ratings = original_grid.ratings
 
 class Composite(models.Model):
     compid= models.CharField(max_length=20, unique=False)
@@ -404,6 +443,9 @@ class Concerns(models.Model):
             ConcernDiff.objects.create(related_id=self.id, grid=self.grid, **old_values)
 
     def delete(self, *args, **kwargs):
+        for r in self.ratings_set.all():
+            r.delete(grid=self.grid)
+
         attributes = {
             "related_id": self.id,
             "old_leftPole": self.leftPole,
@@ -434,6 +476,25 @@ class Ratings(models.Model):
     class Meta:
         unique_together = ('concern',
                            'alternative') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            old_rating = None
+        else:
+            old_rating = Ratings.objects.get(pk=self.pk).rating
+        super(Ratings, self).save(*args, **kwargs)
+        if old_rating != self.rating:
+            RatingDiff.objects.create(related_id=self.alternative_id, concern_id=self.concern_id, grid=self.alternative.grid, old_rating=old_rating, new_rating=self.rating)
+
+    def delete(self, grid, *args, **kwargs):
+        old_rating = self.rating
+        old_alternative_id = self.alternative_id
+        old_concern_id = self.concern_id
+        super(Ratings, self).delete(*args, **kwargs)
+        RatingDiff.objects.create(related_id=old_alternative_id, concern_id=old_concern_id, grid=grid, old_rating=old_rating, new_rating=None)
+
+    def __unicode__(self):
+        return "(%s, %s): %f" % (self.concern, self.alternative, self.rating)
 
 class GridDiffManager(models.Manager):
     def ensure_initial_diff_exists(self, grid):
