@@ -17,7 +17,6 @@ from datetime import datetime, date
 from django.utils.timezone import utc
 from django.core.urlresolvers import reverse
 
-#grid manager
 class GridManager(models.Manager):
 
     @transaction.atomic
@@ -102,7 +101,6 @@ class GridManager(models.Manager):
         return False
 
 
-#grid model
 class Grid(models.Model):
     usid = models.CharField(max_length=20, unique=True, default=lambda: generateRandomString(GRID_USID_KEY_LENGTH))
     user = models.ForeignKey(User, null=True)
@@ -221,7 +219,7 @@ class SubclassingQuerySet(QuerySet):
 
 class DiffManager(models.Manager):
     def daily_revisions(self, grid):
-        rev_grid = MockGrid(grid)
+        rev_grid = GridProxy(grid)
         revisions = []
         previous_date = None
         diffs = grid.diff_set.all().order_by('-datetime')
@@ -237,9 +235,10 @@ class DiffManager(models.Manager):
                     diff_aggregations = {}
             previous_date = diff.datetime.date()
             rev_grid = diff.revert(rev_grid)
-        revisions[-1].aggregations = deepcopy(diff_aggregations)
-
+        if revisions:
+            revisions[-1].aggregations = deepcopy(diff_aggregations)
         revisions.append(Revision(rev_grid, grid.dateTime.date()))
+
         return revisions
 
     def get_query_set(self):
@@ -306,28 +305,23 @@ class AlternativeDiff(Diff):
         return "%s (alt %i): %s" % (self.grid, self.related_id, change_str)
 
     def revert(self, grid):
-        reverted = MockGrid(grid)
-
+        reverted = GridProxy(grid)
         if self.is_addition_diff():
-            alternatives = [a for a in grid.alternatives if self.related_id != a.id]
+            reverted.alternatives = [a for a in grid.alternatives if self.related_id != a.id]
         elif self.is_deletion_diff():
-            alternatives = list(grid.alternatives)
             a = Alternatives(grid_id=grid.id, name=self.old_name)
             a.id = self.related_id
-            alternatives.append(a)
-            alternatives.sort()
+            reverted.alternatives.append(a)
+            reverted.alternatives.sort()
         else:
-            alternatives = list(grid.alternatives)
-            for a in alternatives:
-                if a.id == self.related_id:
-                    a.name = self.old_name
+            a = next(a for a in reverted.alternatives if a.id == self.related_id)
+            a.name = self.old_name
 
-        reverted.alternatives = alternatives
         return reverted
 
 class ConcernDiffManager(models.Manager):
     def daily_revisions(self, grid):
-        rev_grid = MockGrid(grid)
+        rev_grid = GridProxy(grid)
         revisions = []
         previous_date = None
         diffs = grid.concerndiff_set.all().order_by('-datetime')
@@ -356,25 +350,20 @@ class ConcernDiff(Diff):
         return (self.new_leftPole, self.new_rightPole, self.new_weight)
 
     def revert(self, grid):
-        reverted = MockGrid(grid)
-
+        reverted = GridProxy(grid)
         if self.is_addition_diff():
-            concerns = [c for c in grid.concerns if self.related_id != c.id]
+            reverted.concerns = [c for c in grid.concerns if self.related_id != c.id]
         elif self.is_deletion_diff():
-            concerns = list(grid.concerns)
             c = Concerns(grid_id=grid.id, leftPole=self.old_leftPole, rightPole=self.old_rightPole, weight=self.old_weight)
             c.id = self.related_id
-            concerns.append(c)
-            concerns.sort()
+            reverted.concerns.append(c)
+            reverted.concerns.sort()
         else:
-            concerns = list(grid.concerns)
-            for c in concerns:
-                if c.id == self.related_id:
-                    c.leftPole = self.old_leftPole
-                    c.rightPole = self.old_rightPole
-                    c.weight = self.old_weight
+            c = next(c for c in reverted.concerns if c.id == self.related_id)
+            c.leftPole = self.old_leftPole
+            c.rightPole = self.old_rightPole
+            c.weight = self.old_weight
 
-        reverted.concerns = concerns
         return reverted
 
 class RatingDiff(Diff):
@@ -391,24 +380,18 @@ class RatingDiff(Diff):
         return (self.new_rating,)
 
     def revert(self, grid):
-        reverted = MockGrid(grid)
-
+        reverted = GridProxy(grid)
         if self.is_addition_diff():
             ratings = [r for r in grid.ratings if self.related_id != r.alternative_id or self.concern_id != r.concern_id]
         elif self.is_deletion_diff():
-            ratings = list(grid.ratings)
             r = Ratings(alternative_id=self.related_id, concern_id=self.concern_id, rating=self.old_rating)
-            ratings.append(r)
+            reverted.ratings.append(r)
         else:
-            ratings = list(grid.ratings)
-            for r in ratings:
-                if r.alternative_id == self.related_id and r.concern_id == self.concern_id:
-                    r.rating = self.old_rating
-
-        reverted.ratings = ratings
+            r = next(r for r in reverted.ratings if r.alternative_id == self.related_id and r.concern_id == self.concern_id)
+            r.rating = self.old_rating
         return reverted
 
-class MockGrid:
+class GridProxy:
     id = None
     alternatives = None
     concerns = None
@@ -522,8 +505,6 @@ class Ratings(models.Model):
             RatingDiff.objects.create(related_id=self.alternative_id, concern_id=self.concern_id, grid=self.alternative.grid, old_rating=old_rating, new_rating=self.rating)
 
     def delete(self, grid, *args, **kwargs):
-        print "deleting rating"
-
         old_rating = self.rating
         old_alternative_id = self.alternative_id
         old_concern_id = self.concern_id
@@ -541,54 +522,6 @@ class GridDiffManager(models.Manager):
             diff.date = grid.dateTime
             diff.save()
 
-class DiffType(object):
-    INITIAL = 'i'
-    RATINGS = 'r'
-    CONCERNS = 'c'
-    ALTERNATIVES = 'a'
-
-class GridChangeset(models.Model):
-    grid = models.ForeignKey(Grid)
-    user = models.ForeignKey(User)
-    date = models.DateField(auto_now_add=True)
-    added = models.IntegerField(default=0)
-    deleted = models.IntegerField(default=0)
-    changed = models.IntegerField(default=0)
-    types = ((DiffType.INITIAL, 'initial'), (DiffType.RATINGS, 'ratings'), (DiffType.CONCERNS, 'concerns'), (DiffType.ALTERNATIVES, 'alternatives'))
-    type = models.CharField(max_length=1, choices=types)
-    objects = GridDiffManager()
-
-    def __unicode__(self):
-        if self.type == DiffType.INITIAL:
-            return "%s created a grid to select a %s" % (self.user.get_full_name(), self.grid.name)
-
-        return "%s %s %s" % (self.user.get_full_name(), self.__operation_str(), self.__type_str())
-
-    def __operation_str(self):
-        operations = []
-        if self.added > 0:
-            operations.append("added %i" % self.added)
-        if self.deleted > 0:
-            operations.append("deleted %i" % self.deleted)
-        if self.changed > 0:
-            operations.append("changed %i" % self.changed)
-
-        if len(operations) == 3:
-            operation_str = operations[0] + ", " + operations[1] + " and " + operations[2]
-        else:
-            operation_str = " and ".join(operations)
-
-        return operation_str
-
-    def __type_str(self):
-        type = [t for t in self.types if t[0] == self.type]
-        type = type[0][1]
-        if not (self.added > 1 or self.deleted > 1 or self.changed > 1):
-            type = type[:-1]
-
-        return type
-
-#manager for state
 class StateManager(models.Manager):
     def getInitialState(self):
         return self.get(name='initial')
@@ -608,7 +541,6 @@ class StateManager(models.Manager):
     def respondable(self):
         return self.filter(name__in=(SessionState.AC, SessionState.RW))
 
-#model for state
 class State(models.Model):
     name = models.CharField(max_length=30)
     objects = StateManager()
@@ -662,13 +594,11 @@ class State(models.Model):
         else:
             return ()
 
-#manager for facilitator
 class FacilitatorManager(models.Manager):
     def isFacilitator(self, userObj):
         facilitator, created = self.get_or_create(user=userObj)
         return not created and facilitator.session_set.count() > 0
 
-#model for facilitator
 class Facilitator(models.Model):
     user = models.ForeignKey(User, unique=True)
     objects = FacilitatorManager()

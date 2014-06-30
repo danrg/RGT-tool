@@ -25,15 +25,11 @@ RGT | Grid {{ grid.name }}
     $(document).ready(function() {
         prepareForNewGrid($('#results'));	//this function is from gridTableGeneralFunctions.js
         calculateTotalWeight($('#results'));
-
         //set table status as matching with the db
         hasTableBeenSaved = true;
-
         //make the form string that represent the saved table in db
         masterFormString= $("#form").serialize();
-
         isGridComplete();
-
         //set tipsy
         initiateGridTableToolTip($('#results'));
     });
@@ -47,6 +43,7 @@ RGT | Grid {{ grid.name }}
         <label class="gridNameLabel" for="gridName">Name:</label>
         <input type="text" id="gridName" name="gridName" size="45" onchange="isTextEmpty($(this));isTableSaved()" value="{{ grid.name }}" />
         <input type="hidden" id="gridUSID" name="gridUSID" value="{{ grid.usid }}" />
+        <a href="/grids/timeline/{{ grid.usid }}">Show timeline</a>
     </div>
 
 	<div id="results">
@@ -64,7 +61,6 @@ RGT | Grid {{ grid.name }}
         <input type="button" id="weightSlidersButton" onclick="adjustWeights();" value="Prioritize concerns"/>
         <input type="button" id="cancelWeightSliders" onclick="toggleAdjustWeights();" value="Cancel" hidden="hidden"/>
         <input type="button" id="deleteGrid" onclick="$('.resim').remove();deleteMyGrid()" value="Delete" />
-        <a href="/grids/timeline/{{ grid.usid }}">View timeline (alpha)</a>
 	</div>
     <div id="tabs">
         <p>Create a grid with at least two concern pairs and save changes to enable analysis.</p>

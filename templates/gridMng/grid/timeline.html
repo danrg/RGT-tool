@@ -25,6 +25,7 @@ $(document).ready(function() {
 		<p>Please verify your email in order to use this part of the application.</p>
 	</div>
 {% else %}
+    <a href="{{ grid.get_absolute_url }}">Return to grid</a>
     <div id="timeline">
     </div>
 {% endif %}
