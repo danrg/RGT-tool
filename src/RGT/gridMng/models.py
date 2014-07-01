@@ -229,10 +229,10 @@ class DiffManager(models.Manager):
             current = diff_aggregations.get(key, 0)
             diff_aggregations[key] = current + 1
             if diff.datetime.date() != previous_date:
-                revisions.append(Revision(deepcopy(rev_grid), diff.datetime.date()))
-                if len(revisions) > 1:
+                if revisions:
                     revisions[-1].aggregations = deepcopy(diff_aggregations)
                     diff_aggregations = {}
+                revisions.append(Revision(deepcopy(rev_grid), diff.datetime.date()))
             previous_date = diff.datetime.date()
             rev_grid = diff.revert(rev_grid)
         if revisions:
