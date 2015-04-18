@@ -5,4 +5,4 @@
 .project
 .pydevproject
 src/RGT/ownsettings.py
-src/sqlite.db
+*.db
