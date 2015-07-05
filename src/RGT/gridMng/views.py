@@ -227,7 +227,7 @@ def show_image(request, usid, date):
     try:
         proxygrid = next(r.grid for r in revs if r.date == date)
         svg = convertGridTableToSvg(grid, proxygrid.concerns, proxygrid.alternatives, proxygrid.ratings)
-        return HttpResponse(convertSvgToPng(svg), mimetype="image/png")
+        return HttpResponse(convertSvgToPng(svg), content_type="image/png")
     except StopIteration:
         return HttpResponse(getImageError(), content_type='image/jpg')
 

@@ -2,7 +2,7 @@ import itertools
 
 from datetime import datetime
 from django.db import transaction
-from django.contrib.formtools.wizard.views import SessionWizardView
+from formtools.wizard.views import SessionWizardView
 from django.shortcuts import redirect
 from django.utils.timezone import utc
 from RGT.gridMng.models import Grid, Composite, Alternatives, Concerns, Ratings, Rule
