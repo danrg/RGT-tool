@@ -45,8 +45,8 @@ class EmailService(object):
 
         except BadHeaderError:
             print 'bad header error'
-        except Exception:
-            print 'another problem'
+        except Exception as e:
+            print 'another problem: ' + str(e.args[0]) + ' - ' + str(e.args[1])
 
         return False
 

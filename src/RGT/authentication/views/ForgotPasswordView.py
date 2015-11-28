@@ -9,6 +9,7 @@ from RGT.authentication.views.CaptchaSecuredFormView import CaptchaSecuredFormVi
 class ForgotPasswordView(CaptchaSecuredFormView):
     template_name = 'authentication/forgotPass.html'
     form_class = ForgotPasswordForm
+    success_url = '/home'
 
     def form_valid(self, form):
         email = form.cleaned_data['email']
