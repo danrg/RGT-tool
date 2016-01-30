@@ -4,7 +4,7 @@ from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse
 from RGT.gridMng.hierarchical import hcluster, transpose, drawDendogram3, pcaCluster, getSimilarities
 from RGT.XML.SVG.svgDOMImplementation import SvgDOMImplementation
 from RGT.settings import DENDROGRAM_FONT_LOCATION
-import ImageFont #@UnresolvedImport
+from PIL import ImageFont
 from types import StringType, UnicodeType
 
 import base64
@@ -16,8 +16,7 @@ import subprocess
 import traceback
 from io import BytesIO
 
-
-#definition of the supported file to convert svg to image
+# definition of the supported file to convert svg to image
 CONVERT_SVG_TO_PNG = 'png'
 CONVERT_SVG_TO_JPG = 'jpg'
 CONVERT_SVG_TO_PDF = 'pdf'
@@ -34,7 +33,8 @@ def validateName(name):
         return HttpResponse(createXmlErrorResponse("Name can not be empty"))
     return result
 
-#this is a prototype function, do not use or change it
+
+# this is a prototype function, do not use or change it
 def convertSvgTo(svgData, fileType):
     if fileType != None and svgData != None:
         tempSvgFileName = generateRandomString(24)
@@ -62,18 +62,18 @@ def convertSvgTo(svgData, fileType):
         fo.write(svgData);
         fo.close()
         try:
-            #use batik to convert the file to something
+            # use batik to convert the file to something
             batikPath = settings.projectPath
             batikPath += '/src/RGT/gridMng/batik/batik-rasterizer.jar'
             batikPath = '"' + batikPath + '"'
             subprocess.call(
                 'java -jar ' + batikPath + ' -d ' + tempImageFile + ' -m ' + mimeType + ' -dpi 300 ' + tempFileSvg,
                 shell=True)
-            #destroy the svg temp file
+            # destroy the svg temp file
             os.remove(tempFileSvg)
             return (tempImageFile, mimeType, fileExtention)
         except:
-            #remove the file if an error happens
+            # remove the file if an error happens
             os.remove(tempFileSvg)
             raise
     else:
@@ -91,7 +91,7 @@ def convertSvgToPng(svg_data):
     import cairosvg
     import StringIO
     buffer = StringIO.StringIO()
-    cairosvg.svg2png(bytestring=svg_data,write_to=buffer)
+    cairosvg.svg2png(bytestring=svg_data, write_to=buffer)
     out = buffer.getvalue()
     buffer.close()
     return out
@@ -102,7 +102,7 @@ def getImageError():
     if imageErrorData == None:
         fpInMemory = BytesIO()
         fp = open(settings.projectPath + '/src/RGT/gridMng/error/error.jpg', "rb")
-        #read the file and place it in memory
+        # read the file and place it in memory
         try:
             byte = fp.read(1)
             while byte != '':
@@ -121,9 +121,10 @@ def createFileResponse(fileData):
     response['Content-Disposition'] = 'attachment; filename=' + fileData.fileName + '.' + fileData.fileExtension
     return response
 
-#generate a table based on a grid    
+
+# generate a table based on a grid
 def generateGridTable(gridObj):
-    from RGT.gridMng.models import Ratings #can't be declared globally because it will generate an import error
+    from RGT.gridMng.models import Ratings  # can't be declared globally because it will generate an import error
 
     table = []
     header = []
@@ -165,14 +166,14 @@ def generateGridTable(gridObj):
             table.append(row)
             j = 0
             i += 1
-        concernWeights.reverse() #this is needed because the list will be poped during the template execution
+        concernWeights.reverse()  # this is needed because the list will be poped during the template execution
         i = 0;
         while i < nAlternatives:
             header.append(str(alternatives[i].name))
             i += 1
     else:
 
-        #create an empty table if no gridObj is passed
+        # create an empty table if no gridObj is passed
         defaultNConcerns = 3
         defaultNAlternatives = 2
         defaultWeightValue = 1.0
@@ -187,17 +188,18 @@ def generateGridTable(gridObj):
     dic['weights'] = concernWeights
     return dic
 
-#generate the dendogram
-def createDendogram(gridObj):
-    from RGT.gridMng.models import Ratings #can't be declared globally because it will generate an import error
 
-    #lets create a matrix that the hierarchical module understands
-    matrixFull = [] # this is the compleet matrix, it will be used to create the table in the picture
+# generate the dendogram
+def createDendogram(gridObj):
+    from RGT.gridMng.models import Ratings  # can't be declared globally because it will generate an import error
+
+    # lets create a matrix that the hierarchical module understands
+    matrixFull = []  # this is the compleet matrix, it will be used to create the table in the picture
     matrixConcern = []
-    matrixAlternatives = [] #matrix that will be transposed
+    matrixAlternatives = []  # matrix that will be transposed
     concerns = gridObj.concerns_set.all()
     alternatives = gridObj.alternatives_set.all()
-    maxValueOfAlternative = -1 # this is to save time later on as i need to loop trough all the alternatives right now so i can check for max value
+    maxValueOfAlternative = -1  # this is to save time later on as i need to loop trough all the alternatives right now so i can check for max value
 
     if len(concerns) > 1:
         for concernObj in concerns:
@@ -223,7 +225,7 @@ def createDendogram(gridObj):
                 raise ValueError('Concerns must be complete in order to generate a dendrogram.')
             matrixConcern.append(row)
             matrixAlternatives.append(row[1:])
-            row = row[0:] #create new obj of row
+            row = row[0:]  # create new obj of row
             if concernObj.rightPole != None:
                 row.append(str(concernObj.rightPole))
             else:
@@ -231,7 +233,7 @@ def createDendogram(gridObj):
             matrixFull.append(row)
     else:
         raise ValueError('More than one concerns must be present in order to generate a dendrogram.')
-        #lets transpose the matrix so we calculate the dendrogram for the alternatives
+        # lets transpose the matrix so we calculate the dendrogram for the alternatives
     # print "Alternatives: "
     # print matrixAlternatives
     matrixAlternatives = transpose(matrixAlternatives)
@@ -241,7 +243,7 @@ def createDendogram(gridObj):
         if alternatives[i].name != None:
             matrixAlternatives[i].insert(0, str(alternatives[i].name))
             temp.append(str(alternatives[i].name))
-            #print alternatives[i].name
+            # print alternatives[i].name
             i += 1
         else:
             raise ValueError('Invalid alternative name: ' + alternatives[i].name)
@@ -257,7 +259,7 @@ def createDendogram(gridObj):
             gridObj.save()
             return imgData
         else:
-            #old code used to transform the png image to a string so the browser could display it
+            # old code used to transform the png image to a string so the browser could display it
             fp1 = BytesIO()
             img.save(fp1, format="PNG")
             imgData = fp1.getvalue()
@@ -280,15 +282,15 @@ This function returns eigther concerns matrix or alternatives matrix
 
 
 def returnMatrix(gridObj, which):
-    from RGT.gridMng.models import Ratings #can't be declared globally because it will generate an import error
+    from RGT.gridMng.models import Ratings  # can't be declared globally because it will generate an import error
 
-    #lets create a matrix that the hierarchical module understands
-    matrixFull = [] # this is the compleet matrix, it will be used to create the table in the picture
+    # lets create a matrix that the hierarchical module understands
+    matrixFull = []  # this is the compleet matrix, it will be used to create the table in the picture
     matrixConcern = []
-    matrixAlternatives = [] #matrix that will be transposed
+    matrixAlternatives = []  # matrix that will be transposed
     concerns = gridObj.concerns_set.all()
     alternatives = gridObj.alternatives_set.all()
-    maxValueOfAlternative = -1 # this is to save time later on as i need to loop trough all the alternatives right now so i can check for max value
+    maxValueOfAlternative = -1  # this is to save time later on as i need to loop trough all the alternatives right now so i can check for max value
 
     if len(concerns) > 1:
         for concernObj in concerns:
@@ -314,7 +316,7 @@ def returnMatrix(gridObj, which):
                 raise ValueError('Concerns must be complete in order to generate a dendrogram.')
             matrixConcern.append(row)
             matrixAlternatives.append(row[1:])
-            row = row[0:] #create new obj of row
+            row = row[0:]  # create new obj of row
             if concernObj.rightPole != None:
                 row.append(str(concernObj.rightPole))
             else:
@@ -322,7 +324,7 @@ def returnMatrix(gridObj, which):
             matrixFull.append(row)
     else:
         raise ValueError('More than one concerns must be present in order to generate a dendrogram.')
-        #lets transpose the matrix so we calculate the dendrogram for the alternatives
+        # lets transpose the matrix so we calculate the dendrogram for the alternatives
     matrixAlternatives = transpose(matrixAlternatives)
     i = 0
     temp = [[]]
@@ -330,7 +332,7 @@ def returnMatrix(gridObj, which):
         if alternatives[i].name != None:
             matrixAlternatives[i].insert(0, str(alternatives[i].name))
             temp.append(str(alternatives[i].name))
-            #print alternatives[i].name
+            # print alternatives[i].name
             i += 1
         else:
             raise ValueError('Invalid alternative name: ' + alternatives[i].name)
@@ -353,19 +355,19 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
     fontSize = 30
     f = ImageFont.truetype(DENDROGRAM_FONT_LOCATION, fontSize)
 
-    xLeftPoleCellOffset = 5 #in pixels, space between the start of the picture and the left pole
+    xLeftPoleCellOffset = 5  # in pixels, space between the start of the picture and the left pole
     xRightPoleWordOffset = 5
 
-    xWordCellSpace = 5 #space between a word and the right and left line of the cell (in pixels)
-    yWordCellSpace = 5 #space between the biggest word and the top and bottom line of the cell (in pixels)
+    xWordCellSpace = 5  # space between a word and the right and left line of the cell (in pixels)
+    yWordCellSpace = 5  # space between the biggest word and the top and bottom line of the cell (in pixels)
 
-    xTableOffSet = 5 #the x offset of the start point of the table from the end of the biggest left pole word. Start point is x= 0 (in pixels)
-    yTableOffset = 5 #the y offset of the start point of the table. Start point is y= 0 (in pixels)
+    xTableOffSet = 5  # the x offset of the start point of the table from the end of the biggest left pole word. Start point is x= 0 (in pixels)
+    yTableOffset = 5  # the y offset of the start point of the table. Start point is y= 0 (in pixels)
 
-    tableLineThickness = 1 #in pixels
-    tableLineColor = (60, 179, 113) #value in rbg
-    tableCellWordColor = (60, 179, 113) #value in rbg
-    tableHeaderCellWordColor = (255, 255, 255) #value in rbg
+    tableLineThickness = 1  # in pixels
+    tableLineColor = (60, 179, 113)  # value in rbg
+    tableCellWordColor = (60, 179, 113)  # value in rbg
+    tableHeaderCellWordColor = (255, 255, 255)  # value in rbg
 
     tableHeaderLinearColor1 = (141, 179, 235)
     tableHeaderLinearColor2 = (95, 144, 227)
@@ -376,18 +378,18 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
     totalWeightBackgroundColor = (141, 179, 235)
     totalWeightTextColor = (255, 255, 255)
 
-    minLeftAndRightPoleCellWidth = 50 #in pixels, min size of the cell of a pole
-    xOffSetLeftAndRightPoleWordToCell = 15 #in pixels, min space between the inside of the pole cell and the word
+    minLeftAndRightPoleCellWidth = 50  # in pixels, min size of the cell of a pole
+    xOffSetLeftAndRightPoleWordToCell = 15  # in pixels, min space between the inside of the pole cell and the word
 
-    yTotalWeightCellOffset = 5 #in pixels, space between the end of the table and the start of the total weight cell
+    yTotalWeightCellOffset = 5  # in pixels, space between the end of the table and the start of the total weight cell
 
     totalWeightFontSize = 20
     fTotalWeight = ImageFont.truetype(DENDROGRAM_FONT_LOCATION, totalWeightFontSize)
 
     ###shadow settings###
-    shadowXOffset = 3 #value in pixels
-    shadowYOffset = 3 #value in pixels
-    shadowBlurSize = 4 #how big the bluer should be
+    shadowXOffset = 3  # value in pixels
+    shadowYOffset = 3  # value in pixels
+    shadowBlurSize = 4  # how big the bluer should be
 
     fontName = 'arial'
 
@@ -398,8 +400,8 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
         nAlternatives = len(alternatives)
         tData = __TableData___()
         alternativeNames = []
-        concernNames = [] #list of tulips, position 0 contains the left pole, position 1 contains the right pole: [('a', 'b'), ('c', 'd'), ......]
-        tableData = [] #matrix
+        concernNames = []  # list of tulips, position 0 contains the left pole, position 1 contains the right pole: [('a', 'b'), ('c', 'd'), ......]
+        tableData = []  # matrix
         maxWordHeight = 0
         colWidths = [None for x in xrange(nAlternatives + 1)]
         isFirstRunDone = False
@@ -412,11 +414,11 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
             concernNames.append((concernObj.leftPole, concernObj.rightPole))
             size = f.getsize(concernObj.leftPole)
             xTotalConcernCellOffset = 2 * xOffSetLeftAndRightPoleWordToCell
-            #left pole
+            # left pole
             if size[0] + xTotalConcernCellOffset > maxWidthLeftAndRightConcern:
                 maxWidthLeftAndRightConcern = size[0]
             size = f.getsize(concernObj.rightPole)
-            #right pole
+            # right pole
             if size[0] + xTotalConcernCellOffset > maxWidthLeftAndRightConcern:
                 maxWidthLeftAndRightConcern = size[0]
             row = []
@@ -429,15 +431,16 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
                         maxWordHeight = size[1]
                     if size[0] > colWidths[colN]:
                         colWidths[colN] = size[0]
-                        #process the rating info
+                        # process the rating info
                 if ratings is None:
                     ratingObj = Ratings.objects.filter(concern=concernObj, alternative=alternativeObj)
                 else:
-                    ratingObj = [r for r in ratings if r.alternative_id == alternativeObj.id and r.concern_id == concernObj.id]
+                    ratingObj = [r for r in ratings if
+                                 r.alternative_id == alternativeObj.id and r.concern_id == concernObj.id]
                 if len(ratingObj) >= 1:
                     ratingObj = ratingObj[0]
                     row.append(ratingObj.rating)
-                    #check to see if the rating text size 
+                    # check to see if the rating text size
                     if ratingObj.rating != None:
                         size = f.getsize(str(ratingObj.rating))
                         if size[0] > colWidths[colN]:
@@ -446,7 +449,7 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
                             maxWordHeight = size[1]
                 colN += 1
             colN = 0
-            #weight
+            # weight
             if concernObj.weight != None:
                 totalWeight += concernObj.weight
                 size = f.getsize(str(concernObj.weight))
@@ -462,17 +465,17 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
             tableData.append(row)
             row = []
 
-        #add the weight to the alternative names and calculate its size
+        # add the weight to the alternative names and calculate its size
         size = f.getsize('weight')
         if size[0] > colWidths[nAlternatives]:
             colWidths[nAlternatives] = size[0]
         if size[1] > maxWordHeight:
             maxWordHeight = size[1]
 
-        #add xWordCellSpace * 2 to each position of the array (in place)
+        # add xWordCellSpace * 2 to each position of the array (in place)
         colWidths[:] = [x + (xWordCellSpace * 2) for x in colWidths]
 
-        #create a copy of the alternativeNames and append weight to the new copy
+        # create a copy of the alternativeNames and append weight to the new copy
         alternativeNamesCopy = alternativeNames[:]
         alternativeNamesCopy.append('weight')
         tableData.insert(0, alternativeNamesCopy)
@@ -484,7 +487,7 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
         tData.cellWidths = colWidths
         tData.lineThickness = tableLineThickness
         tData.nCols = nAlternatives + 1
-        tData.nRows = nConcerns + 1 #plus 1 as we have added the table header
+        tData.nRows = nConcerns + 1  # plus 1 as we have added the table header
         tData.xTableOffSet = xTableOffSet + maxWidthLeftAndRightConcern + xLeftPoleCellOffset + 2 * xOffSetLeftAndRightPoleWordToCell + (
             tableLineThickness / 2)
         tData.yTableOffSet = yTableOffset
@@ -550,7 +553,7 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
         root.appendChild(tempNode)
         ######### end #create the rectangle to place behind the table 1st row##########
 
-        #add the shadow to the rectangle of the table (main body)
+        # add the shadow to the rectangle of the table (main body)
         for node in gNodeTable.getElementsByTagName('rect'):
             node.setFilter('url(#shadow1)')
 
@@ -562,7 +565,7 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
         while i < nConcerns:
             ######add the rect for the background of the poles######
 
-            #left pole
+            # left pole
             x = xLeftPoleCellOffset
             y = yTableOffset + ((i + 1) * tableLineThickness) + ((i + 1) * cellHeight) + (tableLineThickness / 2)
             height = cellHeight
@@ -571,7 +574,7 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
             tempNode.setFill(createColorRGBString(leftAndRightPoleBackgroundColor))
             tempNode.setFilter('url(#shadow1)')
             poleNode.appendChild(tempNode)
-            #right pole
+            # right pole
             x = xLeftPoleCellOffset + maxWidthLeftAndRightConcern + (
                 2 * xOffSetLeftAndRightPoleWordToCell) + xTableOffSet + tableWidth + xRightPoleWordOffset
             tempNode = xmlDoc.createRectNode(x, y, height, width)
@@ -580,7 +583,7 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
             poleNode.appendChild(tempNode)
             ###### end add the rect for the background of the pole######
 
-            #left
+            # left
             size = f.getsize(concernNames[i][0])
             x = xLeftPoleCellOffset + (maxWidthLeftAndRightConcern / 2) + xOffSetLeftAndRightPoleWordToCell - (
                 size[0] / 2)
@@ -591,7 +594,7 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
             tempNode.setFontSize(str(fontSize) + 'px')
             tempNode.setFill(createColorRGBString(leftAndRightPoleTextColor))
             poleNode.appendChild(tempNode)
-            #right
+            # right
             size = f.getsize(concernNames[i][1])
             x = xLeftPoleCellOffset + maxWidthLeftAndRightConcern + (
                 2 * xOffSetLeftAndRightPoleWordToCell) + xTableOffSet + tableWidth + xTableOffSet + (
@@ -647,7 +650,7 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
         return xml
 
 
-#data should be an object of the ResultAlternativeConcernTableData class
+# data should be an object of the ResultAlternativeConcernTableData class
 def convertAlternativeConcernSessionResultToSvg(data):
     ########### Settings ###########
     fontSize = 30
@@ -669,21 +672,21 @@ def convertAlternativeConcernSessionResultToSvg(data):
 
     fontName = 'arial'
 
-    xWordCellSpace = 5 #space between a word and the right and left line of the cell (in pixels)
-    yWordCellSpace = 5 #space between the biggest word and the top and bottom line of the cell (in pixels)
+    xWordCellSpace = 5  # space between a word and the right and left line of the cell (in pixels)
+    yWordCellSpace = 5  # space between the biggest word and the top and bottom line of the cell (in pixels)
 
-    concernTableYOffset = 5 #offset from the top element. In pixels
-    alternativeTableYOffset = 5 #offset from the top element. In pixels
+    concernTableYOffset = 5  # offset from the top element. In pixels
+    alternativeTableYOffset = 5  # offset from the top element. In pixels
 
-    concernTableXOffset = 5 #offset from the right element. In pixels
-    alternativeTableXOffset = 40 #offset from the right element. In pixels
+    concernTableXOffset = 5  # offset from the right element. In pixels
+    alternativeTableXOffset = 40  # offset from the right element. In pixels
 
-    xNewWordOffset = 5 #offset of the new word from the most left element. In pixels
+    xNewWordOffset = 5  # offset of the new word from the most left element. In pixels
 
-    tableLineThickness = 1 #in pixels
-    tableLineColor = (202, 217, 237) #value in rbg
-    tableCellWordColor = (0, 0, 0) #value in rbg
-    tableHeaderCellWordColor = (185, 187, 189) #value in rbg
+    tableLineThickness = 1  # in pixels
+    tableLineColor = (202, 217, 237)  # value in rbg
+    tableCellWordColor = (0, 0, 0)  # value in rbg
+    tableHeaderCellWordColor = (185, 187, 189)  # value in rbg
 
     concernTableHeaderBackground = (232, 234, 237)
     alternativeTableHeaderBackground = (232, 234, 237)
@@ -691,9 +694,9 @@ def convertAlternativeConcernSessionResultToSvg(data):
     tableBackgroundColor1 = (214, 233, 246)
     tableBackgroundColor2 = (189, 209, 247)
 
-    shadowXOffset = 3 #value in pixels
-    shadowYOffset = 3 #value in pixels
-    shadowBlurSize = 4 #how big the bluer should be
+    shadowXOffset = 3  # value in pixels
+    shadowYOffset = 3  # value in pixels
+    shadowBlurSize = 4  # how big the bluer should be
 
     ########### End settings ###########
 
@@ -702,12 +705,12 @@ def convertAlternativeConcernSessionResultToSvg(data):
     concernTableData = []
     alternativeTableHeader = ['name', 'times cited']
     concernTableHeader = ['left', 'right', 'times cited']
-    concernsNRows = len(data.concerns) + 1 #+1 because of the header
-    alternativesNRows = len(data.alternatives) + 1 #+1 because of the header
+    concernsNRows = len(data.concerns) + 1  # +1 because of the header
+    alternativesNRows = len(data.alternatives) + 1  # +1 because of the header
     concernsNCols = len(concernTableHeader)
     alternativesNCols = len(alternativeTableHeader)
-    concernCellWidths = [0 for x in xrange(concernsNCols)] #@UnusedVariable
-    alternativeCellWidths = [0 for x in xrange(alternativesNCols)] #@UnusedVariable
+    concernCellWidths = [0 for x in xrange(concernsNCols)]  # @UnusedVariable
+    alternativeCellWidths = [0 for x in xrange(alternativesNCols)]  # @UnusedVariable
     concernCellHeight = 0
     alternativeCellHeight = 0
     concernTableTotalXOffset = 0
@@ -720,9 +723,9 @@ def convertAlternativeConcernSessionResultToSvg(data):
 
     #################### Pre-processing ####################
 
-    #create the correct format for the table data
+    # create the correct format for the table data
 
-    #concern
+    # concern
     i = 1
     j = 0
     concernTableData.append(concernTableHeader)
@@ -734,7 +737,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
         if data.concerns[i - 1][5] == True:
             hasNewConcerns = True
         concernTableData.append(row)
-        #calculate the cell height and width
+        # calculate the cell height and width
         while j < concernsNCols:
             word = row[j]
             if type(word) != StringType and type(word) != UnicodeType:
@@ -749,7 +752,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
         j = 0
         i += 1
 
-    #alternative
+    # alternative
     i = 1
     j = 0
     alternativeTableData.append(alternativeTableHeader)
@@ -758,7 +761,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
         row.append(data.alternatives[i - 1][0])
         row.append(data.alternatives[i - 1][1])
         alternativeTableData.append(row)
-        #calculate the cell height and width
+        # calculate the cell height and width
         while j < alternativesNCols:
             word = row[j]
             if type(word) != StringType and type(word) != UnicodeType:
@@ -773,9 +776,9 @@ def convertAlternativeConcernSessionResultToSvg(data):
         j = 0
         i += 1
 
-    #check if the header word sizes
+    # check if the header word sizes
 
-    #concern
+    # concern
     i = 0
     while i < concernsNCols:
         size = f.getsize(concernTableData[0][i])
@@ -785,7 +788,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
             concernCellHeight = size[1]
         i += 1
 
-    #alternative
+    # alternative
     i = 0
     while i < alternativesNCols:
         size = f.getsize(alternativeTableData[0][i])
@@ -795,14 +798,14 @@ def convertAlternativeConcernSessionResultToSvg(data):
             alternativeCellHeight = size[1]
         i += 1
 
-    #calculate the max height of the headers
+    # calculate the max height of the headers
     size = fHeader.getsize(headerConcern)
     if size[1] > headerMaxHeight:
         headerMaxHeight = size[1]
     size = fHeader.getsize(headerAlternative)
     if size[1] > headerMaxHeight:
         headerMaxHeight = size[1]
-        #add xWordCellSpace * 2 to each position of the array (in place)
+        # add xWordCellSpace * 2 to each position of the array (in place)
     concernCellWidths[:] = [x + (xWordCellSpace * 2) for x in concernCellWidths]
     alternativeCellWidths[:] = [x + (xWordCellSpace * 2) for x in alternativeCellWidths]
 
@@ -812,7 +815,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
     if hasNewConcerns:
         alternativeTableTotalXOffset += xNewWordOffset + newWordSize[0]
 
-    #calculate the total y offset for the alternative and concern table
+    # calculate the total y offset for the alternative and concern table
     concernTableTotalYOffset = yHeaderOffset + headerMaxHeight + concernTableYOffset
     alternativeTableTotalYOffset = yHeaderOffset + headerMaxHeight + alternativeTableYOffset
 
@@ -872,14 +875,14 @@ def convertAlternativeConcernSessionResultToSvg(data):
 
     headerGroup = xmlDoc.createGNode()
     headerGroup.setId('headerGroup')
-    #concern
+    # concern
     tempNode = xmlDoc.createSvgTextNode(concernTableXOffset, yHeaderOffset + headerMaxHeight - 5, headerConcern)
     tempNode.setFontFamily(headerFontName)
     tempNode.setFontSize(str(headerFontSize) + 'px')
     tempNode.setColor(createColorRGBString(headerColor))
     headerGroup.appendChild(tempNode)
 
-    #alternative
+    # alternative
     tempNode = xmlDoc.createSvgTextNode(alternativeTableTotalXOffset, yHeaderOffset + headerMaxHeight - 5,
                                         headerAlternative)
     tempNode.setFontFamily(headerFontName)
@@ -891,7 +894,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
 
     #################### Create the background of the header tables ####################
 
-    #concern
+    # concern
     concernTableHeaderBackgroundGround = xmlDoc.createGNode()
     concernTableHeaderBackgroundGround.setId('concernTableHeaderBackgroundGround')
     tempNode = xmlDoc.createRectNode(concernTableTotalXOffset, concernTableTotalYOffset,
@@ -900,7 +903,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
     tempNode.setFill(createColorRGBString(concernTableHeaderBackground))
     concernTableHeaderBackgroundGround.appendChild(tempNode)
 
-    #alternative
+    # alternative
     alternativeTableHeaderBackgroundGround = xmlDoc.createGNode()
     alternativeTableHeaderBackgroundGround.setId('alternativeTableHeaderBackgroundGround')
     tempNode = xmlDoc.createRectNode(alternativeTableTotalXOffset, alternativeTableTotalYOffset,
@@ -913,7 +916,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
 
     #################### Create the background of the data part of the tables ####################
 
-    #concern
+    # concern
     i = 1
     concernTableDataBackgrounGroup = xmlDoc.createGNode()
     concernTableDataBackgrounGroup.setId('concernTableDataBackgrounGroup')
@@ -929,7 +932,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
         concernTableDataBackgrounGroup.appendChild(tempNode)
         i += 1
 
-    #alternative
+    # alternative
     i = 1
     alternativeTableDataBackgrounGroup = xmlDoc.createGNode()
     alternativeTableDataBackgrounGroup.setId('alternativeTableDataBackgrounGroup')
@@ -950,7 +953,7 @@ def convertAlternativeConcernSessionResultToSvg(data):
 
     #################### Add the 'new' word next to the tables ####################
 
-    #concern
+    # concern
     concernNewWordGroup = xmlDoc.createGNode()
     concernNewWordGroup.setId('concernNewWordGroup')
     i = 1
@@ -968,16 +971,16 @@ def convertAlternativeConcernSessionResultToSvg(data):
             concernNewWordGroup.appendChild(tempNode)
         i += 1
 
-    #alternative
+    # alternative
     alternativeNewWordGroup = xmlDoc.createGNode()
     alternativeNewWordGroup.setId('alternativeNewWordGroup')
     i = 1
     x = alternativeTableTotalXOffset + sum(alternativeCellWidths) + (
-        alternativesNCols + 1) * tableLineThickness + xNewWordOffset
+                                                                        alternativesNCols + 1) * tableLineThickness + xNewWordOffset
     while i < alternativesNRows:
         if data.alternatives[i - 1][2] == True:
             y = alternativeTableTotalYOffset + (i * alternativeCellHeight) + alternativeCellHeight / 2 + newWordSize[
-                1] / 2 - 5
+                                                                                                             1] / 2 - 5
             tempNode = xmlDoc.createSvgTextNode(x, y, newWord)
             tempNode.setFontFamily(fontName)
             tempNode.setFontSize(str(newWordFontSize) + 'px')
@@ -987,7 +990,6 @@ def convertAlternativeConcernSessionResultToSvg(data):
             tempNode.setFilter('url(#shadow1)')
             alternativeNewWordGroup.appendChild(tempNode)
         i += 1
-
 
     #################### End add the 'new' word next to the tables ####################
 
@@ -1034,10 +1036,10 @@ def convertAlternativeConcernSessionResultToSvg(data):
 
     return xmlDoc.toxml('utf-8')
 
-#meanData, rangeData and stdData should be objects of the resultRatingWeightTableData class
-def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
 
-###########settings###########
+# meanData, rangeData and stdData should be objects of the resultRatingWeightTableData class
+def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
+    ###########settings###########
     fontSize = 30
     headerFontSize = 45
     f = ImageFont.truetype(DENDROGRAM_FONT_LOCATION, fontSize)
@@ -1045,23 +1047,23 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
 
     fontName = 'arial'
 
-    meanTableYOffset = 5 #offset from the button of the header. In pixels
-    rangeTableYOffset = 5 #offset from the button of the header. In pixels
-    stdTableYOffset = 5 #offset from the button of the header. In pixels
+    meanTableYOffset = 5  # offset from the button of the header. In pixels
+    rangeTableYOffset = 5  # offset from the button of the header. In pixels
+    stdTableYOffset = 5  # offset from the button of the header. In pixels
 
-    meanTableXOffset = 5 #offset from the biggest left concern to the table and the offset from the table to the right concern. In pixels
-    rangeTableXOffset = 5 #offset from the biggest left concern to the table and the offset from the table to the right concern. In pixels
-    stdTableXOffset = 5 #offset from the biggest left concern to the table and the offset from the table to the right concern. In pixels
+    meanTableXOffset = 5  # offset from the biggest left concern to the table and the offset from the table to the right concern. In pixels
+    rangeTableXOffset = 5  # offset from the biggest left concern to the table and the offset from the table to the right concern. In pixels
+    stdTableXOffset = 5  # offset from the biggest left concern to the table and the offset from the table to the right concern. In pixels
 
     tableHeaderLinearColor1 = (141, 179, 235)
     tableHeaderLinearColor2 = (95, 144, 227)
 
-    xWordCellSpace = 5 #space between a word and the right and left line of the cell (in pixels)
-    yWordCellSpace = 5 #space between the biggest word and the top and bottom line of the cell (in pixels)
+    xWordCellSpace = 5  # space between a word and the right and left line of the cell (in pixels)
+    yWordCellSpace = 5  # space between the biggest word and the top and bottom line of the cell (in pixels)
 
-    meanHeaderYOffset = 10 #offset from the top of the header to the bottom of the element above it. In pixels
-    rangeHeaderYOffset = 10 #offset from the top of the header to the bottom of the element above it. In pixels
-    stdHeaderYOffset = 10 #offset from the top of the header to the bottom of the element above it. In pixels
+    meanHeaderYOffset = 10  # offset from the top of the header to the bottom of the element above it. In pixels
+    rangeHeaderYOffset = 10  # offset from the top of the header to the bottom of the element above it. In pixels
+    stdHeaderYOffset = 10  # offset from the top of the header to the bottom of the element above it. In pixels
 
     meanLeftConcernWordOffset = 5
     rangeLeftConcernWordOffset = 5
@@ -1070,10 +1072,10 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
     rangeRightConcernWordOffset = 5
     stdRightConcernWordOffset = 5
 
-    tableLineThickness = 1 #in pixels
-    tableLineColor = (60, 179, 113) #value in rbg
-    tableCellWordColor = (60, 179, 113) #value in rbg
-    tableHeaderCellWordColor = (255, 255, 255) #value in rbg
+    tableLineThickness = 1  # in pixels
+    tableLineColor = (60, 179, 113)  # value in rbg
+    tableCellWordColor = (60, 179, 113)  # value in rbg
+    tableHeaderCellWordColor = (255, 255, 255)  # value in rbg
 
     ##############end##############
 
@@ -1082,27 +1084,27 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
     meanTableData = []
     stdTableData = []
 
-    tempData.nRows = len(meanData.tableData) + 1 #it is + 1 for the table header
+    tempData.nRows = len(meanData.tableData) + 1  # it is + 1 for the table header
     tempData.nCols = len(meanData.tableHeader)
 
-    rangeColWidths = [0 for x in xrange(tempData.nCols)] #@UnusedVariable
-    meanColWidths = [0 for x in xrange(tempData.nCols)] #@UnusedVariable
-    stdColWidths = [0 for x in xrange(tempData.nCols)] #@UnusedVariable
+    rangeColWidths = [0 for x in xrange(tempData.nCols)]  # @UnusedVariable
+    meanColWidths = [0 for x in xrange(tempData.nCols)]  # @UnusedVariable
+    stdColWidths = [0 for x in xrange(tempData.nCols)]  # @UnusedVariable
     rangeCellHeight = 0
     meanCellHeight = 0
     stdCellHeight = 0
-    meanTableYTotalOffset = 0 #@UnusedVariable
-    rangeTableYTotalOffset = 0 #@UnusedVariable
-    stdTableYTotalOffset = 0 #@UnusedVariable
-    meanTableXTotalOffset = 0 #@UnusedVariable
-    rangeTableXTotalOffset = 0 #@UnusedVariable
-    stdTableXTotalOffset = 0 #@UnusedVariable
-    meanHeaderSize = None #@UnusedVariable
-    rangeHeaderSize = None #@UnusedVariable
-    stdHeaderSize = None #@UnusedVariable
-    meanTablesize = None #tulip (width, height) #@UnusedVariable
-    rangeTablesize = None #tulip (width, height) #@UnusedVariable
-    stdTablesize = None #tulip (width, height) #@UnusedVariable
+    meanTableYTotalOffset = 0  # @UnusedVariable
+    rangeTableYTotalOffset = 0  # @UnusedVariable
+    stdTableYTotalOffset = 0  # @UnusedVariable
+    meanTableXTotalOffset = 0  # @UnusedVariable
+    rangeTableXTotalOffset = 0  # @UnusedVariable
+    stdTableXTotalOffset = 0  # @UnusedVariable
+    meanHeaderSize = None  # @UnusedVariable
+    rangeHeaderSize = None  # @UnusedVariable
+    stdHeaderSize = None  # @UnusedVariable
+    meanTablesize = None  # tulip (width, height) #@UnusedVariable
+    rangeTablesize = None  # tulip (width, height) #@UnusedVariable
+    stdTablesize = None  # tulip (width, height) #@UnusedVariable
     meanLeftConcernWordMaxWidth = 0
     rangeLeftConcernWordMaxWidth = 0
     stdLeftConcernWordMaxWidth = 0
@@ -1117,7 +1119,7 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
 
     ####################Pre-processing####################
 
-    #create the correct format for the __createSvgTable__ of the tables data
+    # create the correct format for the __createSvgTable__ of the tables data
     i = 0
     j = 0
     while i < tempData.nRows - 1:
@@ -1168,7 +1170,7 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
         j = 0
         i += 1
 
-    #add the table header to the table data and check the sizes
+    # add the table header to the table data and check the sizes
     i = 0
 
     while i < tempData.nCols:
@@ -1193,22 +1195,22 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
 
         i += 1
 
-    #add xWordCellSpace * 2 to each position of the array (in place)
+    # add xWordCellSpace * 2 to each position of the array (in place)
     meanColWidths[:] = [x + (xWordCellSpace * 2) for x in meanColWidths]
     rangeColWidths[:] = [x + (xWordCellSpace * 2) for x in rangeColWidths]
     stdColWidths[:] = [x + (xWordCellSpace * 2) for x in stdColWidths]
 
-    #add the extra space to the cell height
+    # add the extra space to the cell height
     meanCellHeight += 2 * yWordCellSpace
     rangeCellHeight += 2 * yWordCellSpace
     stdCellHeight += 2 * yWordCellSpace
 
-    #calculate the size of the hear words
+    # calculate the size of the hear words
     meanHeaderSize = fHeader.getsize(meanData.header)
     rangeHeaderSize = fHeader.getsize(rangeData.header)
     stdHeaderSize = fHeader.getsize(stdData.header)
 
-    #calculate the height and width of the tables
+    # calculate the height and width of the tables
 
     height = (tempData.nRows + 1) * tableLineThickness + (tempData.nRows * meanCellHeight)
     width = (tempData.nCols + 1) * tableLineThickness + sum(meanColWidths)
@@ -1228,7 +1230,7 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
     width = (tempData.nCols + 1) * tableLineThickness + sum(stdColWidths)
     stdTablesize = (width, height)
 
-    #calculate max width of the left concern
+    # calculate max width of the left concern
     i = 0
     while i < len(meanData.concerns):
         size = f.getsize(meanData.concerns[i][0])
@@ -1245,36 +1247,35 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
 
         i += 1
 
-    #calculate the offset of each table
+    # calculate the offset of each table
 
-    #y offset
+    # y offset
     meanTableYTotalOffset = meanHeaderSize[1] + meanHeaderYOffset + meanTableYOffset
     rangeTableYTotalOffset = rangeHeaderSize[1] + rangeHeaderYOffset + rangeTableYOffset
     rangeTableYTotalOffset += meanTableYTotalOffset + meanTablesize[1]
 
-
     stdTableYTotalOffset = stdHeaderSize[1] + stdHeaderYOffset + stdTableYOffset
     stdTableYTotalOffset += rangeTableYTotalOffset + rangeTablesize[1]
 
-    #x offset
+    # x offset
     meanTableXTotalOffset = meanLeftConcernWordMaxWidth + meanTableXOffset + meanLeftConcernWordOffset
     rangeTableXTotalOffset = rangeLeftConcernWordMaxWidth + rangeTableXOffset + rangeLeftConcernWordOffset
     stdTableXTotalOffset = stdLeftConcernWordMaxWidth + stdTableXOffset + stdLeftConcernWordOffset
 
     ####################End pre-processing####################
 
-    #add the table header
+    # add the table header
     meanTableData.insert(0, meanData.tableHeader)
     rangeTableData.insert(0, rangeData.tableHeader)
     stdTableData.insert(0, stdData.tableHeader)
 
-    #create xml doc
+    # create xml doc
     imp = SvgDOMImplementation()
     xmlDoc = imp.createSvgDocument()
     root = xmlDoc.documentElement
     root.setXmlns('http://www.w3.org/2000/svg')
     root.setVersion('1.1')
-    tempNode = None #@UnusedVariable
+    tempNode = None  # @UnusedVariable
     globalDefNode = xmlDoc.createDefsNode()
     root.appendChild(globalDefNode)
     meanTableDataGroup = xmlDoc.createGNode()
@@ -1324,7 +1325,7 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
     stdTableHeaderBackgroundGroup.setId('stdTableHeaderBackgroundGroup')
     i = 0
     while i < len(meanData.tableHeader):
-        #calculate the total length of cols from 0 to i for all 3 tables
+        # calculate the total length of cols from 0 to i for all 3 tables
         n1 = 0
         n2 = 0
         n3 = 0
@@ -1334,21 +1335,21 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
             n2 += rangeColWidths[j]
             n3 += stdColWidths[j]
             j += 1
-            #mean
+            # mean
         x = meanTableXTotalOffset + (tableLineThickness / 2) + n1 + i * tableLineThickness
         y = meanTableYTotalOffset + (tableLineThickness / 2)
         tempNode = xmlDoc.createRectNode(x, y, meanCellHeight + tableLineThickness,
                                          meanColWidths[i] + tableLineThickness)
         tempNode.setFill('url(#tableHeaderGradient)')
         meanTableHeaderBackgroundGroup.appendChild(tempNode)
-        #range
+        # range
         x = rangeTableXTotalOffset + (tableLineThickness / 2) + n2 + i * tableLineThickness
         y = rangeTableYTotalOffset + (tableLineThickness / 2)
         tempNode = xmlDoc.createRectNode(x, y, rangeCellHeight + tableLineThickness,
                                          rangeColWidths[i] + tableLineThickness)
         tempNode.setFill('url(#tableHeaderGradient)')
         rangeTableHeaderBackgroundGroup.appendChild(tempNode)
-        #std
+        # std
         x = stdTableXTotalOffset + (tableLineThickness / 2) + n2 + i * tableLineThickness
         y = stdTableYTotalOffset + (tableLineThickness / 2)
         tempNode = xmlDoc.createRectNode(x, y, stdCellHeight + tableLineThickness, stdColWidths[i] + tableLineThickness)
@@ -1375,10 +1376,10 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
                 n1 += rangeColWidths[k]
                 n2 += stdColWidths[k]
                 k += 1
-                #range table
+                # range table
             color = rangeData.tableData[i][j][1]
             tempNode = xmlDoc.createRectNode(tableLineThickness * j + n1 + rangeTableXTotalOffset,
-                                             rangeTableYTotalOffset + ( (i + 1) * tableLineThickness) + (
+                                             rangeTableYTotalOffset + ((i + 1) * tableLineThickness) + (
                                                  (i + 1) * rangeCellHeight), rangeCellHeight + tableLineThickness,
                                              rangeColWidths[j] + tableLineThickness)
             if color != None:
@@ -1386,10 +1387,10 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
             else:
                 tempNode.setFill(createColorRGBString((255, 255, 255)))
             rangeTableBackground.appendChild(tempNode)
-            #std table
+            # std table
             color = stdData.tableData[i][j][1]
             tempNode = xmlDoc.createRectNode(tableLineThickness * j + n2 + stdTableXTotalOffset,
-                                             stdTableYTotalOffset + ( (i + 1) * tableLineThickness) + (
+                                             stdTableYTotalOffset + ((i + 1) * tableLineThickness) + (
                                                  (i + 1) * stdCellHeight), stdCellHeight + tableLineThickness,
                                              stdColWidths[j] + tableLineThickness)
             if color != None:
@@ -1411,9 +1412,9 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
     stdConcernGroup = xmlDoc.createGNode()
     stdConcernGroup.setId('stdTableConcernGroup')
     while i < len(meanData.concerns):
-        #mean
+        # mean
         size = f.getsize(meanData.concerns[i][0])
-        y = meanTableYTotalOffset + (i + 1) * meanCellHeight + ((i + 1) * tableLineThickness ) + (
+        y = meanTableYTotalOffset + (i + 1) * meanCellHeight + ((i + 1) * tableLineThickness) + (
             meanCellHeight / 2) + (size[1] / 2) - 5
         tempNode = xmlDoc.createSvgTextNode(meanLeftConcernWordOffset, y, meanData.concerns[i][0])
         tempNode.setFontFamily(fontName)
@@ -1424,9 +1425,9 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
         tempNode.setFontFamily(fontName)
         tempNode.setFontSize(str(fontSize) + 'px')
         meanConcernGroup.appendChild(tempNode)
-        #range
+        # range
         size = f.getsize(rangeData.concerns[i][0])
-        y = rangeTableYTotalOffset + (i + 1) * rangeCellHeight + ((i + 1) * tableLineThickness ) + (
+        y = rangeTableYTotalOffset + (i + 1) * rangeCellHeight + ((i + 1) * tableLineThickness) + (
             rangeCellHeight / 2) + (size[1] / 2) - 5
         tempNode = xmlDoc.createSvgTextNode(rangeLeftConcernWordOffset, y, rangeData.concerns[i][0])
         tempNode.setFontFamily(fontName)
@@ -1437,9 +1438,9 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
         tempNode.setFontFamily(fontName)
         tempNode.setFontSize(str(fontSize) + 'px')
         rangeConcernGroup.appendChild(tempNode)
-        #std
+        # std
         size = f.getsize(stdData.concerns[i][0])
-        y = stdTableYTotalOffset + (i + 1) * stdCellHeight + ((i + 1) * tableLineThickness ) + (stdCellHeight / 2) + (
+        y = stdTableYTotalOffset + (i + 1) * stdCellHeight + ((i + 1) * tableLineThickness) + (stdCellHeight / 2) + (
             size[1] / 2) - 5
         tempNode = xmlDoc.createSvgTextNode(stdLeftConcernWordOffset, y, stdData.concerns[i][0])
         tempNode.setFontFamily(fontName)
@@ -1454,66 +1455,67 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
         i += 1
         ######### end #create the left and right concerns ##########
 
-    ######### create the final document #########
-    #add the header
+        ######### create the final document #########
+    # add the header
     tempNode = xmlDoc.createSvgTextNode(meanTableXTotalOffset, meanHeaderYOffset + meanHeaderSize[1] - 7,
                                         meanData.header)
     tempNode.setFontFamily(fontName)
     tempNode.setFontSize(str(headerFontSize) + 'px')
     meanTableDataGroup.appendChild(tempNode)
-    #add the different elements of the mean table
+    # add the different elements of the mean table
     meanTableDataGroup.appendChild(meanTableHeaderBackgroundGroup)
     meanTableDataGroup.appendChild(meanConcernGroup)
-    #add the mean table
+    # add the mean table
     meanTableDataGroup.appendChild(xmlTableMean)
 
-    #add the header
+    # add the header
     tempNode = xmlDoc.createSvgTextNode(rangeTableXTotalOffset,
                                         meanTableYTotalOffset + meanTablesize[1] + rangeHeaderYOffset + rangeHeaderSize[
                                             1] - 7, rangeData.header)
     tempNode.setFontFamily(fontName)
     tempNode.setFontSize(str(headerFontSize) + 'px')
     rangeTableDataGroup.appendChild(tempNode)
-    #add the different elements of the range table
+    # add the different elements of the range table
     rangeTableDataGroup.appendChild(rangeTableHeaderBackgroundGroup)
     rangeTableDataGroup.appendChild(rangeConcernGroup)
     rangeTableDataGroup.appendChild(rangeTableBackground)
-    #add the std table
+    # add the std table
     rangeTableDataGroup.appendChild(xmlTableRange)
 
-    #add the headers
+    # add the headers
     tempNode = xmlDoc.createSvgTextNode(stdTableXTotalOffset,
                                         rangeTableYTotalOffset + rangeTablesize[1] + stdHeaderYOffset + stdHeaderSize[
                                             1] - 7, stdData.header)
     tempNode.setFontFamily(fontName)
     tempNode.setFontSize(str(headerFontSize) + 'px')
     stdTableDataGroup.appendChild(tempNode)
-    #add the different elements of the std table
+    # add the different elements of the std table
     stdTableDataGroup.appendChild(stdTableHeaderBackgroundGroup)
     stdTableDataGroup.appendChild(stdConcernGroup)
     stdTableDataGroup.appendChild(stdTableBackground)
-    #add the std table
+    # add the std table
     stdTableDataGroup.appendChild(xmlTableStd)
 
-    #add the data to the document
+    # add the data to the document
     root.appendChild(meanTableDataGroup)
     root.appendChild(rangeTableDataGroup)
     root.appendChild(stdTableDataGroup)
 
     return xmlDoc.toxml('utf-8')
 
-#lineColor: tulip (r,b,g)
-#return is a g node containing the code for the table
+
+# lineColor: tulip (r,b,g)
+# return is a g node containing the code for the table
 def __createSvgTable__(data):
     imp = SvgDOMImplementation()
     xmlDoc = imp.createSvgDocument()
-    nvl = data.nCols - 1 #number vertical lines
-    nhl = data.nRows - 1 #number horizontal lines
+    nvl = data.nCols - 1  # number vertical lines
+    nhl = data.nRows - 1  # number horizontal lines
     previousX = 0
     previousY = 0
     mainGnode = xmlDoc.createGNode()
     mainGnode.setId('svgGridTableGroup')
-    #create the main body of the table
+    # create the main body of the table
     tableWidth = (data.nCols * data.lineThickness) + sum(data.cellWidths)
     tableHeight = (data.nRows * data.lineThickness) + (data.nRows * data.cellHeight)
     tableBodyGroupNode = xmlDoc.createGNode()
@@ -1523,10 +1525,10 @@ def __createSvgTable__(data):
     tempNode.setStroke(createColorRGBString(data.tableLineColor))
     tempNode.setStrokeWidth(data.lineThickness)
     tableBodyGroupNode.appendChild(tempNode)
-    #create the dividing lines in the table
+    # create the dividing lines in the table
     previousX += data.xTableOffSet
     previousY += data.yTableOffSet
-    #create the vertical lines
+    # create the vertical lines
     i = 0
     while i < nvl:
         cw = data.cellWidths[i]
@@ -1538,7 +1540,7 @@ def __createSvgTable__(data):
         previousX = x
         i += 1
 
-    #create the horizontal lines
+    # create the horizontal lines
     i = 0
     while i < nhl:
         y = previousY + data.cellHeight + data.lineThickness
@@ -1550,7 +1552,7 @@ def __createSvgTable__(data):
         tableBodyGroupNode.appendChild(tempNode)
 
     mainGnode.appendChild(tableBodyGroupNode)
-    #place the text inside the table
+    # place the text inside the table
     tableCellTextGroupNode = xmlDoc.createGNode()
     tableCellTextGroupNode.setId('svgGridTableCellText')
     i = 0
@@ -1563,7 +1565,7 @@ def __createSvgTable__(data):
             # use the floor of data.lineThickness/2, this will cause an error of around 0.5 pixels in the placement
         yTotalTableTextOffSet += data.lineThickness / 2
         while j < data.nCols:
-            xTableTextOffSet = 0 # sum of all the cols lenght up to j - 1
+            xTableTextOffSet = 0  # sum of all the cols lenght up to j - 1
             xTotalTableTextOffSet = 0
             if j > 0:
                 colPos = 0
@@ -1579,7 +1581,7 @@ def __createSvgTable__(data):
             if type(word) != StringType and type(word) != UnicodeType:
                 word = str(word)
             size = data.fontObject.getsize(word)
-            #word is center aligned
+            # word is center aligned
             x = data.xTableOffSet + xTotalTableTextOffSet + data.xWordCellSpace + (data.cellWidths[j] / 2) - (
                 size[0] / 2) - 5
             # -5 is used to correct the placement of the text
@@ -1587,7 +1589,7 @@ def __createSvgTable__(data):
             tempNode = xmlDoc.createSvgTextNode(x, y, word)
             tempNode.setFontFamily(data.fontName)
             tempNode.setFontSize(str(data.fontSize) + 'px')
-            #first row is the header of the table and it has some different settings
+            # first row is the header of the table and it has some different settings
             if i == 0:
                 tempNode.setFill(createColorRGBString(data.tableHeaderCellWordColor))
             else:
@@ -1600,13 +1602,13 @@ def __createSvgTable__(data):
     return mainGnode
 
 
-#place holder for the variables used in __createSvgTable__
+# place holder for the variables used in __createSvgTable__
 class __TableData___(object):
-    cellWidths = None #array with the cells width
+    cellWidths = None  # array with the cells width
     cellHeight = None
     nCols = None
     nRows = None
-    tableData = None #matrix containing the text that should be displayed in the table
+    tableData = None  # matrix containing the text that should be displayed in the table
     lineThickness = 1
     xTableOffSet = 0
     yTableOffSet = 0
@@ -1614,22 +1616,20 @@ class __TableData___(object):
     yWordCellSpace = 5
     fontObject = None
     fontName = None
-    fontSize = None # in pixels
-    tableLineColor = None #tulip, value in rbg
-    tableCellWordColor = None #tulip, value in rbg
-    tableHeaderCellWordColor = None #tulip, value in rbg
+    fontSize = None  # in pixels
+    tableLineColor = None  # tulip, value in rbg
+    tableCellWordColor = None  # tulip, value in rbg
+    tableHeaderCellWordColor = None  # tulip, value in rbg
 
-#class used as input to the functions that convert the result to a svg image
+
+# class used as input to the functions that convert the result to a svg image
 class SessionResultImageConversionData(object):
-    tableHeader = None #list with the table header (first col)
-    tableData = None #matrix with the data of the table
-    header = None #string that is used a header for the entire table
+    tableHeader = None  # list with the table header (first col)
+    tableData = None  # matrix with the data of the table
+    header = None  # string that is used a header for the entire table
     concerns = None
+
 
 # returns a string with: 'rgb(number,number,number)'
 def createColorRGBString(color):
     return 'rgb(' + str(color[0]) + ',' + str(color[1]) + ',' + str(color[2]) + ')'
-    
-    
-    
-    
