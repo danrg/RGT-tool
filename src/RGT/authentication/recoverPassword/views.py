@@ -1,13 +1,12 @@
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.contrib.auth import login, authenticate
 #from django.views.generic.simple import redirect_to
 import datetime
 from django.utils.timezone import utc
 from recoverPassForm import RecoverPassForm
-from RGT.authentication.models import PassRecoverCode
 
 
 def recoverPass(request, passRecoverCode=''):

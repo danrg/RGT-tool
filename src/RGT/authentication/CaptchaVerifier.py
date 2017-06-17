@@ -1,5 +1,4 @@
 import logging
-from RGT import settings
 from recaptcha.client import captcha
 import sys
 
@@ -13,6 +12,9 @@ class CaptchaVerifier(object):
         """
         challenge = request.POST['recaptcha_challenge_field']
         response = request.POST['recaptcha_response_field']
+
+        from RGT import settings
+
         privateKey = settings.RECAPTCHA_PRIVATE_KEY
         clientIpAddress = request.META['REMOTE_ADDR']
 

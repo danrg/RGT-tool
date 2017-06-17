@@ -5,7 +5,7 @@ from django.db import transaction
 from formtools.wizard.views import SessionWizardView
 from django.shortcuts import redirect
 from django.utils.timezone import utc
-from RGT.gridMng.models import Grid, Composite, Alternatives, Concerns, Ratings, Rule
+# from RGT.gridMng.models import Grid, Composite, Alternatives, Concerns, Ratings, Rule
 from RGT.gridMng.prototypes.compositeParse import CompositeParse
 from RGT.gridMng.template.showGridsData import ShowGridsData
 from RGT.gridMng.utility import generateRandomString

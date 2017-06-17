@@ -12,6 +12,9 @@ class UserProfile(models.Model):
     verifyEmailCode = models.CharField(max_length=14, unique=False)
     displayHelp = models.BooleanField(default=True)
 
+    class Meta:
+        app_label = 'userProfile'
+
 
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

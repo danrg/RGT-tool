@@ -1,6 +1,11 @@
 # Django settings for RGT project.
 import os
 
+# import django
+import django
+
+from ownsettings import *
+
 projectPath = os.path.normpath(os.path.join(os.path.dirname(__file__), '../../'))
 
 DENDROGRAM_FONT_LOCATION = projectPath + '/src/RGT/LiberationSans-Regular.ttf'
@@ -89,12 +94,34 @@ STATICFILES_FINDERS = (
 SECRET_KEY = 'USE_YOUR_OWN'
 
 # List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
-
+# TEMPLATE_LOADERS = (
+#     'django.template.loaders.filesystem.Loader',
+#     'django.template.loaders.app_directories.Loader',
+# #     'django.template.loaders.eggs.Loader',
+# )
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            projectPath + '/templates'
+            # insert your TEMPLATE_DIRS here
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
+                # list if you haven't customized them:
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    }
+]
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -105,22 +132,22 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'RGT.urls'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    projectPath + '/templates',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages"
-)
+# TEMPLATE_DIRS = (
+#     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+#     # Always use forward slashes, even on Windows.
+#     # Don't forget to use absolute paths, not relative paths.
+#     projectPath + '/templates',
+# )
+#
+# TEMPLATE_CONTEXT_PROCESSORS = (
+#     "django.contrib.auth.context_processors.auth",
+#     "django.core.context_processors.debug",
+#     "django.core.context_processors.i18n",
+#     "django.core.context_processors.media",
+#     "django.core.context_processors.static",
+#     "django.core.context_processors.tz",
+#     "django.contrib.messages.context_processors.messages"
+# )
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -195,8 +222,9 @@ LOGGING = {
 AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend', 'RGT.authentication.backendAuthentication.BackendAuthentication')
 AUTH_PROFILE_MODULE = 'userProfile.UserProfile'
 
-from ownsettings import *
 
 ######## RGT specific variables ########
 GRID_USID_KEY_LENGTH= 20
 SESSION_USID_KEY_LENGTH= 20
+
+django.setup()

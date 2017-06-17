@@ -7,3 +7,6 @@ class PassRecoverCode(models.Model):
     dateTime = models.DateTimeField(auto_now_add=True)
     linkUsed = models.BooleanField(default=False)
     linkExpired = models.BooleanField(default=False)
+
+    class Meta:
+        app_label = 'Pass Recover Code model'

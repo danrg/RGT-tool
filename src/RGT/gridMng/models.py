@@ -7,11 +7,11 @@ from django.db.models.query import QuerySet
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.db import transaction
-from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
-from RGT.gridMng.error.wrongState import WrongState
-from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
+# from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
+# from RGT.gridMng.error.wrongState import WrongState
+# from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
 from RGT.gridMng.session.state import State as SessionState
-from RGT.settings import SESSION_USID_KEY_LENGTH, GRID_USID_KEY_LENGTH
+# from RGT.settings import SESSION_USID_KEY_LENGTH, GRID_USID_KEY_LENGTH
 from utility import generateRandomString
 from datetime import datetime, date
 from django.utils.timezone import utc
@@ -102,7 +102,13 @@ class GridManager(models.Manager):
 
 
 class Grid(models.Model):
+    # from django.contrib.auth import get_user_model
+    # User = get_user_model()
+
     usid = models.CharField(max_length=20, unique=True, default=lambda: generateRandomString(GRID_USID_KEY_LENGTH))
+
+    from django.contrib.auth.models import User
+
     user = models.ForeignKey(User, null=True)
     name = models.CharField(max_length=30, default='untitled')
     description = models.TextField(null=True)
@@ -133,6 +139,7 @@ class Grid(models.Model):
 
     class Meta:
         ordering = ['id']
+        app_label = 'Grid Model'
 
     class GridType(object):
         USER_GRID = 'u'
@@ -182,6 +189,8 @@ class Alternatives(models.Model):
 
     class Meta:
         ordering = ['id']
+        app_label = 'Alternatives Model'
+
 
 class Revision:
     grid = None
@@ -284,6 +293,9 @@ class Diff(models.Model):
             return self
         return model.objects.get(id=self.id)
 
+    class Meta:
+        app_label = 'Diff Model'
+
 class AlternativeDiff(Diff):
     old_name = models.CharField(max_length=100)
     new_name = models.CharField(max_length=100)
@@ -318,6 +330,10 @@ class AlternativeDiff(Diff):
             a.name = self.old_name
 
         return reverted
+
+    class Meta:
+        app_label = 'Alternative Diff Model'
+
 
 class ConcernDiffManager(models.Manager):
     def daily_revisions(self, grid):
@@ -366,6 +382,10 @@ class ConcernDiff(Diff):
 
         return reverted
 
+    class Meta:
+        app_label = 'Concern Diff Model'
+
+
 class RatingDiff(Diff):
     # related_id from Diff class acts as relation id to Alternative
     concern_id = models.IntegerField()
@@ -391,6 +411,10 @@ class RatingDiff(Diff):
             r.rating = self.old_rating
         return reverted
 
+    class Meta:
+        app_label = 'Rating Diff Model'
+
+
 class GridProxy:
     id = None
     alternatives = None
@@ -408,6 +432,7 @@ class GridProxy:
             self.concerns = original_grid.concerns
             self.ratings = original_grid.ratings
 
+
 class Composite(models.Model):
     compid= models.CharField(max_length=20, unique=False)
     user= models.ForeignKey(User, null= True)
@@ -416,6 +441,7 @@ class Composite(models.Model):
 
     class Meta:
         ordering = ['id']
+        app_label = 'Composite Model'
 
 
 class Rule:
@@ -429,6 +455,7 @@ class Rule:
 
     def __lt__(self, other):
         return self.total_rating < other.total_rating
+
 
 class Concerns(models.Model):
     grid = models.ForeignKey(Grid)
@@ -484,6 +511,7 @@ class Concerns(models.Model):
 
     class Meta:
         ordering = ['id']
+        app_label = 'Concerns Model'
 
 
 class Ratings(models.Model):
@@ -494,6 +522,7 @@ class Ratings(models.Model):
     class Meta:
         unique_together = ('concern',
                            'alternative') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
+        app_label = 'Ratings Model'
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -541,6 +570,7 @@ class StateManager(models.Manager):
     def respondable(self):
         return self.filter(name__in=(SessionState.AC, SessionState.RW))
 
+
 class State(models.Model):
     name = models.CharField(max_length=30)
     objects = StateManager()
@@ -554,6 +584,7 @@ class State(models.Model):
 
     class Meta:
         ordering = ['id']
+        app_label = 'State Model'
 
     def __unicode__(self):
         return self.verbose_names.get(self.name)
@@ -599,12 +630,15 @@ class FacilitatorManager(models.Manager):
         facilitator, created = self.get_or_create(user=userObj)
         return not created and facilitator.session_set.count() > 0
 
+
 class Facilitator(models.Model):
     user = models.ForeignKey(User, unique=True)
     objects = FacilitatorManager()
 
     class Meta:
         ordering = ['id']
+        app_label = 'Facilitator Model'
+
 
 class SessionManager(models.Manager):
 
@@ -638,6 +672,7 @@ class SessionManager(models.Manager):
         respondable_states = State.objects.respondable()
         return self.with_participation(user).filter(state__in=respondable_states)
 
+
 class Session(models.Model):
     usid = models.CharField(max_length=20, unique=True)
     facilitator = models.ForeignKey(Facilitator)
@@ -651,6 +686,7 @@ class Session(models.Model):
 
     class Meta:
         ordering = ['id']
+        app_label = 'Session Model'
 
     def getParticipators(self):
         return [participator.user for participator in self.userparticipatesession_set.all()]
@@ -732,9 +768,11 @@ class SessionIterationState(models.Model):
     session = models.ForeignKey(Session)
     state = models.ForeignKey(State)
     objects = SessionIterationStateManager()
+
     class Meta:
         unique_together = ('iteration', 'session')
         ordering = ['id']
+        app_label = 'Session Iteration State Model'
 
 
 class UserParticipateSession(models.Model):
@@ -745,6 +783,8 @@ class UserParticipateSession(models.Model):
         unique_together = ('session',
                            'user') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         ordering = ['id']
+        app_label = 'User Participate Session Model'
+
 
     def has_pending_response(self, user):
         if self.session.state.can_be_responded_to():
@@ -768,6 +808,8 @@ class SessionGrid(models.Model):
         unique_together = ('iteration',
                            'session') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         ordering = ['id']
+        app_label = 'Session Grid Model'
+
 
 class ResponseGridManager(models.Manager):
     def get_iterations_with_grids(self, session, user):
@@ -790,4 +832,4 @@ class ResponseGrid(models.Model):
         unique_together = ('iteration', 'user',
                            'session') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         ordering = ['id']
-
+        app_label = 'Response Grid Model'

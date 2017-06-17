@@ -18,27 +18,27 @@ from django.utils.timezone import utc
 from django.db import IntegrityError
 from django.core.urlresolvers import reverse
 
-from RGT.gridMng.models import Grid
-from RGT.gridMng.models import Alternatives
-from RGT.gridMng.models import Concerns
-from RGT.gridMng.models import Ratings
-from RGT.gridMng.models import Facilitator
-from RGT.gridMng.models import Composite
-from RGT.gridMng.models import AlternativeDiff, Diff, ConcernDiff, GridProxy
-from RGT.gridMng.prototypes.compositeParse import CompositeParse
-from RGT.gridMng.utility import generateRandomString, validateName, convertSvgToPng, convertSvgTo, getImageError, convertGridTableToSvg, returnMatrix
-from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag, HttpErrorResponse
-from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
-from RGT.gridMng.session.state import State
-from RGT.gridMng.template.showGridsData import ShowGridsData
-from RGT.gridMng.template.gridTableData import GridTableData, WritableGridTableData
-from RGT.gridMng.template.createMyGridBaseData import CreateMyGridBaseData
-from RGT.gridMng.template.createMyGridData import CreateMyGridData
-from RGT.gridMng.error.unableToCreateUSID import UnableToCreateUSID
-from RGT.gridMng.utility import generateGridTable, createDendogram, createFileResponse
-from RGT.gridMng.hierarchical import transpose
-from RGT.settings import GRID_USID_KEY_LENGTH, DEBUG
-from RGT.gridMng.fileData import FileData
+# from RGT.gridMng.models import Grid
+# from RGT.gridMng.models import Alternatives
+# from RGT.gridMng.models import Concerns
+# from RGT.gridMng.models import Ratings
+# from RGT.gridMng.models import Facilitator
+# from RGT.gridMng.models import Composite
+# from RGT.gridMng.models import AlternativeDiff, Diff, ConcernDiff, GridProxy
+# from RGT.gridMng.prototypes.compositeParse import CompositeParse
+# from RGT.gridMng.utility import generateRandomString, validateName, convertSvgToPng, convertSvgTo, getImageError, convertGridTableToSvg, returnMatrix
+# from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag, HttpErrorResponse
+# from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
+# from RGT.gridMng.session.state import State
+# from RGT.gridMng.template.showGridsData import ShowGridsData
+# from RGT.gridMng.template.gridTableData import GridTableData, WritableGridTableData
+# from RGT.gridMng.template.createMyGridBaseData import CreateMyGridBaseData
+# from RGT.gridMng.template.createMyGridData import CreateMyGridData
+# from RGT.gridMng.error.unableToCreateUSID import UnableToCreateUSID
+# from RGT.gridMng.utility import generateGridTable, createDendogram, createFileResponse
+# from RGT.gridMng.hierarchical import transpose
+# from RGT.settings import GRID_USID_KEY_LENGTH, DEBUG
+# from RGT.gridMng.fileData import FileData
 
 logger = logging.getLogger('django.request')
 

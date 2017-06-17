@@ -1,5 +1,4 @@
 from django.http import HttpResponse
-from RGT import settings
 from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse
 from RGT.gridMng.hierarchical import hcluster, transpose, drawDendogram3, pcaCluster, getSimilarities
 from RGT.XML.SVG.svgDOMImplementation import SvgDOMImplementation
