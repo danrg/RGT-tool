@@ -1,8 +1,14 @@
-from RGT.gridMng.models import Session
-from RGT.gridMng.template.gridTableData import GridTableData
-from RGT.gridMng.template.session.participantsData import ParticipantsData
-from RGT.gridMng.utility import generateGridTable, generateRandomString
-from RGT.gridMng.session.state import State as SessionState
+# from RGT.gridMng.models import Session
+from ...models import Session
+
+# from RGT.gridMng.template.gridTableData import GridTableData
+from ...template.gridTableData import GridTableData
+# from RGT.gridMng.template.session.participantsData import ParticipantsData
+from ...template.session.participantsData import ParticipantsData
+# from RGT.gridMng.utility import generateGridTable, generateRandomString
+from ...utility import generateGridTable, generateRandomString
+# from RGT.gridMng.session.state import State as SessionState
+from ...session.state import State as SessionState
 
 
 class SessionsData(object):
@@ -10,6 +16,7 @@ class SessionsData(object):
     facilitating_sessions = None
     pending_responses = None
     session = None
+
     def __init__(self, user, session=None):
         self.participating_sessions = Session.objects.with_participation(user)
         self.facilitating_sessions = Session.objects.with_facilitator(user)

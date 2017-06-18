@@ -4,18 +4,20 @@ from copy import deepcopy
 
 from django.db import models
 from django.db.models.query import QuerySet
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User
+# from django.contrib.contenttypes.models import ContentType
+# from django.contrib.auth.models import User
 from django.db import transaction
 # from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
 # from RGT.gridMng.error.wrongState import WrongState
 # from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
-from RGT.gridMng.session.state import State as SessionState
+# from RGT.gridMng.session.state import State as SessionState
+from .session.state import State as SessionState
 # from RGT.settings import SESSION_USID_KEY_LENGTH, GRID_USID_KEY_LENGTH
 from utility import generateRandomString
 from datetime import datetime, date
 from django.utils.timezone import utc
 from django.core.urlresolvers import reverse
+
 
 class GridManager(models.Manager):
 
@@ -139,7 +141,7 @@ class Grid(models.Model):
 
     class Meta:
         ordering = ['id']
-        app_label = 'Grid Model'
+        app_label = 'gridMng'
 
     class GridType(object):
         USER_GRID = 'u'
@@ -189,7 +191,7 @@ class Alternatives(models.Model):
 
     class Meta:
         ordering = ['id']
-        app_label = 'Alternatives Model'
+        app_label = 'gridMng'
 
 
 class Revision:
@@ -269,6 +271,8 @@ class Diff(models.Model):
     grid = models.ForeignKey(Grid)
     datetime = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=100)
+
+    from django.contrib.contenttypes.models import ContentType
     content_type = models.ForeignKey(ContentType, editable=False, null=True)
     objects = DiffManager()
 
@@ -435,7 +439,9 @@ class GridProxy:
 
 class Composite(models.Model):
     compid= models.CharField(max_length=20, unique=False)
-    user= models.ForeignKey(User, null= True)
+
+    from django.contrib.auth.models import User
+    user = models.ForeignKey(User, null=True)
     rule = models.CharField(max_length=200, null=True)
     status = models.CharField(max_length=200, null=True)
 
@@ -511,7 +517,7 @@ class Concerns(models.Model):
 
     class Meta:
         ordering = ['id']
-        app_label = 'Concerns Model'
+        app_label = 'gridMng'
 
 
 class Ratings(models.Model):
@@ -522,7 +528,7 @@ class Ratings(models.Model):
     class Meta:
         unique_together = ('concern',
                            'alternative') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
-        app_label = 'Ratings Model'
+        app_label = 'gridMng'
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -551,6 +557,7 @@ class GridDiffManager(models.Manager):
             diff.date = grid.dateTime
             diff.save()
 
+
 class StateManager(models.Manager):
     def getInitialState(self):
         return self.get(name='initial')
@@ -574,6 +581,8 @@ class StateManager(models.Manager):
 class State(models.Model):
     name = models.CharField(max_length=30)
     objects = StateManager()
+
+    from .session.state import State as SessionState
     verbose_names = { SessionState.INITIAL: 'Invitation', SessionState.AC: 'Alternatives / Concerns',
                       SessionState.RW: 'Ratings / Weights', SessionState.FINISH: 'Closed',
                       SessionState.CHECK: 'Check values'}
@@ -584,7 +593,7 @@ class State(models.Model):
 
     class Meta:
         ordering = ['id']
-        app_label = 'State Model'
+        app_label = 'gridMng'
 
     def __unicode__(self):
         return self.verbose_names.get(self.name)
@@ -632,12 +641,14 @@ class FacilitatorManager(models.Manager):
 
 
 class Facilitator(models.Model):
+    from django.contrib.auth.models import User
+
     user = models.ForeignKey(User, unique=True)
     objects = FacilitatorManager()
 
     class Meta:
         ordering = ['id']
-        app_label = 'Facilitator Model'
+        app_label = 'gridMng'
 
 
 class SessionManager(models.Manager):
@@ -686,7 +697,7 @@ class Session(models.Model):
 
     class Meta:
         ordering = ['id']
-        app_label = 'Session Model'
+        app_label = 'gridMng'
 
     def getParticipators(self):
         return [participator.user for participator in self.userparticipatesession_set.all()]
@@ -777,13 +788,15 @@ class SessionIterationState(models.Model):
 
 class UserParticipateSession(models.Model):
     session = models.ForeignKey(Session)
+
+    from django.contrib.auth.models import User
     user = models.ForeignKey(User)
 
     class Meta:
         unique_together = ('session',
                            'user') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         ordering = ['id']
-        app_label = 'User Participate Session Model'
+        app_label = 'gridMng'
 
 
     def has_pending_response(self, user):
@@ -808,7 +821,7 @@ class SessionGrid(models.Model):
         unique_together = ('iteration',
                            'session') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         ordering = ['id']
-        app_label = 'Session Grid Model'
+        app_label = 'gridMng'
 
 
 class ResponseGridManager(models.Manager):
@@ -825,6 +838,8 @@ class ResponseGrid(models.Model):
     iteration = models.IntegerField()
     session = models.ForeignKey(Session)
     grid = models.ForeignKey(Grid)
+
+    from django.contrib.auth.models import User
     user = models.ForeignKey(User)
     objects = ResponseGridManager()
 
@@ -832,4 +847,4 @@ class ResponseGrid(models.Model):
         unique_together = ('iteration', 'user',
                            'session') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         ordering = ['id']
-        app_label = 'Response Grid Model'
+        app_label = 'gridMng'

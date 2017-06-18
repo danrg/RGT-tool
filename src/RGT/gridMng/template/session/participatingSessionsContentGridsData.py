@@ -1,4 +1,4 @@
-from RGT.gridMng.template.gridTableData import GridTableData
+# from RGT.gridMng.template.gridTableData import GridTableData
 
 
 class ParticipatingSessionsContentGridsData(object):

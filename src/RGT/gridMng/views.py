@@ -39,6 +39,8 @@ from django.core.urlresolvers import reverse
 # from RGT.gridMng.hierarchical import transpose
 # from RGT.settings import GRID_USID_KEY_LENGTH, DEBUG
 # from RGT.gridMng.fileData import FileData
+# from src.RGT.gridMng.models import Grid
+# from .models import Grid
 
 logger = logging.getLogger('django.request')
 
@@ -174,6 +176,7 @@ def getShowGridPage(request):
     This function is used to display the initial page the user sees when he
     clicks the button 'grids'.
     """
+    from .models import Grid
     grids = Grid.objects.filter(user=request.user)
     return render(request, 'gridMng/grid/showMyGrids.html', {'grids': grids})
 
@@ -183,20 +186,30 @@ def show_grid(request, usid):
     """
      This function is used to display a detailed page of a grid with the given usid
     """
+    from .models import Grid
+    from .template.gridTableData import WritableGridTableData
+
     grid = get_object_or_404(Grid, usid=usid, user=request.user)
     other_grids = Grid.objects.filter(user=request.user).exclude(id=grid.id)
 
     template_data = WritableGridTableData(grid)
     context = RequestContext(request, {'data': template_data})
     template = loader.get_template('gridMng/grid/gridTable.html')
-    grid_html = template.render(context)
-
+    # grid_html = template.render(context)
+    #
+    #
+    # return render(request, 'contribute/_donation-application.html', context)
+    grid_html = render(request,
+                       'gridMng/grid/gridTable.html',
+                       {'data': template_data})
     return render(request, 'gridMng/grid/showGrid.html', {'grid': grid, 'grids': other_grids, 'grid_html': grid_html})
+
 
 @login_required
 def timeline(request, usid):
     grid = get_object_or_404(Grid, usid=usid, user=request.user)
     return render(request, 'gridMng/grid/timeline.html', {'grid': grid})
+
 
 def timeline_json(request, usid):
     grid = get_object_or_404(Grid, usid=usid, user=request.user)

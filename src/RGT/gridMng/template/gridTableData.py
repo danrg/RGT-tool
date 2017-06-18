@@ -1,4 +1,5 @@
-from RGT.gridMng.utility import generateGridTable
+# from RGT.gridMng.utility import generateGridTable
+from ..utility import generateGridTable
 
 class GridTableData(object):
     tableId = None #string
@@ -20,8 +21,8 @@ class GridTableData(object):
                 self.tableHeader = tableData['tableHeader']
                 self.weights = tableData['weights']
 
-class WritableGridTableData(GridTableData):
 
+class WritableGridTableData(GridTableData):
     def __init__(self, grid=None):
         table_data = generateGridTable(grid)
         super(WritableGridTableData, self).__init__(tableData=table_data)

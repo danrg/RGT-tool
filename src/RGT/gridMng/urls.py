@@ -1,14 +1,19 @@
 from django.conf.urls import url
-from RGT.gridMng.wizard.views import GridWizard
-from RGT.gridMng.wizard.forms import GeneralsForm, AlternativesForm, ConcernsForm, WeightsForm, RatingsForm
-from RGT.gridMng.composite.views import CompositeWizard
+
+# from src.RGT.gridMng.composite.views import CompositeWizard
+from composite.views import CompositeWizard
+from wizard.views import GridWizard
+# from RGT.gridMng.wizard.forms import GeneralsForm, AlternativesForm, ConcernsForm, WeightsForm, RatingsForm
+# from RGT.gridMng.composite.views import CompositeWizard
 # from RGT.gridMng.composite.forms import FirstStepForm, WhichGridsForm, RulesForm
+from .wizard import GeneralsForm, AlternativesForm, ConcernsForm, WeightsForm, RatingsForm
+from .composite import FirstStepForm, WhichGridsForm, RulesForm
+from . import views
 
 grid_wizard_forms = [GeneralsForm, AlternativesForm, ConcernsForm, WeightsForm, RatingsForm]
 
-# composite_wizard_forms = [FirstStepForm, WhichGridsForm, RulesForm]
+composite_wizard_forms = [FirstStepForm, WhichGridsForm, RulesForm]
 # from RGT import gridMng
-from . import views
 
 urlpatterns = [
                url(r'^$', views.getShowGridPage),
@@ -27,7 +32,7 @@ urlpatterns = [
                url(r'^download/image/$', views.ajaxConvertSvgTo),
                url(r'^download/grid/$', views.ajaxConvertGridTo),
                url(r'^create/wizard/$', GridWizard.as_view(grid_wizard_forms), name='grid_wizard'),
-               # url(r'^create/composite/$', CompositeWizard.as_view(composite_wizard_forms), name='grid_composite'),
+               url(r'^create/composite/$', CompositeWizard.as_view(composite_wizard_forms), name='grid_composite'),
                url(r'^result.png$', views.pca),
                url(r'^image/(?P<usid>[a-zA-Z0-9]{0,50})/(?P<date>[0-9]{4}[-][0-9]{2}[-][0-9]{2}).png',
                    views.show_image)

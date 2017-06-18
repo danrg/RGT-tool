@@ -8,37 +8,40 @@ from django.template import RequestContext
 from django.template import loader
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils.safestring import mark_safe
 
-from RGT.gridMng.models import Grid
-from RGT.gridMng.models import Ratings
-from RGT.gridMng.models import Facilitator
-from RGT.gridMng.models import Session
-from RGT.gridMng.models import State
-from RGT.gridMng.models import SessionGrid
-from RGT.gridMng.models import ResponseGrid
-from RGT.gridMng.models import UserParticipateSession
-from RGT.gridMng.session.state import State as SessionState
-from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
-from RGT.gridMng.error.wrongState import WrongState
-from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
-from RGT.gridMng.error.wrongGridType import WrongGridType
-from RGT.gridMng.error.wrongSessionIteration import WrongSessionIteration
-from RGT.gridMng.utility import *
-from RGT.gridMng.response.xml.htmlResponseUtil import *
-from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
-from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode, createXmlNumberOfResponseNode
-from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid
-from RGT.gridMng.template.session.sessionsData import SessionsData, ParticipatingSessionsData, MySessionsContentData
-from RGT.gridMng.template.session.participatingSessionsContentData import ParticipatingSessionsContentData
-from RGT.gridMng.template.session.resultAlternativeConcernTableData import ResultAlternativeConcernTableData
-from RGT.gridMng.template.session.participatingSessionsContentGridsData import ParticipatingSessionsContentGridsData
-from RGT.gridMng.template.session.resultRatingWeightTableData import ResultRatingWeightTableData
-from RGT.gridMng.template.session.resultRatingWeightTablesData import ResultRatingWeightTablesData
-from RGT.gridMng.template.session.participantsData import ParticipantsData
-from RGT.gridMng.template.gridTableData import GridTableData
-from RGT.gridMng.fileData import FileData
-from RGT.gridMng.utility import generateGridTable, createDendogram, getImageError
-from RGT.settings import DEBUG
+# from RGT.gridMng.models import Grid
+# from RGT.gridMng.models import Ratings
+# from RGT.gridMng.models import Facilitator
+# from RGT.gridMng.models import Session
+from ..models import Session
+# from RGT.gridMng.models import State
+# from RGT.gridMng.models import SessionGrid
+# from RGT.gridMng.models import ResponseGrid
+# from RGT.gridMng.models import UserParticipateSession
+# from RGT.gridMng.session.state import State as SessionState
+# from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
+# from RGT.gridMng.error.wrongState import WrongState
+# from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
+# from RGT.gridMng.error.wrongGridType import WrongGridType
+# from RGT.gridMng.error.wrongSessionIteration import WrongSessionIteration
+# from RGT.gridMng.utility import *
+# from RGT.gridMng.response.xml.htmlResponseUtil import *
+# from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
+# from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode, createXmlNumberOfResponseNode
+# from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid
+# from RGT.gridMng.template.session.sessionsData import SessionsData, ParticipatingSessionsData, MySessionsContentData
+from ..template.session.sessionsData import SessionsData, ParticipatingSessionsData, MySessionsContentData
+# from RGT.gridMng.template.session.participatingSessionsContentData import ParticipatingSessionsContentData
+# from RGT.gridMng.template.session.resultAlternativeConcernTableData import ResultAlternativeConcernTableData
+# from RGT.gridMng.template.session.participatingSessionsContentGridsData import ParticipatingSessionsContentGridsData
+# from RGT.gridMng.template.session.resultRatingWeightTableData import ResultRatingWeightTableData
+# from RGT.gridMng.template.session.resultRatingWeightTablesData import ResultRatingWeightTablesData
+# from RGT.gridMng.template.session.participantsData import ParticipantsData
+# from RGT.gridMng.template.gridTableData import GridTableData
+# from RGT.gridMng.fileData import FileData
+# from RGT.gridMng.utility import generateGridTable, createDendogram, getImageError
+# from RGT.settings import DEBUG
 
 
 logger = logging.getLogger('django.request')
@@ -57,6 +60,8 @@ def ajaxGetCreateSessionPage(request):
 
 @login_required
 def getMySessionsPage(request):
+    from ..template.session.sessionsData import SessionsData
+
     template_data = SessionsData(request.user)
     return render(request, 'gridMng/session/sessions.html', {'data': template_data})
 
@@ -67,12 +72,16 @@ def show_detailed(request, usid):
      This function is used to display a detailed page of a session with the given usid
     """
     session = get_object_or_404(Session, usid=usid, facilitator__user=request.user)
-    context = RequestContext(request, {'session': session, 'data': MySessionsContentData(session=session)})
-    template = loader.get_template('gridMng/session/mySessionsContent.html')
-    session_html = template.render(context)
+
+    content_data = MySessionsContentData(session=session)
+    session_html = render(request,
+                          'gridMng/session/mySessionsContent.html',
+                          {'data': content_data})
     template_data = SessionsData(request.user, session)
 
-    return render(request, 'gridMng/session/showSession.html', {'data': template_data, 'session_html': session_html})
+    return render(request,
+                  'gridMng/session/showSession.html',
+                  {'data': template_data, 'session_html': mark_safe(session_html.content)})
 
 
 @login_required

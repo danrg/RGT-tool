@@ -1,2 +1,4 @@
-from urls import url
+# from urls import url
+# from wizard import GridWizard
 
+from urls import urlpatterns

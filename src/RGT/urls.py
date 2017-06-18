@@ -31,6 +31,7 @@ urlpatterns = [
                url(r'^profile/$', userProfile.views.displayUserProfile),
                url(r'^profile/displayHelp$', userProfile.views.ajaxGetDisplayHelpState),
                url(r'^contact/', contact.views.contact),
-               url(r'^grids/', include(gridMng.urls)),
+               url(r'^grids/', include('RGT.gridMng.urls')),
+               # url(r'^grids/', gridMng.urls),
                url(r'^sessions/', include('RGT.gridMng.session.urls')),
                url(r'^help/(?P<helpMessageId>.*)/$', views.rgtHelp)]

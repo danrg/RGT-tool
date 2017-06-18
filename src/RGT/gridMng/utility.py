@@ -1,8 +1,8 @@
 from django.http import HttpResponse
-from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse
-from RGT.gridMng.hierarchical import hcluster, transpose, drawDendogram3, pcaCluster, getSimilarities
-from RGT.XML.SVG.svgDOMImplementation import SvgDOMImplementation
-from RGT.settings import DENDROGRAM_FONT_LOCATION
+# from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse
+# from RGT.gridMng.hierarchical import hcluster, transpose, drawDendogram3, pcaCluster, getSimilarities
+# from RGT.XML.SVG.svgDOMImplementation import SvgDOMImplementation
+# from RGT.settings import DENDROGRAM_FONT_LOCATION
 from PIL import ImageFont
 from types import StringType, UnicodeType
 

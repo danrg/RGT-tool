@@ -968,7 +968,7 @@ while i < len(clustersConcern):
 
 #prototype function that will be used to create an image using xml      
 def drawDendogram3(clustersConcern=[], clustersAlternative=[], matrix=[[]], maxMatrixCellValue=1):
-    from RGT.gridMng.utility import createColorRGBString
+    # from RGT.gridMng.utility import createColorRGBString
 
     #cluster format is: [([element1, elemet2], distance), ([element1, elemet2, element3], distance), ......]
 
