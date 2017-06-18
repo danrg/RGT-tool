@@ -1,8 +1,5 @@
-# from RGT.gridMng.models import ResponseGrid, Grid
-# from RGT.gridMng.template.gridTableData import GridTableData
-# from RGT.gridMng.template.session.participatingSessionsContentGridsData import ParticipatingSessionsContentGridsData
-# from RGT.gridMng.utility import generateRandomString, generateGridTable
-# from RGT.gridMng.session.state import State as SessionState
+from ...template.gridTableData import GridTableData
+from ...models import ResponseGrid
 
 
 class ParticipatingSessionsContentData(object):

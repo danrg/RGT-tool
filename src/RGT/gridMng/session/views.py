@@ -10,39 +10,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.safestring import mark_safe
 
-# from RGT.gridMng.models import Grid
-# from RGT.gridMng.models import Ratings
-# from RGT.gridMng.models import Facilitator
-# from RGT.gridMng.models import Session
-from ..models import Session
-# from RGT.gridMng.models import State
-# from RGT.gridMng.models import SessionGrid
-# from RGT.gridMng.models import ResponseGrid
-# from RGT.gridMng.models import UserParticipateSession
-# from RGT.gridMng.session.state import State as SessionState
-# from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
-# from RGT.gridMng.error.wrongState import WrongState
-# from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
-# from RGT.gridMng.error.wrongGridType import WrongGridType
-# from RGT.gridMng.error.wrongSessionIteration import WrongSessionIteration
-# from RGT.gridMng.utility import *
-# from RGT.gridMng.response.xml.htmlResponseUtil import *
-# from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
-# from RGT.gridMng.response.xml.generalUtil import createXmlGridIdNode, createXmlNumberOfResponseNode
-# from RGT.gridMng.views import updateGrid, createGrid, __validateInputForGrid
-# from RGT.gridMng.template.session.sessionsData import SessionsData, ParticipatingSessionsData, MySessionsContentData
+from ...gridMng.template.session.participatingSessionsContentData import ParticipatingSessionsContentData
+from ..models import Session, Grid
+from ..models import UserParticipateSession
 from ..template.session.sessionsData import SessionsData, ParticipatingSessionsData, MySessionsContentData
-# from RGT.gridMng.template.session.participatingSessionsContentData import ParticipatingSessionsContentData
-# from RGT.gridMng.template.session.resultAlternativeConcernTableData import ResultAlternativeConcernTableData
-# from RGT.gridMng.template.session.participatingSessionsContentGridsData import ParticipatingSessionsContentGridsData
-# from RGT.gridMng.template.session.resultRatingWeightTableData import ResultRatingWeightTableData
-# from RGT.gridMng.template.session.resultRatingWeightTablesData import ResultRatingWeightTablesData
-# from RGT.gridMng.template.session.participantsData import ParticipantsData
-# from RGT.gridMng.template.gridTableData import GridTableData
-# from RGT.gridMng.fileData import FileData
-# from RGT.gridMng.utility import generateGridTable, createDendogram, getImageError
-# from RGT.settings import DEBUG
-
 
 logger = logging.getLogger('django.request')
 
@@ -246,10 +217,15 @@ def participate_detailed(request, usid):
     participating_session = get_object_or_404(Session, usid=usid)
     participation = get_object_or_404(UserParticipateSession, user=request.user, session=participating_session)
     session_template_data = ParticipatingSessionsContentData(participation)
-    template = loader.get_template('gridMng/session/participatingSessionsContent.html')
-    session_html = template.render(RequestContext(request, {'data': session_template_data}))
+
+    session_html = render(request,
+                          'gridMng/session/participatingSessionsContent.html',
+                          {'data': session_template_data})
+
     template_data = ParticipatingSessionsData(request.user, participating_session)
-    return render(request, 'gridMng/session/participateSession.html', {'data': template_data, 'session_html': session_html})
+    return render(request,
+                  'gridMng/session/participateSession.html',
+                  {'data': template_data, 'session_html': mark_safe(session_html.content)})
 
 
 @login_required
@@ -1110,7 +1086,7 @@ def __generateAlternativeConcernResultTable(data=[], sessionGridObj=None):
     Arguemnts:
         data: obejct of QuerySet
             information: The QuerySet must contain all the grids that were submitted as response for a session with a iteration
-        sessionGridObj: rgt.gridMng.models.Grid object
+        sessionGridObj: models.Grid object
             nformation: The grid object must be of a session.
 
     Return:
@@ -1627,7 +1603,7 @@ def __debug_print_stacktrace():
     """
     TODO: Switch to the default logging system
     """
-    if DEBUG:
+    if logging.DEBUG:
         print "Exception in user code:"
         print '-' * 60
         traceback.print_exc(file=sys.stdout)

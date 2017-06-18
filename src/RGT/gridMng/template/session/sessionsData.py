@@ -1,13 +1,8 @@
-# from RGT.gridMng.models import Session
 from ...models import Session
 
-# from RGT.gridMng.template.gridTableData import GridTableData
 from ...template.gridTableData import GridTableData
-# from RGT.gridMng.template.session.participantsData import ParticipantsData
 from ...template.session.participantsData import ParticipantsData
-# from RGT.gridMng.utility import generateGridTable, generateRandomString
 from ...utility import generateGridTable, generateRandomString
-# from RGT.gridMng.session.state import State as SessionState
 from ...session.state import State as SessionState
 
 
@@ -23,8 +18,10 @@ class SessionsData(object):
         self.pending_responses = Session.objects.with_pending_responses(user)
         self.session = session
 
+
 class ParticipatingSessionsData(SessionsData):
     pass
+
 
 class MySessionsContentData(SessionsData):
     participantTableData = None #ParticipantsData object, used to grid the table where the facilitator can see who joined the section or responded a request

@@ -1,8 +1,9 @@
 from django.http import HttpResponse
-# from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse
-# from RGT.gridMng.hierarchical import hcluster, transpose, drawDendogram3, pcaCluster, getSimilarities
-# from RGT.XML.SVG.svgDOMImplementation import SvgDOMImplementation
-# from RGT.settings import DENDROGRAM_FONT_LOCATION
+from .response.xml.htmlResponseUtil import createXmlErrorResponse
+from ..settings import *
+from ..XML.SVG.svgDOMImplementation import SvgDOMImplementation
+from ..settings import DENDROGRAM_FONT_LOCATION
+
 from PIL import ImageFont
 from types import StringType, UnicodeType
 
@@ -15,7 +16,7 @@ import subprocess
 import traceback
 from io import BytesIO
 
-# definition of the supported file to convert svg to image
+
 CONVERT_SVG_TO_PNG = 'png'
 CONVERT_SVG_TO_JPG = 'jpg'
 CONVERT_SVG_TO_PDF = 'pdf'
@@ -123,15 +124,15 @@ def createFileResponse(fileData):
 
 # generate a table based on a grid
 def generateGridTable(gridObj):
-    from RGT.gridMng.models import Ratings  # can't be declared globally because it will generate an import error
+    from .models import Ratings  # can't be declared globally because it will generate an import error
 
     table = []
     header = []
     concernWeights = []
 
     if gridObj != None:
-        i = 0;
-        j = 0;
+        i = 0
+        j = 0
         concerns = gridObj.concerns_set.all()
         alternatives = gridObj.alternatives_set.all()
         nConcern = gridObj.concerns_set.all().count()
@@ -166,7 +167,7 @@ def generateGridTable(gridObj):
             j = 0
             i += 1
         concernWeights.reverse()  # this is needed because the list will be poped during the template execution
-        i = 0;
+        i = 0
         while i < nAlternatives:
             header.append(str(alternatives[i].name))
             i += 1
@@ -190,7 +191,7 @@ def generateGridTable(gridObj):
 
 # generate the dendogram
 def createDendogram(gridObj):
-    from RGT.gridMng.models import Ratings  # can't be declared globally because it will generate an import error
+    from .models import Ratings  # can't be declared globally because it will generate an import error
 
     # lets create a matrix that the hierarchical module understands
     matrixFull = []  # this is the compleet matrix, it will be used to create the table in the picture
@@ -235,6 +236,7 @@ def createDendogram(gridObj):
         # lets transpose the matrix so we calculate the dendrogram for the alternatives
     # print "Alternatives: "
     # print matrixAlternatives
+    from .hierarchical import transpose
     matrixAlternatives = transpose(matrixAlternatives)
     i = 0
     temp = [[]]
@@ -248,6 +250,8 @@ def createDendogram(gridObj):
             raise ValueError('Invalid alternative name: ' + alternatives[i].name)
     temp.append([])
     matrixFull.insert(0, temp)
+
+    from .hierarchical import hcluster, drawDendogram3
     concenrClusters = hcluster(matrixConcern)
     alternativeClusters = hcluster(matrixAlternatives)
     img = drawDendogram3(concenrClusters, alternativeClusters, matrixFull, maxValueOfAlternative)
@@ -281,7 +285,7 @@ This function returns eigther concerns matrix or alternatives matrix
 
 
 def returnMatrix(gridObj, which):
-    from RGT.gridMng.models import Ratings  # can't be declared globally because it will generate an import error
+    from .models import Ratings  # can't be declared globally because it will generate an import error
 
     # lets create a matrix that the hierarchical module understands
     matrixFull = []  # this is the compleet matrix, it will be used to create the table in the picture
@@ -324,6 +328,8 @@ def returnMatrix(gridObj, which):
     else:
         raise ValueError('More than one concerns must be present in order to generate a dendrogram.')
         # lets transpose the matrix so we calculate the dendrogram for the alternatives
+
+    from .hierarchical import transpose, pcaCluster, getSimilarities
     matrixAlternatives = transpose(matrixAlternatives)
     i = 0
     temp = [[]]
@@ -348,7 +354,7 @@ def returnMatrix(gridObj, which):
 
 
 def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=None):
-    from RGT.gridMng.models import Ratings
+    from .models import Ratings
 
     ###########settings###########
     fontSize = 30

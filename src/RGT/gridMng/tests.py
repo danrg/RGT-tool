@@ -1,6 +1,5 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-# from RGT.gridMng.models import UserParticipateSession, State
 from models import Session, Grid, Ratings
 
 

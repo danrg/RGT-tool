@@ -1,48 +1,36 @@
-from datetime import datetime
-
-import sys
+import json
+import logging
 import os
+import sys
 import tempfile
 import traceback
-import logging
-import json
+from datetime import datetime
 from io import BytesIO
 from types import StringType
 
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template import RequestContext
 from django.template import loader
-from django.http import HttpResponse
-from django.utils.timezone import utc
-from django.db import IntegrityError
-from django.core.urlresolvers import reverse
+from django.utils.safestring import mark_safe
 
-# from RGT.gridMng.models import Grid
-# from RGT.gridMng.models import Alternatives
-# from RGT.gridMng.models import Concerns
-# from RGT.gridMng.models import Ratings
-# from RGT.gridMng.models import Facilitator
-# from RGT.gridMng.models import Composite
-# from RGT.gridMng.models import AlternativeDiff, Diff, ConcernDiff, GridProxy
-# from RGT.gridMng.prototypes.compositeParse import CompositeParse
-# from RGT.gridMng.utility import generateRandomString, validateName, convertSvgToPng, convertSvgTo, getImageError, convertGridTableToSvg, returnMatrix
-# from RGT.gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag, HttpErrorResponse
-# from RGT.gridMng.response.xml.svgResponseUtil import createSvgResponse
-# from RGT.gridMng.session.state import State
-# from RGT.gridMng.template.showGridsData import ShowGridsData
-# from RGT.gridMng.template.gridTableData import GridTableData, WritableGridTableData
-# from RGT.gridMng.template.createMyGridBaseData import CreateMyGridBaseData
-# from RGT.gridMng.template.createMyGridData import CreateMyGridData
-# from RGT.gridMng.error.unableToCreateUSID import UnableToCreateUSID
-# from RGT.gridMng.utility import generateGridTable, createDendogram, createFileResponse
-# from RGT.gridMng.hierarchical import transpose
-# from RGT.settings import GRID_USID_KEY_LENGTH, DEBUG
-# from RGT.gridMng.fileData import FileData
-# from src.RGT.gridMng.models import Grid
-# from .models import Grid
+from .fileData import FileData
+from .hierarchical import transpose
+from .response.xml.htmlResponseUtil import createXmlErrorResponse, createXmlSuccessResponse, createDateTimeTag
+from .response.xml.svgResponseUtil import createSvgResponse
+from .session.state import State
+from .template.createMyGridBaseData import CreateMyGridBaseData
+from .template.createMyGridData import CreateMyGridData
+from .template.gridTableData import GridTableData, WritableGridTableData
+from .utility import generateGridTable, createDendogram, createFileResponse
+from .utility import generateRandomString, validateName, convertSvgToPng, convertSvgTo, getImageError, \
+    convertGridTableToSvg, returnMatrix
+from ..settings import DEBUG
 
 logger = logging.getLogger('django.request')
+
 
 @login_required()
 def getCreateMyGridPage(request):
@@ -79,6 +67,7 @@ def ajaxCreateGrid(request):
                 return HttpResponse(createXmlErrorResponse("Invalid request, unsupported operation"),
                                     content_type='application/xml')
             elif request.POST['gridType'] == 'user':
+                from .models import Grid
                 gridType = Grid.GridType.USER_GRID
             else:
                 return HttpResponse(createXmlErrorResponse("Unsupported grid type"), content_type='application/xml')
@@ -202,16 +191,20 @@ def show_grid(request, usid):
     grid_html = render(request,
                        'gridMng/grid/gridTable.html',
                        {'data': template_data})
-    return render(request, 'gridMng/grid/showGrid.html', {'grid': grid, 'grids': other_grids, 'grid_html': grid_html})
+    return render(request,
+                  'gridMng/grid/showGrid.html',
+                  {'grid': grid, 'grids': other_grids, 'grid_html': mark_safe(grid_html.content)})
 
 
 @login_required
 def timeline(request, usid):
+    from .models import Grid
     grid = get_object_or_404(Grid, usid=usid, user=request.user)
     return render(request, 'gridMng/grid/timeline.html', {'grid': grid})
 
 
 def timeline_json(request, usid):
+    from .models import Grid, Diff
     grid = get_object_or_404(Grid, usid=usid, user=request.user)
     revs = Diff.objects.daily_revisions(grid)
     date = []
@@ -233,6 +226,8 @@ def timeline_json(request, usid):
 
 
 def show_image(request, usid, date):
+    from .models import Grid, Diff
+
     grid = Grid.objects.get(usid=usid)
     date = datetime.strptime(date, "%Y-%m-%d").date()
     revs = Diff.objects.daily_revisions(grid)
@@ -379,6 +374,7 @@ def ajaxUpdateGrid(request):
             information: The gridUSID is only needed if the gridType is user
         gridName: string
     """
+    from .models import Grid
 
     user1 = request.user
     gridObj = None
@@ -389,6 +385,7 @@ def ajaxUpdateGrid(request):
         gridType = request.POST['gridType']
         if gridType == 'session':
             if request.POST.has_key('sessionUSID') and request.POST.has_key('iteration'):
+                from .models import Facilitator
                 isFacilitator = Facilitator.objects.isFacilitator(request.user)
                 if isFacilitator:
                     facilitatorObj = Facilitator.objects.get(user=request.user)
@@ -523,6 +520,7 @@ def ajaxDeleteGrid(request):
         gridUSID = request.POST['gridUSID']
         grid = None
         try:
+            from .models import Grid
             grid = Grid.objects.get(user=request.user, usid=gridUSID)
         except:
             HttpResponse(createXmlErrorResponse('couldn\'t find grid'), content_type='application/xml')
@@ -545,6 +543,7 @@ def ajaxGenerateDendogram(request):
     """
 
     if request.POST.has_key('gridUSID'):
+        from .models import Grid
         grid1 = Grid.objects.filter(user=request.user, usid=request.POST['gridUSID'])
         if len(grid1) >= 1:
             try:
@@ -594,6 +593,7 @@ def ajaxGenerateSimilarity(request):
     """
 
     if request.POST.has_key('gridUSID'):
+        from .models import Grid
         grid1 = Grid.objects.filter(user=request.user, usid=request.POST['gridUSID'])
         if len(grid1) >= 1:
             try:
@@ -615,8 +615,13 @@ def ajaxGenerateSimilarity(request):
                 context = RequestContext(request,
                                          {'cons': matrixConcern, 'alts': matrixAlternatives, 'consRangeX': consRangeX,
                                           'consRangeY': consRangeY, 'altsRangeX': altsRangeX, 'altsRangeY': altsRangeY})
-                htmlData = template.render(context)
-                return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
+                htmlData = render(request,
+                                  'gridMng/grid/similaritymatrix.html',
+                                  {'cons': matrixConcern, 'alts': matrixAlternatives, 'consRangeX': consRangeX,
+                                   'consRangeY': consRangeY, 'altsRangeX': altsRangeX, 'altsRangeY': altsRangeY})
+
+                return HttpResponse(createXmlSuccessResponse(htmlData.content),
+                                    content_type='application/xml')
 
             except:
                 if DEBUG:
@@ -704,6 +709,7 @@ def ajaxConvertGridTo(request):
             convertToData = request.POST['convertTo']
 
             if usidData != None and convertToData != None:
+                from .models import Grid
                 gridObj = Grid.objects.filter(usid=usidData)
                 if len(gridObj) >= 1:
                     gridObj = gridObj[0]
@@ -775,6 +781,7 @@ def dendrogramTo(request):
         if request.POST.has_key('gridUSID') and request.POST.has_key('convertTo'):
             #check to see if the inputs are not None
             if request.POST['gridUSID'] and request.POST['convertTo']:
+                from .models import Grid
                 grid = Grid.objects.filter(usid=request.POST['gridUSID'])
                 if len(grid) >= 1:
                     grid = grid[0]
@@ -1116,6 +1123,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
                     newValue = ratioValues[i][j]
                     #if request.POST.has_key('ratio_concer' + str(i + 1) + '_alternative' + str(j + 1)):
                     #newValue= float(request.POST['ratio_concer' + str(i + 1) + '_alternative' + str(j + 1)])
+                    from .models import Ratings
                     ratingObjList = Ratings.objects.filter(concern=concerns[i], alternative=alternatives[j])
                     if (len(ratingObjList) > 0):
                         ratingObj = ratingObjList[0]
@@ -1136,6 +1144,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
             i = totalConcenrs
             j = 0
             while i < nConcerns:
+                from .models import Concerns
                 concern = Concerns.objects.create(grid=gridObj, leftPole=concernValues[i][0],
                                                   rightPole=concernValues[i][1], weight=concernValues[i][2])
                 objToCommit.append(concern)
@@ -1151,10 +1160,11 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
                 #here we know if we had more concerns it has already been added to the concern list, thus totalConcenrs == nConcerns now.
         if nAlternatives > totalAlternatives:
             valuesChanged = 1
-            i = 0;
+            i = 0
             j = totalAlternatives
             #lets create the new alternatives
             while i < (nAlternatives - totalAlternatives):
+                from .models import Alternatives
                 alternative = Alternatives.objects.create(grid=gridObj, name=alternativeValues[i + totalAlternatives])
                 objToCommit.append(alternative)
                 alternatives.append(alternative)
@@ -1216,6 +1226,7 @@ def createGrid(userObj, gridType, gridName, concernValues, alternativeValues, ra
     """
     args = (userObj,gridType, concernValues, alternativeValues, ratioValues, createRatings)
     if not None in args:
+        from .models import Grid
         return Grid.objects.create_grid(userObj, gridType, concernValues, alternativeValues, createRatings, ratioValues, name=gridName)
     else:
         raise ValueError('One or more variables were None')
@@ -1246,7 +1257,7 @@ def pca(request):
                 #here is sample data
                 #concerns are represented on columns, alternatives on lines
 
-                from RGT.gridMng.models import Ratings #can't be declared globally because it will generate an import error
+                from .models import Ratings #can't be declared globally because it will generate an import error
 
                 #lets create a matrix that the hierarchical module understands
                 matrixFull = [] # this is the compleet matrix, it will be used to create the table in the picture

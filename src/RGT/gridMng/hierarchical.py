@@ -1,17 +1,15 @@
-'''
-Created on Feb 17, 2012
-
-@author: Gray
-'''
 from math import sqrt, floor
 import sys
 
-from RGT.XML.SVG.svgDOMImplementation import SvgDOMImplementation
+from ..XML.SVG.svgDOMImplementation import SvgDOMImplementation
 from PIL import Image, ImageDraw, ImageFont #@UnresolvedImport
-from RGT.settings import DENDROGRAM_FONT_LOCATION
+from ..settings import DENDROGRAM_FONT_LOCATION
 
 
 #calculate the linkage of the distance matrix.
+from .utility import createColorRGBString
+
+
 class MaxLinkageAlgorithm:
     """
     The calculateLinkage method compares all the distances found in row[rowNumber][colNumber] and returns the one that is the largest. colNumber are the numbers found in colNumbers

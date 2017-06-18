@@ -1,8 +1,7 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
-from django.utils.unittest.case import skip
 
-from RGT.gridMng.models import Grid, Session
+from ..models import Grid, Session
 
 
 class CreateSessionTest(TestCase):

@@ -12,6 +12,7 @@ class HttpSuccessResponse(HttpResponse):
         response = createXmlSuccessResponse(success_message)
         HttpResponse.__init__(self, response, content_type='application/xml')
 
+
 def createXmlSuccessResponse(htmlData, extraData=None):
     impl = getDOMImplementation()
     doc = impl.createDocument(None, "site", None)

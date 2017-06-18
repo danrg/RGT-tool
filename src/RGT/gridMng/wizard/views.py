@@ -1,7 +1,7 @@
 from django.http import HttpResponseRedirect
 from formtools.wizard.views import SessionWizardView
 from ..views import createGrid
-# from RGT.gridMng.models import Grid
+
 
 class GridWizard(SessionWizardView):
     def get_template_names(self):
