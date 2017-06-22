@@ -2,6 +2,7 @@ import uuid
 
 from copy import deepcopy
 
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models.query import QuerySet
 # from django.contrib.contenttypes.models import ContentType
@@ -298,7 +299,8 @@ class Diff(models.Model):
         return model.objects.get(id=self.id)
 
     class Meta:
-        app_label = 'Diff Model'
+        app_label = 'gridMng'
+
 
 class AlternativeDiff(Diff):
     old_name = models.CharField(max_length=100)
@@ -306,10 +308,10 @@ class AlternativeDiff(Diff):
     objects = DiffManager()
 
     def old_values(self):
-        return (self.old_name,)
+        return self.old_name
 
     def new_values(self):
-        return (self.new_name,)
+        return self.new_name
 
     def __unicode__(self):
         if self.old_name == "":
@@ -336,7 +338,7 @@ class AlternativeDiff(Diff):
         return reverted
 
     class Meta:
-        app_label = 'Alternative Diff Model'
+        app_label = 'gridMng'
 
 
 class ConcernDiffManager(models.Manager):
@@ -353,6 +355,7 @@ class ConcernDiffManager(models.Manager):
 
         revisions.append(Revision(deepcopy(rev_grid), grid.dateTime.date()))
         return revisions
+
 
 class ConcernDiff(Diff):
     old_leftPole = models.CharField(max_length=150)
@@ -387,7 +390,7 @@ class ConcernDiff(Diff):
         return reverted
 
     class Meta:
-        app_label = 'Concern Diff Model'
+        app_label = 'gridMng'
 
 
 class RatingDiff(Diff):
@@ -416,7 +419,7 @@ class RatingDiff(Diff):
         return reverted
 
     class Meta:
-        app_label = 'Rating Diff Model'
+        app_label = 'gridMng'
 
 
 class GridProxy:
@@ -447,7 +450,7 @@ class Composite(models.Model):
 
     class Meta:
         ordering = ['id']
-        app_label = 'Composite Model'
+        app_label = 'gridMng'
 
 
 class Rule:
@@ -783,7 +786,7 @@ class SessionIterationState(models.Model):
     class Meta:
         unique_together = ('iteration', 'session')
         ordering = ['id']
-        app_label = 'Session Iteration State Model'
+        app_label = 'gridMng'
 
 
 class UserParticipateSession(models.Model):

@@ -9,4 +9,4 @@ class PassRecoverCode(models.Model):
     linkExpired = models.BooleanField(default=False)
 
     class Meta:
-        app_label = 'Pass Recover Code model'
+        app_label = 'authentication'
