@@ -1,3 +1,4 @@
+import traceback
 from math import sqrt, ceil
 import logging
 from datetime import datetime
@@ -11,13 +12,18 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.safestring import mark_safe
 
+from ..error.wrongSessionIteration import WrongSessionIteration
+from ..template.session.resultAlternativeConcernTableData import ResultAlternativeConcernTableData
+from ..template.session.resultRatingWeightTablesData import ResultRatingWeightTablesData
+from ..error.userIsFacilitator import UserIsFacilitator
+from ..views import updateGrid
 from ..error.userAlreadyParticipating import UserAlreadyParticipating
 from ..error.wrongState import WrongState
 from ..response.xml.htmlResponseUtil import HttpErrorResponse, HttpSuccessResponse, \
-    createXmlSuccessResponse
-from src.RGT.gridMng.template.session.participatingSessionsContentGridsData import ParticipatingSessionsContentGridsData
+    createXmlSuccessResponse, createXmlForComboBox, createDateTimeTag
+from ..template.session.participatingSessionsContentGridsData import ParticipatingSessionsContentGridsData
 from ...gridMng.template.session.participatingSessionsContentData import ParticipatingSessionsContentData
-from ..models import Session, Grid, Facilitator, State
+from ..models import Session, Grid, Facilitator, State, ResponseGrid, SessionGrid
 from ..models import UserParticipateSession
 from ..template.session.sessionsData import SessionsData, ParticipatingSessionsData, MySessionsContentData
 
