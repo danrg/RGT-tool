@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django import forms
-from RGT.authentication.forms.CaptchaSecuredForm import CaptchaSecuredForm
+from .CaptchaSecuredForm import CaptchaSecuredForm
 
 
 class ForgotPasswordForm(CaptchaSecuredForm):

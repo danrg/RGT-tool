@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from RGT.authentication.forms.CaptchaSecuredForm import CaptchaSecuredForm
+from .CaptchaSecuredForm import CaptchaSecuredForm
 
 
 class RegistrationForm(CaptchaSecuredForm):

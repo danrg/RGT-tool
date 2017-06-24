@@ -1,7 +1,8 @@
 from django import template
-from RGT.settings import RECAPTCHA_PUBLIC_KEY
+from ...settings import RECAPTCHA_PUBLIC_KEY
 
 register = template.Library()
+
 
 @register.simple_tag
 def recaptcha_public_key():

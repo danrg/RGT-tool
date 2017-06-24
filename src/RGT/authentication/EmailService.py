@@ -1,7 +1,7 @@
 from django.template.loader import get_template
 from django.template import Context
 from django.core.mail import EmailMultiAlternatives, BadHeaderError
-from RGT import settings
+from .. import settings
 
 
 class EmailService(object):
@@ -49,5 +49,3 @@ class EmailService(object):
             print 'another problem: ' + str(e.args[0]) + ' - ' + str(e.args[1])
 
         return False
-
-
