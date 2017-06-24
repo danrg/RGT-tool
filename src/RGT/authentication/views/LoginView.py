@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.http import HttpResponseRedirect
 from django.views.generic.edit import FormView
 from django.contrib.auth import login as djangoLogin
-from RGT.authentication.forms import LoginForm
+from ..forms import LoginForm
 
 
 class LoginView(FormView):

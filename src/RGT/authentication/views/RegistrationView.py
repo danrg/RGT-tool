@@ -1,11 +1,11 @@
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
-from RGT.authentication.EmailService import EmailService
-from RGT.gridMng import utility
+from ..EmailService import EmailService
+from ...gridMng import utility
 from django.conf import settings
-from RGT.authentication.forms import RegistrationForm
-from RGT.authentication.views.CaptchaSecuredFormView import CaptchaSecuredFormView
+from ..forms import RegistrationForm
+from .CaptchaSecuredFormView import CaptchaSecuredFormView
 
 
 class RegistrationView(CaptchaSecuredFormView):
@@ -17,7 +17,8 @@ class RegistrationView(CaptchaSecuredFormView):
         if request.user.is_authenticated():
             return HttpResponseRedirect('/home/')
 
-        return super(RegistrationView, self).get(self, request, *args, **kwargs);
+        captcha_view = super(RegistrationView, self)
+        return captcha_view.get(self, request, *args, **kwargs)
 
     def form_valid(self, form):
         email = form.cleaned_data['email']
