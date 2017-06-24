@@ -1,5 +1,5 @@
-__author__ = 'Dan'
 import itertools
+
 
 class CompositeParse():
     def __init__(self, initialString):

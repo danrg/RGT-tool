@@ -1,10 +1,9 @@
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import redirect, render
 from django.template import RequestContext
-# from RGT.userProfile.userProfileForm import UserProfileForm
+
+from ..gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse
 from .userProfileForm import UserProfileForm
-# from .response.xml.htmlResponseUtil import createXmlSuccessResponse, createXmlErrorResponse
-# from ..gridMng.response.xml.htmlResponseUtil import createXmlSuccessResponse, createXmlErrorResponse
 
 
 def ajaxGetDisplayHelpState(request):
@@ -55,4 +54,3 @@ def displayUserProfile(request):
                                         })
         return render(request,
                       'userProfile/userProfile.html')
-

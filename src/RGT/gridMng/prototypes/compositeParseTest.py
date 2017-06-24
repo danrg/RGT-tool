@@ -1,9 +1,7 @@
-__author__ = 'Dan'
-
 import unittest
+
 from compositeParse import CompositeParse
 
-import itertools
 
 class FooTests(unittest.TestCase):
 
@@ -33,13 +31,3 @@ class FooTests(unittest.TestCase):
         self.failUnlessEqual(c.getNumberOfCompositions(),2)
         c = CompositeParse("A1&(B2|B3)&C4")
         self.failUnlessEqual(c.getNumberOfCompositions(),2)
-
-
-
-
-
-
-
-
-#def main():
- #   unittest.main()

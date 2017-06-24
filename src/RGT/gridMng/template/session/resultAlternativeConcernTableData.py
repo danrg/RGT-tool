@@ -4,4 +4,3 @@ class ResultAlternativeConcernTableData(object):
 
     def __init__(self):
         pass
-        

@@ -1,5 +1,3 @@
-__author__ = 'Dan'
-
 #make sure these libraries are installed:
 import mdp
 import numpy as np

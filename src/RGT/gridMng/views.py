@@ -1250,6 +1250,7 @@ def pca(request):
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
     if request.GET.has_key('gridUSID'):
+        from .models import Grid
         grid1 = Grid.objects.filter(user=request.user, usid=request.GET['gridUSID'])
         if len(grid1) >= 1:
             try:

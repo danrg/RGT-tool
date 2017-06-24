@@ -8,4 +8,3 @@ class FileData(object):
     length = None
     data = None
     fileName = None
-

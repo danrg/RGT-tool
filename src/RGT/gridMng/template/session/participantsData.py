@@ -1,5 +1,5 @@
-# from RGT.gridMng.session.state import State as SessionState
 from ...session.state import State as SessionState
+
 
 class ParticipantsData(object):
     participants = None #list of tulip that is used to generate the table that displays if a user has sent a response or has joined a session. format: [(user, 'cssClass', time), ...] or [(user, 'cssClass'), ...]

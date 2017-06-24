@@ -1,7 +1,5 @@
 from django import forms
-# from RGT.gridMng.models import Grid
-# from django.contrib.auth.models import User
-# from RGT.gridMng.template.showGridsData import ShowGridsData
+
 
 class FirstStepForm(forms.Form):
     composite_name = forms.CharField(widget=forms.TextInput(attrs={'size':'45'}))
@@ -34,6 +32,7 @@ class WhichGridsForm(forms.Form):
              raise forms.ValidationError('You need to select at least two grids from the list.')
 
         return cleaned_data
+
 
 class RulesForm(forms.Form):
 

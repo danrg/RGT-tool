@@ -3,4 +3,3 @@ class ShowGridsData(object):
 
     def __init__(self, grids=None):
         self.grids = grids
-        

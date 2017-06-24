@@ -1,3 +1,5 @@
+from ...template.session.participatingSessionsContentGridsData import ParticipatingSessionsContentGridsData
+from ...utility import generateRandomString, generateGridTable
 from ...template.gridTableData import GridTableData
 from ...models import ResponseGrid
 

@@ -5,11 +5,11 @@ from django.db import transaction
 from formtools.wizard.views import SessionWizardView
 from django.shortcuts import redirect
 from django.utils.timezone import utc
-# from RGT.gridMng.models import Grid, Composite, Alternatives, Concerns, Ratings, Rule
-# from RGT.gridMng.prototypes.compositeParse import CompositeParse
-# from RGT.gridMng.template.showGridsData import ShowGridsData
-# from RGT.gridMng.utility import generateRandomString
-# from RGT.settings import GRID_USID_KEY_LENGTH
+
+from ...settings import GRID_USID_KEY_LENGTH
+from ..prototypes.compositeParse import CompositeParse
+from ..template.showGridsData import ShowGridsData
+from ..utility import generateRandomString
 
 
 class CompositeWizard(SessionWizardView):
@@ -19,6 +19,8 @@ class CompositeWizard(SessionWizardView):
         return ['gridMng/composite/compositeWizard_step%d.html' % (self.steps.step1)]
 
     def get_context_data(self, form, **kwargs):
+        from ..models import Grid
+
         context = super(CompositeWizard, self).get_context_data(form=form, **kwargs)
         # From user name, get the user grids for selection
         if self.steps.step1 == 2:
@@ -72,6 +74,8 @@ class CompositeWizard(SessionWizardView):
         total rating of that combination of alternatives.
         @type grids list of Grid
         """
+        from ..models import Rule
+
         alts = [grid.get_alternative_total_rating_tuples() for grid in grids]
         combinations = itertools.product(*alts)
         rules = []
@@ -89,6 +93,12 @@ class CompositeWizard(SessionWizardView):
         This function is a modificated version of 'createGrid' function. What is different is we don't have any numeric values here, just alternative names(combinations of valid rules),
         and also we are providing grid.usid beforehand
         """
+        from ..models import Composite
+        from ..models import Grid
+        from ..models import Alternatives
+        from ..models import Concerns
+        from ..models import Ratings
+
         if not None in (userObj, rules, statuses):
             gridObj = Grid.objects.create(user=userObj, grid_type=Grid.GridType.COMPOSITE_GRID)
             if gridName != None:
@@ -112,7 +122,7 @@ class CompositeWizard(SessionWizardView):
                 alternative = Alternatives.objects.create(grid=gridObj, name=str(a.replace("'", "")))
                 alternatives.append(alternative)
 
-            concernValues = [['lc1', 'rc1'],['lc2', 'rc2'],['lc3', 'rc3']]
+            concernValues = [['lc1', 'rc1'], ['lc2', 'rc2'], ['lc3', 'rc3']]
             concerns = []
             for [left, right] in concernValues:
                 concern = Concerns.objects.create(grid=gridObj, leftPole=left, rightPole=right)

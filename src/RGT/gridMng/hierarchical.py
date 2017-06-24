@@ -33,6 +33,7 @@ class MaxLinkageAlgorithm:
         else:
             return matrix[rowNumber][base]
 
+
 # create the distance matrix based on the euclidean distance (n dimensions)    
 class EuclideanDistanceAlgorithm:
     @staticmethod

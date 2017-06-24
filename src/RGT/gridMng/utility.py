@@ -1,6 +1,5 @@
 from django.http import HttpResponse
 from .response.xml.htmlResponseUtil import createXmlErrorResponse
-from ..settings import *
 from ..XML.SVG.svgDOMImplementation import SvgDOMImplementation
 from ..settings import DENDROGRAM_FONT_LOCATION
 

@@ -1,11 +1,7 @@
 from django.conf.urls import url
 
-# from src.RGT.gridMng.composite.views import CompositeWizard
 from composite.views import CompositeWizard
 from wizard.views import GridWizard
-# from RGT.gridMng.wizard.forms import GeneralsForm, AlternativesForm, ConcernsForm, WeightsForm, RatingsForm
-# from RGT.gridMng.composite.views import CompositeWizard
-# from RGT.gridMng.composite.forms import FirstStepForm, WhichGridsForm, RulesForm
 from .wizard import GeneralsForm, AlternativesForm, ConcernsForm, WeightsForm, RatingsForm
 from .composite import FirstStepForm, WhichGridsForm, RulesForm
 from . import views
@@ -13,7 +9,6 @@ from . import views
 grid_wizard_forms = [GeneralsForm, AlternativesForm, ConcernsForm, WeightsForm, RatingsForm]
 
 composite_wizard_forms = [FirstStepForm, WhichGridsForm, RulesForm]
-# from RGT import gridMng
 
 urlpatterns = [
                url(r'^$', views.getShowGridPage),

@@ -5,11 +5,10 @@ from authentication.views.LoginView import LoginView
 from authentication.views.LogoutRedirectView import LogoutRedirectView
 from authentication.views.ForgotPasswordView import ForgotPasswordView
 from authentication.views.ChangePasswordView import ChangePasswordView
-from RGT import authentication
-from RGT import userProfile
-from RGT import contact
-from RGT import gridMng
-from RGT import views
+from . import authentication
+from . import userProfile
+from . import contact
+from . import views
 
 admin.autodiscover()
 

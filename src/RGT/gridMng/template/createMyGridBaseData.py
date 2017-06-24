@@ -3,5 +3,3 @@ class CreateMyGridBaseData(object):
 
     def __init__(self, gridData=None):
         self.gridTableData = gridData
-       
-        

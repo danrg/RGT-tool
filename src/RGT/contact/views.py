@@ -4,7 +4,7 @@ from django.template import RequestContext, Context
 from django.template.loader import get_template
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, BadHeaderError
-from RGT.contact.contactForm import ContactForm
+from .contactForm import ContactForm
 
 
 def contact(request):
@@ -43,6 +43,3 @@ def contact(request):
     return render_to_response('contact/contact.html',
                               {'form': form, 'didContact': didContact},
                               context_instance=RequestContext(request))
-    
-    
-    

@@ -1,5 +1,5 @@
-# from RGT.gridMng.utility import generateGridTable
 from ..utility import generateGridTable
+
 
 class GridTableData(object):
     tableId = None #string

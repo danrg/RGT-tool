@@ -1,5 +1,6 @@
 from xml.dom.minidom import DOMImplementation
 
+
 #This function is used to create a successful
 #svgDoc: String with the svg document
 def createSvgResponse(svgDoc, extraData=None):
@@ -19,5 +20,3 @@ def createSvgResponse(svgDoc, extraData=None):
             extraInfoNode.appendChild(extraData)
         root.appendChild(extraInfoNode)
     return xmlDoc.toxml()
-
-    

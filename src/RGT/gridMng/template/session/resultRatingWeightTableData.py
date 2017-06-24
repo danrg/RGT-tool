@@ -6,7 +6,5 @@ class ResultRatingWeightTableData(object):
     tableHead = None
     useColorMap = False
 
-
     def __init__(self):
         pass
-        

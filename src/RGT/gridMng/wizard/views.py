@@ -115,6 +115,7 @@ class GridWizard(SessionWizardView):
         # Get the user of the request.
         user_obj = self.request.user
         # The grid type is 'User', because the grid is created through the wizard.
+        from ..models import Grid
         grid_type = Grid.GridType.USER_GRID
         # Get the grid name of the form data of step 0 (zero index).
         grid_name = step_zero_data['%s-grid_name' % (step_zero_prefix)]

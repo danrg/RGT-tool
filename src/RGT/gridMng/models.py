@@ -5,17 +5,15 @@ from copy import deepcopy
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models.query import QuerySet
-# from django.contrib.contenttypes.models import ContentType
-# from django.contrib.auth.models import User
 from django.db import transaction
-# from RGT.gridMng.error.userAlreadyParticipating import UserAlreadyParticipating
-# from RGT.gridMng.error.wrongState import WrongState
-# from RGT.gridMng.error.userIsFacilitator import UserIsFacilitator
-# from RGT.gridMng.session.state import State as SessionState
+
+from ..settings import SESSION_USID_KEY_LENGTH, GRID_USID_KEY_LENGTH
+from .error.userAlreadyParticipating import UserAlreadyParticipating
+from .error.userIsFacilitator import UserIsFacilitator
+from .error.wrongState import WrongState
 from .session.state import State as SessionState
-# from RGT.settings import SESSION_USID_KEY_LENGTH, GRID_USID_KEY_LENGTH
 from utility import generateRandomString
-from datetime import datetime, date
+from datetime import datetime
 from django.utils.timezone import utc
 from django.core.urlresolvers import reverse
 
@@ -216,6 +214,7 @@ class Revision:
         else:
             return "Grid created"
 
+
 class SubclassingQuerySet(QuerySet):
     """ Needed for polymorphism, see http://stackoverflow.com/questions/5360995/polymorphism-in-django-models
     """
@@ -228,6 +227,7 @@ class SubclassingQuerySet(QuerySet):
     def __iter__(self):
         for item in super(SubclassingQuerySet, self).__iter__():
             yield item.as_leaf_class()
+
 
 class DiffManager(models.Manager):
     def daily_revisions(self, grid):
@@ -266,6 +266,7 @@ class DiffManager(models.Manager):
             type = "changed"
 
         return "%s_%s" % (name, type)
+
 
 class Diff(models.Model):
     related_id = models.IntegerField()
@@ -552,6 +553,7 @@ class Ratings(models.Model):
     def __unicode__(self):
         return "(%s, %s): %f" % (self.concern, self.alternative, self.rating)
 
+
 class GridDiffManager(models.Manager):
     def ensure_initial_diff_exists(self, grid):
         exists = self.filter(grid=grid).exists()
@@ -586,7 +588,7 @@ class State(models.Model):
     objects = StateManager()
 
     from .session.state import State as SessionState
-    verbose_names = { SessionState.INITIAL: 'Invitation', SessionState.AC: 'Alternatives / Concerns',
+    verbose_names = {SessionState.INITIAL: 'Invitation', SessionState.AC: 'Alternatives / Concerns',
                       SessionState.RW: 'Ratings / Weights', SessionState.FINISH: 'Closed',
                       SessionState.CHECK: 'Check values'}
     participation_statuses = {SessionState.INITIAL: 'Waiting for users to join',
@@ -636,6 +638,7 @@ class State(models.Model):
             return (SessionState.AC, SessionState.RW, SessionState.FINISH)
         else:
             return ()
+
 
 class FacilitatorManager(models.Manager):
     def isFacilitator(self, userObj):
@@ -835,6 +838,7 @@ class ResponseGridManager(models.Manager):
     def get_current(self, session, user):
         """ Returns the response grid from the given user of the latest iteration of the given session """
         return user.responsegrid_set.get(session=session, iteration=session.iteration)
+
 
 #the name of this class in the orm is: UserHasGridInIteration
 class ResponseGrid(models.Model):

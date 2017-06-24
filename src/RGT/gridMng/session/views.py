@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template import loader
@@ -10,8 +11,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.safestring import mark_safe
 
+from ..error.userAlreadyParticipating import UserAlreadyParticipating
+from ..error.wrongState import WrongState
+from ..response.xml.htmlResponseUtil import HttpErrorResponse, HttpSuccessResponse, \
+    createXmlSuccessResponse
+from src.RGT.gridMng.template.session.participatingSessionsContentGridsData import ParticipatingSessionsContentGridsData
 from ...gridMng.template.session.participatingSessionsContentData import ParticipatingSessionsContentData
-from ..models import Session, Grid
+from ..models import Session, Grid, Facilitator, State
 from ..models import UserParticipateSession
 from ..template.session.sessionsData import SessionsData, ParticipatingSessionsData, MySessionsContentData
 
@@ -281,6 +287,7 @@ def ajaxRespond(request):
                         if gridObj.grid_type == Grid.GridType.RESPONSE_GRID_ALTERNATIVE_CONCERN:
                             isConcernAlternativeResponseGrid = True
                         try:
+                            from src.RGT.gridMng.views import __validateInputForGrid
                             obj = __validateInputForGrid(request, isConcernAlternativeResponseGrid)
                         except (KeyError, ValueError) as error:
                             __debug_print_stacktrace()

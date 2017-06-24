@@ -4,4 +4,3 @@ class State(object):
     CHECK = 'check'
     INITIAL = 'initial'
     FINISH = 'finish'
-        

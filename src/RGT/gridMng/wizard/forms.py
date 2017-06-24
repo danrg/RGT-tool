@@ -4,10 +4,12 @@ TOTAL_WEIGHT = 100
 MIN_RATING = 1
 MAX_RATING = 5
 
+
 class GeneralsForm(forms.Form):
     grid_name = forms.CharField(widget=forms.TextInput(attrs={'size':'45'}))
     description = forms.CharField(widget=forms.Textarea(), required=False)
-    
+
+
 class AlternativesForm(forms.Form):
     # Override the initialize in order to dynamically add fields to the form in order to be saved,
     # the fields are saved only when the user selects 'Next Step'.
@@ -42,7 +44,8 @@ class AlternativesForm(forms.Form):
         if len(alternatives) < 2:
             raise forms.ValidationError('At least 2 alternatives are required.')
         return cleaned_data
-    
+
+
 class ConcernsForm(forms.Form):
     # Override the initialize in order to dynamically add fields to the form in order to be saved,
     # the fields are saved only when the user selects 'Next Step'.
@@ -98,7 +101,8 @@ class ConcernsForm(forms.Form):
             raise forms.ValidationError('It is not allowed to have the same name for concerns.')
 
         return cleaned_data
-    
+
+
 class WeightsForm(forms.Form):
     # Override the initialize in order to dynamically add fields to the form in order to be saved,
     # the fields are saved only when the user selects 'Next Step'.
@@ -130,7 +134,8 @@ class WeightsForm(forms.Form):
         if total != TOTAL_WEIGHT:
             raise forms.ValidationError('The total weight must be equal to %d.' % TOTAL_WEIGHT) 
         return cleaned_data
-    
+
+
 class RatingsForm(forms.Form):
     # Override the initialize in order to dynamically add fields to the form in order to be saved,
     # the fields are saved only when the user selects 'Next Step'.
