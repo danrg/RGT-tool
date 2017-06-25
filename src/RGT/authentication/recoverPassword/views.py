@@ -1,9 +1,10 @@
-from django.shortcuts import render_to_response, redirect
-from django.template import RequestContext
-from django.http import HttpResponseRedirect
-from django.contrib.auth import login, authenticate
 import datetime
+
+from django.contrib.auth import login, authenticate
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect, render
 from django.utils.timezone import utc
+
 from .recoverPassForm import RecoverPassForm
 
 
@@ -15,13 +16,14 @@ def recoverPass(request, passRecoverCode=''):
         return redirect('/home/')
 
     if request.method == 'POST':
-        postLinkCode = request.POST['linkCode']
+        # POSTed the new password
+        post_link_code = request.POST['linkCode']
         form = RecoverPassForm(request.POST)
         form.full_clean()
         try:
-            code = PassRecoverCode.objects.get(linkCode=postLinkCode)
-            if code.linkUsed == False and code.linkExpired == False:
-                invalidLink = False
+            code = PassRecoverCode.objects.get(linkCode=post_link_code)
+            if code.linkUsed is False and code.linkExpired is False:
+                invalid_link = False
                 if form.is_valid():
                     try:
                         user = User.objects.get(email=code.email)
@@ -38,49 +40,55 @@ def recoverPass(request, passRecoverCode=''):
                         pass
                 else:
                     # form has errors
-                    return render_to_response('authentication/recoverPassword.html',
-                                              {'form': form, 'invalidLink': invalidLink, 'linkCode': code.linkCode},
-                                              context_instance=RequestContext(request))
+                    return render(request,
+                                  'authentication/recoverPassword.html',
+                                  {'form': form, 'invalidLink': invalid_link, 'linkCode': code.linkCode})
             else:
                 # code has been used
-                invalidLink = True
+                invalid_link = True
         except PassRecoverCode.DoesNotExist:
             # code does not exist
-            invalidLink = True
+            invalid_link = True
 
-        return render_to_response('authentication/recoverPassword.html',
-                                  {'invalidLink': invalidLink},
-                                  context_instance=RequestContext(request))
+        return render(request,
+                      'authentication/recoverPassword.html',
+                      {'invalidLink': invalid_link})
     else:
         # GET request
         # check if the link is still active
         try:
             code = PassRecoverCode.objects.get(linkCode=passRecoverCode)
-            if code.linkUsed == False:
+            if code.linkUsed is False:
                 # check date time of the code if it has expired
-                codeDate = code.dateTime
+                code_date = code.dateTime
                 now = datetime.datetime.utcnow().replace(tzinfo=utc)
-                dateSub = now - codeDate
-                if (dateSub.seconds / 60 < 10):
+                elapsed_code_date = now - code_date
+
+                # link is valid for 4 hours
+                if elapsed_code_date.seconds / 60 < 240:
                     form = RecoverPassForm()
-                    invalidLink = False
-                    return render_to_response('authentication/recoverPassword.html',
-                                              {'form': form, 'invalidLink': invalidLink, 'linkCode': code.linkCode},
-                                              context_instance=RequestContext(request))
+                    invalid_link = False
+
+                    context = {'form': form,
+                               'invalidLink': invalid_link,
+                               'linkCode': code.linkCode}
+                    return render(request,
+                                  'authentication/recoverPassword.html',
+                                  context)
                 else:
                     # probably this should not happen here, we should check the time
                     # somehow different. maybe with a script in the database
                     # code has expired
-                    invalidLink = True
+                    invalid_link = True
                     code.linkExpired = True
                     code.save()
             else:
                 # code has been already used
-                invalidLink = True
+                invalid_link = True
         except PassRecoverCode.DoesNotExist:
             # code does not exist
-            invalidLink = True
+            invalid_link = True
 
-        return render_to_response('authentication/recoverPassword.html',
-                                  {'invalidLink': invalidLink},
-                                  context_instance=RequestContext(request))
+        return render(request,
+                      'authentication/recoverPassword.html',
+                      {'invalidLink': invalid_link})

@@ -1,6 +1,6 @@
-from RGT.authentication.forms import ChangePasswordForm
-from RGT import AuthorizedView
-from RGT.authentication.views.CaptchaSecuredFormView import CaptchaSecuredFormView
+from ... import AuthorizedView
+from ..forms import ChangePasswordForm
+from ..views.CaptchaSecuredFormView import CaptchaSecuredFormView
 
 
 class ChangePasswordView(AuthorizedView, CaptchaSecuredFormView):

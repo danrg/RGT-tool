@@ -1,9 +1,9 @@
 from django.contrib.auth.models import User
-from RGT.authentication.forms.ForgotPasswordForm import ForgotPasswordForm
-from RGT.authentication.models import PassRecoverCode
-from RGT.authentication.EmailService import EmailService
-from RGT.gridMng.utility import generateRandomString
-from RGT.authentication.views.CaptchaSecuredFormView import CaptchaSecuredFormView
+from ..forms.ForgotPasswordForm import ForgotPasswordForm
+from ..models import PassRecoverCode
+from ..EmailService import EmailService
+from ...gridMng.utility import generateRandomString
+from ..views.CaptchaSecuredFormView import CaptchaSecuredFormView
 
 
 class ForgotPasswordView(CaptchaSecuredFormView):
@@ -19,9 +19,9 @@ class ForgotPasswordView(CaptchaSecuredFormView):
         code.email = email
         code.linkCode = generateRandomString(14)
 
-        emailService = EmailService()
+        email_service = EmailService()
 
-        if emailService.sendForgotPasswordEmail(user, code):
+        if email_service.sendForgotPasswordEmail(user, code):
             code.save()
             return self.render_to_response(self.get_context_data(form=form, checkEmail=True))
         else:

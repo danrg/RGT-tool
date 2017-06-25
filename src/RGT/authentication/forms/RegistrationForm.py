@@ -7,8 +7,10 @@ class RegistrationForm(CaptchaSecuredForm):
     email = forms.EmailField(label='E-mail address')
     firstName = forms.CharField(label='First name')
     lastName = forms.CharField(label='Last name')
-    password = forms.CharField(label=(u'Password'), widget=forms.PasswordInput(render_value=False))
-    retyped = forms.CharField(label=(u'Confirm Password'), widget=forms.PasswordInput(render_value=False))
+    password = forms.CharField(label=u'Password',
+                               widget=forms.PasswordInput(render_value=False))
+    retyped = forms.CharField(label=u'Confirm Password',
+                              widget=forms.PasswordInput(render_value=False))
 
     def clean(self):
         cleaned_data = super(RegistrationForm, self).clean()
@@ -34,7 +36,7 @@ class RegistrationForm(CaptchaSecuredForm):
 
         try:
             user = User.objects.get(email=data)
-        except User.DoesNotExist: #do nothing
+        except User.DoesNotExist:
             pass
 
         if user is not None:

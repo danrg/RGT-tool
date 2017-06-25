@@ -1,5 +1,5 @@
 from django.test import TestCase
-from RGT.authentication.EmailService import EmailService
+from ..EmailService import EmailService
 from mock import Mock, MagicMock
 
 

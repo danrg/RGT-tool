@@ -13,14 +13,13 @@ class CaptchaVerifier(object):
         challenge = request.POST['recaptcha_challenge_field']
         response = request.POST['recaptcha_response_field']
 
-        from RGT import settings
-
-        privateKey = settings.RECAPTCHA_PRIVATE_KEY
-        clientIpAddress = request.META['REMOTE_ADDR']
+        from .. import settings
+        private_key = settings.RECAPTCHA_PRIVATE_KEY
+        client_ip_address = request.META['REMOTE_ADDR']
 
         try:
-            return captcha.submit(challenge, response, privateKey, clientIpAddress).is_valid
-        except Exception: # Catch all and log
+            return captcha.submit(challenge, response, private_key, client_ip_address).is_valid
+        except Exception:
             logger = logging.getLogger('django')
             logger.error('Unexpected exception from ReCaptcha:' + sys.exc_info()[0])
             return False
