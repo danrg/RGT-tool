@@ -14,8 +14,5 @@ def verify(request, verifyEmailCode=''):
             user = User.objects.get(email=user_email)
             user.is_active = True
             user.save()
-        else:
-        # profile already verified
-            pass
 
     return redirect('/auth/login/')

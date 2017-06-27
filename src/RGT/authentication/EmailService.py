@@ -5,37 +5,37 @@ from .. import settings
 
 
 class EmailService(object):
-    def sendForgotPasswordEmail(self, user, passRecoverCode):
+    def send_forgot_password_email(self, user, pass_recover_code):
         # send the email for the new password request
         subject = 'New password request for RGT!'
-        htmlContentTemplate = 'authentication/forgotPassEmail.html'
-        linkInitialPart = settings.HOST_NAME + '/accounts/recover/'
+        html_content_template = 'authentication/forgotPassEmail.html'
+        link_initial_part = settings.HOST_NAME + '/accounts/recover/'
 
-        verifyEmailCode = passRecoverCode.linkCode + '/'
-        link = linkInitialPart + verifyEmailCode
+        verify_email_code = pass_recover_code.linkCode + '/'
+        link = link_initial_part + verify_email_code
 
-        htmlContent = get_template(htmlContentTemplate)
+        html_content = get_template(html_content_template)
         context = {'link': link, 'user': user}
 
-        html_render = htmlContent.render(context)
-        return self.prepareAndSendEmail(subject, passRecoverCode.email, html_render)
+        html_render = html_content.render(context)
+        return self.prepare_send_email(subject, pass_recover_code.email, html_render)
 
-    def sendRegistrationEmail(self, user, verificationCode):
+    def send_registration_email(self, user, verificationCode):
         subject = 'Email verification for RGT!'
-        htmlContentTemplate = 'authentication/verifyEmail.html'
+        html_content_template = 'authentication/verifyEmail.html'
 
-        linkInitialPart = settings.HOST_NAME + '/auth/verify/'
-        link = linkInitialPart + verificationCode + '/'
+        link_initial_part = settings.HOST_NAME + '/auth/verify/'
+        link = link_initial_part + verificationCode + '/'
 
-        htmlContent = get_template(htmlContentTemplate)
+        html_content = get_template(html_content_template)
         context = Context({'link': link, 'user': user})
 
-        return self.prepareAndSendEmail(subject, user.email, htmlContent.render(context))
+        return self.prepare_send_email(subject, user.email, html_content.render(context))
 
-    def prepareAndSendEmail(self, subject, toMail, htmlContent):
-        fromMail = settings.EMAIL_HOST_USER
-        email = EmailMultiAlternatives(subject, htmlContent, fromMail, [toMail])
-        email.attach_alternative(htmlContent, 'text/html')
+    def prepare_send_email(self, subject, to_mail, html_content):
+        from_mail = settings.EMAIL_HOST_USER
+        email = EmailMultiAlternatives(subject, html_content, from_mail, [to_mail])
+        email.attach_alternative(html_content, 'text/html')
 
         return self.sendEmail(email)
 

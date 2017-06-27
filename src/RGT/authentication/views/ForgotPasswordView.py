@@ -21,7 +21,7 @@ class ForgotPasswordView(CaptchaSecuredFormView):
 
         email_service = EmailService()
 
-        if email_service.sendForgotPasswordEmail(user, code):
+        if email_service.send_forgot_password_email(user, code):
             code.save()
             return self.render_to_response(self.get_context_data(form=form, checkEmail=True))
         else:

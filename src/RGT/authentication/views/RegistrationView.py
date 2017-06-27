@@ -41,7 +41,7 @@ class RegistrationView(CaptchaSecuredFormView):
         user.profile.verifyEmailCode = verification_code
 
         email_service = EmailService()
-        if email_service.sendRegistrationEmail(user, verification_code):
+        if email_service.send_registration_email(user, verification_code):
             user.profile.save()
             return HttpResponseRedirect('/home/')
 
