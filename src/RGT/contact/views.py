@@ -1,9 +1,9 @@
-from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response, redirect
-from django.template import RequestContext, Context
-from django.template.loader import get_template
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, BadHeaderError
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect, render
+from django.template.loader import get_template
+
 from .contactForm import ContactForm
 
 
@@ -18,10 +18,12 @@ def contact(request):
             toMail = [settings.EMAIL_HOST_USER]
             sender = form.cleaned_data['email']
             content = form.cleaned_data['content']
-            htmlContent = get_template('contact/contactEmail.html')
-            context = Context({'email': sender, 'content': content})
-            email = EmailMultiAlternatives(subject, '', sender, toMail)
-            email.attach_alternative(htmlContent.render(context), 'text/html')
+            html_content = get_template('contact/contactEmail.html')
+            context = {'email': sender, 'content': content}
+            rendered_html = html_content.render(context)
+
+            email = EmailMultiAlternatives(subject, rendered_html, sender, toMail)
+            email.attach_alternative(rendered_html, 'text/html')
             try:
                 email.send()
                 request.session['didContact'] = True
@@ -31,15 +33,15 @@ def contact(request):
             except:
                 print 'another problem'
         else:
-            return render_to_response('contact/contact.html',
-                                      {'form': form},
-                                      context_instance=RequestContext(request))
+            return render(request,
+                          'contact/contact.html',
+                          {'form': form})
     else:
         form = ContactForm()
-        didContact = request.session.get('didContact')
-        if didContact != None:
+        did_contact = request.session.get('didContact')
+        if did_contact is not None:
             del request.session['didContact']
 
-    return render_to_response('contact/contact.html',
-                              {'form': form, 'didContact': didContact},
-                              context_instance=RequestContext(request))
+        return render(request,
+                      'contact/contact.html',
+                      {'form': form, 'didContact': did_contact})

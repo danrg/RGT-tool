@@ -1,6 +1,5 @@
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import redirect, render
-from django.template import RequestContext
 
 from ..gridMng.response.xml.htmlResponseUtil import createXmlErrorResponse
 from .userProfileForm import UserProfileForm
@@ -38,9 +37,9 @@ def displayUserProfile(request):
             return HttpResponseRedirect('/profile/')
         else:
             # form contains errors
-            return render('userProfile/userProfile.html',
-                          {'form': form},
-                          context_instance=RequestContext(request))
+            return render(request,
+                          'userProfile/userProfile.html',
+                          {'form': form})
     else:
         profileUpdated = request.session.get('profileUpdated')
         if 'profileUpdated' in request.session:
@@ -53,4 +52,5 @@ def displayUserProfile(request):
                                         'displayHelp': profile.displayHelp,
                                         })
         return render(request,
-                      'userProfile/userProfile.html')
+                      'userProfile/userProfile.html',
+                      {'form': form})
