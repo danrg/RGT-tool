@@ -1,13 +1,15 @@
 from django.shortcuts import redirect
-from ...userProfile.models import UserProfile
-from django.contrib.auth.models import User
 
 
 def verify(request, verifyEmailCode=''):
     if request.method == 'GET':
         code = verifyEmailCode
+
+        from django.contrib.auth.models import User
+        from ...userProfile.models import UserProfile
         profile = UserProfile.objects.get(verifyEmailCode=code)
         user_email = profile.user
+
         if not profile.verifiedEmail:
             profile.verifiedEmail = True
             profile.save()

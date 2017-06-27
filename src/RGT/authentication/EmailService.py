@@ -1,5 +1,4 @@
 from django.template.loader import get_template
-from django.template import Context
 from django.core.mail import EmailMultiAlternatives, BadHeaderError
 from .. import settings
 
@@ -28,9 +27,11 @@ class EmailService(object):
         link = link_initial_part + verificationCode + '/'
 
         html_content = get_template(html_content_template)
-        context = Context({'link': link, 'user': user})
+        context = {'link': link, 'user': user}
 
-        return self.prepare_send_email(subject, user.email, html_content.render(context))
+        html_render = html_content.render(context)
+
+        return self.prepare_send_email(subject, user.email, html_render)
 
     def prepare_send_email(self, subject, to_mail, html_content):
         from_mail = settings.EMAIL_HOST_USER
