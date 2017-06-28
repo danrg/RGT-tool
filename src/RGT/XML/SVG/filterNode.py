@@ -33,7 +33,7 @@ class FilterNode(BasicSvgNode, PresentationAttributes, XlinkAttributes, ClassAtt
     def setExternalResourcesRequired(self, data):
         allowedValues = ['true', 'false']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -44,7 +44,7 @@ class FilterNode(BasicSvgNode, PresentationAttributes, XlinkAttributes, ClassAtt
                 self._setNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED, data)
 
     def setFilterRes(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_FILTER_RES, data)
@@ -52,7 +52,7 @@ class FilterNode(BasicSvgNode, PresentationAttributes, XlinkAttributes, ClassAtt
     def setFilterUnits(self, data):
         allowedValues = ['userSpaceOnUse', 'objectBoundingBox']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -65,7 +65,7 @@ class FilterNode(BasicSvgNode, PresentationAttributes, XlinkAttributes, ClassAtt
     def setPrimitiveUnits(self, data):
         allowedValues = ['userSpaceOnUse', 'objectBoundingBox']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -77,24 +77,24 @@ class FilterNode(BasicSvgNode, PresentationAttributes, XlinkAttributes, ClassAtt
 
     def getExternalResourcesRequired(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getFilterRes(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_FILTER_RES)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getFilterUnits(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_FILTER_UNITS)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getPrimitiveUnits(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_PRIMITIVE_UNITS)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

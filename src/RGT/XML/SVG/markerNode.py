@@ -34,7 +34,7 @@ class MarkerNode(BaseContainerNode):
     def setExternalResourcesRequired(self, data):
         allowedValues = ['true', 'false']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -45,25 +45,25 @@ class MarkerNode(BaseContainerNode):
                 self._setNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED, data)
 
     def setViewBox(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_VIEW_BOX, data)
 
     def setPreserveAspectRatio(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_PRESERVE_ASPECT_RATIO, data)
 
     def setRefX(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_REF_X, data)
 
     def setRefY(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_REF_Y, data)
@@ -71,7 +71,7 @@ class MarkerNode(BaseContainerNode):
     def setMarkerUnits(self, data):
         allowedValues = ['strokeWidth', 'userSpaceOnUse']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -82,73 +82,73 @@ class MarkerNode(BaseContainerNode):
                 self._setNodeAttribute(self.ATTRIBUTE_MARKER_UNITS, data)
 
     def setMarkerWidth(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_MARKER_WIDTH, data)
 
     def setMarkerHeight(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_MARKER_HEIGHT, data)
 
     def setOrient(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_ORIENT, data)
 
     def getExternalResourcesRequired(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getViewBox(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_VIEW_BOX)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getPreserveAspectRatio(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_PRESERVE_ASPECT_RATIO)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getRefX(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_REF_X)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getRefY(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_REF_Y)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getMarkerUnits(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_MARKER_UNITS)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getMarkerWidth(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_MARKER_WIDTH)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getMarkerHeight(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_MARKER_HEIGHT)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getOrient(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_ORIENT)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

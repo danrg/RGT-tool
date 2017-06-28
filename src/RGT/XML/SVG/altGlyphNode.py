@@ -21,57 +21,57 @@ class AltGlyphNode(BaseTextNode, XlinkAttributes, PositionAttributes):
         self.allowAllSvgNodesAsChildNodes = True
 
     def setDx(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_DX, data)
 
     def setDy(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_DY, data)
 
     def setGlypthRef(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_GLYPH_REF, data)
 
     def setFormat(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_FORMAT, data)
 
     def setRotate(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_ROTATE, data)
 
     def getDx(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_DX)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getDy(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_DY)
-        if node != None:
+        if node is not None:
             return node.nodeValue
 
     def getGlypthRef(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_GLYPH_REF)
-        if node != None:
+        if node is not None:
             return node.nodeValue
 
     def getFormat(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_FORMAT)
-        if node != None:
+        if node is not None:
             return node.nodeValue
 
     def getRotate(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_ROTATE)
-        if node != None:
+        if node is not None:
             return node.nodeValue

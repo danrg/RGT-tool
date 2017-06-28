@@ -15,13 +15,13 @@ class FeComponentTransferNode(BaseFilterNode):
 
 
     def setIn(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_IN, data)
 
     def getIn(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_IN)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

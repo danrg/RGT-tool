@@ -16,7 +16,7 @@ class FeMorphologyNode(BaseFilterNode):
         self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_SET_NODE})
 
     def setIn(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_IN, data)
@@ -24,7 +24,7 @@ class FeMorphologyNode(BaseFilterNode):
     def setOperator(self, data):
         allowedValues = ['erode', 'dilate']
 
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
 
@@ -38,25 +38,25 @@ class FeMorphologyNode(BaseFilterNode):
                 self._setNodeAttribute(self.ATTRIBUTE_OPERATOR, data)
 
     def setRadius(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_RADIUS, data)
 
     def getIn(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_IN)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getOperator(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_OPERATOR)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getRadius(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_RADIUS)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

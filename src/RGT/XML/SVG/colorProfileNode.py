@@ -16,13 +16,13 @@ class ColorProfileNode(BasicSvgNode, XlinkAttributes):
         self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS)
 
     def setLocal(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_LOCAL, data)
 
     def setName(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_NAME, data)
@@ -30,7 +30,7 @@ class ColorProfileNode(BasicSvgNode, XlinkAttributes):
     def setRenderingIntent(self, data):
         allowedValues = ['auto', 'perceptual', 'relative-colorimetric', 'saturation', 'absolute-colorimetric']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -42,18 +42,18 @@ class ColorProfileNode(BasicSvgNode, XlinkAttributes):
 
     def getLocal(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_LOCAL)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getName(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_NAME)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getRenderingIntent(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_RENDERING_INTENT)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

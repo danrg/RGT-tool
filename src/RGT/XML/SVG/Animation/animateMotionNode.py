@@ -24,49 +24,49 @@ class AnimateMotionNode(BaseAnimationNode, AnimationAdditionAttributes, Animatio
         self._allowedSvgChildNodes.add(self.SVG_MPATH_NODE)
 
     def setPath(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_PATH, data)
 
     def setKeyPoints(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_KEY_POINTS, data)
 
     def setRotate(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_ROTATE, data)
 
     def setOrigin(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_ORIGIN, data)
 
     def getPath(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_PATH)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def geKeyPoints(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_KEY_POINTS)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getRotate(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_ROTATE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getOrigin(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_ORIGIN)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

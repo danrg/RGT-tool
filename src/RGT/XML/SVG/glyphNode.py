@@ -17,13 +17,13 @@ class GlyphNode(BaseGlyph):
 
 
     def setUnicode(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_UNICODE, data)
 
     def setGlyphName(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_GLYPH_NAME, data)
@@ -31,7 +31,7 @@ class GlyphNode(BaseGlyph):
     def setOrientation(self, data):
         allowedValues = ['h', 'v']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -44,7 +44,7 @@ class GlyphNode(BaseGlyph):
     def setArabicForm(self, data):
         allowedValues = ['initial', 'medial', 'terminal', 'isolated']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -55,7 +55,7 @@ class GlyphNode(BaseGlyph):
                 self._setNodeAttribute(self.ATTRIBUTE_ARABIC_FORM, data)
 
     def setLang(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_LANG, data)
@@ -63,30 +63,30 @@ class GlyphNode(BaseGlyph):
 
     def getUnicode(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_UNICODE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getGlyphName(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_GLYPH_NAME)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getOrientation(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_ORIENTATION)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getArabicForm(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_ARABIC_FORM)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getLang(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_LANG)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

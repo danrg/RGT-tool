@@ -15,25 +15,25 @@ class FeDistantLightNode(BasicSvgNode):
         self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_SET_NODE})
 
     def setAzimuth(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_AZIMUTH, data)
 
     def setElevation(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_ELEVATION, data)
 
     def getAzimuth(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_AZIMUTH)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getElevation(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_ELEVATION)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None    

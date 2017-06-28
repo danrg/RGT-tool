@@ -17,7 +17,7 @@ class TransferFunctionElementAttributes(BasicSvgAttribute):
     def setType(self, data):
         allowedValues = ['identity', 'table', 'discrete', 'linear', 'gamma']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -28,79 +28,79 @@ class TransferFunctionElementAttributes(BasicSvgAttribute):
                 self._setNodeAttribute(self.ATTRIBUTE_TYPE, data)
 
     def setTableValues(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_TABLE_VALUES, data)
 
     def setSlope(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_SLOPE, data)
 
     def setIntercept(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_INTERCEPT, data)
 
     def setAmplitude(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_AMPLITUDE, data)
 
     def setExponent(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_EXPONENT, data)
 
     def setOffset(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_OFFSET, data)
 
     def getType(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_TYPE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getTableValues(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_TABLE_VALUES)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getSlope(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_SLOPE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getIntercept(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_INTERCEPT)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getAmplitude(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_AMPLITUDE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getExponent(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_EXPONENT)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getOffset(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_OFFSET)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

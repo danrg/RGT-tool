@@ -24,7 +24,7 @@ class BaseShapeNode(BasicSvgNode, ConditionalProcessingAttributes, GraphicalEven
     def setExternalResourcesRequired(self, data):
         allowedValues = ['true', 'false']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -35,19 +35,19 @@ class BaseShapeNode(BasicSvgNode, ConditionalProcessingAttributes, GraphicalEven
                 self._setNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED, data)
 
     def setTransform(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_TRANSFORM, data)
 
     def getExternalResourcesRequired(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getTransform(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_TRANSFORM)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

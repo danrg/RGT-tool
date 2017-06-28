@@ -12,7 +12,7 @@ class AnimationAdditionAttributes(BasicSvgAttribute):
     def setAdditive(self, data):
         allowedValues = ['replace', 'sum']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -25,7 +25,7 @@ class AnimationAdditionAttributes(BasicSvgAttribute):
     def setAccumulate(self, data):
         allowedValues = ['none', 'sum']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -37,13 +37,13 @@ class AnimationAdditionAttributes(BasicSvgAttribute):
 
     def getAddtive(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_ADDITIVE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getAccumulate(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_ACCUMULATE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
         

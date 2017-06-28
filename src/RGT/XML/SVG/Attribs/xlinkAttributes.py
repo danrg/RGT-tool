@@ -16,7 +16,7 @@ class XlinkAttributes(BasicSvgAttribute):
 
 
     def setXlinkHref(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_XLINK_HREF, data)
@@ -24,7 +24,7 @@ class XlinkAttributes(BasicSvgAttribute):
     def setXlinkShow(self, data):
         allowedValues = ['new', 'replace', 'embed', 'other', 'none']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -37,7 +37,7 @@ class XlinkAttributes(BasicSvgAttribute):
     def setXlinkActuate(self, data):
         allowedValues = ['onLoad']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -50,7 +50,7 @@ class XlinkAttributes(BasicSvgAttribute):
     def setXlinkType(self, data):
         allowedValues = ['simple']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -61,61 +61,61 @@ class XlinkAttributes(BasicSvgAttribute):
                 self._setNodeAttribute(self.ATTRIBUTE_XLINK_TYPE, data)
 
     def setXlinkRole(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_XLINK_ROLE, data)
 
     def setXlinkArcrole(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_XLINK_ARCROLE, data)
 
     def setXlinkTitle(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_XLINK_TITLE, data)
 
     def getXlinkHref(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_XLINK_HREF)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getXlinkShow(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_XLINK_SHOW)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getXlinkActuate(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_XLINK_ACTUATE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getXlinkType(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_XLINK_TYPE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getXlinkRole(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_XLINK_ROLE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getXlinkArcrole(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_XLINK_ARCROLE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getXlinkTitle(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_XLINK_TITLE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

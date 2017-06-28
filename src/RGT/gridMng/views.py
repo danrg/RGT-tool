@@ -56,18 +56,19 @@ def ajaxCreateGrid(request):
             values: user
         gridName: string
     """
+    from .models import Grid
+
     gridType = None
     userObj = request.user
     isConcernAlternativeResponseGrid = False
     # check the if the inputs are correct
     if request.POST.has_key('nAlternatives') and request.POST.has_key(
             'nConcerns'):
-        if request.POST.has_key('gridType'):
+        if 'gridType' in request.POST:
             if request.POST['gridType'] == 'response':
                 return HttpResponse(createXmlErrorResponse("Invalid request, unsupported operation"),
                                     content_type='application/xml')
             elif request.POST['gridType'] == 'user':
-                from .models import Grid
                 gridType = Grid.GridType.USER_GRID
             else:
                 return HttpResponse(createXmlErrorResponse("Unsupported grid type"), content_type='application/xml')
@@ -459,7 +460,7 @@ def ajaxUpdateGrid(request):
     nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues = obj
 
     # update the grid
-    if gridObj != None:
+    if gridObj is not None:
         for i in range(int(nAlternatives)):
             try:
                 str(alternativeValues[i])
@@ -524,7 +525,7 @@ def ajaxDeleteGrid(request):
             grid = Grid.objects.get(user=request.user, usid=gridUSID)
         except:
             HttpResponse(createXmlErrorResponse('couldn\'t find grid'), content_type='application/xml')
-        if grid != None:
+        if grid is not None:
             grid.delete()
             return HttpResponse(createXmlSuccessResponse('Grid was deleted'), content_type='application/xml')
     else:
@@ -548,7 +549,7 @@ def ajaxGenerateDendogram(request):
         if len(grid1) >= 1:
             try:
                 grid1 = grid1[0]
-                if grid1.dendogram != None and grid1.dendogram != '':
+                if grid1.dendogram is not None and grid1.dendogram is not '':
                     imgData = createDendogram(grid1)
                     responseData = createSvgResponse(imgData, None)
                     return HttpResponse(responseData, content_type='application/xml')
@@ -708,7 +709,7 @@ def ajaxConvertGridTo(request):
             usidData = request.POST['usid']
             convertToData = request.POST['convertTo']
 
-            if usidData != None and convertToData != None:
+            if usidData is not None and convertToData is not None:
                 from .models import Grid
                 gridObj = Grid.objects.filter(usid=usidData)
                 if len(gridObj) >= 1:
@@ -852,7 +853,7 @@ def __convertSvgStringTo(svgString=None, convertTo=None):
             (imageFileName, mimeType, fileExtention) = convertSvgTo(svgString, convertTo)
             imgData.contentType = mimeType
             imgData.fileExtension = fileExtention
-            if imageFileName != None:
+            if imageFileName is not None:
                 fpInMemory = BytesIO()
                 fp = open(imageFileName, "rb")
 
@@ -994,7 +995,7 @@ def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
         while i < nConcerns:
             ratios = []
             # it is not allowed to have rations in an concern that has no leftPole or rightPole
-            if concernValues[i][0] != None and concernValues[i][1] != None:
+            if concernValues[i][0] is not None and concernValues[i][1] is not None:
                 hasEmptyConcern = False
             else:
                 hasEmptyConcern = True
@@ -1023,7 +1024,7 @@ def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
             ratioValues.append(ratios)
             j = 0
             i += 1
-    return (nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues)
+    return nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues
 
 
 def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues,
@@ -1049,7 +1050,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
         boolean
     """
 
-    if gridObj != None:
+    if gridObj is not None:
         valuesChanged = None  # use to check if we need to clear the dendogram field in the Grid model
         objToCommit = []
         totalConcenrs = gridObj.concerns_set.all().count()
@@ -1272,12 +1273,12 @@ def pca(request):
                         row = []
                         ratio = None
                         weight = 1  # concernObj.weight
-                        if concernObj.leftPole != None:
+                        if concernObj.leftPole is not None:
                             row.append(str(concernObj.leftPole))
                             if len(alternatives) >= 1:
                                 for alternativeObj in alternatives:
                                     ratio = (Ratings.objects.get(concern=concernObj, alternative=alternativeObj)).rating
-                                    if ratio != None:
+                                    if ratio is not None:
                                         ratio *= weight
                                         ratio = round(ratio, 2)
                                         row.append(ratio)
@@ -1292,7 +1293,7 @@ def pca(request):
                         matrixConcern.append(row)
                         matrixAlternatives.append(row[1:])
                         row = row[0:]  # create new obj of row
-                        if concernObj.rightPole != None:
+                        if concernObj.rightPole is not None:
                             row.append(str(concernObj.rightPole))
                         else:
                             raise ValueError('Concerns must be complete in order to generate a dendrogram.')

@@ -9,7 +9,7 @@ class BaseEditableTextNode(BaseTextNode):
         self._allowedSvgChildNodes.update(self.SVG_GROUP_DESCRIPTIVE_ELEMENTS)
 
     def setText(self, text):
-        if text != None:
+        if text is not None:
             textNode = None
             if type(text) != StringType and type(text) != UnicodeType:
                 text = str(text)

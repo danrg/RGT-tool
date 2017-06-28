@@ -9,25 +9,25 @@ class CoreAttributes(BasicSvgAttribute):
     ATTRIBUTE_XML_SPACE = 'xml:space'
 
     def setId(self, idData=None):
-        if idData != None:
+        if idData is not None:
             if type(idData) is not StringType:
                 idData = str(idData)
             self._setNodeAttribute(self.ATTRIBUTE_ID, idData)
 
     def setXmlBase(self, xmlBase=None):
-        if xmlBase != None:
+        if xmlBase is not None:
             if type(xmlBase) is not StringType:
                 xmlBase = str(xmlBase)
             self._setNodeAttribute(self.ATTRIBUTE_XML_BASE, xmlBase)
 
     def setXmlLang(self, xmlLang=None):
-        if xmlLang != None:
+        if xmlLang is not None:
             if type(xmlLang) is not StringType:
                 xmlLang = str(xmlLang)
             self._setNodeAttribute(self.ATTRIBUTE_XML_LANG, xmlLang)
 
     def setXmlSpace(self, xmlSpace=None):
-        if xmlSpace != None:
+        if xmlSpace is not None:
             if xmlSpace == 'default' or xmlSpace == 'preserve':
                 self._setNodeAttribute(self.ATTRIBUTE_XML_SPACE, xmlSpace)
             else:
@@ -36,25 +36,25 @@ class CoreAttributes(BasicSvgAttribute):
 
     def getId(self):
         idNode = self._getNodeAttribute(self.ATTRIBUTE_ID)
-        if idNode != None:
+        if idNode is not None:
             return idNode.nodeValue
         return None
 
     def getXmlBase(self):
         xmlBaseNode = self._getNodeAttribute(self.ATTRIBUTE_XML_BASE)
-        if xmlBaseNode != None:
+        if xmlBaseNode is not None:
             return xmlBaseNode.nodeValue
         return None
 
     def getXmlLang(self):
         xmlLangNode = self._getNodeAttribute(self.ATTRIBUTE_XML_LANG)
-        if xmlLangNode != None:
+        if xmlLangNode is not None:
             return xmlLangNode.nodeValue
         return None
 
     def getXmlSpace(self):
         xmlSpaceNode = self._getNodeAttribute(self.ATTRIBUTE_XML_SPACE)
-        if xmlSpaceNode != None:
+        if xmlSpaceNode is not None:
             return xmlSpaceNode.nodeValue
         return None
         

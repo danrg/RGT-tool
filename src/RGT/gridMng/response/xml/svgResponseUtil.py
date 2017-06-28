@@ -12,7 +12,7 @@ def createSvgResponse(svgDoc, extraData=None):
     tempNode.appendChild(xmlDoc.createCDATASection(svgDoc))
     root.appendChild(tempNode)
     #add extra data
-    if extraData != None:
+    if extraData is not None:
         extraInfoNode = xmlDoc.createElement('extraInfo')
         if hasattr(extraData, 'documentElement'):
             extraInfoNode.appendChild(extraData.documentElement)

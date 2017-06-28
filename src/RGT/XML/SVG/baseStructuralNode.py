@@ -22,7 +22,7 @@ class BaseStructuralNode(BasicSvgNode, GraphicalEventAttributes, PresentationAtt
     def setExternalResourcesRequired(self, data):
         allowedValues = ['true', 'false']
 
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
 
@@ -37,7 +37,7 @@ class BaseStructuralNode(BasicSvgNode, GraphicalEventAttributes, PresentationAtt
 
     def getExternalResourcesRequired(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_EXTERNALRESOURCESREQUIRED)
-        if node != None:
+        if node is not None:
             value = node.nodeValue
             if value == 'false' or value == 'False':
                 return False

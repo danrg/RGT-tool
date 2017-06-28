@@ -16,7 +16,7 @@ class MpathNode(BasicSvgNode, XlinkAttributes):
     def setExternalResourcesRequired(self, data):
         allowedValues = ['true', 'false']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -28,6 +28,6 @@ class MpathNode(BasicSvgNode, XlinkAttributes):
 
     def getExternalResourcesRequired(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

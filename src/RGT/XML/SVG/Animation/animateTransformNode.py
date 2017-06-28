@@ -23,7 +23,7 @@ class AnimateTransformNode(BaseAnimationNode, AnimationAdditionAttributes, Anima
     def setType(self, data):
         allowedValues = ['translate', 'scale', 'rotate', 'skewX', 'skewY']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -35,6 +35,6 @@ class AnimateTransformNode(BaseAnimationNode, AnimationAdditionAttributes, Anima
 
     def getType(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_TYPE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

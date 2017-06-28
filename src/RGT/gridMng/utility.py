@@ -35,7 +35,7 @@ def validateName(name):
 
 # this is a prototype function, do not use or change it
 def convertSvgTo(svgData, fileType):
-    if fileType != None and svgData != None:
+    if fileType is not None and svgData is not None:
         tempSvgFileName = generateRandomString(24)
         tempImageFileName = generateRandomString(24)
         tempDirPath = tempfile.gettempdir()
@@ -115,7 +115,7 @@ def getImageError():
 
 def createFileResponse(fileData):
     response = HttpResponse(fileData.data, content_type=fileData.contentType)
-    if fileData.length != None:
+    if fileData.length is not None:
         response['Content-Length'] = fileData.length
     response['Content-Disposition'] = 'attachment; filename=' + fileData.fileName + '.' + fileData.fileExtension
     return response
@@ -129,7 +129,7 @@ def generateGridTable(gridObj):
     header = []
     concernWeights = []
 
-    if gridObj != None:
+    if gridObj is not None:
         i = 0
         j = 0
         concerns = gridObj.concerns_set.all()
@@ -147,7 +147,7 @@ def generateGridTable(gridObj):
                 ratio = Ratings.objects.filter(concern=concerns[i], alternative=alternatives[j])
                 if len(ratio) >= 1:
                     ratio = ratio[0]
-                    if ratio.rating != None:
+                    if ratio.rating is not None:
                         row.append(ratio.rating)
                     else:
                         row.append('')
@@ -158,7 +158,7 @@ def generateGridTable(gridObj):
                 row.append('')
             else:
                 row.append(concerns[i].rightPole)
-            if concerns[i].weight != None:
+            if concerns[i].weight is not None:
                 concernWeights.append(concerns[i].weight)
             else:
                 concernWeights.append('')
@@ -205,12 +205,12 @@ def createDendogram(gridObj):
             row = []
             ratio = None
             weight = concernObj.weight
-            if concernObj.leftPole != None:
+            if concernObj.leftPole is not None:
                 row.append(str(concernObj.leftPole))
                 if len(alternatives) >= 1:
                     for alternativeObj in alternatives:
                         ratio = (Ratings.objects.get(concern=concernObj, alternative=alternativeObj)).rating
-                        if ratio != None:
+                        if ratio is not None:
                             ratio *= weight
                             ratio = round(ratio, 2)
                             row.append(ratio)
@@ -225,7 +225,7 @@ def createDendogram(gridObj):
             matrixConcern.append(row)
             matrixAlternatives.append(row[1:])
             row = row[0:]  # create new obj of row
-            if concernObj.rightPole != None:
+            if concernObj.rightPole is not None:
                 row.append(str(concernObj.rightPole))
             else:
                 raise ValueError('Concerns must be complete in order to generate a dendrogram.')
@@ -240,7 +240,7 @@ def createDendogram(gridObj):
     i = 0
     temp = [[]]
     while i < len(alternatives):
-        if alternatives[i].name != None:
+        if alternatives[i].name is not None:
             matrixAlternatives[i].insert(0, str(alternatives[i].name))
             temp.append(str(alternatives[i].name))
             # print alternatives[i].name
@@ -299,12 +299,12 @@ def returnMatrix(gridObj, which):
             row = []
             ratio = None
             weight = concernObj.weight
-            if concernObj.leftPole != None:
+            if concernObj.leftPole is not None:
                 row.append(str(concernObj.leftPole))
                 if len(alternatives) >= 1:
                     for alternativeObj in alternatives:
                         ratio = (Ratings.objects.get(concern=concernObj, alternative=alternativeObj)).rating
-                        if ratio != None:
+                        if ratio is not None:
                             ratio *= weight
                             ratio = round(ratio, 2)
                             row.append(ratio)
@@ -319,7 +319,7 @@ def returnMatrix(gridObj, which):
             matrixConcern.append(row)
             matrixAlternatives.append(row[1:])
             row = row[0:]  # create new obj of row
-            if concernObj.rightPole != None:
+            if concernObj.rightPole is not None:
                 row.append(str(concernObj.rightPole))
             else:
                 raise ValueError('Concerns must be complete in order to generate a dendrogram.')
@@ -333,7 +333,7 @@ def returnMatrix(gridObj, which):
     i = 0
     temp = [[]]
     while i < len(alternatives):
-        if alternatives[i].name != None:
+        if alternatives[i].name is not None:
             matrixAlternatives[i].insert(0, str(alternatives[i].name))
             temp.append(str(alternatives[i].name))
             # print alternatives[i].name
@@ -397,7 +397,7 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
 
     fontName = 'arial'
 
-    if gridObj != None:
+    if gridObj is not None:
         concerns = concerns or gridObj.concerns_set.all()
         alternatives = alternatives or gridObj.alternatives_set.all()
         nConcerns = len(concerns)
@@ -445,7 +445,7 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
                     ratingObj = ratingObj[0]
                     row.append(ratingObj.rating)
                     # check to see if the rating text size
-                    if ratingObj.rating != None:
+                    if ratingObj.rating is not None:
                         size = f.getsize(str(ratingObj.rating))
                         if size[0] > colWidths[colN]:
                             colWidths[colN] = size[0]
@@ -454,7 +454,7 @@ def convertGridTableToSvg(gridObj, concerns=None, alternatives=None, ratings=Non
                 colN += 1
             colN = 0
             # weight
-            if concernObj.weight != None:
+            if concernObj.weight is not None:
                 totalWeight += concernObj.weight
                 size = f.getsize(str(concernObj.weight))
                 if size[0] > colWidths[nAlternatives]:
@@ -1386,7 +1386,7 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
                                              rangeTableYTotalOffset + ((i + 1) * tableLineThickness) + (
                                                  (i + 1) * rangeCellHeight), rangeCellHeight + tableLineThickness,
                                              rangeColWidths[j] + tableLineThickness)
-            if color != None:
+            if color is not None:
                 tempNode.setFill(createColorRGBString(rangeData.tableData[i][j][1]))
             else:
                 tempNode.setFill(createColorRGBString((255, 255, 255)))
@@ -1397,7 +1397,7 @@ def convertRatingWeightSessionResultToSvg(meanData, rangeData, stdData):
                                              stdTableYTotalOffset + ((i + 1) * tableLineThickness) + (
                                                  (i + 1) * stdCellHeight), stdCellHeight + tableLineThickness,
                                              stdColWidths[j] + tableLineThickness)
-            if color != None:
+            if color is not None:
                 tempNode.setFill(createColorRGBString(stdData.tableData[i][j][1]))
             else:
                 tempNode.setFill(createColorRGBString((255, 255, 255)))

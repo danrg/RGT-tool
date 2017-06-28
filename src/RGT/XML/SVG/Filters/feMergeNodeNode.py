@@ -12,13 +12,13 @@ class FeMergeNodeNode(BasicSvgNode):
         self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_SET_NODE})
 
     def setIn(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_IN, data)
 
     def getIn(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_IN)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

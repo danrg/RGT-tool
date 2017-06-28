@@ -17,31 +17,31 @@ class AnimationTimingAttributes(BasicSvgAttribute):
         BasicSvgAttribute.__init__(self)
 
     def setBegin(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_BEGIN, data)
 
     def setDur(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_DUR, data)
 
     def setEnd(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_END, data)
 
     def setMin(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_MIN, data)
 
     def setMax(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_MAX, data)
@@ -49,7 +49,7 @@ class AnimationTimingAttributes(BasicSvgAttribute):
     def setRestart(self, data):
         allowedValues = ['always', 'whenNotActive', 'never']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -60,13 +60,13 @@ class AnimationTimingAttributes(BasicSvgAttribute):
                 self._setNodeAttribute(self.ATTRIBUTE_RESTART, data)
 
     def setRepeatCount(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_REPEAT_COUNT, data)
 
     def setRepeatDur(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_REPEAT_DUR, data)
@@ -74,7 +74,7 @@ class AnimationTimingAttributes(BasicSvgAttribute):
     def setFill(self, data):
         allowedValues = ['freeze', 'remove']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -86,54 +86,54 @@ class AnimationTimingAttributes(BasicSvgAttribute):
 
     def getBegin(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_BEGIN)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getDur(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_DUR)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getEnd(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_END)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getMin(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_MIN)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getMax(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_MAX)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getRestart(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_RESTART)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getRepeatCount(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_REPEAT_COUNT)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getRepeatDur(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_REPEAT_DUR)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getFill(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_FILL)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

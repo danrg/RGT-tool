@@ -19,49 +19,49 @@ class LineNode(BaseShapeNode):
         self.setY2(y2)
 
     def setX1(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_X1, data)
 
     def setY1(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_Y1, data)
 
     def setX2(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_X2, data)
 
     def setY2(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_Y2, data)
 
     def getX1(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_X1)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getY1(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_Y1)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getX2(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_X2)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getY2(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_Y2)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

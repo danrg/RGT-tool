@@ -9,7 +9,7 @@ class BaseScriptNode(BasicSvgNode):
 
     def setData(self, data):
 
-        if data != None:
+        if data is not None:
             foundCDataNode = False
 
             #check to see if we have a child node (text node) 

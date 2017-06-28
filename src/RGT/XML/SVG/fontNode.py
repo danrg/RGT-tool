@@ -31,7 +31,7 @@ class FontNode(BasicSvgNode):
     def setExternalResourcesRequired(self, data):
         allowedValues = ['true', 'false']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -42,79 +42,79 @@ class FontNode(BasicSvgNode):
                 self._setNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED, data)
 
     def setHorizOriginX(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_HORIZ_ORIGIN_X, data)
 
     def setHorizOriginY(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_HORIZ_ORIGIN_Y, data)
 
     def setHorizAdvX(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_HORIZ_ADV_X, data)
 
     def setVertOriginX(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_VERT_ORIGIN_X, data)
 
     def setVertOriginY(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_VERT_ORIGIN_Y, data)
 
     def setVertAdvY(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_VERT_ADV_Y, data)
 
     def getExternalResourcesRequired(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getHorizOriginX(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_HORIZ_ORIGIN_X)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getHorizOriginY(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_HORIZ_ORIGIN_Y)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getHorizAdvX(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_HORIZ_ADV_X)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getVertOriginX(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_VERT_ORIGIN_X)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getVertOriginY(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_VERT_ORIGIN_Y)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getVertAdvY(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_VERT_ADV_Y)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

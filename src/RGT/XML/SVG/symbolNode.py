@@ -26,25 +26,25 @@ class SymbolNode(BaseStructuralNode):
 
 
     def setPreserveAspectRatio(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_PRESERVEASPECTRATIO, data)
 
     def setViewBox(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_VIEWBOX, data)
 
     def getViewBox(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_VIEWBOX)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getPreserveAspectRatio(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_PRESERVEASPECTRATIO)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

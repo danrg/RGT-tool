@@ -26,7 +26,7 @@ class GNode(BaseStructuralNode, ConditionalProcessingAttributes):
 
 
     def setTransform(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_TRANSFORM, data)
@@ -34,6 +34,6 @@ class GNode(BaseStructuralNode, ConditionalProcessingAttributes):
 
     def getTransform(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_TRANSFORM)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

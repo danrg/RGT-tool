@@ -17,19 +17,19 @@ class FeTurbulenceNode(BaseFilterNode):
         self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_SET_NODE})
 
     def setBaseFrequency(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_BASE_FREQUENCY, data)
 
     def setNumOctaves(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_NUM_OCTAVES, data)
 
     def setSeed(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_SEED, data)
@@ -37,7 +37,7 @@ class FeTurbulenceNode(BaseFilterNode):
     def setStitchTiles(self, data):
         allowedValues = ['stitch', 'noStitch']
 
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
 
@@ -53,7 +53,7 @@ class FeTurbulenceNode(BaseFilterNode):
     def setType(self, data):
         allowedValues = ['fractalNoise', 'turbulence']
 
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
 
@@ -68,30 +68,30 @@ class FeTurbulenceNode(BaseFilterNode):
 
     def getBaseFrequency(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_BASE_FREQUENCY)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getNumOctaves(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_NUM_OCTAVES)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getSeed(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_SEED)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getStitchTiles(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_STITCH_TILES)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getType(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_TYPE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

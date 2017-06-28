@@ -48,7 +48,7 @@ class GridManager(models.Manager):
     def duplicateGrid(self, gridObj, userObj=None, gridName=None, gridType=None):
         #create new grid
         if userObj:
-            if gridName != None:
+            if gridName is not None:
                 newGrid = Grid(user=userObj, description=gridObj.description, name=gridName,
                                dendogram=gridObj.dendogram, grid_type=gridObj.grid_type, usid=generateRandomString(20),
                                dateTime=datetime.utcnow().replace(tzinfo=utc))
@@ -57,7 +57,7 @@ class GridManager(models.Manager):
                                dendogram=gridObj.dendogram, grid_type=gridObj.grid_type, usid=generateRandomString(20),
                                dateTime=datetime.utcnow().replace(tzinfo=utc))
         else:
-            if gridName != None:
+            if gridName is not None:
                 newGrid = Grid(description=gridObj.description, name=gridName, dendogram=gridObj.dendogram,
                                grid_type=gridObj.grid_type, usid=generateRandomString(20),
                                dateTime=datetime.utcnow().replace(tzinfo=utc))
@@ -65,7 +65,7 @@ class GridManager(models.Manager):
                 newGrid = Grid(description=gridObj.description, name=gridObj.name, dendogram=gridObj.dendogram,
                                grid_type=gridObj.grid_type, usid=generateRandomString(20),
                                dateTime=datetime.utcnow().replace(tzinfo=utc))
-        if gridType != None:
+        if gridType is not None:
             newGrid.grid_type = gridType
         if newGrid:
             try:

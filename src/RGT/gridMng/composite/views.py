@@ -101,7 +101,7 @@ class CompositeWizard(SessionWizardView):
 
         if not None in (userObj, rules, statuses):
             gridObj = Grid.objects.create(user=userObj, grid_type=Grid.GridType.COMPOSITE_GRID)
-            if gridName != None:
+            if gridName is not None:
                 gridObj.name = gridName
             gridObj.usid = generateRandomString(GRID_USID_KEY_LENGTH)
             gridObj.dateTime = datetime.utcnow().replace(tzinfo=utc)

@@ -41,98 +41,98 @@ class SvgNode(BaseStructuralNode, PositionAttributes, SizeAttributes, Conditiona
             })
 
     def setViewBox(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_VIEWBOX, data)
 
 
     def setPreserveAspectRatio(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_PRESERVEASPECTRATIO, data)
 
     def setZoomAndPan(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_ZOOMANDPAN, data)
 
     def setVersion(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_VERSION, data)
 
     def setBaseProfile(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_BASEPROFILE, data)
 
     def setContentScriptType(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_CONTENTSCRIPTTYPE, data)
 
     def setContentStyleType(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_CONTENTSTYLETYPE, data)
 
     def setXmlns(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_XMLNS, data)
 
     def getViewBox(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_VIEWBOX)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getPreserveAspectRatio(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_PRESERVEASPECTRATIO)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getZoomAndPan(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_ZOOMANDPAN)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getVersion(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_VERSION)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getBaseProfile(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_BASEPROFILE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getContentScriptType(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_CONTENTSCRIPTTYPE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getContentStyleType(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_CONTENTSTYLETYPE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getXmlns(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_XMLNS)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

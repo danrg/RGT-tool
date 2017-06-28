@@ -27,49 +27,49 @@ class GlyphRefNode(BasicSvgNode, PresentationAttributes, XlinkAttributes, ClassA
         self._allowedSvgChildNodes.update({self.SVG_GLYPH_REF_NODE, self.SVG_ALT_GLYPH_ITEM_NODE})
 
     def setDx(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_DX, data)
 
     def setDy(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_DY, data)
 
     def setGlyphRef(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_GLYPH_REF, data)
 
     def setFormat(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_FORMAT, data)
 
     def getDx(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_DX)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getDy(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_DY)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getGlyphRef(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_GLYPH_REF)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getFormat(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_FORMAT)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

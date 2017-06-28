@@ -19,7 +19,7 @@ class TextPathNode(BaseEditableTextNode, XlinkAttributes):
              self.SVG_SET_NODE, self.SVG_TREF_NODE, self.SVG_TSPAN_NODE})
 
     def setStartOffset(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_START_OFFSET, data)
@@ -27,7 +27,7 @@ class TextPathNode(BaseEditableTextNode, XlinkAttributes):
     def setMethod(self, data):
         allowedValues = ['align', 'stretch']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -40,7 +40,7 @@ class TextPathNode(BaseEditableTextNode, XlinkAttributes):
     def setSpacing(self, data):
         allowedValues = ['auto', 'exact']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -52,18 +52,18 @@ class TextPathNode(BaseEditableTextNode, XlinkAttributes):
 
     def getStartOffset(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_START_OFFSET)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getMethod(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_METHOD)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getSpacing(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_SPACING)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

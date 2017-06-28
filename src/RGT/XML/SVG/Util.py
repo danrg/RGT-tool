@@ -7,7 +7,7 @@ def createCssStyleNode(svgDoc, cssData=None):
     node = svgDoc.createStyleNode()
     node.setType('text/css')
 
-    if cssData != None:
+    if cssData is not None:
         node.setData(cssData)
 
     return node
@@ -17,7 +17,7 @@ def createJavaScriptNode(svgDoc, jsData=None):
     node = svgDoc.createScriptNode()
     node.setType('text/javascript')
 
-    if jsData != None:
+    if jsData is not None:
         node.setData(jsData)
 
     return node
@@ -27,7 +27,7 @@ def createEcmaScriptNode(svgDoc, ecmaData):
     node = svgDoc.createScriptNode()
     node.setType('text/ecmascript')
 
-    if ecmaData != None:
+    if ecmaData is not None:
         node.setData(ecmaData)
 
     return node

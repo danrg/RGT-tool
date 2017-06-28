@@ -19,7 +19,7 @@ class FeImageNode(BaseFilterNode, XlinkAttributes):
     def setExternalResourcesRequired(self, data):
         allowedValues = ['true', 'false']
 
-        if data != None:
+        if data is not None:
             if data not in allowedValues:
                 values = ''
                 for value in allowedValues:
@@ -30,19 +30,19 @@ class FeImageNode(BaseFilterNode, XlinkAttributes):
                 self._setNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED, data)
 
     def setPreserveAspectRatio(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_PRESERVE_ASPECT_RATIO, data)
 
     def getExternalResourcesRequired(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_EXTERNAL_RESOURCES_REQUIRED)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getPreserveAspectRatio(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_PRESERVE_ASPECT_RATIO)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

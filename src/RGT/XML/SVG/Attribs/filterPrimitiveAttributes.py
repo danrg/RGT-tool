@@ -14,14 +14,14 @@ class FilterPrimitiveAttributes(PositionAttributes, SizeAttributes, BasicSvgAttr
 
 
     def setResult(self, data=None):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_RESULT, data)
 
     def geResult(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_RESULT)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
     

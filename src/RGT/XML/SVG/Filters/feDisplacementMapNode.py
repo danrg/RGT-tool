@@ -17,19 +17,19 @@ class FeDisplacementMapNode(BaseFilterNode):
         self._allowedSvgChildNodes.update({self.SVG_ANIMATE_NODE, self.SVG_SET_NODE})
 
     def setIn(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_IN, data)
 
     def setIn2(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_IN2, data)
 
     def setScale(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_SCALE, data)
@@ -37,7 +37,7 @@ class FeDisplacementMapNode(BaseFilterNode):
     def setXChannelSelector(self, data):
         allowedValues = ['R', 'G', 'B', 'A']
 
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
 
@@ -53,7 +53,7 @@ class FeDisplacementMapNode(BaseFilterNode):
     def setYChannelSelector(self, data):
         allowedValues = ['R', 'G', 'B', 'A']
 
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
 
@@ -68,30 +68,30 @@ class FeDisplacementMapNode(BaseFilterNode):
 
     def getIn(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_IN)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getIn2(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_IN2)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getScale(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_SCALE)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getXChannelSelector(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_X_CHANNEL_SELECTOR)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
 
     def getYChannelSelector(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_Y_CHANNEL_SELECTOR)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None

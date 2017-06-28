@@ -22,14 +22,14 @@ class StopNode(BasicSvgNode, PresentationAttributes, ClassAttribute, StyleAttrib
         self.setStyle(style)
 
     def setOffset(self, data):
-        if data != None:
+        if data is not None:
             if type(data) is not StringType:
                 data = str(data)
             self._setNodeAttribute(self.ATTRIBUTE_OFFSET, data)
 
     def getOffset(self):
         node = self._getNodeAttribute(self.ATTRIBUTE_OFFSET)
-        if node != None:
+        if node is not None:
             return node.nodeValue
         return None
         
