@@ -59,7 +59,7 @@ def ajaxCreateGrid(request):
     gridType = None
     userObj = request.user
     isConcernAlternativeResponseGrid = False
-    #check the if the inputs are correct
+    # check the if the inputs are correct
     if request.POST.has_key('nAlternatives') and request.POST.has_key(
             'nConcerns'):
         if request.POST.has_key('gridType'):
@@ -72,13 +72,13 @@ def ajaxCreateGrid(request):
             else:
                 return HttpResponse(createXmlErrorResponse("Unsupported grid type"), content_type='application/xml')
         else:
-            #if the gridType key is not found assume it is a user grid
+            # if the gridType key is not found assume it is a user grid
             gridType = Grid.GridType.USER_GRID
     else:
         return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"),
                             content_type='application/xml')
 
-    #lets validate the data
+    # lets validate the data
     try:
         obj = __validateInputForGrid(request, isConcernAlternativeResponseGrid)
     except KeyError as error:
@@ -144,10 +144,10 @@ def ajaxCreateGrid(request):
         createGrid(userObj, gridType, gridName, concernValues, alternativeValues, ratioValues,
                    True)
     except:
-        #return render_to_response('gridMng/createGrid.html', {'existingProjectName': request.REQUEST['grid']}, context_instance=RequestContext(request))
+        # return render_to_response('gridMng/createGrid.html', {'existingProjectName': request.REQUEST['grid']}, context_instance=RequestContext(request))
         return HttpResponse(createXmlErrorResponse("Could not create grid."), content_type='application/xml')
 
-    #return an empty grid div
+    # return an empty grid div
     gridTableTemplate = GridTableData(generateGridTable(None))
     gridTableTemplate.changeRatingsWeights = True
     gridTableTemplate.changeCornAlt = True
@@ -286,7 +286,7 @@ def ajaxGetGrid(request):
     showRatingWhileFalseChangeRatingsWeights = True
     error = None;
 
-    #validate the options
+    # validate the options
     gridUSID = None
     viewMode = None
     writeMode = None
@@ -297,7 +297,7 @@ def ajaxGetGrid(request):
     except KeyError:
         error = 'Invalid arguments.'
 
-    #variable check
+    # variable check
     try:
         if not gridUSID:
             error = 'name of the grid was not specified'
@@ -326,7 +326,7 @@ def ajaxGetGrid(request):
     if not error:
         # create the table for the template
         grids = user1.grid_set
-        gridObj = grids.filter(usid=gridUSID) #gridObj is first a list
+        gridObj = grids.filter(usid=gridUSID)  # gridObj is first a list
         if len(gridObj) > 0:
             gridObj = gridObj[0]
             try:
@@ -380,7 +380,7 @@ def ajaxUpdateGrid(request):
     gridObj = None
     isConcernAlternativeResponseGrid = False
 
-    #lets determine what type of grid we are dealing with here and do some checks to see if all the parameters are present
+    # lets determine what type of grid we are dealing with here and do some checks to see if all the parameters are present
     if request.POST.has_key('gridType'):
         gridType = request.POST['gridType']
         if gridType == 'session':
@@ -428,9 +428,9 @@ def ajaxUpdateGrid(request):
         if type(gridCheckNameResult) == StringType:
             gridObj.name = gridCheckNameResult
         else:
-            #if the grid name isn't a string than it is an error
+            # if the grid name isn't a string than it is an error
             return gridCheckNameResult
-            #because django will save stuff to the database even if .save() is not called, we need to validate everything before starting to create the objects that will be used to populate the db
+            # because django will save stuff to the database even if .save() is not called, we need to validate everything before starting to create the objects that will be used to populate the db
     obj = None
     try:
         obj = __validateInputForGrid(request, isConcernAlternativeResponseGrid)
@@ -458,7 +458,7 @@ def ajaxUpdateGrid(request):
         return HttpResponse(createXmlErrorResponse('Unknown error'), content_type='application/xml')
     nConcerns, nAlternatives, concernValues, alternativeValues, ratioValues = obj
 
-    #update the grid
+    # update the grid
     if gridObj != None:
         for i in range(int(nAlternatives)):
             try:
@@ -600,7 +600,7 @@ def ajaxGenerateSimilarity(request):
                 grid1 = grid1[0]
 
                 matrixConcern = returnMatrix(grid1, "concern")
-                matrixAlternatives = returnMatrix(grid1, "alt") #matrix that will be transposed
+                matrixAlternatives = returnMatrix(grid1, "alt")  # matrix that will be transposed
 
                 consRangeXi = len(matrixConcern[0])
                 consRangeYi = len(matrixConcern) - 1
@@ -683,7 +683,7 @@ def ajaxConvertSvgTo(request):
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
-            #in case of an error or checks failing return an image error
+            # in case of an error or checks failing return an image error
     errorImageData = getImageError()
     # send the file
     response = HttpResponse(errorImageData, content_type='image/jpg')
@@ -713,7 +713,7 @@ def ajaxConvertGridTo(request):
                 gridObj = Grid.objects.filter(usid=usidData)
                 if len(gridObj) >= 1:
                     gridObj = gridObj[0]
-                    #check if the requesting user is the owner of the grid
+                    # check if the requesting user is the owner of the grid
                     if gridObj.user == request.user or gridObj.user == None:
                         imgData = FileData()
                         if convertToData == 'svg':
@@ -748,7 +748,7 @@ def ajaxConvertGridTo(request):
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
-            #anything else return the img error
+            # anything else return the img error
     errorImageData = getImageError()
     # send the file
     response = HttpResponse(errorImageData, content_type='image/jpg')
@@ -773,13 +773,13 @@ def dendrogramTo(request):
     ############## Options ##################
     #########################################
     #                                       #
-    #convertTo: svg                         #
-    #gridUSID: usid of the grid in question #
+    # convertTo: svg                         #
+    # gridUSID: usid of the grid in question #
     #########################################
 
     try:
         if request.POST.has_key('gridUSID') and request.POST.has_key('convertTo'):
-            #check to see if the inputs are not None
+            # check to see if the inputs are not None
             if request.POST['gridUSID'] and request.POST['convertTo']:
                 from .models import Grid
                 grid = Grid.objects.filter(usid=request.POST['gridUSID'])
@@ -791,7 +791,7 @@ def dendrogramTo(request):
                     else:
                         data.fileName = generateRandomString()
 
-                    #return the file
+                    # return the file
                     return createFileResponse(data)
             else:
                 if not request.POST['gridUSID']:
@@ -809,7 +809,7 @@ def dendrogramTo(request):
             print '-' * 60
             traceback.print_exc(file=sys.stdout)
             print '-' * 60
-            #in case of an error or failing of one the checks return an image error
+            # in case of an error or failing of one the checks return an image error
     errorImageData = getImageError()
     # send the file
     response = HttpResponse(errorImageData, content_type='image/jpg')
@@ -840,9 +840,9 @@ def __convertSvgStringTo(svgString=None, convertTo=None):
             imgData.data = svgString
             imgData.contentType = 'image/svg+xml'
             imgData.fileExtension = 'svg'
-            #response = HttpResponse(request.POST['data'], content_type='image/svg+xml')
-            #response['Content-Disposition'] = 'attachment; filename=' + fileName + '.svg'
-            #return response
+            # response = HttpResponse(request.POST['data'], content_type='image/svg+xml')
+            # response['Content-Disposition'] = 'attachment; filename=' + fileName + '.svg'
+            # return response
             return imgData
 
         #################################################################
@@ -856,7 +856,7 @@ def __convertSvgStringTo(svgString=None, convertTo=None):
                 fpInMemory = BytesIO()
                 fp = open(imageFileName, "rb")
 
-                #read the file and place it in memory
+                # read the file and place it in memory
                 try:
                     byte = fp.read(1)
                     while byte != '':
@@ -898,7 +898,7 @@ def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
                      two contains the weight of the concern.
 
     """
-    concernValues = [] #this will contain a tuple with 3 values, (leftPole, rightPole, weight)
+    concernValues = []  # this will contain a tuple with 3 values, (leftPole, rightPole, weight)
     alternativeValues = []
     ratioValues = []
     usedConcernNames = []
@@ -908,69 +908,69 @@ def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
     nAlternatives = int(request.POST['nAlternatives'])
     nConcerns = int(request.POST['nConcerns'])
 
-    #check if the keys with the alternatives are present
+    # check if the keys with the alternatives are present
     while i < nAlternatives:
         keyName = 'alternative_' + str((i + 1)) + '_name'
         if not request.POST.has_key(keyName):
             raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
         else:
-            #alternative names should be unique in a grid, so lets check for that
+            # alternative names should be unique in a grid, so lets check for that
             temp = request.POST[keyName].strip()
             if temp != '':
                 if not temp in alternativeValues:
                     alternativeValues.append(temp)
                 else:
                     raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
-                    #return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"))
+                    # return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"))
             else:
                 raise ValueError("No empty values are allowed for alternatives")
-                #return HttpResponse(createXmlErrorResponse("No empty values are allowed for alternatives"), content_type='application/xml') 
+                # return HttpResponse(createXmlErrorResponse("No empty values are allowed for alternatives"), content_type='application/xml')
         i += 1
 
     i = 0
-    #check if all the keys for the left and right pole are present
+    # check if all the keys for the left and right pole are present
     while i < nConcerns:
         leftPole = None
         rightPole = None
-        #check the left pole first
+        # check the left pole first
         keyName = 'concern_' + str((i + 1)) + '_left'
         if not request.POST.has_key(keyName):
             raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
-            #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
+            # return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
         else:
-            #the right and left pole can be None so convert the empty string into None
+            # the right and left pole can be None so convert the empty string into None
             leftPole = request.POST[keyName]
             if leftPole == '':
                 leftPole = None
-                #the names of the left and right pole should be unique in a grid, so lets check for that. If the left pole is none, allow it to be saved
+                # the names of the left and right pole should be unique in a grid, so lets check for that. If the left pole is none, allow it to be saved
             if not leftPole in usedConcernNames or leftPole == None:
                 usedConcernNames.append(leftPole)
             else:
                 raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
-                #return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
-                #check the right pole
+                # return HttpResponse(createXmlErrorResponse("The name " + request.POST[keyName] + " is being used more than one time"), content_type='application/xml')
+                # check the right pole
         keyName = 'concern_' + str((i + 1)) + '_right'
         if not request.POST.has_key(keyName):
             raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
-            #return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
+            # return HttpResponse(createXmlErrorResponse("Invalid request, request is missing argument(s)"), content_type='application/xml')
         else:
-            #the right and left pole can be None so convert the empty string into None
+            # the right and left pole can be None so convert the empty string into None
             rightPole = request.POST[keyName].strip()
             if rightPole == '':
                 rightPole = None
-                #the names of the left and right pole should be unique in a grid, so lets check for that. If the right pole is none, allow it to be saved
+                # the names of the left and right pole should be unique in a grid, so lets check for that. If the right pole is none, allow it to be saved
             if not rightPole in usedConcernNames or rightPole == None:
                 usedConcernNames.append(rightPole)
             else:
                 raise ValueError("The name " + request.POST[keyName] + " is being used more than one time")
-                #if it is a response grid of the alternative.concern we don't need to check for the weights as they will not be there
+                # if it is a response grid of the alternative.concern we don't need to check for the weights as they will not be there
         if not isConcernAlternativeResponseGrid:
-            #lets check if the weight key is present
+            # lets check if the weight key is present
             keyName = 'weight_concern' + str((i + 1))
             if not request.POST.has_key(keyName):
                 raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
             else:
-                #allowed values for the values are None, '', ' ' and numbers
+                # allowed values for the values are None, '', ' ' and numbers
                 keyValue = request.POST[keyName]
                 if not (keyValue == None or keyValue == ' ' or keyValue == ''):
                     try:
@@ -978,7 +978,7 @@ def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
                         concernValues.append((leftPole, rightPole, value))
                     except:
                         raise ValueError("Invalid input " + keyValue)
-                        #return HttpResponse(createXmlErrorResponse("Invalid input " + keyValue), content_type='application/xml')
+                        # return HttpResponse(createXmlErrorResponse("Invalid input " + keyValue), content_type='application/xml')
                 else:
                     raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
         else:
@@ -986,36 +986,36 @@ def __validateInputForGrid(request, isConcernAlternativeResponseGrid):
         i += 1
     i = 0
 
-    #we are going to check the ratios now, because the response grid for the alternative/concern doesn't have ratios we don't need to check for them
+    # we are going to check the ratios now, because the response grid for the alternative/concern doesn't have ratios we don't need to check for them
     if not isConcernAlternativeResponseGrid:
         i = 0
         j = 0
         hasEmptyConcern = False;
         while i < nConcerns:
             ratios = []
-            #it is not allowed to have rations in an concern that has no leftPole or rightPole
+            # it is not allowed to have rations in an concern that has no leftPole or rightPole
             if concernValues[i][0] != None and concernValues[i][1] != None:
                 hasEmptyConcern = False
             else:
                 hasEmptyConcern = True
             while j < nAlternatives:
-                keyName = 'ratio_concer' + str((i + 1)) + '_alternative' + str(( j + 1))
+                keyName = 'ratio_concer' + str((i + 1)) + '_alternative' + str((j + 1))
                 if not request.POST.has_key(keyName):
                     raise KeyError('Invalid request, request is missing argument(s)', 'Error key not found: ' + keyName)
                 else:
                     keyValue = request.POST[keyName].strip()
-                    #valid values for the they are None, ' ', '' and numbers, anything else is not allowed
+                    # valid values for the they are None, ' ', '' and numbers, anything else is not allowed
                     if not (keyValue == None or keyValue == ''):
                         if hasEmptyConcern:
                             raise ValueError('It is not allowed to have ratings while the concern is empty')
-                            #return HttpResponse(createXmlErrorResponse('It is not allowed to have ratings while the concern is empty'), content_type='application/xml')
+                            # return HttpResponse(createXmlErrorResponse('It is not allowed to have ratings while the concern is empty'), content_type='application/xml')
                         else:
                             try:
                                 value = float(keyValue)
                                 ratios.append(value)
                             except:
                                 raise ValueError("Invalid value: " + keyValue)
-                                #return HttpResponse(createXmlErrorResponse("Invalid value: " + keyValue), content_type='application/xml')
+                                # return HttpResponse(createXmlErrorResponse("Invalid value: " + keyValue), content_type='application/xml')
                     else:
                         raise KeyError('Invalid request, request is missing argument(s)',
                                        'Error rating not found: ' + keyName)
@@ -1050,7 +1050,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
     """
 
     if gridObj != None:
-        valuesChanged = None #use to check if we need to clear the dendogram field in the Grid model
+        valuesChanged = None  # use to check if we need to clear the dendogram field in the Grid model
         objToCommit = []
         totalConcenrs = gridObj.concerns_set.all().count()
         totalAlternatives = gridObj.alternatives_set.all().count()
@@ -1066,7 +1066,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
         i = 0;
         j = 0;
 
-        #remove the concerns and alternatives first, this is because we want to avoid any type of database errors
+        # remove the concerns and alternatives first, this is because we want to avoid any type of database errors
         if nConcerns < totalConcenrs:
             valuesChanged = 1
             i = totalConcenrs - nConcerns
@@ -1083,10 +1083,10 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
                 i -= 1
 
         i = 0
-        #lets update what we have
-        #lets check what changed with the concerns first
+        # lets update what we have
+        # lets check what changed with the concerns first
         while i < nConcerns and i < totalConcenrs:
-            #check if the name of the concern is the same
+            # check if the name of the concern is the same
             if concerns[i].leftPole != concernValues[i][0] or concerns[i].rightPole != concernValues[i][1]:
                 concern1 = concerns[i]
                 concern1.leftPole = concernValues[i][0]
@@ -1094,7 +1094,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
                 if not valuesChanged:
                     valuesChanged = 1
                 objToCommit.append(concern1)
-                #check if the weight didn't change only if the grid is not an response grid from alternative/concerns as it doesn't have weights or ratios
+                # check if the weight didn't change only if the grid is not an response grid from alternative/concerns as it doesn't have weights or ratios
             if not isConcernAlternativeResponseGrid:
                 newWeight = concernValues[i][2]
                 if concerns[i].weight != newWeight:
@@ -1105,7 +1105,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
                     objToCommit.append(concern1)
             i += 1
         i = 0
-        #check if the names are the same
+        # check if the names are the same
         while i < nAlternatives and i < totalAlternatives:
             if alternatives[i].name != alternativeValues[i]:
                 alternatives[i].name = alternativeValues[i]
@@ -1116,20 +1116,20 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
         i = 0
         j = 0
 
-        #the alternative/concern response grid has no ratios, so just ignore it
+        # the alternative/concern response grid has no ratios, so just ignore it
         if not isConcernAlternativeResponseGrid:
             while i < nConcerns and i < totalConcenrs:
                 while j < nAlternatives and j < totalAlternatives:
                     newValue = ratioValues[i][j]
-                    #if request.POST.has_key('ratio_concer' + str(i + 1) + '_alternative' + str(j + 1)):
-                    #newValue= float(request.POST['ratio_concer' + str(i + 1) + '_alternative' + str(j + 1)])
+                    # if request.POST.has_key('ratio_concer' + str(i + 1) + '_alternative' + str(j + 1)):
+                    # newValue= float(request.POST['ratio_concer' + str(i + 1) + '_alternative' + str(j + 1)])
                     from .models import Ratings
                     ratingObjList = Ratings.objects.filter(concern=concerns[i], alternative=alternatives[j])
                     if (len(ratingObjList) > 0):
                         ratingObj = ratingObjList[0]
                         # check to see if the rating had a value before, if not create the new value
                     if newValue != ratingObj.rating:
-                        #update values here
+                        # update values here
                         ratingObj.rating = newValue
                         objToCommit.append(ratingObj)
                         if not valuesChanged:
@@ -1138,7 +1138,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
                 i += 1
                 j = 0
 
-        #now lets take care of adding stuff
+        # now lets take care of adding stuff
         if nConcerns > totalConcenrs:
             valuesChanged = 1
             i = totalConcenrs
@@ -1150,19 +1150,19 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
                 objToCommit.append(concern)
                 concerns.append(concern)
                 if not isConcernAlternativeResponseGrid:
-                    #create ratios for the concern, ratios will be created only for the old known alternatives
+                    # create ratios for the concern, ratios will be created only for the old known alternatives
                     while j < totalAlternatives:
                         rate = Ratings(concern=concerns[i], alternative=alternatives[j], rating=ratioValues[i][j])
                         objToCommit.append(rate)
                         j += 1
                     j = 0
                 i += 1
-                #here we know if we had more concerns it has already been added to the concern list, thus totalConcenrs == nConcerns now.
+                # here we know if we had more concerns it has already been added to the concern list, thus totalConcenrs == nConcerns now.
         if nAlternatives > totalAlternatives:
             valuesChanged = 1
             i = 0
             j = totalAlternatives
-            #lets create the new alternatives
+            # lets create the new alternatives
             while i < (nAlternatives - totalAlternatives):
                 from .models import Alternatives
                 alternative = Alternatives.objects.create(grid=gridObj, name=alternativeValues[i + totalAlternatives])
@@ -1170,7 +1170,7 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
                 alternatives.append(alternative)
                 i += 1
             i = 0
-            #create the ratios
+            # create the ratios
             if not isConcernAlternativeResponseGrid:
                 while i < nConcerns:
                     while j < nAlternatives:
@@ -1181,10 +1181,10 @@ def updateGrid(gridObj, nConcerns, nAlternatives, concernValues, alternativeValu
                     i += 1
         if valuesChanged:
             gridObj.dendogram = ''
-            #check to see if the grid obj is already schedule to be saved
+            # check to see if the grid obj is already schedule to be saved
             if not (gridObj in objToCommit):
                 objToCommit.append(gridObj)
-                #now that all went ok commit the changes (except delete as that one is done when the function is called)
+                # now that all went ok commit the changes (except delete as that one is done when the function is called)
         for obj in objToCommit:
             obj.save()
 
@@ -1224,19 +1224,20 @@ def createGrid(userObj, gridType, gridName, concernValues, alternativeValues, ra
     Return:
         rgt/gridMng/models.Grid
     """
-    args = (userObj,gridType, concernValues, alternativeValues, ratioValues, createRatings)
+    args = (userObj, gridType, concernValues, alternativeValues, ratioValues, createRatings)
     if not None in args:
         from .models import Grid
-        return Grid.objects.create_grid(userObj, gridType, concernValues, alternativeValues, createRatings, ratioValues, name=gridName)
+        return Grid.objects.create_grid(userObj, gridType, concernValues, alternativeValues, createRatings, ratioValues,
+                                        name=gridName)
     else:
         raise ValueError('One or more variables were None')
 
 
 def pca(request):
-    #this is a setting for matplotlib
+    # this is a setting for matplotlib
     os.environ['MPLCONFIGDIR'] = tempfile.mkdtemp()
 
-    #these libraries are imported separately, because they are heavyweight
+    # these libraries are imported separately, because they are heavyweight
     import mdp
     import numpy as np
     import matplotlib.pyplot as plt
@@ -1244,8 +1245,6 @@ def pca(request):
     import matplotlib
     matplotlib.use('Agg')
     from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-
-
 
     if not request.user.is_authenticated():
         return redirect('/auth/login/')
@@ -1255,24 +1254,24 @@ def pca(request):
         if len(grid1) >= 1:
             try:
                 grid1 = grid1[0]
-                #here is sample data
-                #concerns are represented on columns, alternatives on lines
+                # here is sample data
+                # concerns are represented on columns, alternatives on lines
 
-                from .models import Ratings #can't be declared globally because it will generate an import error
+                from .models import Ratings  # can't be declared globally because it will generate an import error
 
-                #lets create a matrix that the hierarchical module understands
-                matrixFull = [] # this is the compleet matrix, it will be used to create the table in the picture
+                # lets create a matrix that the hierarchical module understands
+                matrixFull = []  # this is the compleet matrix, it will be used to create the table in the picture
                 matrixConcern = []
-                matrixAlternatives = [] #matrix that will be transposed
+                matrixAlternatives = []  # matrix that will be transposed
                 concerns = grid1.concerns_set.all()
                 alternatives = grid1.alternatives_set.all()
-                maxValueOfAlternative = -1 # this is to save time later on as i need to loop trough all the alternatives right now so i can check for max value
+                maxValueOfAlternative = -1  # this is to save time later on as i need to loop trough all the alternatives right now so i can check for max value
 
                 if len(concerns) > 1:
                     for concernObj in concerns:
                         row = []
                         ratio = None
-                        weight = 1 #concernObj.weight
+                        weight = 1  # concernObj.weight
                         if concernObj.leftPole != None:
                             row.append(str(concernObj.leftPole))
                             if len(alternatives) >= 1:
@@ -1292,7 +1291,7 @@ def pca(request):
                             raise ValueError('Concerns must be complete in order to generate a dendrogram.')
                         matrixConcern.append(row)
                         matrixAlternatives.append(row[1:])
-                        row = row[0:] #create new obj of row
+                        row = row[0:]  # create new obj of row
                         if concernObj.rightPole != None:
                             row.append(str(concernObj.rightPole))
                         else:
@@ -1303,28 +1302,27 @@ def pca(request):
 
                 matrixAlternatives = transpose(matrixAlternatives)
                 var_grid = np.array(matrixAlternatives)
-                #improve output readability
+                # improve output readability
                 np.set_printoptions(precision=2)
                 np.set_printoptions(suppress=True)
 
-
-                #Create the PCA node and train it
+                # Create the PCA node and train it
                 pcan = mdp.nodes.PCANode(output_dim=2, svd=True)
                 pcar = pcan.execute(var_grid)
 
-                #Graph results
-                #pcar[3,0],pcar[3,1] has the projections of alternative3 on the
-                #first two principal components (0 and 1)
+                # Graph results
+                # pcar[3,0],pcar[3,1] has the projections of alternative3 on the
+                # first two principal components (0 and 1)
                 fig = plt.figure()
                 ax = fig.add_subplot(111)
                 ax.plot(pcar[:, 0], pcar[:, 1], 'bo')
                 ax.plot(pcan.v[:, 0], pcan.v[:, 1], 'ro')
 
-                #draw axes
+                # draw axes
                 ax.axhline(0, color='black')
                 ax.axvline(0, color='black')
 
-                #annotations each concern
+                # annotations each concern
                 id = 0
                 for xpoint, ypoint in pcan.v:
                     ax.annotate('C{:.0f}'.format(id), (xpoint, ypoint + 0.1), ha='center',
@@ -1336,12 +1334,11 @@ def pca(request):
                                 va='center', bbox=dict(fc='0.99', ec='none'))
                     id += 1
 
-
-                #calculate accounted for variance
+                # calculate accounted for variance
                 var_accounted_PC1 = pcan.d[0] * pcan.explained_variance * 100 / (pcan.d[0] + pcan.d[1])
                 var_accounted_PC2 = pcan.d[1] * pcan.explained_variance * 100 / (pcan.d[0] + pcan.d[1])
 
-                #Show variance accounted for
+                # Show variance accounted for
                 ax.set_xlabel('Accounted variance on PC1 (%.1f%%)' % (var_accounted_PC1))
                 ax.set_ylabel('Accounted variance on PC2 (%.1f%%)' % (var_accounted_PC2))
 
