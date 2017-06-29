@@ -19,9 +19,9 @@ from django.core.urlresolvers import reverse
 
 
 class GridManager(models.Manager):
-
     @transaction.atomic
-    def create_grid(self, user, type, concernValues=None, alternativeValues=None, createRatings=False, ratioValues=None, **kwargs):
+    def create_grid(self, user, type, concernValues=None, alternativeValues=None, createRatings=False, ratioValues=None,
+                    **kwargs):
         if kwargs['name'] is None:
             del kwargs['name']
         grid = self.create(user=user, grid_type=type, **kwargs)
@@ -31,7 +31,7 @@ class GridManager(models.Manager):
             alternatives = [Alternatives(grid=grid, name=alt) for alt in alternativeValues]
             Alternatives.objects.bulk_create(alternatives)
         if concernValues is not None:
-            concerns = [Concerns(grid=grid, leftPole=c[0],rightPole=c[1], weight=c[2]) for c in concernValues]
+            concerns = [Concerns(grid=grid, leftPole=c[0], rightPole=c[1], weight=c[2]) for c in concernValues]
             Concerns.objects.bulk_create(concerns)
         if createRatings and ratioValues is not None:
             # Retrieve them again to populate primary keys (still better than saving each object seperately above)
@@ -39,14 +39,14 @@ class GridManager(models.Manager):
             alternatives = Alternatives.objects.filter(grid=grid).all()
             ratings = []
             for i, concern in enumerate(concerns):
-                 for j, alternative in enumerate(alternatives):
-                     ratings.append(Ratings(concern=concern, alternative=alternative, rating=ratioValues[i][j]))
+                for j, alternative in enumerate(alternatives):
+                    ratings.append(Ratings(concern=concern, alternative=alternative, rating=ratioValues[i][j]))
             Ratings.objects.bulk_create(ratings)
 
         return grid
 
     def duplicateGrid(self, gridObj, userObj=None, gridName=None, gridType=None):
-        #create new grid
+        # create new grid
         if userObj:
             if gridName is not None:
                 newGrid = Grid(user=userObj, description=gridObj.description, name=gridName,
@@ -96,7 +96,7 @@ class GridManager(models.Manager):
                     i += 1
                 return newGrid
             except:
-                #delete what ever we had
+                # delete what ever we had
                 if newGrid:
                     newGrid.delete()
         return False
@@ -116,12 +116,13 @@ class Grid(models.Model):
     dendogram = models.TextField(null=True)
     dateTime = models.DateTimeField(auto_now_add=True, null=True)
     grid_types = (('u', 'User grid'), ('s', 'Session grid'), ('ac', 'Response grid, Alternative/Concern'),
-                  ('rw', 'Response grid, Ratings/Weight'), ('cg', 'Composite Grid') )
+                  ('rw', 'Response grid, Ratings/Weight'), ('cg', 'Composite Grid'))
     grid_type = models.CharField(max_length=2, choices=grid_types, default='u')
     objects = GridManager()
 
     def get_absolute_url(self):
-        return reverse('RGT.gridMng.views.show_grid', args=[self.usid])
+        # return reverse('RGT.gridMng.views.show_grid', args=[self.usid])
+        return reverse('views.show_grid', args=[self.usid])
 
     def get_alternative_total_rating_tuples(self):
         """ Return a collection containing a tuple for each alternative containing that alternative and the total
@@ -218,6 +219,7 @@ class Revision:
 class SubclassingQuerySet(QuerySet):
     """ Needed for polymorphism, see http://stackoverflow.com/questions/5360995/polymorphism-in-django-models
     """
+
     def __getitem__(self, k):
         result = super(SubclassingQuerySet, self).__getitem__(k)
         if isinstance(result, models.Model):
@@ -378,7 +380,8 @@ class ConcernDiff(Diff):
         if self.is_addition_diff():
             reverted.concerns = [c for c in grid.concerns if self.related_id != c.id]
         elif self.is_deletion_diff():
-            c = Concerns(grid_id=grid.id, leftPole=self.old_leftPole, rightPole=self.old_rightPole, weight=self.old_weight)
+            c = Concerns(grid_id=grid.id, leftPole=self.old_leftPole, rightPole=self.old_rightPole,
+                         weight=self.old_weight)
             c.id = self.related_id
             reverted.concerns.append(c)
             reverted.concerns.sort()
@@ -410,12 +413,14 @@ class RatingDiff(Diff):
     def revert(self, grid):
         reverted = GridProxy(grid)
         if self.is_addition_diff():
-            ratings = [r for r in grid.ratings if self.related_id != r.alternative_id or self.concern_id != r.concern_id]
+            ratings = [r for r in grid.ratings if
+                       self.related_id != r.alternative_id or self.concern_id != r.concern_id]
         elif self.is_deletion_diff():
             r = Ratings(alternative_id=self.related_id, concern_id=self.concern_id, rating=self.old_rating)
             reverted.ratings.append(r)
         else:
-            r = next(r for r in reverted.ratings if r.alternative_id == self.related_id and r.concern_id == self.concern_id)
+            r = next(
+                r for r in reverted.ratings if r.alternative_id == self.related_id and r.concern_id == self.concern_id)
             r.rating = self.old_rating
         return reverted
 
@@ -442,7 +447,7 @@ class GridProxy:
 
 
 class Composite(models.Model):
-    compid= models.CharField(max_length=20, unique=False)
+    compid = models.CharField(max_length=20, unique=False)
 
     from django.contrib.auth.models import User
     user = models.ForeignKey(User, null=True)
@@ -531,7 +536,7 @@ class Ratings(models.Model):
 
     class Meta:
         unique_together = ('concern',
-                           'alternative') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
+                           'alternative')  # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         app_label = 'gridMng'
 
     def save(self, *args, **kwargs):
@@ -541,14 +546,16 @@ class Ratings(models.Model):
             old_rating = Ratings.objects.get(pk=self.pk).rating
         super(Ratings, self).save(*args, **kwargs)
         if old_rating != self.rating:
-            RatingDiff.objects.create(related_id=self.alternative_id, concern_id=self.concern_id, grid=self.alternative.grid, old_rating=old_rating, new_rating=self.rating)
+            RatingDiff.objects.create(related_id=self.alternative_id, concern_id=self.concern_id,
+                                      grid=self.alternative.grid, old_rating=old_rating, new_rating=self.rating)
 
     def delete(self, grid, *args, **kwargs):
         old_rating = self.rating
         old_alternative_id = self.alternative_id
         old_concern_id = self.concern_id
         super(Ratings, self).delete(*args, **kwargs)
-        RatingDiff.objects.create(related_id=old_alternative_id, concern_id=old_concern_id, grid=grid, old_rating=old_rating, new_rating=None)
+        RatingDiff.objects.create(related_id=old_alternative_id, concern_id=old_concern_id, grid=grid,
+                                  old_rating=old_rating, new_rating=None)
 
     def __unicode__(self):
         return "(%s, %s): %f" % (self.concern, self.alternative, self.rating)
@@ -589,8 +596,8 @@ class State(models.Model):
 
     from .session.state import State as SessionState
     verbose_names = {SessionState.INITIAL: 'Invitation', SessionState.AC: 'Alternatives / Concerns',
-                      SessionState.RW: 'Ratings / Weights', SessionState.FINISH: 'Closed',
-                      SessionState.CHECK: 'Check values'}
+                     SessionState.RW: 'Ratings / Weights', SessionState.FINISH: 'Closed',
+                     SessionState.CHECK: 'Check values'}
     participation_statuses = {SessionState.INITIAL: 'Waiting for users to join',
                               SessionState.AC: 'Waiting for Alternative and concerns',
                               SessionState.RW: 'Waiting for Ratings and Weights', SessionState.FINISH: 'Closed',
@@ -633,9 +640,9 @@ class State(models.Model):
 
     def get_possible_next_states(self):
         if self.name in (SessionState.INITIAL, SessionState.AC, SessionState.RW):
-            return (SessionState.CHECK)
+            return SessionState.CHECK
         elif self.name == SessionState.CHECK:
-            return (SessionState.AC, SessionState.RW, SessionState.FINISH)
+            return SessionState.AC, SessionState.RW, SessionState.FINISH
         else:
             return ()
 
@@ -658,7 +665,6 @@ class Facilitator(models.Model):
 
 
 class SessionManager(models.Manager):
-
     @transaction.atomic
     def create_session(self, facilitating_user, original_grid, name=None, show_results=None):
         if name is None or name == '':
@@ -671,7 +677,8 @@ class SessionManager(models.Manager):
         state = State.objects.getInitialState()
         invitation_key = str(uuid.uuid4())
 
-        session = self.create(usid=usid, facilitator=facilitator, name=name, showResult=show_results, state=state, invitationKey=invitation_key)
+        session = self.create(usid=usid, facilitator=facilitator, name=name, showResult=show_results, state=state,
+                              invitationKey=invitation_key)
         duplicateGrid = Grid.objects.duplicateGrid(original_grid, gridType=Grid.GridType.SESSION_GRID)
         SessionGrid.objects.create(session=session, grid=duplicateGrid, iteration=0)
 
@@ -709,7 +716,7 @@ class Session(models.Model):
         return [participator.user for participator in self.userparticipatesession_set.all()]
 
     def addParticipant(self, user):
-        if(self.facilitator.user == user):
+        if self.facilitator.user == user:
             raise UserIsFacilitator(user, self)
         if self.userparticipatesession_set.filter(user=user).exists():
             raise UserAlreadyParticipating(user, self)
@@ -777,7 +784,7 @@ class Session(models.Model):
 
 class SessionIterationStateManager(models.Manager):
     def create_from_session(self, session):
-        SessionIterationState.objects.create(iteration=session.iteration, session=session,state=session.state)
+        SessionIterationState.objects.create(iteration=session.iteration, session=session, state=session.state)
 
 
 class SessionIterationState(models.Model):
@@ -800,10 +807,9 @@ class UserParticipateSession(models.Model):
 
     class Meta:
         unique_together = ('session',
-                           'user') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
+                           'user')  # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         ordering = ['id']
         app_label = 'gridMng'
-
 
     def has_pending_response(self, user):
         if self.session.state.can_be_responded_to():
@@ -817,7 +823,7 @@ class UserParticipateSession(models.Model):
         return "%s participating in %s" % (self.user, self.session)
 
 
-#the name of this class in the orm is: iterationHasGridInSession
+# the name of this class in the orm is: iterationHasGridInSession
 class SessionGrid(models.Model):
     iteration = models.IntegerField()
     session = models.ForeignKey(Session)
@@ -825,7 +831,7 @@ class SessionGrid(models.Model):
 
     class Meta:
         unique_together = ('iteration',
-                           'session') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
+                           'session')  # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         ordering = ['id']
         app_label = 'gridMng'
 
@@ -840,7 +846,7 @@ class ResponseGridManager(models.Manager):
         return user.responsegrid_set.get(session=session, iteration=session.iteration)
 
 
-#the name of this class in the orm is: UserHasGridInIteration
+# the name of this class in the orm is: UserHasGridInIteration
 class ResponseGrid(models.Model):
     iteration = models.IntegerField()
     session = models.ForeignKey(Session)
@@ -852,6 +858,6 @@ class ResponseGrid(models.Model):
 
     class Meta:
         unique_together = ('iteration', 'user',
-                           'session') # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
+                           'session')  # they should be primary key but django wouldn't allow composite primary key so to enforce it it somewhat unique is used
         ordering = ['id']
         app_label = 'gridMng'

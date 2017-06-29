@@ -183,12 +183,7 @@ def show_grid(request, usid):
     other_grids = Grid.objects.filter(user=request.user).exclude(id=grid.id)
 
     template_data = WritableGridTableData(grid)
-    context = RequestContext(request, {'data': template_data})
-    template = loader.get_template('gridMng/grid/gridTable.html')
-    # grid_html = template.render(context)
-    #
-    #
-    # return render(request, 'contribute/_donation-application.html', context)
+
     grid_html = render(request,
                        'gridMng/grid/gridTable.html',
                        {'data': template_data})

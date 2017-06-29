@@ -16,7 +16,7 @@ class CompositeWizard(SessionWizardView):
 
     def get_template_names(self):
         # Get the templates to be used for the steps of the wizard.
-        return ['gridMng/composite/compositeWizard_step%d.html' % (self.steps.step1)]
+        return ['gridMng/composite/compositeWizard_step%d.html' % self.steps.step1]
 
     def get_context_data(self, form, **kwargs):
         from ..models import Grid
@@ -34,7 +34,7 @@ class CompositeWizard(SessionWizardView):
                 if len(templateData.grids) <= 0:
                     templateData.grids = None
 
-                context.update({'data':templateData})
+                context.update({'data': templateData})
             except:
                 # User data do not yet exist
                 pass
@@ -59,7 +59,7 @@ class CompositeWizard(SessionWizardView):
         # step 2 - concerns
         step_two_data = self.get_form_step_data(form_list[2])
         # Get the grid name of the form data of step 0 (zero index).
-        grid_name = step_zero_data['%s-composite_name' % (step_zero_prefix)]
+        grid_name = step_zero_data['%s-composite_name' % step_zero_prefix]
         rules = step_two_data.getlist('rules')
         statuses = step_two_data.getlist('statuses')
 
@@ -90,7 +90,9 @@ class CompositeWizard(SessionWizardView):
     @transaction.atomic
     def createCompositeGrid(self, userObj, gridName, rules, statuses):
         """
-        This function is a modificated version of 'createGrid' function. What is different is we don't have any numeric values here, just alternative names(combinations of valid rules),
+        This function is a modificated version of 'createGrid' function.
+        What is different is we don't have any numeric values here,
+        just alternative names(combinations of valid rules),
         and also we are providing grid.usid beforehand
         """
         from ..models import Composite
