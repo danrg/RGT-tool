@@ -153,11 +153,17 @@ def ajaxCreateGrid(request):
     gridTableTemplate.changeRatingsWeights = True
     gridTableTemplate.changeCornAlt = True
     gridTableTemplate.tableId = generateRandomString()
-    template = loader.get_template('gridMng/grid/createMyGridBase.html')
+
     templateData = CreateMyGridBaseData(gridTableTemplate)
-    context = RequestContext(request, {'data': templateData})
-    htmlData = template.render(context)
-    return HttpResponse(createXmlSuccessResponse(htmlData), content_type='application/xml')
+
+    context = {'data': templateData}
+    rendered_html = render(request,
+                           'gridMng/grid/createMyGridBase.html',
+                           context)
+
+    xml_success_response = createXmlSuccessResponse(rendered_html.content)
+    return HttpResponse(xml_success_response,
+                        content_type='application/xml')
 
 
 @login_required

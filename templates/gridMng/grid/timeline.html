@@ -12,7 +12,7 @@ $(document).ready(function() {
         type:       'timeline',
         width:      '1200',
         height:     '600',
-        source:     '{% url 'RGT.gridMng.views.timeline_json' grid.usid %}',
+        source:     '{% url 'timeline_json' grid.usid %}',
         embed_id:   'timeline'
     });
 });

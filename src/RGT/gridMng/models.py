@@ -122,7 +122,7 @@ class Grid(models.Model):
 
     def get_absolute_url(self):
         # return reverse('RGT.gridMng.views.show_grid', args=[self.usid])
-        return reverse('views.show_grid', args=[self.usid])
+        return reverse('show_grid', args=[self.usid])
 
     def get_alternative_total_rating_tuples(self):
         """ Return a collection containing a tuple for each alternative containing that alternative and the total
